@@ -20,6 +20,7 @@ License.
     android:layout_height="match_parent"
     app:cardBackgroundColor="?android:attr/windowBackground"
     app:cardCornerRadius="0dp"
+    app:cardElevation="@dimen/card_view_elevation"
     app:cardUseCompatPadding="false">
 
     <LinearLayout
@@ -27,7 +28,7 @@ License.
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:orientation="horizontal"
-        android:visibility="invisible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tab_title_text_view"

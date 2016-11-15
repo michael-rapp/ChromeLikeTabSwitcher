@@ -15,7 +15,6 @@ package de.mrapp.android.tabswitcher;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
@@ -30,6 +29,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -223,11 +223,24 @@ public class TabSwitcher extends FrameLayout {
             viewHolder.childContainer
                     .setPadding(padding, padding + actionBarSize, padding, padding);
             long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-            view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setDuration(duration).y(view.getHeight() * 0.5f).scaleX(0.95f).scaleY(0.95f)
-                    .start();
+            ViewPropertyAnimator animator =
+                    view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
+                            .setDuration(duration).scaleX(0.95f).scaleY(0.95f);
+
+            if (count < VISIBLE_TAB_COUNT) {
+                animator.y((float) (view.getHeight() * Math.pow(0.5, count)));
+            } else if (count < (VISIBLE_TAB_COUNT + STACKED_TAB_COUNT)) {
+                int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+                animator.y(spacing * (VISIBLE_TAB_COUNT - (count - STACKED_TAB_COUNT)));
+            }
+
+            animator.start();
             count++;
         }
     }
+
+    private static final int VISIBLE_TAB_COUNT = 4;
+
+    private static final int STACKED_TAB_COUNT = 3;
 
 }

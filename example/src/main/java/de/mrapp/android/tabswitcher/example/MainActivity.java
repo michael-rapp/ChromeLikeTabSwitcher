@@ -95,6 +95,21 @@ public class MainActivity extends AppCompatActivity {
         String tabTitle3 = "Tab 3";
         TabSwitcher.Tab tab3 = new TabSwitcher.Tab(tabTitle3, new Decorator(tabTitle3));
         tabSwitcher.addTab(tab3);
+        String tabTitle4 = "Tab 4";
+        TabSwitcher.Tab tab4 = new TabSwitcher.Tab(tabTitle4, new Decorator(tabTitle4));
+        tabSwitcher.addTab(tab4);
+        String tabTitle5 = "Tab 5";
+        TabSwitcher.Tab tab5 = new TabSwitcher.Tab(tabTitle5, new Decorator(tabTitle5));
+        tabSwitcher.addTab(tab5);
+        String tabTitle6 = "Tab 6";
+        TabSwitcher.Tab tab6 = new TabSwitcher.Tab(tabTitle6, new Decorator(tabTitle6));
+        tabSwitcher.addTab(tab6);
+        String tabTitle7 = "Tab 7";
+        TabSwitcher.Tab tab7 = new TabSwitcher.Tab(tabTitle7, new Decorator(tabTitle7));
+        tabSwitcher.addTab(tab7);
+        String tabTitle8 = "Tab 8";
+        TabSwitcher.Tab tab8 = new TabSwitcher.Tab(tabTitle6, new Decorator(tabTitle8));
+        tabSwitcher.addTab(tab8);
     }
 
 }
