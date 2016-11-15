@@ -27,9 +27,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mrapp.android.util.ThemeUtil;
+import de.mrapp.android.util.gesture.DragHelper;
 
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -143,10 +144,19 @@ public class TabSwitcher extends FrameLayout {
     private List<Tab> tabs;
 
     /**
+     * An instance of the class {@link DragHelper}, which is used to recognize drag gestures.
+     */
+    private transient DragHelper dragHelper;
+
+    private boolean switcherShown;
+
+    /**
      * Initializes the view.
      */
     private void initialize() {
         tabs = new ArrayList<>();
+        dragHelper = new DragHelper(10);
+        switcherShown = false;
     }
 
     private ViewGroup inflateLayout(@NonNull final Tab tab) {
@@ -170,7 +180,7 @@ public class TabSwitcher extends FrameLayout {
         View view = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
         viewHolder.childContainer.addView(view, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        frameLayout.setTag(viewHolder);
+        frameLayout.setTag(R.id.tag_view_holder, viewHolder);
         return frameLayout;
     }
 
@@ -208,34 +218,105 @@ public class TabSwitcher extends FrameLayout {
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
 
+    public final boolean isSwitcherShown() {
+        return switcherShown;
+    }
+
     public final void showSwitcher() {
-        int count = 1;
+        if (!isSwitcherShown()) {
+            switcherShown = true;
+            int count = 1;
 
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            View view = getChildAt(i);
-            ViewHolder viewHolder = (ViewHolder) view.getTag();
-            viewHolder.cardView.setUseCompatPadding(true);
-            viewHolder.cardView.setRadius(
-                    getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
-            viewHolder.titleContainer.setVisibility(View.VISIBLE);
-            int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
-            int actionBarSize = ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
-            viewHolder.childContainer
-                    .setPadding(padding, padding + actionBarSize, padding, padding);
-            long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-            ViewPropertyAnimator animator =
-                    view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
-                            .setDuration(duration).scaleX(0.95f).scaleY(0.95f);
-
-            if (count < VISIBLE_TAB_COUNT) {
-                animator.y((float) (view.getHeight() * Math.pow(0.5, count)));
-            } else if (count < (VISIBLE_TAB_COUNT + STACKED_TAB_COUNT)) {
-                int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-                animator.y(spacing * (VISIBLE_TAB_COUNT - (count - STACKED_TAB_COUNT)));
+            for (int i = getChildCount() - 1; i >= 0; i--) {
+                View view = getChildAt(i);
+                ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+                viewHolder.cardView.setUseCompatPadding(true);
+                viewHolder.cardView.setRadius(
+                        getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
+                viewHolder.titleContainer.setVisibility(View.VISIBLE);
+                int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
+                int actionBarSize =
+                        ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
+                viewHolder.childContainer
+                        .setPadding(padding, padding + actionBarSize, padding, padding);
+                long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
+                float position = calculateInitialTabPosition(view, count);
+                view.setTag(R.id.tag_position, position);
+                view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
+                        .setDuration(duration).scaleX(0.95f).scaleY(0.95f).y(position).start();
+                count++;
             }
+        }
+    }
 
-            animator.start();
-            count++;
+    private float calculateInitialTabPosition(@NonNull final View view, final int index) {
+        if (index < VISIBLE_TAB_COUNT) {
+            return (float) (view.getHeight() * Math.pow(0.5, index));
+        } else if (index < (VISIBLE_TAB_COUNT + STACKED_TAB_COUNT)) {
+            int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+            return spacing * (VISIBLE_TAB_COUNT - (index - STACKED_TAB_COUNT));
+        }
+
+        return 0;
+    }
+
+    private int calculateTopMostPosition() {
+        int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        return spacing * STACKED_TAB_COUNT;
+    }
+
+    @Override
+    public final boolean onTouchEvent(final MotionEvent event) {
+        if (isSwitcherShown()) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    handleDrag(event.getY());
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (dragHelper.hasThresholdBeenReached()) {
+                        handleRelease();
+                    }
+
+                    performClick();
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        return super.onTouchEvent(event);
+    }
+
+    private void handleDrag(final float dragPosition) {
+        dragHelper.update(dragPosition);
+
+        if (dragHelper.hasThresholdBeenReached()) {
+            int count = 1;
+            float topMostPosition = calculateTopMostPosition();
+
+            for (int i = getChildCount() - 1; i >= 0; i--) {
+                if (count < VISIBLE_TAB_COUNT) {
+                    View view = getChildAt(i);
+                    float initialPosition = (float) view.getTag(R.id.tag_position);
+                    float newPosition = (float) (initialPosition +
+                            (dragHelper.getDistance() * Math.pow(0.7, count)));
+                    newPosition = Math.max(newPosition, topMostPosition);
+                    view.setY(newPosition);
+                }
+
+                count++;
+            }
+        }
+    }
+
+    private void handleRelease() {
+        dragHelper.reset();
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            view.setTag(R.id.tag_position, view.getY());
         }
     }
 
