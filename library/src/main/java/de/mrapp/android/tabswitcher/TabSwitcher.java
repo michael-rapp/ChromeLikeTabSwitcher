@@ -24,6 +24,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -218,6 +219,10 @@ public class TabSwitcher extends FrameLayout {
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
 
+    public final int getCount() {
+        return tabs.size();
+    }
+
     public final boolean isSwitcherShown() {
         return switcherShown;
     }
@@ -240,7 +245,10 @@ public class TabSwitcher extends FrameLayout {
                 viewHolder.childContainer
                         .setPadding(padding, padding + actionBarSize, padding, padding);
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-                float position = calculateInitialTabPosition(view, count);
+                Pair<Float, TabPosition> pair = calculateInitialTabPosition(view, count);
+                float position = pair.first;
+                view.setVisibility(
+                        pair.second == TabPosition.TOP_MOST ? View.INVISIBLE : View.VISIBLE);
                 view.setTag(R.id.tag_position, position);
                 view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
                         .setDuration(duration).scaleX(0.95f).scaleY(0.95f).y(position).start();
@@ -249,18 +257,21 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private float calculateInitialTabPosition(@NonNull final View view, final int index) {
+    private Pair<Float, TabPosition> calculateInitialTabPosition(@NonNull final View view,
+                                                                 final int index) {
         if (index < VISIBLE_TAB_COUNT) {
-            return (float) (view.getHeight() * Math.pow(0.5, index));
-        } else if (index < (VISIBLE_TAB_COUNT + STACKED_TAB_COUNT)) {
+            float position = (float) (view.getHeight() * Math.pow(0.5, index));
+            return Pair.create(position, TabPosition.VISIBLE);
+        } else if ((getCount() - index) <= STACKED_TAB_COUNT) {
             int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-            return spacing * (VISIBLE_TAB_COUNT - (index - STACKED_TAB_COUNT));
+            float position = spacing * (getCount() - index);
+            return Pair.create(position, TabPosition.STACKED_TOP);
+        } else {
+            return Pair.create(calculateTopMostPosition(), TabPosition.TOP_MOST);
         }
-
-        return 0;
     }
 
-    private int calculateTopMostPosition() {
+    private float calculateTopMostPosition() {
         int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         return spacing * STACKED_TAB_COUNT;
     }
@@ -323,5 +334,17 @@ public class TabSwitcher extends FrameLayout {
     private static final int VISIBLE_TAB_COUNT = 4;
 
     private static final int STACKED_TAB_COUNT = 3;
+
+    private enum TabPosition {
+
+        STACKED_TOP,
+
+        TOP_MOST,
+
+        VISIBLE,
+
+        STACKED_BOTTOM
+
+    }
 
 }
