@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mrapp.android.util.ThemeUtil;
+import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.gesture.DragHelper;
 
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
@@ -153,11 +155,26 @@ public class TabSwitcher extends FrameLayout {
 
     /**
      * Initializes the view.
+     *
+     * @param attributeSet
+     *         The attribute set, which should be used to initialize the view, as an instance of the
+     *         type {@link AttributeSet} or null, if no attributes should be obtained
+     * @param defaultStyle
+     *         The default style to apply to this view. If 0, no style will be applied (beyond what
+     *         is included in the theme). This may either be an attribute resource, whose value will
+     *         be retrieved from the current theme, or an explicit style resource
+     * @param defaultStyleResource
+     *         A resource identifier of a style resource that supplies default values for the view,
+     *         used only if the default style is 0 or can not be found in the theme. Can be 0 to not
+     *         look for defaults
      */
-    private void initialize() {
+    private void initialize(@Nullable final AttributeSet attributeSet,
+                            @AttrRes final int defaultStyle,
+                            @StyleRes final int defaultStyleResource) {
         tabs = new ArrayList<>();
         dragHelper = new DragHelper(10);
         switcherShown = false;
+        obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
 
     private ViewGroup inflateLayout(@NonNull final Tab tab) {
@@ -185,26 +202,76 @@ public class TabSwitcher extends FrameLayout {
         return frameLayout;
     }
 
+    /**
+     * Obtains all attributes froma specific attribute set.
+     *
+     * @param attributeSet
+     *         The attribute set, the attributes should be obtained from, as an instance of the type
+     *         {@link AttributeSet} or null, if no attributes should be obtained
+     * @param defaultStyle
+     *         The default style to apply to this view. If 0, no style will be applied (beyond what
+     *         is included in the theme). This may either be an attribute resource, whose value will
+     *         be retrieved from the current theme, or an explicit style resource
+     * @param defaultStyleResource
+     *         A resource identifier of a style resource that supplies default values for the view,
+     *         used only if the default style is 0 or can not be found in the theme. Can be 0 to not
+     *         look for defaults
+     */
+    private void obtainStyledAttributes(@Nullable final AttributeSet attributeSet,
+                                        @AttrRes final int defaultStyle,
+                                        @StyleRes final int defaultStyleResource) {
+        TypedArray typedArray = getContext()
+                .obtainStyledAttributes(attributeSet, R.styleable.TabSwitcher, defaultStyle,
+                        defaultStyleResource);
+
+        try {
+            obtainBackground(typedArray);
+        } finally {
+            typedArray.recycle();
+        }
+    }
+
+    /**
+     * Obtains the view's background from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainBackground(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
+
+        if (resourceId != 0) {
+            ViewUtil.setBackground(this, ContextCompat.getDrawable(getContext(), resourceId));
+        } else {
+            int defaultValue =
+                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
+            int color =
+                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
+            setBackgroundColor(color);
+        }
+    }
+
     public TabSwitcher(@NonNull final Context context) {
         this(context, null);
     }
 
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet) {
         super(context, attributeSet);
-        initialize();
+        initialize(attributeSet, 0, 0);
     }
 
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet,
                        @AttrRes final int defaultStyle) {
         super(context, attributeSet, defaultStyle);
-        initialize();
+        initialize(attributeSet, defaultStyle, 0);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet,
                        @AttrRes final int defaultStyle, @StyleRes final int defaultStyleResource) {
         super(context, attributeSet, defaultStyle, defaultStyleResource);
-        initialize();
+        initialize(attributeSet, defaultStyle, defaultStyleResource);
     }
 
     public final void addTab(@NonNull final Tab tab) {
