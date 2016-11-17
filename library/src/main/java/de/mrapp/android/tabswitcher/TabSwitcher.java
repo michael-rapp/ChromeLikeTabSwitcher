@@ -320,7 +320,7 @@ public class TabSwitcher extends FrameLayout {
                 viewHolder.childContainer
                         .setPadding(padding, padding + actionBarSize, padding, padding);
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-                Pair<Float, Boolean> pair = calculateInitialTabPosition(view, count);
+                Pair<Float, Boolean> pair = calculateInitialTabPosition(count);
                 float position = pair.first;
                 boolean visible = pair.second;
                 view.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
@@ -336,8 +336,7 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private Pair<Float, Boolean> calculateInitialTabPosition(@NonNull final View view,
-                                                             final int index) {
+    private Pair<Float, Boolean> calculateInitialTabPosition(final int index) {
         if (getCount() < VISIBLE_TAB_COUNT && index == getCount()) {
             return Pair.create(0f, true);
         } else {
