@@ -28,16 +28,18 @@ License.
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:orientation="horizontal"
+        android:paddingLeft="@dimen/tab_title_padding"
+        android:paddingRight="@dimen/tab_title_padding"
         android:visibility="gone">
 
         <TextView
             android:id="@+id/tab_title_text_view"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:drawablePadding="@dimen/tab_title_drawable_padding"
             android:ellipsize="marquee"
-            android:gravity="center_vertical"
             android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorPrimary"/>
@@ -46,6 +48,7 @@ License.
             android:id="@+id/close_tab_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
             android:src="@drawable/ic_close_grey600_18dp"/>
