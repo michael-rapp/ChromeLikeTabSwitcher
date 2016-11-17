@@ -390,11 +390,6 @@ public class TabSwitcher extends FrameLayout {
             return Pair.create(position, TabPosition.STACKED_TOP);
         } else {
             float position = stackedTabSpacing * STACKED_TAB_COUNT;
-
-            if (previous != null && previous.second == TabPosition.TOP_MOST) {
-                System.out.println(index + " is hidden");
-            }
-
             return Pair.create(position,
                     (previous == null || previous.second == TabPosition.VISIBLE) ?
                             TabPosition.TOP_MOST : TabPosition.TOP_MOST_HIDDEN);
