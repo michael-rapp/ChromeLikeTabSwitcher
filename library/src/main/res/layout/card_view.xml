@@ -44,10 +44,11 @@ License.
 
         <ImageButton
             android:id="@+id/close_tab_button"
-            style="?attr/selectableItemBackgroundBorderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@null"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_close_grey600_18dp"/>
 
     </LinearLayout>
 
