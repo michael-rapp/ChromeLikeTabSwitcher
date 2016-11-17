@@ -153,6 +153,12 @@ public class TabSwitcher extends FrameLayout {
 
     private boolean switcherShown;
 
+    private int stackedTabSpacing;
+
+    private int cardViewMargin;
+
+    private int draggedIndex;
+
     /**
      * Initializes the view.
      *
@@ -174,6 +180,8 @@ public class TabSwitcher extends FrameLayout {
         tabs = new ArrayList<>();
         dragHelper = new DragHelper(10);
         switcherShown = false;
+        stackedTabSpacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        cardViewMargin = getResources().getDimensionPixelSize(R.dimen.card_view_margin);
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
 
@@ -314,11 +322,16 @@ public class TabSwitcher extends FrameLayout {
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
                 Pair<Float, TabPosition> pair = calculateInitialTabPosition(view, count);
                 float position = pair.first;
-                view.setVisibility(
-                        pair.second == TabPosition.TOP_MOST ? View.INVISIBLE : View.VISIBLE);
+                TabPosition tabPosition = pair.second;
+                view.setVisibility(tabPosition == TabPosition.TOP_MOST ||
+                        tabPosition == TabPosition.BOTTOM_MOST ? View.INVISIBLE : View.VISIBLE);
                 view.setTag(R.id.tag_position, position);
-                view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
-                        .setDuration(duration).scaleX(0.95f).scaleY(0.95f).y(position).start();
+
+                if (position > 0) {
+                    view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
+                            .setDuration(duration).y(position).start();
+                }
+
                 count++;
             }
         }
@@ -326,21 +339,84 @@ public class TabSwitcher extends FrameLayout {
 
     private Pair<Float, TabPosition> calculateInitialTabPosition(@NonNull final View view,
                                                                  final int index) {
-        if (index < VISIBLE_TAB_COUNT) {
-            float position = (float) (view.getHeight() * Math.pow(0.5, index));
-            return Pair.create(position, TabPosition.VISIBLE);
-        } else if ((getCount() - index) <= STACKED_TAB_COUNT) {
-            int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-            float position = spacing * (getCount() - index);
-            return Pair.create(position, TabPosition.STACKED_TOP);
+        if (getCount() < VISIBLE_TAB_COUNT && index == getCount()) {
+            return Pair.create(0f, TabPosition.VISIBLE);
         } else {
-            return Pair.create(calculateTopMostPosition(), TabPosition.TOP_MOST);
+            if (index < VISIBLE_TAB_COUNT) {
+                float modifier = 0.5f +
+                        (Math.min(1, Math.max(0, getCount() - 2) / (VISIBLE_TAB_COUNT - 2)) *
+                                0.075f);
+                float position = (float) (getHeight() * Math.pow(modifier, index) - cardViewMargin);
+                return Pair.create(position, TabPosition.VISIBLE);
+            } else if ((getCount() - index) <= STACKED_TAB_COUNT) {
+                float position = stackedTabSpacing * (getCount() - index);
+                return Pair.create(position, TabPosition.STACKED_TOP);
+            } else {
+                return Pair.create((float) stackedTabSpacing * STACKED_TAB_COUNT,
+                        (getCount() - index) == STACKED_TAB_COUNT + 1 ? TabPosition.VISIBLE :
+                                TabPosition.TOP_MOST);
+            }
         }
     }
 
-    private float calculateTopMostPosition() {
-        int spacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-        return spacing * STACKED_TAB_COUNT;
+    private Pair<Float, TabPosition> calculateDraggedTabPosition(@NonNull final View view,
+                                                                 final int distance,
+                                                                 final int index) {
+        float initialPosition = (float) view.getTag(R.id.tag_position);
+        float newPosition =
+                initialPosition + (float) (distance * Math.pow(0.75, index - draggedIndex));
+        Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index);
+        float topMostPosition = topMostPair.first;
+
+        if (newPosition <= topMostPosition) {
+            return topMostPair;
+        } else {
+            Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
+            float bottomMostPosition = bottomMostPair.first;
+
+            if (newPosition >= bottomMostPosition) {
+                return bottomMostPair;
+            }
+        }
+
+        return Pair.create(newPosition, TabPosition.VISIBLE);
+    }
+
+    private Pair<Float, TabPosition> calculateTopMostPosition(final int index) {
+        if ((getCount() - index) <= STACKED_TAB_COUNT) {
+            float position = stackedTabSpacing * (getCount() - index);
+            return Pair.create(position, TabPosition.STACKED_TOP);
+        } else {
+            float position = stackedTabSpacing * STACKED_TAB_COUNT;
+            return Pair.create(position,
+                    (getCount() - index) == STACKED_TAB_COUNT + 1 ? TabPosition.VISIBLE :
+                            TabPosition.TOP_MOST);
+        }
+    }
+
+    private Pair<Float, TabPosition> calculateBottomMostPosition(final int index) {
+        if (index <= STACKED_TAB_COUNT) {
+            float position = getHeight() - cardViewMargin - stackedTabSpacing * index;
+            return Pair.create(position, TabPosition.STACKED_BOTTOM);
+        } else {
+            float position = getHeight() - cardViewMargin - stackedTabSpacing * STACKED_TAB_COUNT;
+            return Pair.create(position, TabPosition.BOTTOM_MOST);
+        }
+    }
+
+    private int calculateDraggedIndex(final float position) {
+        int count = 0;
+
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            count++;
+            View view = getChildAt(i);
+
+            if (view.getY() <= position) {
+                return count;
+            }
+        }
+
+        return count;
     }
 
     @Override
@@ -348,6 +424,8 @@ public class TabSwitcher extends FrameLayout {
         if (isSwitcherShown()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    draggedIndex = calculateDraggedIndex(event.getY());
+                    System.out.println(draggedIndex);
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     handleDrag(event.getY());
@@ -372,18 +450,16 @@ public class TabSwitcher extends FrameLayout {
 
         if (dragHelper.hasThresholdBeenReached()) {
             int count = 1;
-            float topMostPosition = calculateTopMostPosition();
 
             for (int i = getChildCount() - 1; i >= 0; i--) {
-                if (count < VISIBLE_TAB_COUNT) {
-                    View view = getChildAt(i);
-                    float initialPosition = (float) view.getTag(R.id.tag_position);
-                    float newPosition = (float) (initialPosition +
-                            (dragHelper.getDistance() * Math.pow(0.7, count)));
-                    newPosition = Math.max(newPosition, topMostPosition);
-                    view.setY(newPosition);
-                }
-
+                View view = getChildAt(i);
+                Pair<Float, TabPosition> pair =
+                        calculateDraggedTabPosition(view, dragHelper.getDistance(), count);
+                float position = pair.first;
+                TabPosition tabPosition = pair.second;
+                view.setY(position);
+                view.setVisibility(tabPosition == TabPosition.TOP_MOST ||
+                        tabPosition == TabPosition.BOTTOM_MOST ? View.INVISIBLE : View.VISIBLE);
                 count++;
             }
         }
@@ -409,6 +485,8 @@ public class TabSwitcher extends FrameLayout {
         TOP_MOST,
 
         VISIBLE,
+
+        BOTTOM_MOST,
 
         STACKED_BOTTOM
 
