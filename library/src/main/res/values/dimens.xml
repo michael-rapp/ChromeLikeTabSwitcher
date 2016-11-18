@@ -16,7 +16,7 @@ License.
 <resources>
 
     <dimen name="card_view_corner_radius">4dp</dimen>
-    <dimen name="card_view_padding">4dp</dimen>
+    <dimen name="card_view_padding">6dp</dimen>
     <dimen name="card_view_elevation">12dp</dimen>
     <dimen name="card_view_margin">20dp</dimen>
     <dimen name="tab_title_padding">8dp</dimen>
