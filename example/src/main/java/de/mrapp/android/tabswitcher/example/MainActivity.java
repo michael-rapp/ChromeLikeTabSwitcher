@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         tab7.setIcon(this, R.drawable.ic_file_outline_grey600_18dp);
         tabSwitcher.addTab(tab7);
         String tabTitle8 = "Tab 8";
-        TabSwitcher.Tab tab8 = new TabSwitcher.Tab(tabTitle6, new Decorator(tabTitle8));
+        TabSwitcher.Tab tab8 = new TabSwitcher.Tab(tabTitle8, new Decorator(tabTitle8));
         tab8.setIcon(this, R.drawable.ic_file_outline_grey600_18dp);
         tabSwitcher.addTab(tab8);
     }
