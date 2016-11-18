@@ -198,6 +198,8 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.titleTextView =
                 (TextView) viewHolder.cardView.findViewById(R.id.tab_title_text_view);
         viewHolder.titleTextView.setText(tab.getTitle());
+        viewHolder.titleTextView
+                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(), null, null, null);
         viewHolder.closeButton =
                 (ImageButton) viewHolder.cardView.findViewById(R.id.close_tab_button);
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
