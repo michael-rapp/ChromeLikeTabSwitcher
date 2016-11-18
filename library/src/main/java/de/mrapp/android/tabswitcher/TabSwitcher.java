@@ -433,7 +433,6 @@ public class TabSwitcher extends FrameLayout {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     draggedIndex = calculateDraggedIndex(event.getY());
-                    System.out.println(draggedIndex);
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     handleDrag(event.getY());
