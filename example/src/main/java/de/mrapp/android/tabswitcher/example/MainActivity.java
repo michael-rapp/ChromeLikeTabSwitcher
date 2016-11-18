@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         public final View inflateLayout(@NonNull final LayoutInflater inflater,
                                         @NonNull final ViewGroup parent) {
             View view = inflater.inflate(R.layout.tab, parent, false);
-            TextView textView = (TextView) view.findViewById(android.R.id.text1);
+            TextView textView = (TextView) view.findViewById(android.R.id.title);
             textView.setText(title);
             return view;
         }
