@@ -344,9 +344,9 @@ public class TabSwitcher extends FrameLayout {
             return Pair.create(0f, TabPosition.VISIBLE);
         } else {
             if (index < VISIBLE_TAB_COUNT) {
-                float modifier = 0.5f +
+                float modifier = 0.45f +
                         (Math.min(1, Math.max(0, getCount() - 2) / (VISIBLE_TAB_COUNT - 2)) *
-                                0.075f);
+                                0.05f);
                 float position = (float) (getHeight() * Math.pow(modifier, index) - cardViewMargin);
                 return Pair.create(position, TabPosition.VISIBLE);
             } else if ((getCount() - index) < STACKED_TAB_COUNT) {
