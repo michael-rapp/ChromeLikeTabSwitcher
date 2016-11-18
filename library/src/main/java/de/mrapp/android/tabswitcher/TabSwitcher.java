@@ -419,7 +419,7 @@ public class TabSwitcher extends FrameLayout {
             count++;
             View view = getChildAt(i);
 
-            if (view.getY() <= position) {
+            if (view.getY() + cardViewMargin <= position) {
                 return count;
             }
         }
