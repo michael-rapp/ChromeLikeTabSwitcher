@@ -55,9 +55,41 @@ License.
 
     </LinearLayout>
 
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/child_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tab_border_width"
+            android:layout_alignParentTop="true"
+            android:background="@color/tab_border_color"/>
+
+        <View
+            android:layout_width="@dimen/tab_border_width"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="@dimen/tab_border_width"
+            android:layout_marginTop="@dimen/tab_border_width"
+            android:background="@color/tab_border_color"/>
+
+        <View
+            android:layout_width="@dimen/tab_border_width"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/tab_border_width"
+            android:layout_marginTop="@dimen/tab_border_width"
+            android:background="@color/tab_border_color"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/tab_border_color"/>
+
+    </RelativeLayout>
 
 </android.support.v7.widget.CardView>

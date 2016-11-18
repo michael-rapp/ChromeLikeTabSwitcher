@@ -19,8 +19,9 @@ License.
     <dimen name="card_view_padding">4dp</dimen>
     <dimen name="card_view_elevation">12dp</dimen>
     <dimen name="card_view_margin">20dp</dimen>
-    <dimen name="tab_title_padding">16dp</dimen>
+    <dimen name="tab_title_padding">8dp</dimen>
     <dimen name="tab_title_drawable_padding">8dp</dimen>
+    <dimen name="tab_border_width">1dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>
 
 </resources>

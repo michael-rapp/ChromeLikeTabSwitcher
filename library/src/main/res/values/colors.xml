@@ -17,5 +17,6 @@ License.
 
     <color name="tab_switcher_background_color">#ff14181c</color>
     <color name="tab_title_color">#90000000</color>
+    <color name="tab_border_color">#42000000</color>
 
 </resources>

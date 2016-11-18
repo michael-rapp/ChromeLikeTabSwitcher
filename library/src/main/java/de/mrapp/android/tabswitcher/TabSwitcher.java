@@ -317,8 +317,7 @@ public class TabSwitcher extends FrameLayout {
                 int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
                 int actionBarSize =
                         ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
-                viewHolder.childContainer
-                        .setPadding(padding, padding + actionBarSize, padding, padding);
+                viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
                 Pair<Float, TabPosition> pair = calculateInitialTabPosition(count);
                 float position = pair.first;
