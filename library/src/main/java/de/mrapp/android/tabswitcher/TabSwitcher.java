@@ -365,23 +365,28 @@ public class TabSwitcher extends FrameLayout {
                                                                  final int index,
                                                                  @Nullable final Pair<Float, TabPosition> previous) {
         float initialPosition = (float) view.getTag(R.id.tag_position);
-        float newPosition =
-                initialPosition + (float) (distance * Math.pow(0.75, index - draggedIndex));
-        Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
-        float topMostPosition = topMostPair.first;
 
-        if (newPosition <= topMostPosition) {
-            return topMostPair;
-        } else {
-            Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
-            float bottomMostPosition = bottomMostPair.first;
+        if (getChildCount() - index > 0) {
+            float newPosition =
+                    initialPosition + (float) (distance * Math.pow(0.75, index - draggedIndex));
+            Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
+            float topMostPosition = topMostPair.first;
 
-            if (newPosition >= bottomMostPosition) {
-                return bottomMostPair;
+            if (newPosition <= topMostPosition) {
+                return topMostPair;
+            } else {
+                Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
+                float bottomMostPosition = bottomMostPair.first;
+
+                if (newPosition >= bottomMostPosition) {
+                    return bottomMostPair;
+                }
             }
+
+            return Pair.create(newPosition, TabPosition.VISIBLE);
         }
 
-        return Pair.create(newPosition, TabPosition.VISIBLE);
+        return Pair.create(initialPosition, TabPosition.VISIBLE);
     }
 
     private Pair<Float, TabPosition> calculateTopMostPosition(final int index,
