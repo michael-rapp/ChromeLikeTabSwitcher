@@ -141,6 +141,26 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private static class TabProperties {
+
+        private float position;
+
+        private float projectedPosition;
+
+        private float tempPosition;
+
+        private TabPosition tabPosition;
+
+        public TabProperties(final float position, final float projectedPosition,
+                             final TabPosition tabPosition) {
+            this.position = position;
+            this.projectedPosition = projectedPosition;
+            this.tempPosition = projectedPosition;
+            this.tabPosition = tabPosition;
+        }
+
+    }
+
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -308,6 +328,7 @@ public class TabSwitcher extends FrameLayout {
         if (!isSwitcherShown()) {
             switcherShown = true;
             int count = 1;
+            TabProperties previous = null;
 
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
@@ -321,13 +342,13 @@ public class TabSwitcher extends FrameLayout {
                         ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
                 viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-                Pair<Float, TabPosition> pair = calculateInitialTabPosition(count);
-                float position = pair.first;
-                TabPosition tabPosition = pair.second;
+                previous = calculateInitialTabPosition(count, previous);
+                float position = previous.position;
+                TabPosition tabPosition = previous.tabPosition;
                 view.setVisibility(tabPosition == TabPosition.TOP_MOST_HIDDEN ||
                         tabPosition == TabPosition.BOTTOM_MOST_HIDDEN ? View.INVISIBLE :
                         View.VISIBLE);
-                view.setTag(R.id.tag_position, position);
+                view.setTag(R.id.tag_position, previous);
 
                 if (position > 0) {
                     view.animate().setInterpolator(new AccelerateDecelerateInterpolator())
@@ -339,65 +360,69 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private Pair<Float, TabPosition> calculateInitialTabPosition(final int index) {
-        if (getCount() < VISIBLE_TAB_COUNT && index == getCount()) {
-            return Pair.create(0f, TabPosition.VISIBLE);
+    private TabProperties calculateInitialTabPosition(final int index,
+                                                      @Nullable final TabProperties previous) {
+        float position = (getHeight() * 0.5f - cardViewMargin) -
+                (index * MIN_TAB_DISTANCE - MIN_TAB_DISTANCE);
+        Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
+
+        float topMostPosition = topMostPair.first;
+
+        if (position <= topMostPosition) {
+            return new TabProperties(topMostPair.first, position, topMostPair.second);
         } else {
-            if (index < VISIBLE_TAB_COUNT) {
-                float modifier = 0.45f +
-                        (Math.min(1, Math.max(0, getCount() - 2) / (VISIBLE_TAB_COUNT - 2)) *
-                                0.05f);
-                float position = (float) (getHeight() * Math.pow(modifier, index) - cardViewMargin);
-                return Pair.create(position, TabPosition.VISIBLE);
-            } else if ((getCount() - index) < STACKED_TAB_COUNT) {
-                float position = stackedTabSpacing * (getCount() - index);
-                return Pair.create(position, TabPosition.STACKED_TOP);
-            } else {
-                return Pair.create((float) stackedTabSpacing * STACKED_TAB_COUNT,
-                        (getCount() - index) == STACKED_TAB_COUNT + 1 ? TabPosition.TOP_MOST :
-                                TabPosition.TOP_MOST_HIDDEN);
+            Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
+            float bottomMostPosition = bottomMostPair.first;
+
+            if (position >= bottomMostPosition) {
+                return new TabProperties(bottomMostPair.first, position, topMostPair.second);
             }
         }
+
+        return new TabProperties(position, position, TabPosition.VISIBLE);
     }
 
-    private Pair<Float, TabPosition> calculateDraggedTabPosition(@NonNull final View view,
-                                                                 final int distance,
-                                                                 final int index,
-                                                                 @Nullable final Pair<Float, TabPosition> previous) {
-        float initialPosition = (float) view.getTag(R.id.tag_position);
+    @SuppressWarnings("unchecked")
+    private TabProperties calculateDraggedTabPosition(@NonNull final View view, final int distance,
+                                                      final int index,
+                                                      @Nullable final TabProperties previous) {
+        TabProperties tabProperties = (TabProperties) view.getTag(R.id.tag_position);
 
         if (getChildCount() - index > 0) {
-            float newPosition =
-                    initialPosition + (float) (distance * Math.pow(0.75, index - draggedIndex));
+            float newPosition = tabProperties.projectedPosition + distance;
             Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
             float topMostPosition = topMostPair.first;
 
             if (newPosition <= topMostPosition) {
-                return topMostPair;
+                return new TabProperties(topMostPair.first, newPosition, topMostPair.second);
             } else {
                 Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
                 float bottomMostPosition = bottomMostPair.first;
 
                 if (newPosition >= bottomMostPosition) {
-                    return bottomMostPair;
+                    return new TabProperties(bottomMostPair.first, newPosition,
+                            bottomMostPair.second);
                 }
             }
 
-            return Pair.create(newPosition, TabPosition.VISIBLE);
+            TabProperties result = new TabProperties(newPosition, tabProperties.projectedPosition,
+                    TabPosition.VISIBLE);
+            result.tempPosition = newPosition;
+            return result;
         }
 
-        return Pair.create(initialPosition, TabPosition.VISIBLE);
+        return tabProperties;
     }
 
     private Pair<Float, TabPosition> calculateTopMostPosition(final int index,
-                                                              @Nullable final Pair<Float, TabPosition> previous) {
+                                                              @Nullable final TabProperties previous) {
         if ((getCount() - index) < STACKED_TAB_COUNT) {
             float position = stackedTabSpacing * (getCount() - index);
             return Pair.create(position, TabPosition.STACKED_TOP);
         } else {
             float position = stackedTabSpacing * STACKED_TAB_COUNT;
             return Pair.create(position,
-                    (previous == null || previous.second == TabPosition.VISIBLE) ?
+                    (previous == null || previous.tabPosition == TabPosition.VISIBLE) ?
                             TabPosition.TOP_MOST : TabPosition.TOP_MOST_HIDDEN);
         }
     }
@@ -452,19 +477,26 @@ public class TabSwitcher extends FrameLayout {
         return super.onTouchEvent(event);
     }
 
+    @SuppressWarnings("unchecked")
     private void handleDrag(final float dragPosition) {
         dragHelper.update(dragPosition);
 
         if (dragHelper.hasThresholdBeenReached()) {
             int count = 1;
-            Pair<Float, TabPosition> previous = null;
+            TabProperties previous = null;
 
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
                 previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count,
                         previous);
-                float position = previous.first;
-                TabPosition tabPosition = previous.second;
+                TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
+                TabProperties tabProperties =
+                        new TabProperties(previous.position, tag.projectedPosition,
+                                previous.tabPosition);
+                tabProperties.tempPosition = previous.tempPosition;
+                view.setTag(R.id.tag_position, tabProperties);
+                float position = previous.position;
+                TabPosition tabPosition = previous.tabPosition;
                 view.setY(position);
                 view.setVisibility(tabPosition == TabPosition.TOP_MOST_HIDDEN ||
                         tabPosition == TabPosition.BOTTOM_MOST_HIDDEN ? View.INVISIBLE :
@@ -474,16 +506,19 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void handleRelease() {
         dragHelper.reset();
 
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
-            view.setTag(R.id.tag_position, view.getY());
+            TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
+            view.setTag(R.id.tag_position,
+                    new TabProperties(view.getY(), tag.tempPosition, tag.tabPosition));
         }
     }
 
-    private static final int VISIBLE_TAB_COUNT = 4;
+    private static final int MIN_TAB_DISTANCE = 200;
 
     private static final int STACKED_TAB_COUNT = 3;
 
