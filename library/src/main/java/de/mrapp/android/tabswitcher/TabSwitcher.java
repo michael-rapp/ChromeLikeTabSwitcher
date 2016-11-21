@@ -360,10 +360,26 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
+    private float calculateInitialTabPosition(final int index) {
+        if (getCount() < VISIBLE_TAB_COUNT && index == getCount()) {
+            return 0;
+        } else {
+            float modifier = 0.45f +
+                    (Math.min(1, Math.max(0, getCount() - 2) / (VISIBLE_TAB_COUNT - 2)) * 0.05f);
+
+            if (index < VISIBLE_TAB_COUNT) {
+                return (float) (getHeight() * Math.pow(modifier, index) - cardViewMargin);
+            } else {
+                float position = (float) (getHeight() * Math.pow(modifier, VISIBLE_TAB_COUNT - 1) -
+                        cardViewMargin);
+                return position - ((index - VISIBLE_TAB_COUNT + 1) * MIN_TAB_DISTANCE);
+            }
+        }
+    }
+
     private TabProperties calculateInitialTabPosition(final int index,
                                                       @Nullable final TabProperties previous) {
-        float position = (getHeight() * 0.5f - cardViewMargin) -
-                (index * MIN_TAB_DISTANCE - MIN_TAB_DISTANCE);
+        float position = calculateInitialTabPosition(index);
         Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
 
         float topMostPosition = topMostPair.first;
@@ -521,6 +537,8 @@ public class TabSwitcher extends FrameLayout {
     private static final int MIN_TAB_DISTANCE = 200;
 
     private static final int STACKED_TAB_COUNT = 3;
+
+    private static final int VISIBLE_TAB_COUNT = 4;
 
     private enum TabPosition {
 
