@@ -179,6 +179,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int draggedIndex;
 
+    private float maxTabDistance;
+
     /**
      * Initializes the view.
      *
@@ -342,7 +344,13 @@ public class TabSwitcher extends FrameLayout {
                         ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
                 viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
                 long duration = getResources().getInteger(android.R.integer.config_longAnimTime);
-                previous = calculateInitialTabPosition(count, previous);
+                TabProperties temp = calculateInitialTabPosition(count, previous);
+
+                if (count == 2) {
+                    maxTabDistance = previous.position - temp.position;
+                }
+
+                previous = temp;
                 float position = previous.position;
                 TabPosition tabPosition = previous.tabPosition;
                 view.setVisibility(tabPosition == TabPosition.TOP_MOST_HIDDEN ||
@@ -398,12 +406,21 @@ public class TabSwitcher extends FrameLayout {
         return new TabProperties(position, position, TabPosition.VISIBLE);
     }
 
-    @SuppressWarnings("unchecked")
     private TabProperties calculateDraggedTabPosition(final int distance, final int index,
                                                       @NonNull final TabProperties tag,
                                                       @Nullable final TabProperties previous) {
         if (getChildCount() - index > 0) {
             float newPosition = tag.projectedPosition + distance;
+
+            if (previous != null) {
+                newPosition =
+                        tag.projectedPosition + (float) (distance * (Math.pow(0.75, index - 1)));
+
+                if (previous.position - newPosition >= maxTabDistance) {
+                    newPosition = previous.position - maxTabDistance;
+                }
+            }
+
             Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
             float topMostPosition = topMostPair.first;
 
