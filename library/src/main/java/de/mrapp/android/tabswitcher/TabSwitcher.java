@@ -506,11 +506,9 @@ public class TabSwitcher extends FrameLayout {
                 previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count,
                         previous);
                 TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
-                TabProperties tabProperties =
-                        new TabProperties(previous.position, tag.projectedPosition,
-                                previous.tabPosition);
-                tabProperties.tempPosition = previous.tempPosition;
-                view.setTag(R.id.tag_position, tabProperties);
+                tag.position = previous.position;
+                tag.tabPosition = previous.tabPosition;
+                tag.tempPosition = previous.tempPosition;
                 float position = previous.position;
                 TabPosition tabPosition = previous.tabPosition;
                 view.setY(position);
@@ -529,8 +527,8 @@ public class TabSwitcher extends FrameLayout {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
-            view.setTag(R.id.tag_position,
-                    new TabProperties(view.getY(), tag.tempPosition, tag.tabPosition));
+            tag.position = view.getY();
+            tag.projectedPosition = tag.tempPosition;
         }
     }
 
