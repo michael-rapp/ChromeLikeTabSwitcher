@@ -399,8 +399,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @SuppressWarnings("unchecked")
-    private TabProperties calculateDraggedTabPosition(@NonNull final View view, final int distance,
-                                                      final int index,
+    private TabProperties calculateDraggedTabPosition(final int distance, final int index,
                                                       @NonNull final TabProperties tag,
                                                       @Nullable final TabProperties previous) {
         if (getChildCount() - index > 0) {
@@ -508,8 +507,8 @@ public class TabSwitcher extends FrameLayout {
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
                 TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
-                previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count, tag,
-                        previous);
+                previous =
+                        calculateDraggedTabPosition(dragHelper.getDistance(), count, tag, previous);
                 float position = previous.position;
                 TabPosition tabPosition = previous.tabPosition;
                 view.setY(position);
