@@ -404,11 +404,12 @@ public class TabSwitcher extends FrameLayout {
         return new Tag(position, position, State.VISIBLE);
     }
 
-    private Tag calculateDraggedTabPosition(final int distance, final int index,
-                                            @NonNull final Tag tag, @Nullable final Tag previous) {
+    private Tag calculateDraggedTabPosition(final int index, @NonNull final Tag tag,
+                                            @Nullable final Tag previous) {
         if (getChildCount() - index > 0) {
-            float newPosition = tag.projectedPosition + (distance - tag.distance);
+            int distance = dragHelper.getDistance() - tag.distance;
             tag.distance = distance;
+            float newPosition = tag.projectedPosition + (distance - tag.distance);
             Pair<Float, State> topMostPair = calculateTopMostPosition(index, previous);
             float topMostPosition = topMostPair.first;
 
@@ -512,8 +513,7 @@ public class TabSwitcher extends FrameLayout {
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
                 Tag tag = (Tag) view.getTag(R.id.tag_properties);
-                previous =
-                        calculateDraggedTabPosition(dragHelper.getDistance(), count, tag, previous);
+                previous = calculateDraggedTabPosition(count, tag, previous);
                 float position = previous.position;
                 State state = previous.state;
                 view.setY(position);
