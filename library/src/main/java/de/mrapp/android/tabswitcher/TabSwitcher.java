@@ -147,7 +147,7 @@ public class TabSwitcher extends FrameLayout {
 
         private float projectedPosition;
 
-        private float tempPosition;
+        private int distance;
 
         private TabPosition tabPosition;
 
@@ -155,8 +155,8 @@ public class TabSwitcher extends FrameLayout {
                              final TabPosition tabPosition) {
             this.position = position;
             this.projectedPosition = projectedPosition;
-            this.tempPosition = projectedPosition;
             this.tabPosition = tabPosition;
+            this.distance = 0;
         }
 
     }
@@ -410,23 +410,14 @@ public class TabSwitcher extends FrameLayout {
                                                       @NonNull final TabProperties tag,
                                                       @Nullable final TabProperties previous) {
         if (getChildCount() - index > 0) {
-            float newPosition = tag.projectedPosition + distance;
-
-            if (previous != null) {
-                newPosition =
-                        tag.projectedPosition + (float) (distance * (Math.pow(0.75, index - 1)));
-
-                if (previous.position - newPosition >= maxTabDistance) {
-                    newPosition = previous.position - maxTabDistance;
-                }
-            }
-
+            float newPosition = tag.projectedPosition + (distance - tag.distance);
+            tag.distance = distance;
             Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
             float topMostPosition = topMostPair.first;
 
             if (newPosition <= topMostPosition) {
                 tag.position = topMostPair.first;
-                tag.tempPosition = newPosition;
+                tag.projectedPosition = newPosition;
                 tag.tabPosition = topMostPair.second;
                 return tag;
             } else {
@@ -435,14 +426,14 @@ public class TabSwitcher extends FrameLayout {
 
                 if (newPosition >= bottomMostPosition) {
                     tag.position = bottomMostPair.first;
-                    tag.tempPosition = newPosition;
+                    tag.projectedPosition = newPosition;
                     tag.tabPosition = bottomMostPair.second;
                     return tag;
                 }
             }
 
             tag.position = newPosition;
-            tag.tempPosition = newPosition;
+            tag.projectedPosition = newPosition;
             tag.tabPosition = TabPosition.VISIBLE;
             return tag;
         }
@@ -545,7 +536,7 @@ public class TabSwitcher extends FrameLayout {
             View view = getChildAt(i);
             TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
             tag.position = view.getY();
-            tag.projectedPosition = tag.tempPosition;
+            tag.distance = 0;
         }
     }
 
