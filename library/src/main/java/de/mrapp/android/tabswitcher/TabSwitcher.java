@@ -401,11 +401,10 @@ public class TabSwitcher extends FrameLayout {
     @SuppressWarnings("unchecked")
     private TabProperties calculateDraggedTabPosition(@NonNull final View view, final int distance,
                                                       final int index,
+                                                      @NonNull final TabProperties tag,
                                                       @Nullable final TabProperties previous) {
-        TabProperties tabProperties = (TabProperties) view.getTag(R.id.tag_position);
-
         if (getChildCount() - index > 0) {
-            float newPosition = tabProperties.projectedPosition + distance;
+            float newPosition = tag.projectedPosition + distance;
             Pair<Float, TabPosition> topMostPair = calculateTopMostPosition(index, previous);
             float topMostPosition = topMostPair.first;
 
@@ -421,13 +420,13 @@ public class TabSwitcher extends FrameLayout {
                 }
             }
 
-            TabProperties result = new TabProperties(newPosition, tabProperties.projectedPosition,
-                    TabPosition.VISIBLE);
+            TabProperties result =
+                    new TabProperties(newPosition, tag.projectedPosition, TabPosition.VISIBLE);
             result.tempPosition = newPosition;
             return result;
         }
 
-        return tabProperties;
+        return tag;
     }
 
     private Pair<Float, TabPosition> calculateTopMostPosition(final int index,
@@ -503,9 +502,9 @@ public class TabSwitcher extends FrameLayout {
 
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
-                previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count,
-                        previous);
                 TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
+                previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count, tag,
+                        previous);
                 tag.position = previous.position;
                 tag.tabPosition = previous.tabPosition;
                 tag.tempPosition = previous.tempPosition;
