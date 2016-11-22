@@ -409,21 +409,26 @@ public class TabSwitcher extends FrameLayout {
             float topMostPosition = topMostPair.first;
 
             if (newPosition <= topMostPosition) {
-                return new TabProperties(topMostPair.first, newPosition, topMostPair.second);
+                tag.position = topMostPair.first;
+                tag.tempPosition = newPosition;
+                tag.tabPosition = topMostPair.second;
+                return tag;
             } else {
                 Pair<Float, TabPosition> bottomMostPair = calculateBottomMostPosition(index);
                 float bottomMostPosition = bottomMostPair.first;
 
                 if (newPosition >= bottomMostPosition) {
-                    return new TabProperties(bottomMostPair.first, newPosition,
-                            bottomMostPair.second);
+                    tag.position = bottomMostPair.first;
+                    tag.tempPosition = newPosition;
+                    tag.tabPosition = bottomMostPair.second;
+                    return tag;
                 }
             }
 
-            TabProperties result =
-                    new TabProperties(newPosition, tag.projectedPosition, TabPosition.VISIBLE);
-            result.tempPosition = newPosition;
-            return result;
+            tag.position = newPosition;
+            tag.tempPosition = newPosition;
+            tag.tabPosition = TabPosition.VISIBLE;
+            return tag;
         }
 
         return tag;
@@ -505,9 +510,6 @@ public class TabSwitcher extends FrameLayout {
                 TabProperties tag = (TabProperties) view.getTag(R.id.tag_position);
                 previous = calculateDraggedTabPosition(view, dragHelper.getDistance(), count, tag,
                         previous);
-                tag.position = previous.position;
-                tag.tabPosition = previous.tabPosition;
-                tag.tempPosition = previous.tempPosition;
                 float position = previous.position;
                 TabPosition tabPosition = previous.tabPosition;
                 view.setY(position);
