@@ -180,6 +180,10 @@ public class TabSwitcher extends FrameLayout {
 
     private float maxTabDistance;
 
+    private boolean scrollingDown;
+
+    private int lastAttachedIndex;
+
     /**
      * Initializes the view.
      *
@@ -404,39 +408,79 @@ public class TabSwitcher extends FrameLayout {
         return new Tag(position, position, State.VISIBLE);
     }
 
-    private Tag calculateDraggedTabPosition(final int index, @NonNull final Tag tag,
-                                            @Nullable final Tag previous) {
+    private void calculateDraggedTabPosition(final int index, @NonNull final Tag tag,
+                                             @Nullable final Tag previous) {
         if (getChildCount() - index > 0) {
             int distance = dragHelper.getDistance() - tag.distance;
             tag.distance = dragHelper.getDistance();
-            float newPosition = tag.projectedPosition + distance;
-            Pair<Float, State> topMostPair = calculateTopMostPosition(index, previous);
-            float topMostPosition = topMostPair.first;
 
-            if (newPosition <= topMostPosition) {
-                tag.position = topMostPair.first;
-                tag.projectedPosition = newPosition;
-                tag.state = topMostPair.second;
-                return tag;
-            } else {
-                Pair<Float, State> bottomMostPair = calculateBottomMostPosition(index);
-                float bottomMostPosition = bottomMostPair.first;
+            if (distance != 0) {
+                float currentPosition = tag.projectedPosition;
+                float newPosition = currentPosition + distance;
+                clipDraggedTabPosition(newPosition, index, tag, previous);
 
-                if (newPosition >= bottomMostPosition) {
-                    tag.position = bottomMostPair.first;
-                    tag.projectedPosition = newPosition;
-                    tag.state = bottomMostPair.second;
-                    return tag;
+                if (scrollingDown) {
+                    if (previous != null && previous.state == State.VISIBLE &&
+                            tag.state == State.VISIBLE) {
+                        newPosition = currentPosition +
+                                (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
+
+                        if (previous.position - newPosition >= maxTabDistance) {
+                            lastAttachedIndex = index;
+                            newPosition = previous.position - maxTabDistance;
+                        }
+
+                        clipDraggedTabPosition(newPosition, index, tag, previous);
+                    }
+                } else {
+                    if (tag.state == State.VISIBLE) {
+                        if (previous == null || previous.state == State.STACKED_BOTTOM ||
+                                previous.state == State.BOTTOM_MOST_HIDDEN) {
+                            lastAttachedIndex = index;
+                        }
+
+                        newPosition = currentPosition +
+                                (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
+
+                        if (previous != null && previous.state != State.STACKED_BOTTOM &&
+                                previous.state != State.BOTTOM_MOST_HIDDEN) {
+                            if (previous.position - newPosition <= MIN_TAB_DISTANCE) {
+                                newPosition = previous.position - MIN_TAB_DISTANCE;
+                            }
+                        }
+
+                        clipDraggedTabPosition(newPosition, index, tag, previous);
+                    }
                 }
             }
+        }
+    }
 
-            tag.position = newPosition;
-            tag.projectedPosition = newPosition;
-            tag.state = State.VISIBLE;
-            return tag;
+    private void clipDraggedTabPosition(final float position, final int index,
+                                        @NonNull final Tag tag, @Nullable final Tag previous) {
+        Pair<Float, State> topMostPair = calculateTopMostPosition(index, previous);
+        float topMostPosition = topMostPair.first;
+
+        if (position <= topMostPosition) {
+            tag.position = topMostPair.first;
+            tag.projectedPosition = position;
+            tag.state = topMostPair.second;
+            return;
+        } else {
+            Pair<Float, State> bottomMostPair = calculateBottomMostPosition(index);
+            float bottomMostPosition = bottomMostPair.first;
+
+            if (position >= bottomMostPosition) {
+                tag.position = bottomMostPair.first;
+                tag.projectedPosition = position;
+                tag.state = bottomMostPair.second;
+                return;
+            }
         }
 
-        return tag;
+        tag.position = position;
+        tag.projectedPosition = position;
+        tag.state = State.VISIBLE;
     }
 
     private Pair<Float, State> calculateTopMostPosition(final int index,
@@ -504,22 +548,26 @@ public class TabSwitcher extends FrameLayout {
 
     @SuppressWarnings("unchecked")
     private void handleDrag(final float dragPosition) {
+        int previousDistance = dragHelper.getDistance();
         dragHelper.update(dragPosition);
+        scrollingDown = previousDistance - dragHelper.getDistance() <= 0;
 
         if (dragHelper.hasThresholdBeenReached()) {
             int count = 1;
             Tag previous = null;
+            lastAttachedIndex = 1;
 
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
                 Tag tag = (Tag) view.getTag(R.id.tag_properties);
-                previous = calculateDraggedTabPosition(count, tag, previous);
-                float position = previous.position;
-                State state = previous.state;
+                calculateDraggedTabPosition(count, tag, previous);
+                float position = tag.position;
+                State state = tag.state;
                 view.setY(position);
                 view.setVisibility(
                         state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
                                 View.INVISIBLE : View.VISIBLE);
+                previous = tag;
                 count++;
             }
         }
