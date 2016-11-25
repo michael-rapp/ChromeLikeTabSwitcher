@@ -150,7 +150,6 @@ public class TabSwitcher extends FrameLayout {
 
         private State state;
 
-        private float attachedPosition;
     }
 
     /**
@@ -173,11 +172,11 @@ public class TabSwitcher extends FrameLayout {
 
     private int cardViewMargin;
 
-    private int draggedIndex;
-
     private boolean scrollingDown;
 
     private int lastAttachedIndex;
+
+    private float attachedPosition;
 
     /**
      * Initializes the view.
@@ -357,12 +356,12 @@ public class TabSwitcher extends FrameLayout {
         float position = 0 - (index - 1) * minTabSpacing;
         Tag tag = new Tag();
         clipDraggedTabPosition(position, index, tag, previous);
-        // calculateDraggedTabPosition(getHeight() / 2 - cardViewMargin, index, tag, previous);
+        // calculateTabPosition(getHeight() / 2 - cardViewMargin, index, tag, previous);
         return tag;
     }
 
-    private void calculateDraggedTabPosition(final int dragDistance, final int index,
-                                             @NonNull final Tag tag, @Nullable final Tag previous) {
+    private void calculateTabPosition(final int dragDistance, final int index,
+                                      @NonNull final Tag tag, @Nullable final Tag previous) {
         if (getChildCount() - index > 0) {
             int distance = dragDistance - tag.distance;
             tag.distance = dragDistance;
@@ -373,50 +372,68 @@ public class TabSwitcher extends FrameLayout {
                 clipDraggedTabPosition(newPosition, index, tag, previous);
 
                 if (scrollingDown) {
-                    if (previous != null && previous.state == State.VISIBLE &&
-                            tag.state == State.VISIBLE) {
-                        newPosition = currentPosition +
-                                (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
-                        boolean attached = false;
-
-                        if (previous.position - newPosition >= maxTabSpacing) {
-                            lastAttachedIndex = index;
-                            newPosition = previous.position - maxTabSpacing;
-                            attached = true;
-                        }
-
-                        clipDraggedTabPosition(newPosition, index, tag, previous);
-
-                        if (attached && tag.attachedPosition == 0) {
-                            tag.attachedPosition = tag.position;
-                        }
-                    }
+                    calculateNonLinearPositionWhenDraggingDown(distance, index, tag, previous,
+                            currentPosition);
                 } else {
-                    if (tag.state == State.VISIBLE) {
-                        boolean attached =
-                                tag.attachedPosition == 0 || tag.position <= tag.attachedPosition;
-
-                        if (previous == null || !attached) {
-                            lastAttachedIndex = index;
-                        }
-
-                        if (previous != null && attached) {
-                            tag.attachedPosition = 0;
-                            newPosition = currentPosition +
-                                    (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
-
-                            if (previous.state != State.STACKED_BOTTOM &&
-                                    previous.state != State.BOTTOM_MOST_HIDDEN &&
-                                    previous.position - newPosition <= minTabSpacing) {
-                                newPosition = previous.position - minTabSpacing;
-                            }
-
-                            clipDraggedTabPosition(newPosition, index, tag, previous);
-                        }
-                    }
+                    calculateNonLinearPositionWhenDraggingUp(distance, index, tag, previous,
+                            currentPosition);
                 }
             }
         }
+    }
+
+    private void calculateNonLinearPositionWhenDraggingDown(final int dragDistance, final int index,
+                                                            @NonNull final Tag tag,
+                                                            @Nullable final Tag previous,
+                                                            final float currentPosition) {
+        if (previous != null && previous.state == State.VISIBLE &&
+                tag.state == State.VISIBLE) {
+            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, index);
+            boolean attached = false;
+
+            if (previous.position - newPosition >= maxTabSpacing) {
+                lastAttachedIndex = index;
+                newPosition = previous.position - maxTabSpacing;
+                attached = true;
+            }
+
+            clipDraggedTabPosition(newPosition, index, tag, previous);
+
+            if (attached && attachedPosition == 0) {
+                attachedPosition = tag.position;
+            }
+        }
+    }
+
+    private void calculateNonLinearPositionWhenDraggingUp(final int dragDistance, final int index,
+                                                          @NonNull final Tag tag,
+                                                          @Nullable final Tag previous,
+                                                          final float currentPosition) {
+        if (tag.state == State.VISIBLE) {
+            boolean attached = tag.position <= attachedPosition;
+
+            if (previous == null || !attached) {
+                lastAttachedIndex = index;
+            }
+
+            if (previous != null && attached) {
+                float newPosition =
+                        calculateNonLinearPosition(dragDistance, currentPosition, index);
+
+                if (previous.state != State.STACKED_BOTTOM &&
+                        previous.state != State.BOTTOM_MOST_HIDDEN &&
+                        previous.position - newPosition <= minTabSpacing) {
+                    newPosition = previous.position - minTabSpacing;
+                }
+
+                clipDraggedTabPosition(newPosition, index, tag, previous);
+            }
+        }
+    }
+
+    private float calculateNonLinearPosition(final int dragDistance, final float currentPosition,
+                                             final int index) {
+        return currentPosition + (float) (dragDistance * Math.pow(0.5, index - lastAttachedIndex));
     }
 
     private void clipDraggedTabPosition(final float position, final int index,
@@ -469,27 +486,11 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private int calculateDraggedIndex(final float position) {
-        int count = 0;
-
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            count++;
-            View view = getChildAt(i);
-
-            if (view.getY() + cardViewMargin <= position) {
-                return count;
-            }
-        }
-
-        return count;
-    }
-
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
         if (isSwitcherShown()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    draggedIndex = calculateDraggedIndex(event.getY());
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     handleDrag(event.getY());
@@ -509,7 +510,6 @@ public class TabSwitcher extends FrameLayout {
         return super.onTouchEvent(event);
     }
 
-    @SuppressWarnings("unchecked")
     private void handleDrag(final float dragPosition) {
         int previousDistance = dragHelper.getDistance();
         dragHelper.update(dragPosition);
@@ -523,7 +523,7 @@ public class TabSwitcher extends FrameLayout {
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View view = getChildAt(i);
                 Tag tag = (Tag) view.getTag(R.id.tag_properties);
-                calculateDraggedTabPosition(dragHelper.getDistance(), count, tag, previous);
+                calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
                 float position = tag.position;
                 State state = tag.state;
                 view.setY(position);
@@ -536,7 +536,6 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void handleRelease() {
         dragHelper.reset();
 
@@ -545,7 +544,6 @@ public class TabSwitcher extends FrameLayout {
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
-            tag.attachedPosition = 0;
         }
     }
 
