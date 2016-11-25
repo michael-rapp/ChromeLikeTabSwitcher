@@ -150,6 +150,8 @@ public class TabSwitcher extends FrameLayout {
         private int distance;
 
         private State state;
+
+        private float attachedPosition;
     }
 
     /**
@@ -376,16 +378,23 @@ public class TabSwitcher extends FrameLayout {
                             tag.state == State.VISIBLE) {
                         newPosition = currentPosition +
                                 (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
+                        boolean attached = false;
 
                         if (previous.position - newPosition >= maxTabSpacing) {
                             lastAttachedIndex = index;
                             newPosition = previous.position - maxTabSpacing;
+                            attached = true;
                         }
 
                         clipDraggedTabPosition(newPosition, index, tag, previous);
+
+                        if (attached && tag.attachedPosition == 0) {
+                            tag.attachedPosition = tag.position;
+                        }
                     }
                 } else {
-                    if (tag.state == State.VISIBLE) {
+                    if (tag.state == State.VISIBLE && tag.attachedPosition != 0 &&
+                            tag.position <= tag.attachedPosition) {
                         if (previous == null || previous.state == State.STACKED_BOTTOM ||
                                 previous.state == State.BOTTOM_MOST_HIDDEN) {
                             lastAttachedIndex = index;
@@ -395,10 +404,9 @@ public class TabSwitcher extends FrameLayout {
                                 (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
 
                         if (previous != null && previous.state != State.STACKED_BOTTOM &&
-                                previous.state != State.BOTTOM_MOST_HIDDEN) {
-                            if (previous.position - newPosition <= minTabSpacing) {
-                                newPosition = previous.position - minTabSpacing;
-                            }
+                                previous.state != State.BOTTOM_MOST_HIDDEN &&
+                                previous.position - newPosition <= minTabSpacing) {
+                            newPosition = previous.position - minTabSpacing;
                         }
 
                         clipDraggedTabPosition(newPosition, index, tag, previous);
@@ -534,6 +542,7 @@ public class TabSwitcher extends FrameLayout {
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
+            tag.attachedPosition = 0;
         }
     }
 
