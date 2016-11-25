@@ -168,6 +168,14 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private enum ScrollDirection {
+
+        UP,
+
+        DOWN
+
+    }
+
     private static final int STACKED_TAB_COUNT = 3;
 
     /**
@@ -190,7 +198,7 @@ public class TabSwitcher extends FrameLayout {
 
     private int cardViewMargin;
 
-    private boolean scrollingDown;
+    private ScrollDirection scrollDirection;
 
     private int lastAttachedIndex;
 
@@ -389,7 +397,7 @@ public class TabSwitcher extends FrameLayout {
                 float newPosition = currentPosition + distance;
                 clipDraggedTabPosition(newPosition, index, tag, previous);
 
-                if (scrollingDown) {
+                if (scrollDirection == ScrollDirection.DOWN) {
                     calculateNonLinearPositionWhenDraggingDown(distance, index, tag, previous,
                             currentPosition);
                 } else {
@@ -531,7 +539,9 @@ public class TabSwitcher extends FrameLayout {
     private void handleDrag(final float dragPosition) {
         int previousDistance = dragHelper.getDistance();
         dragHelper.update(dragPosition);
-        scrollingDown = previousDistance - dragHelper.getDistance() <= 0;
+        scrollDirection =
+                (previousDistance - dragHelper.getDistance() <= 0) ? ScrollDirection.DOWN :
+                        ScrollDirection.UP;
 
         if (dragHelper.hasThresholdBeenReached()) {
             int count = 1;
