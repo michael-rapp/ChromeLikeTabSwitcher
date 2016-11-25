@@ -152,6 +152,24 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private enum State {
+
+        STACKED_TOP,
+
+        TOP_MOST_HIDDEN,
+
+        TOP_MOST,
+
+        VISIBLE,
+
+        BOTTOM_MOST_HIDDEN,
+
+        STACKED_BOTTOM
+
+    }
+
+    private static final int STACKED_TAB_COUNT = 3;
+
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -545,24 +563,6 @@ public class TabSwitcher extends FrameLayout {
             tag.position = view.getY();
             tag.distance = 0;
         }
-    }
-
-    private static final int STACKED_TAB_COUNT = 3;
-
-    private enum State {
-
-        STACKED_TOP,
-
-        TOP_MOST_HIDDEN,
-
-        TOP_MOST,
-
-        VISIBLE,
-
-        BOTTOM_MOST_HIDDEN,
-
-        STACKED_BOTTOM
-
     }
 
 }
