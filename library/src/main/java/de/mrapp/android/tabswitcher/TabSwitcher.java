@@ -32,7 +32,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -393,23 +392,27 @@ public class TabSwitcher extends FrameLayout {
                         }
                     }
                 } else {
-                    if (tag.state == State.VISIBLE && tag.attachedPosition != 0 &&
-                            tag.position <= tag.attachedPosition) {
-                        if (previous == null || previous.state == State.STACKED_BOTTOM ||
-                                previous.state == State.BOTTOM_MOST_HIDDEN) {
+                    if (tag.state == State.VISIBLE) {
+                        boolean attached =
+                                tag.attachedPosition == 0 || tag.position <= tag.attachedPosition;
+
+                        if (previous == null || !attached) {
                             lastAttachedIndex = index;
                         }
 
-                        newPosition = currentPosition +
-                                (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
+                        if (previous != null && attached) {
+                            tag.attachedPosition = 0;
+                            newPosition = currentPosition +
+                                    (float) (distance * Math.pow(0.5, index - lastAttachedIndex));
 
-                        if (previous != null && previous.state != State.STACKED_BOTTOM &&
-                                previous.state != State.BOTTOM_MOST_HIDDEN &&
-                                previous.position - newPosition <= minTabSpacing) {
-                            newPosition = previous.position - minTabSpacing;
+                            if (previous.state != State.STACKED_BOTTOM &&
+                                    previous.state != State.BOTTOM_MOST_HIDDEN &&
+                                    previous.position - newPosition <= minTabSpacing) {
+                                newPosition = previous.position - minTabSpacing;
+                            }
+
+                            clipDraggedTabPosition(newPosition, index, tag, previous);
                         }
-
-                        clipDraggedTabPosition(newPosition, index, tag, previous);
                     }
                 }
             }
