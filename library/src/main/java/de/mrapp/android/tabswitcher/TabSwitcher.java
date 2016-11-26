@@ -204,6 +204,8 @@ public class TabSwitcher extends FrameLayout {
 
     private float attachedPosition;
 
+    private float topDragPosition = Float.MIN_VALUE;
+
     /**
      * Initializes the view.
      *
@@ -537,29 +539,36 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void handleDrag(final float dragPosition) {
-        int previousDistance = dragHelper.getDistance();
-        dragHelper.update(dragPosition);
-        scrollDirection =
-                (previousDistance - dragHelper.getDistance() <= 0) ? ScrollDirection.DOWN :
-                        ScrollDirection.UP;
+        if (dragPosition > topDragPosition) {
+            int previousDistance = dragHelper.getDistance();
+            dragHelper.update(dragPosition);
+            scrollDirection =
+                    (previousDistance - dragHelper.getDistance() <= 0) ? ScrollDirection.DOWN :
+                            ScrollDirection.UP;
 
-        if (dragHelper.hasThresholdBeenReached()) {
-            int count = 1;
-            Tag previous = null;
-            lastAttachedIndex = 1;
+            if (dragHelper.hasThresholdBeenReached()) {
+                int count = 1;
+                Tag previous = null;
+                lastAttachedIndex = 1;
 
-            for (int i = getChildCount() - 1; i >= 0; i--) {
-                View view = getChildAt(i);
-                Tag tag = (Tag) view.getTag(R.id.tag_properties);
-                calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
-                float position = tag.position;
-                State state = tag.state;
-                view.setY(position);
-                view.setVisibility(
-                        state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
-                                View.INVISIBLE : View.VISIBLE);
-                previous = tag;
-                count++;
+                for (int i = getChildCount() - 1; i >= 0; i--) {
+                    View view = getChildAt(i);
+                    Tag tag = (Tag) view.getTag(R.id.tag_properties);
+                    calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
+
+                    if (count == 1 && tag.state == State.TOP_MOST) {
+                        topDragPosition = dragPosition;
+                    }
+
+                    float position = tag.position;
+                    State state = tag.state;
+                    view.setY(position);
+                    view.setVisibility(
+                            state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
+                                    View.INVISIBLE : View.VISIBLE);
+                    previous = tag;
+                    count++;
+                }
             }
         }
     }
@@ -572,6 +581,7 @@ public class TabSwitcher extends FrameLayout {
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
+            topDragPosition = 0;
         }
     }
 
