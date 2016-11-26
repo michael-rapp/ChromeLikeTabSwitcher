@@ -617,14 +617,14 @@ public class TabSwitcher extends FrameLayout {
 
     private void handleRelease() {
         dragHelper.reset();
+        topDragThreshold = Float.MIN_VALUE;
+        bottomDragThreshold = Float.MAX_VALUE;
 
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
-            topDragThreshold = Float.MIN_VALUE;
-            bottomDragThreshold = Float.MAX_VALUE;
         }
     }
 
