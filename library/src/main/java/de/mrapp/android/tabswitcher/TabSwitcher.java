@@ -561,7 +561,10 @@ public class TabSwitcher extends FrameLayout {
                 case MotionEvent.ACTION_DOWN:
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    handleDrag(event.getY());
+                    if (getAnimation() == null) {
+                        handleDrag(event.getY());
+                    }
+
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (dragHelper.hasThresholdBeenReached()) {
