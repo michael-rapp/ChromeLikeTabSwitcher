@@ -183,7 +183,7 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            handleDrag(getHeight() / 2f * interpolatedTime);
+            handleDrag((getHeight() / 2f - cardViewMargin) * interpolatedTime);
         }
 
     }
