@@ -32,6 +32,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -173,6 +176,15 @@ public class TabSwitcher extends FrameLayout {
         UP,
 
         DOWN
+
+    }
+
+    private class ShowSwitcherAnimation extends Animation {
+
+        @Override
+        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
+            handleDrag(getHeight() / 2f * interpolatedTime);
+        }
 
     }
 
@@ -379,14 +391,40 @@ public class TabSwitcher extends FrameLayout {
                 view.setTag(R.id.tag_properties, previous);
                 count++;
             }
+
+            Animation animation = new ShowSwitcherAnimation();
+            animation.setAnimationListener(createShowSwitcherAnimationListener());
+            animation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
+            animation.setInterpolator(new AccelerateDecelerateInterpolator());
+            startAnimation(animation);
         }
+    }
+
+    private Animation.AnimationListener createShowSwitcherAnimationListener() {
+        return new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(final Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(final Animation animation) {
+                handleRelease();
+            }
+
+            @Override
+            public void onAnimationRepeat(final Animation animation) {
+
+            }
+
+        };
     }
 
     private Tag calculateInitialTabPosition(final int index, @Nullable final Tag previous) {
         float position = 0 - (index - 1) * minTabSpacing;
         Tag tag = new Tag();
         clipDraggedTabPosition(position, index, tag, previous);
-        // calculateTabPosition(getHeight() / 2 - cardViewMargin, index, tag, previous);
         return tag;
     }
 
