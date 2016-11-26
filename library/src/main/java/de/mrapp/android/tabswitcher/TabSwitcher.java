@@ -204,7 +204,9 @@ public class TabSwitcher extends FrameLayout {
 
     private float attachedPosition;
 
-    private float topDragPosition = Float.MIN_VALUE;
+    private float topDragThreshold = Float.MIN_VALUE;
+
+    private float bottomDragThreshold = Float.MAX_VALUE;
 
     /**
      * Initializes the view.
@@ -539,7 +541,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void handleDrag(final float dragPosition) {
-        if (dragPosition > topDragPosition) {
+        if (dragPosition > topDragThreshold && dragPosition < bottomDragThreshold) {
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(dragPosition);
             scrollDirection =
@@ -557,7 +559,9 @@ public class TabSwitcher extends FrameLayout {
                     calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
 
                     if (count == 1 && tag.state == State.TOP_MOST) {
-                        topDragPosition = dragPosition;
+                        topDragThreshold = dragPosition;
+                    } else if (count == getChildCount() - 1 && tag.position >= maxTabSpacing) {
+                        bottomDragThreshold = dragPosition;
                     }
 
                     float position = tag.position;
@@ -581,7 +585,8 @@ public class TabSwitcher extends FrameLayout {
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
-            topDragPosition = 0;
+            topDragThreshold = Float.MIN_VALUE;
+            bottomDragThreshold = Float.MAX_VALUE;
         }
     }
 
