@@ -30,7 +30,9 @@ import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
@@ -218,6 +220,8 @@ public class TabSwitcher extends FrameLayout {
      */
     private transient DragHelper dragHelper;
 
+    private VelocityTracker velocityTracker;
+
     private boolean switcherShown;
 
     private int stackedTabSpacing;
@@ -226,9 +230,9 @@ public class TabSwitcher extends FrameLayout {
 
     private int maxTabSpacing;
 
-    private int flingMultiplicator;
+    private float minimumFlingVelocity;
 
-    private int flingThreshold;
+    private float maximumFlingVelocity;
 
     private int cardViewMargin;
 
@@ -266,8 +270,9 @@ public class TabSwitcher extends FrameLayout {
         stackedTabSpacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         minTabSpacing = getResources().getDimensionPixelSize(R.dimen.min_tab_spacing);
         maxTabSpacing = getResources().getDimensionPixelSize(R.dimen.max_tab_spacing);
-        flingMultiplicator = getResources().getDimensionPixelSize(R.dimen.fling_multiplicator);
-        flingThreshold = getResources().getDimensionPixelSize(R.dimen.fling_threshold);
+        ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        minimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
+        maximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         cardViewMargin = getResources().getDimensionPixelSize(R.dimen.card_view_margin);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -435,7 +440,7 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onAnimationEnd(final Animation animation) {
-                handleRelease(false);
+                handleRelease(null, false);
             }
 
             @Override
@@ -588,15 +593,25 @@ public class TabSwitcher extends FrameLayout {
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    if (velocityTracker == null) {
+                        velocityTracker = VelocityTracker.obtain();
+                    } else {
+                        velocityTracker.clear();
+                    }
+
+                    velocityTracker.addMovement(event);
                     return true;
                 case MotionEvent.ACTION_MOVE:
+                    velocityTracker.addMovement(event);
                     handleDrag(event.getY());
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (dragHelper.hasThresholdBeenReached()) {
-                        handleRelease(true);
+                        handleRelease(event, true);
                     }
 
+                    velocityTracker.recycle();
+                    velocityTracker = null;
                     performClick();
                     return true;
                 default:
@@ -644,8 +659,7 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private void handleRelease(final boolean fling) {
-        float flingSpeed = dragHelper.getDragSpeed();
+    private void handleRelease(@Nullable final MotionEvent event, final boolean fling) {
         ScrollDirection flingDirection = this.scrollDirection;
         this.dragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
@@ -659,15 +673,19 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (fling && flingDirection != ScrollDirection.NONE) {
-            float flingDistance = flingMultiplicator * flingSpeed;
+        if (fling && event != null && velocityTracker != null &&
+                flingDirection != ScrollDirection.NONE) {
+            int pointerId = event.getPointerId(0);
+            velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
+            float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
 
-            if (flingDistance > flingThreshold) {
+            if ((flingVelocity > minimumFlingVelocity)) {
+                float flingDistance = 0.25f * flingVelocity;
                 flingDistance =
                         flingDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
                 Animation animation = new FlingAnimation(flingDistance);
                 animation.setAnimationListener(createAnimationListener());
-                animation.setDuration(Math.round(Math.abs(flingDistance) / flingSpeed));
+                animation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
                 animation.setInterpolator(new DecelerateInterpolator());
                 startAnimation(animation);
             }
