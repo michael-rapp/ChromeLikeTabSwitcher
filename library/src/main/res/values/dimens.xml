@@ -25,5 +25,6 @@ License.
     <dimen name="min_tab_spacing">64dp</dimen>
     <dimen name="max_tab_spacing">112dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>
+    <dimen name="fling_multiplicator">256dp</dimen>
 
 </resources>

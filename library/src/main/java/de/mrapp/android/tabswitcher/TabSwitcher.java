@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -173,6 +174,8 @@ public class TabSwitcher extends FrameLayout {
 
     private enum ScrollDirection {
 
+        NONE,
+
         UP,
 
         DOWN
@@ -184,6 +187,21 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             handleDrag((getHeight() / 2f - cardViewMargin) * interpolatedTime);
+        }
+
+    }
+
+    private class FlingAnimation extends Animation {
+
+        private final float flingDistance;
+
+        public FlingAnimation(final float flingDistance) {
+            this.flingDistance = flingDistance;
+        }
+
+        @Override
+        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
+            handleDrag(flingDistance * interpolatedTime);
         }
 
     }
@@ -208,6 +226,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int maxTabSpacing;
 
+    private int flingMultiplicator;
+
     private int cardViewMargin;
 
     private ScrollDirection scrollDirection;
@@ -216,7 +236,7 @@ public class TabSwitcher extends FrameLayout {
 
     private float attachedPosition;
 
-    private float topDragThreshold = Float.MIN_VALUE;
+    private float topDragThreshold = -Float.MIN_VALUE;
 
     private float bottomDragThreshold = Float.MAX_VALUE;
 
@@ -244,7 +264,9 @@ public class TabSwitcher extends FrameLayout {
         stackedTabSpacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         minTabSpacing = getResources().getDimensionPixelSize(R.dimen.min_tab_spacing);
         maxTabSpacing = getResources().getDimensionPixelSize(R.dimen.max_tab_spacing);
+        flingMultiplicator = getResources().getDimensionPixelSize(R.dimen.fling_multiplicator);
         cardViewMargin = getResources().getDimensionPixelSize(R.dimen.card_view_margin);
+        scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
 
@@ -393,14 +415,14 @@ public class TabSwitcher extends FrameLayout {
             }
 
             Animation animation = new ShowSwitcherAnimation();
-            animation.setAnimationListener(createShowSwitcherAnimationListener());
+            animation.setAnimationListener(createAnimationListener());
             animation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
             animation.setInterpolator(new AccelerateDecelerateInterpolator());
             startAnimation(animation);
         }
     }
 
-    private Animation.AnimationListener createShowSwitcherAnimationListener() {
+    private Animation.AnimationListener createAnimationListener() {
         return new Animation.AnimationListener() {
 
             @Override
@@ -410,7 +432,7 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onAnimationEnd(final Animation animation) {
-                handleRelease();
+                handleRelease(false);
             }
 
             @Override
@@ -442,7 +464,7 @@ public class TabSwitcher extends FrameLayout {
                 if (scrollDirection == ScrollDirection.DOWN) {
                     calculateNonLinearPositionWhenDraggingDown(distance, index, tag, previous,
                             currentPosition);
-                } else {
+                } else if (scrollDirection == ScrollDirection.UP) {
                     calculateNonLinearPositionWhenDraggingUp(distance, index, tag, previous,
                             currentPosition);
                 }
@@ -557,6 +579,10 @@ public class TabSwitcher extends FrameLayout {
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
         if (isSwitcherShown()) {
+            if (getAnimation() != null) {
+                getAnimation().cancel();
+            }
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     return true;
@@ -568,7 +594,7 @@ public class TabSwitcher extends FrameLayout {
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (dragHelper.hasThresholdBeenReached()) {
-                        handleRelease();
+                        handleRelease(true);
                     }
 
                     performClick();
@@ -585,9 +611,9 @@ public class TabSwitcher extends FrameLayout {
         if (dragPosition > topDragThreshold && dragPosition < bottomDragThreshold) {
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(dragPosition);
-            scrollDirection =
-                    (previousDistance - dragHelper.getDistance() <= 0) ? ScrollDirection.DOWN :
-                            ScrollDirection.UP;
+            int diff = previousDistance - dragHelper.getDistance();
+            scrollDirection = diff == 0 ? ScrollDirection.NONE :
+                    diff < 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
 
             if (dragHelper.hasThresholdBeenReached()) {
                 int count = 1;
@@ -618,16 +644,31 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private void handleRelease() {
-        dragHelper.reset();
-        topDragThreshold = Float.MIN_VALUE;
-        bottomDragThreshold = Float.MAX_VALUE;
+    private void handleRelease(final boolean fling) {
+        int dragDistance = dragHelper.getDistance();
+        float dragSpeed = dragHelper.getDragSpeed();
+        ScrollDirection scrollDirection = this.scrollDirection;
+        this.dragHelper.reset();
+        this.topDragThreshold = -Float.MAX_VALUE;
+        this.bottomDragThreshold = Float.MAX_VALUE;
+        this.scrollDirection = ScrollDirection.NONE;
 
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             tag.position = view.getY();
             tag.distance = 0;
+        }
+
+        if (fling && scrollDirection != ScrollDirection.NONE && dragSpeed > 1) {
+            float flingDistance = flingMultiplicator * dragSpeed;
+            flingDistance =
+                    scrollDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
+            Animation animation = new FlingAnimation(flingDistance);
+            animation.setAnimationListener(createAnimationListener());
+            animation.setDuration(Math.round(Math.abs(flingDistance) / dragSpeed));
+            animation.setInterpolator(new DecelerateInterpolator());
+            startAnimation(animation);
         }
     }
 
