@@ -587,10 +587,7 @@ public class TabSwitcher extends FrameLayout {
                 case MotionEvent.ACTION_DOWN:
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    if (getAnimation() == null) {
-                        handleDrag(event.getY());
-                    }
-
+                    handleDrag(event.getY());
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (dragHelper.hasThresholdBeenReached()) {
@@ -645,9 +642,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void handleRelease(final boolean fling) {
-        int dragDistance = dragHelper.getDistance();
-        float dragSpeed = dragHelper.getDragSpeed();
-        ScrollDirection scrollDirection = this.scrollDirection;
+        float flingSpeed = dragHelper.getDragSpeed();
+        ScrollDirection flingDirection = this.scrollDirection;
         this.dragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
@@ -660,13 +656,13 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (fling && scrollDirection != ScrollDirection.NONE) {
-            float flingDistance = flingMultiplicator * dragSpeed;
+        if (fling && flingDirection != ScrollDirection.NONE) {
+            float flingDistance = flingMultiplicator * flingSpeed;
             flingDistance =
-                    scrollDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
+                    flingDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
             Animation animation = new FlingAnimation(flingDistance);
             animation.setAnimationListener(createAnimationListener());
-            animation.setDuration(Math.round(Math.abs(flingDistance) / dragSpeed));
+            animation.setDuration(Math.round(Math.abs(flingDistance) / flingSpeed));
             animation.setInterpolator(new DecelerateInterpolator());
             startAnimation(animation);
         }
