@@ -660,7 +660,7 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (fling && scrollDirection != ScrollDirection.NONE && dragSpeed > 1) {
+        if (fling && scrollDirection != ScrollDirection.NONE) {
             float flingDistance = flingMultiplicator * dragSpeed;
             flingDistance =
                     scrollDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
