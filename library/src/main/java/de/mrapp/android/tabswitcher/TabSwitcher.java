@@ -228,6 +228,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int flingMultiplicator;
 
+    private int flingThreshold;
+
     private int cardViewMargin;
 
     private ScrollDirection scrollDirection;
@@ -265,6 +267,7 @@ public class TabSwitcher extends FrameLayout {
         minTabSpacing = getResources().getDimensionPixelSize(R.dimen.min_tab_spacing);
         maxTabSpacing = getResources().getDimensionPixelSize(R.dimen.max_tab_spacing);
         flingMultiplicator = getResources().getDimensionPixelSize(R.dimen.fling_multiplicator);
+        flingThreshold = getResources().getDimensionPixelSize(R.dimen.fling_threshold);
         cardViewMargin = getResources().getDimensionPixelSize(R.dimen.card_view_margin);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -658,13 +661,16 @@ public class TabSwitcher extends FrameLayout {
 
         if (fling && flingDirection != ScrollDirection.NONE) {
             float flingDistance = flingMultiplicator * flingSpeed;
-            flingDistance =
-                    flingDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
-            Animation animation = new FlingAnimation(flingDistance);
-            animation.setAnimationListener(createAnimationListener());
-            animation.setDuration(Math.round(Math.abs(flingDistance) / flingSpeed));
-            animation.setInterpolator(new DecelerateInterpolator());
-            startAnimation(animation);
+
+            if (flingDistance > flingThreshold) {
+                flingDistance =
+                        flingDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
+                Animation animation = new FlingAnimation(flingDistance);
+                animation.setAnimationListener(createAnimationListener());
+                animation.setDuration(Math.round(Math.abs(flingDistance) / flingSpeed));
+                animation.setInterpolator(new DecelerateInterpolator());
+                startAnimation(animation);
+            }
         }
     }
 
