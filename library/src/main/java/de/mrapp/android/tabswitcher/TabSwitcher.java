@@ -48,6 +48,7 @@ import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.gesture.DragHelper;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -127,6 +128,66 @@ public class TabSwitcher extends FrameLayout {
 
         public final void setCloseable(final boolean closeable) {
             this.closeable = closeable;
+        }
+
+    }
+
+    private class TabView {
+
+        private int position;
+
+        private View view;
+
+        private Tag tag;
+
+        private ViewHolder viewHolder;
+
+        public TabView(final int position, @NonNull final View view) {
+            ensureAtLeast(position, 1, "The position must be at least 1");
+            ensureNotNull(view, "The view may not be null");
+            this.position = position;
+            this.view = view;
+            this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            this.tag = (Tag) view.getTag(R.id.tag_properties);
+
+            if (tag == null) {
+                tag = new Tag();
+                view.setTag(R.id.tag_properties, tag);
+            }
+        }
+
+    }
+
+    private class Iterator implements java.util.Iterator<TabView> {
+
+        private int position = 1;
+
+        private TabView current = null;
+
+        private TabView previous = null;
+
+        public TabView previous() {
+            return previous;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return getChildCount() - position >= 0;
+        }
+
+        @Override
+        public TabView next() {
+            int i = getChildCount() - position;
+
+            if (i >= 0) {
+                View view = getChildAt(i);
+                previous = current;
+                current = new TabView(position, view);
+                position++;
+                return current;
+            }
+
+            return null;
         }
 
     }
