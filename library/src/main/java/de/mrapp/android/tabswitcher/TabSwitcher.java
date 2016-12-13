@@ -150,9 +150,9 @@ public class TabSwitcher extends FrameLayout {
             this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             this.tag = (Tag) view.getTag(R.id.tag_properties);
 
-            if (tag == null) {
-                tag = new Tag();
-                view.setTag(R.id.tag_properties, tag);
+            if (this.tag == null) {
+                this.tag = new Tag();
+                this.view.setTag(R.id.tag_properties, this.tag);
             }
         }
 
@@ -502,10 +502,11 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void printProjectedPositions() {
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            View view = getChildAt(i);
-            Tag tag2 = (Tag) view.getTag(R.id.tag_properties);
-            System.out.println(i + ": " + tag2.projectedPosition);
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            System.out.println(tabView.position + ": " + tabView.tag.projectedPosition);
         }
 
         System.out.println("-----------------------");
@@ -533,12 +534,11 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void dragToTopThresholdPosition() {
-        int count = 1;
-        Tag previous = null;
+        Iterator iterator = new Iterator();
+        TabView tabView;
 
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            View view = getChildAt(i);
-            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+        while ((tabView = iterator.next()) != null) {
+            ViewHolder viewHolder = tabView.viewHolder;
             viewHolder.cardView.setUseCompatPadding(true);
             viewHolder.cardView.setRadius(
                     getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
@@ -546,12 +546,9 @@ public class TabSwitcher extends FrameLayout {
             int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
             int actionBarSize = ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
             viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
-            Tag tag = new Tag();
-            calculateTopThresholdPosition(count, tag, previous);
-            applyTag(tag, view);
-            view.setTag(R.id.tag_properties, tag);
-            previous = tag;
-            count++;
+            Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
+            calculateTopThresholdPosition(tabView.position, tabView.tag, previous);
+            applyTag(tabView.tag, tabView.view);
         }
     }
 
@@ -562,16 +559,13 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void dragToBottomThresholdPosition() {
-        int count = 1;
-        Tag previous = null;
+        Iterator iterator = new Iterator();
+        TabView tabView;
 
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            View view = getChildAt(i);
-            Tag tag = (Tag) view.getTag(R.id.tag_properties);
-            calculateBottomThresholdPosition(count, tag, previous);
-            applyTag(tag, view);
-            previous = tag;
-            count++;
+        while ((tabView = iterator.next()) != null) {
+            Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
+            calculateBottomThresholdPosition(tabView.position, tabView.tag, previous);
+            applyTag(tabView.tag, tabView.view);
         }
     }
 
@@ -783,17 +777,15 @@ public class TabSwitcher extends FrameLayout {
                     diff < 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
 
             if (scrollDirection != ScrollDirection.NONE && dragHelper.hasThresholdBeenReached()) {
-                int count = 1;
-                Tag previous = null;
                 lastAttachedIndex = 1;
+                Iterator iterator = new Iterator();
+                TabView tabView;
 
-                for (int i = getChildCount() - 1; i >= 0; i--) {
-                    View view = getChildAt(i);
-                    Tag tag = (Tag) view.getTag(R.id.tag_properties);
-                    calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
-                    applyTag(tag, view);
-                    previous = tag;
-                    count++;
+                while ((tabView = iterator.next()) != null) {
+                    Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
+                    calculateTabPosition(dragHelper.getDistance(), tabView.position, tabView.tag,
+                            previous);
+                    applyTag(tabView.tag, tabView.view);
                 }
 
                 if (isBottomDragThresholdReached()) {
