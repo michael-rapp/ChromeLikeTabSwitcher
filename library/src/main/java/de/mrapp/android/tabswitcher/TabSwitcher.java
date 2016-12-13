@@ -34,7 +34,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
@@ -422,12 +421,48 @@ public class TabSwitcher extends FrameLayout {
                 count++;
             }
 
+            printProjectedPositions();
+
+            boolean dragging = true;
+            int drag = 0;
+
+            while (dragging) {
+                drag += 20;
+                dragging = handleDrag(drag);
+            }
+
+            handleRelease(null, false);
+            printProjectedPositions();
+
+            dragging = true;
+            drag = 0;
+
+            while (dragging) {
+                drag -= 20;
+                dragging = handleDrag(drag);
+            }
+
+            handleRelease(null, false);
+            printProjectedPositions();
+
+/*
             Animation animation = new ShowSwitcherAnimation();
             animation.setAnimationListener(createAnimationListener());
             animation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
             animation.setInterpolator(new AccelerateDecelerateInterpolator());
             startAnimation(animation);
+            */
         }
+    }
+
+    private void printProjectedPositions() {
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            View view = getChildAt(i);
+            Tag tag2 = (Tag) view.getTag(R.id.tag_properties);
+            System.out.println(i + ": " + tag2.projectedPosition);
+        }
+
+        System.out.println("-----------------------");
     }
 
     private Animation.AnimationListener createAnimationListener() {
@@ -622,7 +657,7 @@ public class TabSwitcher extends FrameLayout {
         return super.onTouchEvent(event);
     }
 
-    private void handleDrag(final float dragPosition) {
+    private boolean handleDrag(final float dragPosition) {
         if (dragPosition > topDragThreshold && dragPosition < bottomDragThreshold) {
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(dragPosition);
@@ -656,7 +691,11 @@ public class TabSwitcher extends FrameLayout {
                     count++;
                 }
             }
+
+            return true;
         }
+
+        return false;
     }
 
     private void handleRelease(@Nullable final MotionEvent event, final boolean fling) {
