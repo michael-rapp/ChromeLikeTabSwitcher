@@ -245,6 +245,8 @@ public class TabSwitcher extends FrameLayout {
 
     private float bottomDragThreshold = Float.MAX_VALUE;
 
+    private int pointerId = -1;
+
     /**
      * Initializes the view.
      *
@@ -431,7 +433,7 @@ public class TabSwitcher extends FrameLayout {
                 dragging = handleDrag(drag);
             }
 
-            handleRelease(null, false);
+            handleRelease(null);
             printProjectedPositions();
 
             dragging = true;
@@ -442,7 +444,7 @@ public class TabSwitcher extends FrameLayout {
                 dragging = handleDrag(drag);
             }
 
-            handleRelease(null, false);
+            handleRelease(null);
             printProjectedPositions();
 
 /*
@@ -475,7 +477,7 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onAnimationEnd(final Animation animation) {
-                handleRelease(null, false);
+                handleRelease(null);
             }
 
             @Override
@@ -628,26 +630,23 @@ public class TabSwitcher extends FrameLayout {
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    if (velocityTracker == null) {
-                        velocityTracker = VelocityTracker.obtain();
-                    } else {
-                        velocityTracker.clear();
-                    }
-
-                    velocityTracker.addMovement(event);
+                    handleDown(event);
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    velocityTracker.addMovement(event);
-                    handleDrag(event.getY());
-                    return true;
-                case MotionEvent.ACTION_UP:
-                    if (dragHelper.hasThresholdBeenReached()) {
-                        handleRelease(event, true);
+                    if (event.getPointerId(0) == pointerId) {
+                        velocityTracker.addMovement(event);
+                        handleDrag(event.getY(0));
+                    } else {
+                        handleRelease(null);
+                        handleDown(event);
                     }
 
-                    velocityTracker.recycle();
-                    velocityTracker = null;
-                    performClick();
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (event.getPointerId(0) == pointerId) {
+                        handleRelease(event);
+                    }
+
                     return true;
                 default:
                     break;
@@ -655,6 +654,18 @@ public class TabSwitcher extends FrameLayout {
         }
 
         return super.onTouchEvent(event);
+    }
+
+    private void handleDown(@NonNull final MotionEvent event) {
+        pointerId = event.getPointerId(0);
+
+        if (velocityTracker == null) {
+            velocityTracker = VelocityTracker.obtain();
+        } else {
+            velocityTracker.clear();
+        }
+
+        velocityTracker.addMovement(event);
     }
 
     private boolean handleDrag(final float dragPosition) {
@@ -698,7 +709,8 @@ public class TabSwitcher extends FrameLayout {
         return false;
     }
 
-    private void handleRelease(@Nullable final MotionEvent event, final boolean fling) {
+    private void handleRelease(@Nullable final MotionEvent event) {
+        boolean thresholdReached = dragHelper.hasThresholdBeenReached();
         ScrollDirection flingDirection = this.scrollDirection;
         this.dragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
@@ -712,22 +724,27 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (fling && event != null && velocityTracker != null &&
-                flingDirection != ScrollDirection.NONE) {
-            int pointerId = event.getPointerId(0);
-            velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
-            float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
+        if (velocityTracker != null) {
+            if (thresholdReached && event != null && flingDirection != ScrollDirection.NONE) {
+                int pointerId = event.getPointerId(0);
+                velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
+                float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
 
-            if ((flingVelocity > minimumFlingVelocity)) {
-                float flingDistance = 0.25f * flingVelocity;
-                flingDistance =
-                        flingDirection == ScrollDirection.UP ? -1 * flingDistance : flingDistance;
-                Animation animation = new FlingAnimation(flingDistance);
-                animation.setAnimationListener(createAnimationListener());
-                animation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
-                animation.setInterpolator(new DecelerateInterpolator());
-                startAnimation(animation);
+                if ((flingVelocity > minimumFlingVelocity)) {
+                    float flingDistance = 0.25f * flingVelocity;
+                    flingDistance = flingDirection == ScrollDirection.UP ? -1 * flingDistance :
+                            flingDistance;
+                    Animation animation = new FlingAnimation(flingDistance);
+                    animation.setAnimationListener(createAnimationListener());
+                    animation.setDuration(
+                            Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
+                    animation.setInterpolator(new DecelerateInterpolator());
+                    startAnimation(animation);
+                }
             }
+
+            velocityTracker.recycle();
+            velocityTracker = null;
         }
     }
 
