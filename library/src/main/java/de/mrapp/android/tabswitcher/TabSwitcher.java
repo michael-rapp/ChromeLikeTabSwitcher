@@ -827,7 +827,7 @@ public class TabSwitcher extends FrameLayout {
                 velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
                 float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
 
-                if ((flingVelocity > minimumFlingVelocity)) {
+                if (flingVelocity > minimumFlingVelocity) {
                     float flingDistance = 0.25f * flingVelocity;
                     flingDistance = flingDirection == ScrollDirection.UP ? -1 * flingDistance :
                             flingDistance;
