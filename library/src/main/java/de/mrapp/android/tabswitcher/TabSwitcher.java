@@ -742,6 +742,7 @@ public class TabSwitcher extends FrameLayout {
                 } else if (isTopDragThresholdReached()) {
                     topDragThreshold = dragPosition;
                     scrollDirection = ScrollDirection.TOP_THRESHOLD;
+                    // TODO: dragToTopThresholdPosition();
                 }
             }
 
