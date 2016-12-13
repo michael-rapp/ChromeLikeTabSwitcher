@@ -179,7 +179,11 @@ public class TabSwitcher extends FrameLayout {
 
         UP,
 
-        DOWN
+        DOWN,
+
+        TOP_THRESHOLD,
+
+        BOTTOM_THRESHOLD;
 
     }
 
@@ -401,28 +405,7 @@ public class TabSwitcher extends FrameLayout {
     public final void showSwitcher() {
         if (!isSwitcherShown()) {
             switcherShown = true;
-            int count = 1;
-            Tag previous = null;
-
-            for (int i = getChildCount() - 1; i >= 0; i--) {
-                View view = getChildAt(i);
-                ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
-                viewHolder.cardView.setUseCompatPadding(true);
-                viewHolder.cardView.setRadius(
-                        getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
-                viewHolder.titleContainer.setVisibility(View.VISIBLE);
-                int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
-                int actionBarSize =
-                        ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
-                viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
-                previous = calculateInitialTabPosition(count, previous);
-                view.setY(previous.position);
-                view.setVisibility(previous.state == State.TOP_MOST_HIDDEN ||
-                        previous.state == State.BOTTOM_MOST_HIDDEN ? View.INVISIBLE : View.VISIBLE);
-                view.setTag(R.id.tag_properties, previous);
-                count++;
-            }
-
+            dragToTopThresholdPosition();
             printProjectedPositions();
 
             boolean dragging = true;
@@ -488,11 +471,61 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
-    private Tag calculateInitialTabPosition(final int index, @Nullable final Tag previous) {
+    private void dragToTopThresholdPosition() {
+        int count = 1;
+        Tag previous = null;
+
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            View view = getChildAt(i);
+            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            viewHolder.cardView.setUseCompatPadding(true);
+            viewHolder.cardView.setRadius(
+                    getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
+            viewHolder.titleContainer.setVisibility(View.VISIBLE);
+            int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
+            int actionBarSize = ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
+            viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
+            Tag tag = new Tag();
+            calculateTopThresholdPosition(count, tag, previous);
+            previous = tag;
+            view.setY(previous.position);
+            view.setVisibility(previous.state == State.TOP_MOST_HIDDEN ||
+                    previous.state == State.BOTTOM_MOST_HIDDEN ? View.INVISIBLE : View.VISIBLE);
+            view.setTag(R.id.tag_properties, previous);
+            count++;
+        }
+    }
+
+    private void calculateTopThresholdPosition(final int index, @NonNull final Tag tag,
+                                               @Nullable final Tag previous) {
         float position = 0 - (index - 1) * minTabSpacing;
-        Tag tag = new Tag();
         clipDraggedTabPosition(position, index, tag, previous);
-        return tag;
+    }
+
+    private void dragToBottomThresholdPosition() {
+        int count = 1;
+        Tag previous = null;
+
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            View view = getChildAt(i);
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+
+            calculateBottomThresholdPosition(count, tag, previous);
+
+            float position = tag.position;
+            State state = tag.state;
+            view.setY(position);
+            view.setVisibility(state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
+                    View.INVISIBLE : View.VISIBLE);
+            previous = tag;
+            count++;
+        }
+    }
+
+    private void calculateBottomThresholdPosition(final int index, @NonNull final Tag tag,
+                                                  @Nullable final Tag previous) {
+        float position = (getChildCount() - index) * maxTabSpacing;
+        clipDraggedTabPosition(position, index, tag, previous);
     }
 
     private void calculateTabPosition(final int dragDistance, final int index,
@@ -668,6 +701,18 @@ public class TabSwitcher extends FrameLayout {
         velocityTracker.addMovement(event);
     }
 
+    private boolean isTopDragThresholdReached() {
+        View view = getChildAt(getChildCount() - 1);
+        Tag tag = (Tag) view.getTag(R.id.tag_properties);
+        return tag.state == State.TOP_MOST;
+    }
+
+    private boolean isBottomDragThresholdReached() {
+        View view = getChildAt(1);
+        Tag tag = (Tag) view.getTag(R.id.tag_properties);
+        return tag.position >= maxTabSpacing;
+    }
+
     private boolean handleDrag(final float dragPosition) {
         if (dragPosition > topDragThreshold && dragPosition < bottomDragThreshold) {
             int previousDistance = dragHelper.getDistance();
@@ -676,7 +721,7 @@ public class TabSwitcher extends FrameLayout {
             scrollDirection = diff == 0 ? ScrollDirection.NONE :
                     diff < 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
 
-            if (dragHelper.hasThresholdBeenReached()) {
+            if (scrollDirection != ScrollDirection.NONE && dragHelper.hasThresholdBeenReached()) {
                 int count = 1;
                 Tag previous = null;
                 lastAttachedIndex = 1;
@@ -685,13 +730,6 @@ public class TabSwitcher extends FrameLayout {
                     View view = getChildAt(i);
                     Tag tag = (Tag) view.getTag(R.id.tag_properties);
                     calculateTabPosition(dragHelper.getDistance(), count, tag, previous);
-
-                    if (count == 1 && tag.state == State.TOP_MOST) {
-                        topDragThreshold = dragPosition;
-                    } else if (count == getChildCount() - 1 && tag.position >= maxTabSpacing) {
-                        bottomDragThreshold = dragPosition;
-                    }
-
                     float position = tag.position;
                     State state = tag.state;
                     view.setY(position);
@@ -700,6 +738,15 @@ public class TabSwitcher extends FrameLayout {
                                     View.INVISIBLE : View.VISIBLE);
                     previous = tag;
                     count++;
+                }
+
+                if (isBottomDragThresholdReached()) {
+                    bottomDragThreshold = dragPosition;
+                    scrollDirection = ScrollDirection.BOTTOM_THRESHOLD;
+                    dragToBottomThresholdPosition();
+                } else if (isTopDragThresholdReached()) {
+                    topDragThreshold = dragPosition;
+                    scrollDirection = ScrollDirection.TOP_THRESHOLD;
                 }
             }
 
@@ -725,7 +772,8 @@ public class TabSwitcher extends FrameLayout {
         }
 
         if (velocityTracker != null) {
-            if (thresholdReached && event != null && flingDirection != ScrollDirection.NONE) {
+            if (thresholdReached && event != null && (flingDirection == ScrollDirection.UP ||
+                    flingDirection == ScrollDirection.DOWN)) {
                 int pointerId = event.getPointerId(0);
                 velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
                 float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
