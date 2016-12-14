@@ -894,8 +894,11 @@ public class TabSwitcher extends FrameLayout {
 
         if (flingVelocity > minFlingVelocity) {
             float flingDistance = 0.25f * flingVelocity;
-            flingDistance = flingDirection == ScrollDirection.DRAGGING_UP ? -1 * flingDistance :
-                    flingDistance;
+
+            if (flingDirection == ScrollDirection.DRAGGING_UP) {
+                flingDistance = -1 * flingDistance;
+            }
+
             Animation animation = new FlingAnimation(flingDistance);
             animation.setAnimationListener(createAnimationListener());
             animation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
