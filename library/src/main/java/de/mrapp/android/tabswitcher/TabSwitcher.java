@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -238,13 +239,13 @@ public class TabSwitcher extends FrameLayout {
 
         NONE,
 
-        UP,
+        DRAGGING_UP,
 
-        DOWN,
+        DRAGGING_DOWN,
 
-        TOP_THRESHOLD,
+        OVERSHOOT_UP,
 
-        BOTTOM_THRESHOLD;
+        OVERSHOOT_DOWN;
 
     }
 
@@ -282,7 +283,9 @@ public class TabSwitcher extends FrameLayout {
     /**
      * An instance of the class {@link DragHelper}, which is used to recognize drag gestures.
      */
-    private transient DragHelper dragHelper;
+    private DragHelper dragHelper;
+
+    private DragHelper overshootDragHelper;
 
     private VelocityTracker velocityTracker;
 
@@ -294,9 +297,11 @@ public class TabSwitcher extends FrameLayout {
 
     private int maxTabSpacing;
 
-    private float minimumFlingVelocity;
+    private int maxOvershootDistance;
 
-    private float maximumFlingVelocity;
+    private float minFlingVelocity;
+
+    private float maxFlingVelocity;
 
     private int cardViewMargin;
 
@@ -332,14 +337,17 @@ public class TabSwitcher extends FrameLayout {
                             @StyleRes final int defaultStyleResource) {
         tabs = new ArrayList<>();
         dragHelper = new DragHelper(10);
+        overshootDragHelper = new DragHelper(0);
         switcherShown = false;
-        stackedTabSpacing = getResources().getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-        minTabSpacing = getResources().getDimensionPixelSize(R.dimen.min_tab_spacing);
-        maxTabSpacing = getResources().getDimensionPixelSize(R.dimen.max_tab_spacing);
+        Resources resources = getResources();
+        stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        minTabSpacing = resources.getDimensionPixelSize(R.dimen.min_tab_spacing);
+        maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
+        maxOvershootDistance = resources.getDimensionPixelSize(R.dimen.max_overshoot_distance);
         ViewConfiguration configuration = ViewConfiguration.get(getContext());
-        minimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
-        maximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
-        cardViewMargin = getResources().getDimensionPixelSize(R.dimen.card_view_margin);
+        minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
+        maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+        cardViewMargin = resources.getDimensionPixelSize(R.dimen.card_view_margin);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
@@ -581,6 +589,7 @@ public class TabSwitcher extends FrameLayout {
         view.setY(position);
         view.setVisibility(state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
                 View.INVISIBLE : View.VISIBLE);
+        view.setRotationX(0);
     }
 
     private void calculateTabPosition(final int dragDistance, @NonNull final TabView tabView,
@@ -594,10 +603,10 @@ public class TabSwitcher extends FrameLayout {
                 float newPosition = currentPosition + distance;
                 clipDraggedTabPosition(newPosition, tabView, previous);
 
-                if (scrollDirection == ScrollDirection.DOWN) {
+                if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
                     calculateNonLinearPositionWhenDraggingDown(distance, tabView, previous,
                             currentPosition);
-                } else if (scrollDirection == ScrollDirection.UP) {
+                } else if (scrollDirection == ScrollDirection.DRAGGING_UP) {
                     calculateNonLinearPositionWhenDraggingUp(distance, tabView, previous,
                             currentPosition);
                 }
@@ -723,6 +732,10 @@ public class TabSwitcher extends FrameLayout {
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     if (event.getPointerId(0) == pointerId) {
+                        if (velocityTracker == null) {
+                            velocityTracker = VelocityTracker.obtain();
+                        }
+
                         velocityTracker.addMovement(event);
                         handleDrag(event.getY(0));
                     } else {
@@ -769,13 +782,50 @@ public class TabSwitcher extends FrameLayout {
         return tag.projectedPosition >= maxTabSpacing;
     }
 
+    private void overshoot(final float angle) {
+        Iterator iterator = new Iterator();
+        TabView tabView;
+        float density = getResources().getDisplayMetrics().density;
+        float maxCameraDistance = density * 1280;
+        float minCameraDistance = maxCameraDistance / 2f;
+        int firstVisibleIndex = -1;
+
+        while ((tabView = iterator.next()) != null) {
+            View view = tabView.view;
+
+            if (firstVisibleIndex == -1) {
+                view.setCameraDistance(minCameraDistance);
+
+                if (tabView.tag.state == State.VISIBLE) {
+                    firstVisibleIndex = tabView.index;
+                }
+            } else {
+                int diff = tabView.index - firstVisibleIndex;
+                float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
+                view.setCameraDistance(
+                        minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
+            }
+
+            view.setPivotY(maxTabSpacing);
+            view.setRotationX(angle);
+        }
+    }
+
     private boolean handleDrag(final float dragPosition) {
-        if (dragPosition > topDragThreshold && dragPosition < bottomDragThreshold) {
+        if (dragPosition <= topDragThreshold) {
+
+        } else if (dragPosition >= bottomDragThreshold) {
+            overshootDragHelper.update(dragPosition);
+            float overshootDistance = overshootDragHelper.getDistance();
+            float ratio = Math.max(0, Math.min(1, (overshootDistance / maxOvershootDistance)));
+            overshoot(ratio * -6f);
+        } else {
+            overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(dragPosition);
             int diff = previousDistance - dragHelper.getDistance();
             scrollDirection = diff == 0 ? ScrollDirection.NONE :
-                    diff < 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
+                    diff < 0 ? ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
 
             if (scrollDirection != ScrollDirection.NONE && dragHelper.hasThresholdBeenReached()) {
                 lastAttachedIndex = 1;
@@ -789,11 +839,11 @@ public class TabSwitcher extends FrameLayout {
 
                 if (isBottomDragThresholdReached()) {
                     bottomDragThreshold = dragPosition;
-                    scrollDirection = ScrollDirection.BOTTOM_THRESHOLD;
+                    scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
                     dragToBottomThresholdPosition();
                 } else if (isTopDragThresholdReached()) {
                     topDragThreshold = dragPosition;
-                    scrollDirection = ScrollDirection.TOP_THRESHOLD;
+                    scrollDirection = ScrollDirection.OVERSHOOT_UP;
                     // TODO: dragToTopThresholdPosition();
                 }
             }
@@ -808,6 +858,7 @@ public class TabSwitcher extends FrameLayout {
         boolean thresholdReached = dragHelper.hasThresholdBeenReached();
         ScrollDirection flingDirection = this.scrollDirection;
         this.dragHelper.reset();
+        this.overshootDragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
@@ -819,28 +870,37 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (velocityTracker != null) {
-            if (thresholdReached && event != null && (flingDirection == ScrollDirection.UP ||
-                    flingDirection == ScrollDirection.DOWN)) {
-                int pointerId = event.getPointerId(0);
-                velocityTracker.computeCurrentVelocity(1000, maximumFlingVelocity);
-                float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
-
-                if (flingVelocity > minimumFlingVelocity) {
-                    float flingDistance = 0.25f * flingVelocity;
-                    flingDistance = flingDirection == ScrollDirection.UP ? -1 * flingDistance :
-                            flingDistance;
-                    Animation animation = new FlingAnimation(flingDistance);
-                    animation.setAnimationListener(createAnimationListener());
-                    animation.setDuration(
-                            Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
-                    animation.setInterpolator(new DecelerateInterpolator());
-                    startAnimation(animation);
-                }
+        if (flingDirection == ScrollDirection.DRAGGING_UP ||
+                flingDirection == ScrollDirection.DRAGGING_DOWN) {
+            if (event != null && velocityTracker != null && thresholdReached) {
+                fling(event, flingDirection);
             }
+        } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN ||
+                flingDirection == ScrollDirection.OVERSHOOT_UP) {
+            // TODO: Revert overshoot animation
+        }
 
+        if (velocityTracker != null) {
             velocityTracker.recycle();
             velocityTracker = null;
+        }
+    }
+
+    private void fling(@NonNull final MotionEvent event,
+                       @NonNull final ScrollDirection flingDirection) {
+        int pointerId = event.getPointerId(0);
+        velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+        float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
+
+        if (flingVelocity > minFlingVelocity) {
+            float flingDistance = 0.25f * flingVelocity;
+            flingDistance = flingDirection == ScrollDirection.DRAGGING_UP ? -1 * flingDistance :
+                    flingDistance;
+            Animation animation = new FlingAnimation(flingDistance);
+            animation.setAnimationListener(createAnimationListener());
+            animation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
+            animation.setInterpolator(new DecelerateInterpolator());
+            startAnimation(animation);
         }
     }
 
