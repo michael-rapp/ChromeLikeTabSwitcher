@@ -546,16 +546,15 @@ public class TabSwitcher extends FrameLayout {
             int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
             int actionBarSize = ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
             viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
-            Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
-            calculateTopThresholdPosition(tabView.index, tabView.tag, previous);
-            applyTag(tabView.tag, tabView.view);
+            calculateTopThresholdPosition(tabView, iterator.previous());
+            applyTag(tabView);
         }
     }
 
-    private void calculateTopThresholdPosition(final int index, @NonNull final Tag tag,
-                                               @Nullable final Tag previous) {
-        float position = 0 - (index - 1) * minTabSpacing;
-        clipDraggedTabPosition(position, index, tag, previous);
+    private void calculateTopThresholdPosition(@NonNull final TabView tabView,
+                                               @Nullable final TabView previous) {
+        float thresholdPosition = 0 - (tabView.index - 1) * minTabSpacing;
+        clipDraggedTabPosition(thresholdPosition, tabView, previous);
     }
 
     private void dragToBottomThresholdPosition() {
@@ -563,145 +562,147 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
-            calculateBottomThresholdPosition(tabView.index, tabView.tag, previous);
-            applyTag(tabView.tag, tabView.view);
+            calculateBottomThresholdPosition(tabView, iterator.previous());
+            applyTag(tabView);
         }
     }
 
-    private void calculateBottomThresholdPosition(final int index, @NonNull final Tag tag,
-                                                  @Nullable final Tag previous) {
-        float position = (getChildCount() - index) * maxTabSpacing;
-        clipDraggedTabPosition(position, index, tag, previous);
+    private void calculateBottomThresholdPosition(@NonNull final TabView tabView,
+                                                  @Nullable final TabView previous) {
+        float position = (getChildCount() - tabView.index) * maxTabSpacing;
+        clipDraggedTabPosition(position, tabView, previous);
     }
 
-    private void applyTag(@NonNull final Tag tag, @NonNull final View view) {
+    private void applyTag(@NonNull final TabView tabView) {
+        Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         State state = tag.state;
+        View view = tabView.view;
         view.setY(position);
         view.setVisibility(state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
                 View.INVISIBLE : View.VISIBLE);
     }
 
-    private void calculateTabPosition(final int dragDistance, final int index,
-                                      @NonNull final Tag tag, @Nullable final Tag previous) {
-        if (getChildCount() - index > 0) {
-            int distance = dragDistance - tag.distance;
-            tag.distance = dragDistance;
+    private void calculateTabPosition(final int dragDistance, @NonNull final TabView tabView,
+                                      @Nullable final TabView previous) {
+        if (getChildCount() - tabView.index > 0) {
+            int distance = dragDistance - tabView.tag.distance;
+            tabView.tag.distance = dragDistance;
 
             if (distance != 0) {
-                float currentPosition = tag.actualPosition;
+                float currentPosition = tabView.tag.actualPosition;
                 float newPosition = currentPosition + distance;
-                clipDraggedTabPosition(newPosition, index, tag, previous);
+                clipDraggedTabPosition(newPosition, tabView, previous);
 
                 if (scrollDirection == ScrollDirection.DOWN) {
-                    calculateNonLinearPositionWhenDraggingDown(distance, index, tag, previous,
+                    calculateNonLinearPositionWhenDraggingDown(distance, tabView, previous,
                             currentPosition);
                 } else if (scrollDirection == ScrollDirection.UP) {
-                    calculateNonLinearPositionWhenDraggingUp(distance, index, tag, previous,
+                    calculateNonLinearPositionWhenDraggingUp(distance, tabView, previous,
                             currentPosition);
                 }
             }
         }
     }
 
-    private void calculateNonLinearPositionWhenDraggingDown(final int dragDistance, final int index,
-                                                            @NonNull final Tag tag,
-                                                            @Nullable final Tag previous,
+    private void calculateNonLinearPositionWhenDraggingDown(final int dragDistance,
+                                                            @NonNull final TabView tabView,
+                                                            @Nullable final TabView previous,
                                                             final float currentPosition) {
-        if (previous != null && previous.state == State.VISIBLE &&
-                tag.state == State.VISIBLE) {
-            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, index);
+        if (previous != null && previous.tag.state == State.VISIBLE &&
+                tabView.tag.state == State.VISIBLE) {
+            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, tabView);
             boolean attached = false;
 
-            if (previous.projectedPosition - newPosition >= maxTabSpacing) {
-                lastAttachedIndex = index;
-                newPosition = previous.projectedPosition - maxTabSpacing;
+            if (previous.tag.projectedPosition - newPosition >= maxTabSpacing) {
+                lastAttachedIndex = tabView.index;
+                newPosition = previous.tag.projectedPosition - maxTabSpacing;
                 attached = true;
             }
 
-            clipDraggedTabPosition(newPosition, index, tag, previous);
+            clipDraggedTabPosition(newPosition, tabView, previous);
 
             if (attached && attachedPosition == 0) {
-                attachedPosition = tag.projectedPosition;
+                attachedPosition = tabView.tag.projectedPosition;
             }
         }
     }
 
-    private void calculateNonLinearPositionWhenDraggingUp(final int dragDistance, final int index,
-                                                          @NonNull final Tag tag,
-                                                          @Nullable final Tag previous,
+    private void calculateNonLinearPositionWhenDraggingUp(final int dragDistance,
+                                                          @NonNull final TabView tabView,
+                                                          @Nullable final TabView previous,
                                                           final float currentPosition) {
-        if (tag.state == State.VISIBLE) {
-            boolean attached = tag.projectedPosition <= attachedPosition;
+        if (tabView.tag.state == State.VISIBLE) {
+            boolean attached = tabView.tag.projectedPosition <= attachedPosition;
 
             if (previous == null || !attached) {
-                lastAttachedIndex = index;
+                lastAttachedIndex = tabView.index;
             }
 
             if (previous != null && attached) {
                 float newPosition =
-                        calculateNonLinearPosition(dragDistance, currentPosition, index);
+                        calculateNonLinearPosition(dragDistance, currentPosition, tabView);
 
-                if (previous.state != State.STACKED_BOTTOM &&
-                        previous.state != State.BOTTOM_MOST_HIDDEN &&
-                        previous.projectedPosition - newPosition <= minTabSpacing) {
-                    newPosition = previous.projectedPosition - minTabSpacing;
+                if (previous.tag.state != State.STACKED_BOTTOM &&
+                        previous.tag.state != State.BOTTOM_MOST_HIDDEN &&
+                        previous.tag.projectedPosition - newPosition <= minTabSpacing) {
+                    newPosition = previous.tag.projectedPosition - minTabSpacing;
                 }
 
-                clipDraggedTabPosition(newPosition, index, tag, previous);
+                clipDraggedTabPosition(newPosition, tabView, previous);
             }
         }
     }
 
     private float calculateNonLinearPosition(final int dragDistance, final float currentPosition,
-                                             final int index) {
-        return currentPosition + (float) (dragDistance * Math.pow(0.5, index - lastAttachedIndex));
+                                             @NonNull final TabView tabView) {
+        return currentPosition +
+                (float) (dragDistance * Math.pow(0.5, tabView.index - lastAttachedIndex));
     }
 
-    private void clipDraggedTabPosition(final float dragPosition, final int index,
-                                        @NonNull final Tag tag, @Nullable final Tag previous) {
-        Pair<Float, State> topMostPair = calculateTopMostPosition(index, previous);
+    private void clipDraggedTabPosition(final float dragPosition, @NonNull final TabView tabView,
+                                        @Nullable final TabView previous) {
+        Pair<Float, State> topMostPair = calculateTopMostPosition(tabView, previous);
         float topMostPosition = topMostPair.first;
 
         if (dragPosition <= topMostPosition) {
-            tag.projectedPosition = topMostPair.first;
-            tag.actualPosition = dragPosition;
-            tag.state = topMostPair.second;
+            tabView.tag.projectedPosition = topMostPair.first;
+            tabView.tag.actualPosition = dragPosition;
+            tabView.tag.state = topMostPair.second;
             return;
         } else {
-            Pair<Float, State> bottomMostPair = calculateBottomMostPosition(index);
+            Pair<Float, State> bottomMostPair = calculateBottomMostPosition(tabView);
             float bottomMostPosition = bottomMostPair.first;
 
             if (dragPosition >= bottomMostPosition) {
-                tag.projectedPosition = bottomMostPair.first;
-                tag.actualPosition = dragPosition;
-                tag.state = bottomMostPair.second;
+                tabView.tag.projectedPosition = bottomMostPair.first;
+                tabView.tag.actualPosition = dragPosition;
+                tabView.tag.state = bottomMostPair.second;
                 return;
             }
         }
 
-        tag.projectedPosition = dragPosition;
-        tag.actualPosition = dragPosition;
-        tag.state = State.VISIBLE;
+        tabView.tag.projectedPosition = dragPosition;
+        tabView.tag.actualPosition = dragPosition;
+        tabView.tag.state = State.VISIBLE;
     }
 
-    private Pair<Float, State> calculateTopMostPosition(final int index,
-                                                        @Nullable final Tag previous) {
-        if ((getCount() - index) < STACKED_TAB_COUNT) {
-            float position = stackedTabSpacing * (getCount() - index);
+    private Pair<Float, State> calculateTopMostPosition(@NonNull final TabView tabView,
+                                                        @Nullable final TabView previous) {
+        if ((getCount() - tabView.index) < STACKED_TAB_COUNT) {
+            float position = stackedTabSpacing * (getCount() - tabView.index);
             return Pair.create(position, State.STACKED_TOP);
         } else {
             float position = stackedTabSpacing * STACKED_TAB_COUNT;
             return Pair.create(position,
-                    (previous == null || previous.state == State.VISIBLE) ? State.TOP_MOST :
+                    (previous == null || previous.tag.state == State.VISIBLE) ? State.TOP_MOST :
                             State.TOP_MOST_HIDDEN);
         }
     }
 
-    private Pair<Float, State> calculateBottomMostPosition(final int index) {
-        if (index <= STACKED_TAB_COUNT) {
-            float position = getHeight() - cardViewMargin - stackedTabSpacing * index;
+    private Pair<Float, State> calculateBottomMostPosition(@NonNull final TabView tabView) {
+        if (tabView.index <= STACKED_TAB_COUNT) {
+            float position = getHeight() - cardViewMargin - stackedTabSpacing * tabView.index;
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
             float position = getHeight() - cardViewMargin - stackedTabSpacing * STACKED_TAB_COUNT;
@@ -782,10 +783,8 @@ public class TabSwitcher extends FrameLayout {
                 TabView tabView;
 
                 while ((tabView = iterator.next()) != null) {
-                    Tag previous = iterator.previous() != null ? iterator.previous().tag : null;
-                    calculateTabPosition(dragHelper.getDistance(), tabView.index, tabView.tag,
-                            previous);
-                    applyTag(tabView.tag, tabView.view);
+                    calculateTabPosition(dragHelper.getDistance(), tabView, iterator.previous());
+                    applyTag(tabView);
                 }
 
                 if (isBottomDragThresholdReached()) {
