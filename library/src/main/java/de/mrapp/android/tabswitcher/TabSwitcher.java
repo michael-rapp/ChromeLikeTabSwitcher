@@ -13,6 +13,8 @@
  */
 package de.mrapp.android.tabswitcher;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -35,6 +37,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
@@ -275,6 +279,8 @@ public class TabSwitcher extends FrameLayout {
 
     private static final int STACKED_TAB_COUNT = 3;
 
+    private static final float MAX_OVERSHOOT_ANGLE = 6f;
+
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -316,6 +322,10 @@ public class TabSwitcher extends FrameLayout {
     private float bottomDragThreshold = Float.MAX_VALUE;
 
     private int pointerId = -1;
+
+    private Animation dragAnimation;
+
+    private ViewPropertyAnimator overshootAnimation;
 
     /**
      * Initializes the view.
@@ -500,11 +510,12 @@ public class TabSwitcher extends FrameLayout {
             printProjectedPositions();
 
 /*
-            Animation animation = new ShowSwitcherAnimation();
-            animation.setAnimationListener(createAnimationListener());
-            animation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
-            animation.setInterpolator(new AccelerateDecelerateInterpolator());
-            startAnimation(animation);
+            dragAnimation = new ShowSwitcherAnimation();
+            dragAnimation.setFillAfter(true);
+            dragAnimation.setAnimationListener(createDragAnimationListener());
+            dragAnimation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
+            dragAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+            startAnimation(dragAnimation);
             */
         }
     }
@@ -520,7 +531,7 @@ public class TabSwitcher extends FrameLayout {
         System.out.println("-----------------------");
     }
 
-    private Animation.AnimationListener createAnimationListener() {
+    private Animation.AnimationListener createDragAnimationListener() {
         return new Animation.AnimationListener() {
 
             @Override
@@ -531,11 +542,30 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animation animation) {
                 handleRelease(null);
+                dragAnimation = null;
             }
 
             @Override
             public void onAnimationRepeat(final Animation animation) {
 
+            }
+
+        };
+    }
+
+    private Animator.AnimatorListener createOvershootAnimationListener() {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationCancel(final Animator animation) {
+                super.onAnimationCancel(animation);
+                overshootAnimation = null;
+            }
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                overshootAnimation = null;
             }
 
         };
@@ -722,8 +752,9 @@ public class TabSwitcher extends FrameLayout {
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
         if (isSwitcherShown()) {
-            if (getAnimation() != null) {
-                getAnimation().cancel();
+            if (dragAnimation != null) {
+                dragAnimation.cancel();
+                dragAnimation = null;
             }
 
             switch (event.getAction()) {
@@ -731,7 +762,7 @@ public class TabSwitcher extends FrameLayout {
                     handleDown(event);
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    if (event.getPointerId(0) == pointerId) {
+                    if (overshootAnimation == null && event.getPointerId(0) == pointerId) {
                         if (velocityTracker == null) {
                             velocityTracker = VelocityTracker.obtain();
                         }
@@ -745,7 +776,7 @@ public class TabSwitcher extends FrameLayout {
 
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (event.getPointerId(0) == pointerId) {
+                    if (overshootAnimation == null && event.getPointerId(0) == pointerId) {
                         handleRelease(event);
                     }
 
@@ -818,7 +849,7 @@ public class TabSwitcher extends FrameLayout {
             overshootDragHelper.update(dragPosition);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, (overshootDistance / maxOvershootDistance)));
-            overshoot(ratio * -6f);
+            overshoot(ratio * -MAX_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
@@ -873,10 +904,11 @@ public class TabSwitcher extends FrameLayout {
         if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
             if (event != null && velocityTracker != null && thresholdReached) {
-                fling(event, flingDirection);
+                animateFling(event, flingDirection);
             }
-        } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN ||
-                flingDirection == ScrollDirection.OVERSHOOT_UP) {
+        } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN) {
+            animateOvershootDown();
+        } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
             // TODO: Revert overshoot animation
         }
 
@@ -886,8 +918,26 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private void fling(@NonNull final MotionEvent event,
-                       @NonNull final ScrollDirection flingDirection) {
+    private void animateOvershootDown() {
+        long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            View view = tabView.view;
+
+            overshootAnimation = view.animate();
+            overshootAnimation.setListener(createOvershootAnimationListener());
+            overshootAnimation.setDuration(Math.round(
+                    animationDuration * (Math.abs(view.getRotationX()) / MAX_OVERSHOOT_ANGLE)));
+            overshootAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+            overshootAnimation.rotationX(0);
+            overshootAnimation.start();
+        }
+    }
+
+    private void animateFling(@NonNull final MotionEvent event,
+                              @NonNull final ScrollDirection flingDirection) {
         int pointerId = event.getPointerId(0);
         velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
         float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
@@ -899,11 +949,12 @@ public class TabSwitcher extends FrameLayout {
                 flingDistance = -1 * flingDistance;
             }
 
-            Animation animation = new FlingAnimation(flingDistance);
-            animation.setAnimationListener(createAnimationListener());
-            animation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
-            animation.setInterpolator(new DecelerateInterpolator());
-            startAnimation(animation);
+            dragAnimation = new FlingAnimation(flingDistance);
+            dragAnimation.setFillAfter(true);
+            dragAnimation.setAnimationListener(createDragAnimationListener());
+            dragAnimation.setDuration(Math.round(Math.abs(flingDistance) / flingVelocity * 1000));
+            dragAnimation.setInterpolator(new DecelerateInterpolator());
+            startAnimation(dragAnimation);
         }
     }
 
