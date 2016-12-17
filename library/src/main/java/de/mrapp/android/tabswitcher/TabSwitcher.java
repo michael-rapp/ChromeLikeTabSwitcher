@@ -902,7 +902,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isAnimationRunning() {
-        return overshootAnimation != null || closeAnimation != null;
+        return overshootAnimation != null || closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
