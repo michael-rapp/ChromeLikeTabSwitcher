@@ -382,7 +382,7 @@ public class TabSwitcher extends FrameLayout {
         tabs = new ArrayList<>();
         dragHelper = new DragHelper(10);
         overshootDragHelper = new DragHelper(0);
-        closeDragHelper = new DragHelper(10);
+        closeDragHelper = new DragHelper(20);
         switcherShown = false;
         Resources resources = getResources();
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
@@ -1058,7 +1058,8 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            if (tabView.tag.projectedPosition <= y) {
+            if ((tabView.tag.state == State.VISIBLE || tabView.tag.state == State.STACKED_TOP) &&
+                    tabView.tag.projectedPosition <= y) {
                 return tabView;
             }
         }
