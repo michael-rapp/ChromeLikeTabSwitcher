@@ -279,7 +279,7 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            handleDrag((getHeight() / 2f - cardViewMargin) * interpolatedTime);
+            handleDrag(0, (getHeight() / 2f - cardViewMargin) * interpolatedTime);
         }
 
     }
@@ -294,7 +294,7 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            handleDrag(flingDistance * interpolatedTime);
+            handleDrag(0, flingDistance * interpolatedTime);
         }
 
     }
@@ -302,6 +302,10 @@ public class TabSwitcher extends FrameLayout {
     private static final int STACKED_TAB_COUNT = 3;
 
     private static final float MAX_OVERSHOOT_ANGLE = 6f;
+
+    private static final float CLOSED_TAB_SIZE = 0.5f;
+
+    private static final float CLOSED_TAB_ALPHA = 0f;
 
     /**
      * A list, which contains the tab switcher's tabs.
@@ -314,6 +318,8 @@ public class TabSwitcher extends FrameLayout {
     private DragHelper dragHelper;
 
     private DragHelper overshootDragHelper;
+
+    private DragHelper closeDragHelper;
 
     private VelocityTracker velocityTracker;
 
@@ -334,6 +340,8 @@ public class TabSwitcher extends FrameLayout {
     private int cardViewMargin;
 
     private ScrollDirection scrollDirection;
+
+    private TabView draggedTabView;
 
     private int lastAttachedIndex;
 
@@ -374,6 +382,7 @@ public class TabSwitcher extends FrameLayout {
         tabs = new ArrayList<>();
         dragHelper = new DragHelper(10);
         overshootDragHelper = new DragHelper(0);
+        closeDragHelper = new DragHelper(10);
         switcherShown = false;
         Resources resources = getResources();
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
@@ -424,36 +433,43 @@ public class TabSwitcher extends FrameLayout {
                 int index = tabs.indexOf(tab);
 
                 if (index != -1) {
-                    tabs.remove(index);
                     int childIndex = getChildCount() - (index + 1);
                     View view = getChildAt(childIndex);
                     TabView tabView = new TabView(index + 1, view);
-                    long animationDuration =
-                            getResources().getInteger(android.R.integer.config_mediumAnimTime);
-                    closeAnimation = view.animate();
-                    closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                    closeAnimation.setListener(createCloseAnimationListener(tabView));
-                    closeAnimation.setDuration(animationDuration);
-                    closeAnimation.x(getWidth());
-                    closeAnimation.scaleX(0.5f);
-                    closeAnimation.scaleY(0.5f);
-                    closeAnimation.alpha(0);
-                    closeAnimation.setStartDelay(0);
-                    closeAnimation.start();
+                    animateClose(tabView, true);
                 }
             }
 
         };
     }
 
-    private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView) {
+    private void animateClose(@NonNull final TabView tabView, final boolean close) {
+        View view = tabView.view;
+        float closedTabPosition = calculateClosedTabPosition();
+        float targetX = close ? (view.getX() < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
+        float distance = Math.abs(targetX - view.getX());
+        long animationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        closeAnimation = view.animate();
+        closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        closeAnimation.setListener(createCloseAnimationListener(tabView, close));
+        closeAnimation.setDuration(Math.round(animationDuration * (distance / closedTabPosition)));
+        closeAnimation.x(targetX);
+        closeAnimation.scaleX(close ? CLOSED_TAB_SIZE : 1);
+        closeAnimation.scaleY(close ? CLOSED_TAB_SIZE : 1);
+        closeAnimation.alpha(close ? CLOSED_TAB_ALPHA : 1);
+        closeAnimation.setStartDelay(0);
+        closeAnimation.start();
+    }
+
+    private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
+                                                                   final boolean close) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
 
-                if (tabView.index > 1) {
+                if (close && tabView.index > 1) {
                     long animationDuration =
                             getResources().getInteger(android.R.integer.config_mediumAnimTime);
                     long startDelay =
@@ -480,8 +496,14 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                removeView(tabView.view);
+
+                if (close) {
+                    removeView(tabView.view);
+                    tabs.remove(tabView.index - 1);
+                }
+
                 closeAnimation = null;
+                draggedTabView = null;
             }
 
         };
@@ -610,7 +632,7 @@ public class TabSwitcher extends FrameLayout {
 
             while (dragging) {
                 drag += 20;
-                dragging = handleDrag(drag);
+                dragging = handleDrag(0, drag);
             }
 
             handleRelease(null);
@@ -621,7 +643,7 @@ public class TabSwitcher extends FrameLayout {
 
             while (dragging) {
                 drag -= 20;
-                dragging = handleDrag(drag);
+                dragging = handleDrag(0, drag);
             }
 
             handleRelease(null);
@@ -880,7 +902,7 @@ public class TabSwitcher extends FrameLayout {
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(event.getY(0));
+                        handleDrag(event.getX(0), event.getY(0));
                     } else {
                         handleRelease(null);
                         handleDown(event);
@@ -958,23 +980,37 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private boolean handleDrag(final float dragPosition) {
-        if (dragPosition <= topDragThreshold) {
+    private boolean handleDrag(final float x, final float y) {
+        if (y <= topDragThreshold) {
 
-        } else if (dragPosition >= bottomDragThreshold) {
-            overshootDragHelper.update(dragPosition);
+        } else if (y >= bottomDragThreshold) {
+            overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, (overshootDistance / maxOvershootDistance)));
             overshoot(ratio * -MAX_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
-            dragHelper.update(dragPosition);
-            int diff = previousDistance - dragHelper.getDistance();
-            scrollDirection = diff == 0 ? ScrollDirection.NONE :
-                    diff < 0 ? ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
+            dragHelper.update(y);
+            closeDragHelper.update(x);
 
-            if (scrollDirection != ScrollDirection.NONE && dragHelper.hasThresholdBeenReached()) {
+            if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
+                    closeDragHelper.hasThresholdBeenReached()) {
+                TabView tabView = getDraggedTabView(dragHelper.getStartPosition());
+
+                if (tabView != null && tabs.get(tabView.index - 1).isCloseable()) {
+                    draggedTabView = tabView;
+                }
+            }
+
+            if (draggedTabView == null && dragHelper.hasThresholdBeenReached()) {
+                scrollDirection = previousDistance - dragHelper.getDistance() < 0 ?
+                        ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
+            }
+
+            if (draggedTabView != null) {
+                handleDragToClose();
+            } else if (scrollDirection != ScrollDirection.NONE) {
                 lastAttachedIndex = 1;
                 Iterator iterator = new Iterator();
                 TabView tabView;
@@ -985,11 +1021,11 @@ public class TabSwitcher extends FrameLayout {
                 }
 
                 if (isBottomDragThresholdReached()) {
-                    bottomDragThreshold = dragPosition;
+                    bottomDragThreshold = y;
                     scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
                     dragToBottomThresholdPosition();
                 } else if (isTopDragThresholdReached()) {
-                    topDragThreshold = dragPosition;
+                    topDragThreshold = y;
                     scrollDirection = ScrollDirection.OVERSHOOT_UP;
                     // TODO: dragToTopThresholdPosition();
                 }
@@ -1001,11 +1037,41 @@ public class TabSwitcher extends FrameLayout {
         return false;
     }
 
+    private void handleDragToClose() {
+        int dragDistance = closeDragHelper.getDistance();
+        View view = draggedTabView.view;
+        view.setX(dragDistance);
+        float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
+        float size = CLOSED_TAB_SIZE + ratio * (1 - CLOSED_TAB_SIZE);
+        view.setScaleX(size);
+        view.setScaleY(size);
+        view.setAlpha(CLOSED_TAB_ALPHA + ratio * (1 - CLOSED_TAB_ALPHA));
+    }
+
+    private int calculateClosedTabPosition() {
+        return getWidth();
+    }
+
+    @Nullable
+    private TabView getDraggedTabView(final float y) {
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            if (tabView.tag.projectedPosition <= y) {
+                return tabView;
+            }
+        }
+
+        return null;
+    }
+
     private void handleRelease(@Nullable final MotionEvent event) {
         boolean thresholdReached = dragHelper.hasThresholdBeenReached();
         ScrollDirection flingDirection = this.scrollDirection;
         this.dragHelper.reset();
         this.overshootDragHelper.reset();
+        this.closeDragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
@@ -1017,7 +1083,12 @@ public class TabSwitcher extends FrameLayout {
             tag.distance = 0;
         }
 
-        if (flingDirection == ScrollDirection.DRAGGING_UP ||
+        if (draggedTabView != null) {
+            View view = draggedTabView.view;
+            // TODO: Take drag velocity into consideration for calculating close threshold
+            // TODO: Calculate animation duration based on drag velocity
+            animateClose(draggedTabView, Math.abs(view.getX()) > view.getWidth() / 4f);
+        } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
             if (event != null && velocityTracker != null && thresholdReached) {
                 animateFling(event, flingDirection);
