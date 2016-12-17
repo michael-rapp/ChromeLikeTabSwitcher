@@ -31,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -303,10 +304,6 @@ public class TabSwitcher extends FrameLayout {
 
     private static final float MAX_OVERSHOOT_ANGLE = 6f;
 
-    private static final float CLOSED_TAB_SIZE = 0.5f;
-
-    private static final float CLOSED_TAB_ALPHA = 0f;
-
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -338,6 +335,10 @@ public class TabSwitcher extends FrameLayout {
     private float maxFlingVelocity;
 
     private float minCloseFlingVelocity;
+
+    private float closedTabAlpha;
+
+    private float closedTabSize;
 
     private int cardViewMargin;
 
@@ -395,6 +396,11 @@ public class TabSwitcher extends FrameLayout {
         minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         minCloseFlingVelocity = resources.getDimensionPixelSize(R.dimen.min_close_fling_velocity);
+        TypedValue typedValue = new TypedValue();
+        resources.getValue(R.dimen.closed_tab_size, typedValue, true);
+        closedTabSize = typedValue.getFloat();
+        resources.getValue(R.dimen.closed_tab_alpha, typedValue, true);
+        closedTabAlpha = typedValue.getFloat();
         cardViewMargin = resources.getDimensionPixelSize(R.dimen.card_view_margin);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -467,9 +473,9 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.setListener(createCloseAnimationListener(tabView, close));
         closeAnimation.setDuration(animationDuration);
         closeAnimation.x(targetX);
-        closeAnimation.scaleX(close ? CLOSED_TAB_SIZE : 1);
-        closeAnimation.scaleY(close ? CLOSED_TAB_SIZE : 1);
-        closeAnimation.alpha(close ? CLOSED_TAB_ALPHA : 1);
+        closeAnimation.scaleX(close ? closedTabSize : 1);
+        closeAnimation.scaleY(close ? closedTabSize : 1);
+        closeAnimation.alpha(close ? closedTabAlpha : 1);
         closeAnimation.setStartDelay(0);
         closeAnimation.start();
     }
@@ -1055,10 +1061,10 @@ public class TabSwitcher extends FrameLayout {
         View view = draggedTabView.view;
         view.setX(dragDistance);
         float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
-        float size = CLOSED_TAB_SIZE + ratio * (1 - CLOSED_TAB_SIZE);
+        float size = closedTabSize + ratio * (1 - closedTabSize);
         view.setScaleX(size);
         view.setScaleY(size);
-        view.setAlpha(CLOSED_TAB_ALPHA + ratio * (1 - CLOSED_TAB_ALPHA));
+        view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
     }
 
     private int calculateClosedTabPosition() {
