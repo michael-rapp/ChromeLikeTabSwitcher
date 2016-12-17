@@ -165,11 +165,35 @@ public class TabSwitcher extends FrameLayout {
 
     private class Iterator implements java.util.Iterator<TabView> {
 
-        private int index = 1;
+        private boolean reverse;
 
-        private TabView current = null;
+        private int index;
 
-        private TabView previous = null;
+        private TabView current;
+
+        private TabView previous;
+
+        public Iterator() {
+            this(false);
+        }
+
+        public Iterator(final boolean reverse) {
+            this(reverse, -1);
+        }
+
+        public Iterator(final boolean reverse, final int start) {
+            this.reverse = reverse;
+            this.previous = null;
+            this.index = start != -1 ? start : (reverse ? getChildCount() : 1);
+            int previousIndex = reverse ? this.index + 1 : this.index - 1;
+
+            if (previousIndex >= 1 && previousIndex <= getChildCount()) {
+                this.current =
+                        new TabView(previousIndex, getChildAt(getChildCount() - previousIndex));
+            } else {
+                this.current = null;
+            }
+        }
 
         public TabView previous() {
             return previous;
@@ -177,18 +201,16 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         public boolean hasNext() {
-            return getChildCount() - index >= 0;
+            return reverse ? index >= 1 : getChildCount() - index >= 0;
         }
 
         @Override
         public TabView next() {
-            int i = getChildCount() - index;
-
-            if (i >= 0) {
-                View view = getChildAt(i);
+            if (hasNext()) {
+                View view = getChildAt(getChildCount() - index);
                 previous = current;
                 current = new TabView(index, view);
-                index++;
+                index += reverse ? -1 : 1;
                 return current;
             }
 
@@ -327,6 +349,10 @@ public class TabSwitcher extends FrameLayout {
 
     private ViewPropertyAnimator overshootAnimation;
 
+    private ViewPropertyAnimator closeAnimation;
+
+    private ViewPropertyAnimator relocateAnimation;
+
     /**
      * Initializes the view.
      *
@@ -380,6 +406,7 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.closeButton =
                 (ImageButton) viewHolder.cardView.findViewById(R.id.close_tab_button);
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
+        viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer =
                 (ViewGroup) viewHolder.cardView.findViewById(R.id.child_container);
         View view = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
@@ -387,6 +414,97 @@ public class TabSwitcher extends FrameLayout {
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         frameLayout.setTag(R.id.tag_view_holder, viewHolder);
         return frameLayout;
+    }
+
+    private OnClickListener createCloseButtonClickListener(@NonNull final Tab tab) {
+        return new OnClickListener() {
+
+            @Override
+            public void onClick(final View v) {
+                int index = tabs.indexOf(tab);
+
+                if (index != -1) {
+                    tabs.remove(index);
+                    int childIndex = getChildCount() - (index + 1);
+                    View view = getChildAt(childIndex);
+                    TabView tabView = new TabView(index + 1, view);
+                    long animationDuration =
+                            getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                    closeAnimation = view.animate();
+                    closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                    closeAnimation.setListener(createCloseAnimationListener(tabView));
+                    closeAnimation.setDuration(animationDuration);
+                    closeAnimation.x(getWidth());
+                    closeAnimation.scaleX(0.5f);
+                    closeAnimation.scaleY(0.5f);
+                    closeAnimation.alpha(0);
+                    closeAnimation.setStartDelay(0);
+                    closeAnimation.start();
+                }
+            }
+
+        };
+    }
+
+    private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (tabView.index > 1) {
+                    long animationDuration =
+                            getResources().getInteger(android.R.integer.config_mediumAnimTime);
+                    long startDelay =
+                            getResources().getInteger(android.R.integer.config_shortAnimTime);
+                    int start = tabView.index - 1;
+                    Iterator iterator = new Iterator(true, start);
+                    TabView tabView;
+
+                    while ((tabView = iterator.next()) != null) {
+                        TabView previous = iterator.previous();
+                        View view = tabView.view;
+                        closeAnimation = view.animate();
+                        closeAnimation.setListener(
+                                createRelocateAnimationListener(tabView, previous.tag));
+                        closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                        closeAnimation.setDuration(animationDuration);
+                        closeAnimation.y(previous.tag.projectedPosition);
+                        closeAnimation.setStartDelay((start + 1 - tabView.index) * startDelay);
+                        closeAnimation.start();
+                    }
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                removeView(tabView.view);
+                closeAnimation = null;
+            }
+
+        };
+    }
+
+    private Animator.AnimatorListener createRelocateAnimationListener(
+            @NonNull final TabView tabView, @NonNull final Tag tag) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                View view = tabView.view;
+                view.setTag(R.id.tag_properties, tag);
+                tabView.tag = tag;
+                applyTag(tabView);
+
+                if (tabView.index == 1) {
+                    relocateAnimation = null;
+                }
+            }
+
+        };
     }
 
     /**
@@ -555,12 +673,6 @@ public class TabSwitcher extends FrameLayout {
 
     private Animator.AnimatorListener createOvershootAnimationListener() {
         return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationCancel(final Animator animation) {
-                super.onAnimationCancel(animation);
-                overshootAnimation = null;
-            }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
@@ -762,7 +874,7 @@ public class TabSwitcher extends FrameLayout {
                     handleDown(event);
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    if (overshootAnimation == null && event.getPointerId(0) == pointerId) {
+                    if (!isAnimationRunning() && event.getPointerId(0) == pointerId) {
                         if (velocityTracker == null) {
                             velocityTracker = VelocityTracker.obtain();
                         }
@@ -776,7 +888,7 @@ public class TabSwitcher extends FrameLayout {
 
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (overshootAnimation == null && event.getPointerId(0) == pointerId) {
+                    if (!isAnimationRunning() && event.getPointerId(0) == pointerId) {
                         handleRelease(event);
                     }
 
@@ -787,6 +899,10 @@ public class TabSwitcher extends FrameLayout {
         }
 
         return super.onTouchEvent(event);
+    }
+
+    private boolean isAnimationRunning() {
+        return overshootAnimation != null || closeAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
@@ -925,13 +1041,14 @@ public class TabSwitcher extends FrameLayout {
 
         while ((tabView = iterator.next()) != null) {
             View view = tabView.view;
-
             overshootAnimation = view.animate();
-            overshootAnimation.setListener(createOvershootAnimationListener());
+            overshootAnimation
+                    .setListener(iterator.hasNext() ? null : createOvershootAnimationListener());
             overshootAnimation.setDuration(Math.round(
                     animationDuration * (Math.abs(view.getRotationX()) / MAX_OVERSHOOT_ANGLE)));
             overshootAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
             overshootAnimation.rotationX(0);
+            overshootAnimation.setStartDelay(0);
             overshootAnimation.start();
         }
     }
