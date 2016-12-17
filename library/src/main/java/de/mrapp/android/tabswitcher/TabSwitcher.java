@@ -337,6 +337,8 @@ public class TabSwitcher extends FrameLayout {
 
     private float maxFlingVelocity;
 
+    private float minCloseFlingVelocity;
+
     private int cardViewMargin;
 
     private ScrollDirection scrollDirection;
@@ -392,6 +394,7 @@ public class TabSwitcher extends FrameLayout {
         ViewConfiguration configuration = ViewConfiguration.get(getContext());
         minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+        minCloseFlingVelocity = resources.getDimensionPixelSize(R.dimen.min_close_fling_velocity);
         cardViewMargin = resources.getDimensionPixelSize(R.dimen.card_view_margin);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -436,23 +439,33 @@ public class TabSwitcher extends FrameLayout {
                     int childIndex = getChildCount() - (index + 1);
                     View view = getChildAt(childIndex);
                     TabView tabView = new TabView(index + 1, view);
-                    animateClose(tabView, true);
+                    animateClose(tabView, true, 0);
                 }
             }
 
         };
     }
 
-    private void animateClose(@NonNull final TabView tabView, final boolean close) {
+    private void animateClose(@NonNull final TabView tabView, final boolean close,
+                              final float flingVelocity) {
         View view = tabView.view;
         float closedTabPosition = calculateClosedTabPosition();
         float targetX = close ? (view.getX() < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
         float distance = Math.abs(targetX - view.getX());
-        long animationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        long animationDuration;
+
+        if (flingVelocity >= minCloseFlingVelocity) {
+            animationDuration = Math.round((distance / flingVelocity) * 1000);
+        } else {
+            animationDuration = Math.round(
+                    getResources().getInteger(android.R.integer.config_mediumAnimTime) *
+                            (distance / closedTabPosition));
+        }
+
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(createCloseAnimationListener(tabView, close));
-        closeAnimation.setDuration(Math.round(animationDuration * (distance / closedTabPosition)));
+        closeAnimation.setDuration(animationDuration);
         closeAnimation.x(targetX);
         closeAnimation.scaleX(close ? CLOSED_TAB_SIZE : 1);
         closeAnimation.scaleY(close ? CLOSED_TAB_SIZE : 1);
@@ -1085,10 +1098,18 @@ public class TabSwitcher extends FrameLayout {
         }
 
         if (draggedTabView != null) {
+            float flingVelocity = 0;
+
+            if (event != null && velocityTracker != null) {
+                int pointerId = event.getPointerId(0);
+                velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+                flingVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));
+            }
+
             View view = draggedTabView.view;
-            // TODO: Take drag velocity into consideration for calculating close threshold
-            // TODO: Calculate animation duration based on drag velocity
-            animateClose(draggedTabView, Math.abs(view.getX()) > view.getWidth() / 4f);
+            boolean close = flingVelocity >= minCloseFlingVelocity ||
+                    Math.abs(view.getX()) > view.getWidth() / 4f;
+            animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
             if (event != null && velocityTracker != null && thresholdReached) {
