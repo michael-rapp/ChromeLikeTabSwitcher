@@ -281,7 +281,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, (getHeight() / 2f - cardViewMargin) * interpolatedTime);
+                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime);
             }
         }
 
@@ -673,14 +673,13 @@ public class TabSwitcher extends FrameLayout {
             handleRelease(null);
             printProjectedPositions();
 
-/*
             dragAnimation = new ShowSwitcherAnimation();
             dragAnimation.setFillAfter(true);
             dragAnimation.setAnimationListener(createDragAnimationListener());
-            dragAnimation.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
+            dragAnimation
+                    .setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
             dragAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
             startAnimation(dragAnimation);
-            */
         }
     }
 
