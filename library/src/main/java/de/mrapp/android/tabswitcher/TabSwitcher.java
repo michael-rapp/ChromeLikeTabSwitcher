@@ -1006,6 +1006,7 @@ public class TabSwitcher extends FrameLayout {
 
     private boolean handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
+            scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
             float overshootDistance = Math.abs(overshootDragHelper.getDistance());
             Iterator iterator = new Iterator();
@@ -1015,6 +1016,7 @@ public class TabSwitcher extends FrameLayout {
             float currentPosition = tabView.tag.projectedPosition;
             view.setY(currentPosition - (currentPosition * ratio));
         } else if (y >= bottomDragThreshold) {
+            scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
