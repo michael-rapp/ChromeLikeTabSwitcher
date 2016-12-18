@@ -383,11 +383,12 @@ public class TabSwitcher extends FrameLayout {
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         tabs = new ArrayList<>();
-        dragHelper = new DragHelper(10);
-        overshootDragHelper = new DragHelper(0);
-        closeDragHelper = new DragHelper(20);
         switcherShown = false;
         Resources resources = getResources();
+        dragHelper = new DragHelper(resources.getDimensionPixelSize(R.dimen.drag_threshold));
+        overshootDragHelper = new DragHelper(0);
+        closeDragHelper =
+                new DragHelper(resources.getDimensionPixelSize(R.dimen.close_drag_threshold));
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         minTabSpacing = resources.getDimensionPixelSize(R.dimen.min_tab_spacing);
         maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
