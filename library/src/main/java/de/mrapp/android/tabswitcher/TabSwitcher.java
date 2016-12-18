@@ -976,12 +976,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void overshoot(final float angle) {
-        Iterator iterator = new Iterator();
-        TabView tabView;
         float density = getResources().getDisplayMetrics().density;
         float maxCameraDistance = density * 1280;
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
+        Iterator iterator = new Iterator();
+        TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
             View view = tabView.view;
@@ -1006,18 +1006,24 @@ public class TabSwitcher extends FrameLayout {
 
     private boolean handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
-
+            overshootDragHelper.update(y);
+            float overshootDistance = Math.abs(overshootDragHelper.getDistance());
+            Iterator iterator = new Iterator();
+            TabView tabView = iterator.next();
+            View view = tabView.view;
+            float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
+            float currentPosition = tabView.tag.projectedPosition;
+            view.setY(currentPosition - (currentPosition * ratio));
         } else if (y >= bottomDragThreshold) {
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
-            float ratio = Math.max(0, Math.min(1, (overshootDistance / maxOvershootDistance)));
+            float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
             overshoot(ratio * -MAX_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(y);
             closeDragHelper.update(x);
-            System.out.println("update");
 
             if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
                     closeDragHelper.hasThresholdBeenReached()) {
@@ -1098,7 +1104,6 @@ public class TabSwitcher extends FrameLayout {
         this.dragHelper.reset();
         this.overshootDragHelper.reset();
         this.closeDragHelper.reset();
-        System.out.println("reset");
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
