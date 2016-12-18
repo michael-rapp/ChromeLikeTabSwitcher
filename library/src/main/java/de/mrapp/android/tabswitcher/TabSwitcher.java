@@ -280,7 +280,9 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            handleDrag(0, (getHeight() / 2f - cardViewMargin) * interpolatedTime);
+            if (dragAnimation != null) {
+                handleDrag(0, (getHeight() / 2f - cardViewMargin) * interpolatedTime);
+            }
         }
 
     }
@@ -295,7 +297,9 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            handleDrag(0, flingDistance * interpolatedTime);
+            if (dragAnimation != null) {
+                handleDrag(0, flingDistance * interpolatedTime);
+            }
         }
 
     }
@@ -719,6 +723,7 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+                handleRelease(null);
                 overshootAnimation = null;
             }
 
@@ -1013,6 +1018,7 @@ public class TabSwitcher extends FrameLayout {
             int previousDistance = dragHelper.getDistance();
             dragHelper.update(y);
             closeDragHelper.update(x);
+            System.out.println("update");
 
             if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
                     closeDragHelper.hasThresholdBeenReached()) {
@@ -1093,6 +1099,7 @@ public class TabSwitcher extends FrameLayout {
         this.dragHelper.reset();
         this.overshootDragHelper.reset();
         this.closeDragHelper.reset();
+        System.out.println("reset");
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
