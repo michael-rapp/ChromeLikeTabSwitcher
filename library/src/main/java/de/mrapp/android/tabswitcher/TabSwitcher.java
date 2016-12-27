@@ -992,7 +992,7 @@ public class TabSwitcher extends FrameLayout {
         return tag.projectedPosition >= maxTabSpacing;
     }
 
-    private void overshoot(final float angle) {
+    private void tilt(final float angle) {
         float density = getResources().getDisplayMetrics().density;
         float maxCameraDistance = density * 1280;
         float minCameraDistance = maxCameraDistance / 2f;
@@ -1049,7 +1049,7 @@ public class TabSwitcher extends FrameLayout {
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            overshoot(ratio * -MAX_OVERSHOOT_ANGLE);
+            tilt(ratio * -MAX_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
