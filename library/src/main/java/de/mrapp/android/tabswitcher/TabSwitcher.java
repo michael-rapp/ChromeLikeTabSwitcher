@@ -769,15 +769,21 @@ public class TabSwitcher extends FrameLayout {
         clipDraggedTabPosition(position, tabView, previous);
     }
 
+    @SuppressWarnings("WrongConstant")
     private void applyTag(@NonNull final TabView tabView) {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         State state = tag.state;
         View view = tabView.view;
         view.setY(position);
-        view.setVisibility(state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
-                View.INVISIBLE : View.VISIBLE);
         view.setRotationX(0);
+        view.setVisibility(getVisibility(tabView));
+    }
+
+    private int getVisibility(@NonNull final TabView tabView) {
+        State state = tabView.tag.state;
+        return state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
+                View.INVISIBLE : View.VISIBLE;
     }
 
     private void calculateTabPosition(final int dragDistance, @NonNull final TabView tabView,
@@ -1004,17 +1010,30 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
+    @SuppressWarnings("WrongConstant")
     private boolean handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
-            float overshootDistance = Math.abs(overshootDragHelper.getDistance());
             Iterator iterator = new Iterator();
-            TabView tabView = iterator.next();
-            View view = tabView.view;
-            float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            float currentPosition = tabView.tag.projectedPosition;
-            view.setY(currentPosition - (currentPosition * ratio));
+            TabView tabView;
+            View firstView = null;
+
+            while ((tabView = iterator.next()) != null) {
+                View view = tabView.view;
+
+                if (tabView.index == 1) {
+                    firstView = view;
+                    float overshootDistance = Math.abs(overshootDragHelper.getDistance());
+                    float ratio =
+                            Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
+                    float currentPosition = tabView.tag.projectedPosition;
+                    view.setY(currentPosition - (currentPosition * ratio));
+                } else if (firstView != null) {
+                    view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
+                            getVisibility(tabView));
+                }
+            }
         } else if (y >= bottomDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             overshootDragHelper.update(y);
