@@ -174,6 +174,8 @@ public class TabSwitcher extends FrameLayout {
 
         private TabView previous;
 
+        private TabView first;
+
         public Iterator() {
             this(false);
         }
@@ -196,6 +198,10 @@ public class TabSwitcher extends FrameLayout {
             }
         }
 
+        public TabView first() {
+            return first;
+        }
+
         public TabView previous() {
             return previous;
         }
@@ -210,6 +216,11 @@ public class TabSwitcher extends FrameLayout {
             if (hasNext()) {
                 View view = getChildAt(getChildCount() - index);
                 previous = current;
+
+                if (first == null) {
+                    first = current;
+                }
+
                 current = new TabView(index, view);
                 index += reverse ? -1 : 1;
                 return current;
@@ -1017,19 +1028,18 @@ public class TabSwitcher extends FrameLayout {
             overshootDragHelper.update(y);
             Iterator iterator = new Iterator();
             TabView tabView;
-            View firstView = null;
 
             while ((tabView = iterator.next()) != null) {
                 View view = tabView.view;
 
                 if (tabView.index == 1) {
-                    firstView = view;
                     float overshootDistance = Math.abs(overshootDragHelper.getDistance());
                     float ratio =
                             Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
                     float currentPosition = tabView.tag.projectedPosition;
                     view.setY(currentPosition - (currentPosition * ratio));
-                } else if (firstView != null) {
+                } else {
+                    View firstView = iterator.first.view;
                     view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
                             getVisibility(tabView));
                 }
