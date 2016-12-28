@@ -40,8 +40,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -315,6 +317,39 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private class OvershootUpAnimation extends Animation {
+
+        private Float startPosition = null;
+
+        @SuppressWarnings("WrongConstant")
+        @Override
+        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
+            if (overshootUpAnimation != null) {
+                Iterator iterator = new Iterator();
+                TabView tabView;
+
+                while ((tabView = iterator.next()) != null) {
+                    View view = tabView.view;
+
+                    if (tabView.index == 1) {
+                        if (startPosition == null) {
+                            startPosition = view.getY();
+                        }
+
+                        float targetPosition = tabView.tag.projectedPosition;
+                        view.setY(startPosition +
+                                (targetPosition - startPosition) * interpolatedTime);
+                    } else {
+                        View firstView = iterator.first().view;
+                        view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
+                                getVisibility(tabView));
+                    }
+                }
+            }
+        }
+
+    }
+
     private static final int STACKED_TAB_COUNT = 3;
 
     private static final float MAX_OVERSHOOT_ANGLE = 4f;
@@ -374,6 +409,8 @@ public class TabSwitcher extends FrameLayout {
     private Animation dragAnimation;
 
     private ViewPropertyAnimator overshootAnimation;
+
+    private Animation overshootUpAnimation;
 
     private ViewPropertyAnimator closeAnimation;
 
@@ -684,6 +721,7 @@ public class TabSwitcher extends FrameLayout {
             handleRelease(null);
             printProjectedPositions();
 
+            /*
             dragAnimation = new ShowSwitcherAnimation();
             dragAnimation.setFillAfter(true);
             dragAnimation.setAnimationListener(createDragAnimationListener());
@@ -691,6 +729,7 @@ public class TabSwitcher extends FrameLayout {
                     .setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
             dragAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
             startAnimation(dragAnimation);
+            */
         }
     }
 
@@ -740,6 +779,28 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
+    private Animation.AnimationListener createOvershootUpAnimationListener() {
+        return new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                handleRelease(null);
+                overshootUpAnimation = null;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+
+        };
+    }
+
     private void dragToTopThresholdPosition() {
         Iterator iterator = new Iterator();
         TabView tabView;
@@ -780,11 +841,19 @@ public class TabSwitcher extends FrameLayout {
         clipDraggedTabPosition(position, tabView, previous);
     }
 
+    private void updateTags() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+            tag.projectedPosition = view.getY();
+            tag.distance = 0;
+        }
+    }
+
     @SuppressWarnings("WrongConstant")
     private void applyTag(@NonNull final TabView tabView) {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
-        State state = tag.state;
         View view = tabView.view;
         view.setY(position);
         view.setRotationX(0);
@@ -965,7 +1034,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isAnimationRunning() {
-        return overshootAnimation != null || closeAnimation != null || relocateAnimation != null;
+        return overshootAnimation != null || overshootUpAnimation != null ||
+                closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
@@ -1052,6 +1122,7 @@ public class TabSwitcher extends FrameLayout {
             float overshootDistance = Math.abs(overshootDragHelper.getDistance());
 
             if (overshootDistance <= maxOvershootDistance) {
+                float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
                 Iterator iterator = new Iterator();
                 TabView tabView;
 
@@ -1059,12 +1130,10 @@ public class TabSwitcher extends FrameLayout {
                     View view = tabView.view;
 
                     if (tabView.index == 1) {
-                        float ratio =
-                                Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
                         float currentPosition = tabView.tag.projectedPosition;
                         view.setY(currentPosition - (currentPosition * ratio));
                     } else {
-                        View firstView = iterator.first.view;
+                        View firstView = iterator.first().view;
                         view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
                                 getVisibility(tabView));
                     }
@@ -1169,14 +1238,8 @@ public class TabSwitcher extends FrameLayout {
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
 
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            Tag tag = (Tag) view.getTag(R.id.tag_properties);
-            tag.projectedPosition = view.getY();
-            tag.distance = 0;
-        }
-
         if (draggedTabView != null) {
+            updateTags();
             float flingVelocity = 0;
 
             if (event != null && velocityTracker != null) {
@@ -1191,13 +1254,17 @@ public class TabSwitcher extends FrameLayout {
             animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
+            updateTags();
+
             if (event != null && velocityTracker != null && thresholdReached) {
                 animateFling(event, flingDirection);
             }
         } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN) {
             animateOvershootDown();
         } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
-            // TODO: Revert overshoot animation
+            animateOvershootUp();
+        } else {
+            updateTags();
         }
 
         if (velocityTracker != null) {
@@ -1207,22 +1274,65 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootDown() {
+        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootAnimationListener());
+
+    }
+
+    private void animateOvershootUp() {
+        boolean tilted = animateTilt(new AccelerateInterpolator(), createTiltAnimationListener());
+
+        if (!tilted) {
+            animateOvershootUp(new AccelerateDecelerateInterpolator());
+        }
+    }
+
+    private Animator.AnimatorListener createTiltAnimationListener() {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                animateOvershootUp(new DecelerateInterpolator());
+                overshootAnimation = null;
+            }
+
+        };
+    }
+
+    private void animateOvershootUp(@NonNull final Interpolator interpolator) {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        Iterator iterator = new Iterator();
+        overshootUpAnimation = new OvershootUpAnimation();
+        overshootUpAnimation.setFillAfter(true);
+        overshootUpAnimation.setDuration(animationDuration);
+        overshootUpAnimation.setInterpolator(interpolator);
+        overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
+        startAnimation(overshootUpAnimation);
+    }
+
+    private boolean animateTilt(@NonNull final Interpolator interpolator,
+                                @Nullable final Animator.AnimatorListener listener) {
+        long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        Iterator iterator = new Iterator(true);
         TabView tabView;
+        boolean result = false;
 
         while ((tabView = iterator.next()) != null) {
             View view = tabView.view;
-            overshootAnimation = view.animate();
-            overshootAnimation
-                    .setListener(iterator.hasNext() ? null : createOvershootAnimationListener());
-            overshootAnimation.setDuration(Math.round(
-                    animationDuration * (Math.abs(view.getRotationX()) / MAX_OVERSHOOT_ANGLE)));
-            overshootAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-            overshootAnimation.rotationX(0);
-            overshootAnimation.setStartDelay(0);
-            overshootAnimation.start();
+
+            if (view.getRotationX() != 0) {
+                result = true;
+                overshootAnimation = view.animate();
+                overshootAnimation.setListener(iterator.hasNext() ? null : listener);
+                overshootAnimation.setDuration(Math.round(
+                        animationDuration * (Math.abs(view.getRotationX()) / MAX_OVERSHOOT_ANGLE)));
+                overshootAnimation.setInterpolator(interpolator);
+                overshootAnimation.rotationX(0);
+                overshootAnimation.setStartDelay(0);
+                overshootAnimation.start();
+            }
         }
+
+        return result;
     }
 
     private void animateFling(@NonNull final MotionEvent event,
