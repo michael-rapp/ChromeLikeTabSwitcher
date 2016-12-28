@@ -317,7 +317,7 @@ public class TabSwitcher extends FrameLayout {
 
     private static final int STACKED_TAB_COUNT = 3;
 
-    private static final float MAX_OVERSHOOT_ANGLE = 6f;
+    private static final float MAX_OVERSHOOT_ANGLE = 4f;
 
     /**
      * A list, which contains the tab switcher's tabs.
@@ -992,7 +992,7 @@ public class TabSwitcher extends FrameLayout {
         return tag.projectedPosition >= maxTabSpacing;
     }
 
-    private void tilt(final float angle) {
+    private void tiltOnOvershootDown(final float angle) {
         float density = getResources().getDisplayMetrics().density;
         float maxCameraDistance = density * 1280;
         float minCameraDistance = maxCameraDistance / 2f;
@@ -1021,35 +1021,62 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
+    private void tiltOnOvershootUp(final float angle) {
+        float density = getResources().getDisplayMetrics().density;
+        float cameraDistance = density * 1280;
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            View view = tabView.view;
+
+            if (tabView.index == 1) {
+                view.setVisibility(View.VISIBLE);
+                view.setCameraDistance(cameraDistance);
+                view.setPivotY(view.getHeight() / 2f);
+                view.setRotationX(angle);
+            } else {
+                view.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
     @SuppressWarnings("WrongConstant")
     private boolean handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
-            Iterator iterator = new Iterator();
-            TabView tabView;
+            float overshootDistance = Math.abs(overshootDragHelper.getDistance());
 
-            while ((tabView = iterator.next()) != null) {
-                View view = tabView.view;
+            if (overshootDistance <= maxOvershootDistance) {
+                Iterator iterator = new Iterator();
+                TabView tabView;
 
-                if (tabView.index == 1) {
-                    float overshootDistance = Math.abs(overshootDragHelper.getDistance());
-                    float ratio =
-                            Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-                    float currentPosition = tabView.tag.projectedPosition;
-                    view.setY(currentPosition - (currentPosition * ratio));
-                } else {
-                    View firstView = iterator.first.view;
-                    view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
-                            getVisibility(tabView));
+                while ((tabView = iterator.next()) != null) {
+                    View view = tabView.view;
+
+                    if (tabView.index == 1) {
+                        float ratio =
+                                Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
+                        float currentPosition = tabView.tag.projectedPosition;
+                        view.setY(currentPosition - (currentPosition * ratio));
+                    } else {
+                        View firstView = iterator.first.view;
+                        view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
+                                getVisibility(tabView));
+                    }
                 }
+            } else {
+                float ratio = Math.max(0, Math.min(1,
+                        (overshootDistance - maxOvershootDistance) / maxOvershootDistance));
+                tiltOnOvershootUp(ratio * MAX_OVERSHOOT_ANGLE);
             }
         } else if (y >= bottomDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            tilt(ratio * -MAX_OVERSHOOT_ANGLE);
+            tiltOnOvershootDown(ratio * -MAX_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
