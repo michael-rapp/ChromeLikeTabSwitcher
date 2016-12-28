@@ -993,8 +993,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void tiltOnOvershootDown(final float angle) {
-        float density = getResources().getDisplayMetrics().density;
-        float maxCameraDistance = density * 1280;
+        float maxCameraDistance = getMaxCameraDistance();
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
         Iterator iterator = new Iterator();
@@ -1022,8 +1021,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void tiltOnOvershootUp(final float angle) {
-        float density = getResources().getDisplayMetrics().density;
-        float cameraDistance = density * 1280;
+        float cameraDistance = getMaxCameraDistance();
         Iterator iterator = new Iterator();
         TabView tabView;
 
@@ -1039,6 +1037,11 @@ public class TabSwitcher extends FrameLayout {
                 view.setVisibility(View.INVISIBLE);
             }
         }
+    }
+
+    private float getMaxCameraDistance() {
+        float density = getResources().getDisplayMetrics().density;
+        return density * 1280;
     }
 
     @SuppressWarnings("WrongConstant")
