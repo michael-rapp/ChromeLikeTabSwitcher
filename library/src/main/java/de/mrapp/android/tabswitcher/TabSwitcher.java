@@ -352,7 +352,9 @@ public class TabSwitcher extends FrameLayout {
 
     private static final int STACKED_TAB_COUNT = 3;
 
-    private static final float MAX_OVERSHOOT_ANGLE = 4f;
+    private static final float MAX_DOWN_OVERSHOOT_ANGLE = 4f;
+
+    private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
     /**
      * A list, which contains the tab switcher's tabs.
@@ -1141,14 +1143,14 @@ public class TabSwitcher extends FrameLayout {
             } else {
                 float ratio = Math.max(0, Math.min(1,
                         (overshootDistance - maxOvershootDistance) / maxOvershootDistance));
-                tiltOnOvershootUp(ratio * MAX_OVERSHOOT_ANGLE);
+                tiltOnOvershootUp(ratio * MAX_UP_OVERSHOOT_ANGLE);
             }
         } else if (y >= bottomDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            tiltOnOvershootDown(ratio * -MAX_OVERSHOOT_ANGLE);
+            tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
@@ -1274,12 +1276,14 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootDown() {
-        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootAnimationListener());
+        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootAnimationListener(),
+                MAX_DOWN_OVERSHOOT_ANGLE);
 
     }
 
     private void animateOvershootUp() {
-        boolean tilted = animateTilt(new AccelerateInterpolator(), createTiltAnimationListener());
+        boolean tilted = animateTilt(new AccelerateInterpolator(), createTiltAnimationListener(),
+                MAX_UP_OVERSHOOT_ANGLE);
 
         if (!tilted) {
             animateOvershootUp(new AccelerateDecelerateInterpolator());
@@ -1310,7 +1314,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean animateTilt(@NonNull final Interpolator interpolator,
-                                @Nullable final Animator.AnimatorListener listener) {
+                                @Nullable final Animator.AnimatorListener listener,
+                                final float maxAngle) {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         Iterator iterator = new Iterator(true);
         TabView tabView;
@@ -1323,8 +1328,8 @@ public class TabSwitcher extends FrameLayout {
                 result = true;
                 overshootAnimation = view.animate();
                 overshootAnimation.setListener(iterator.hasNext() ? null : listener);
-                overshootAnimation.setDuration(Math.round(
-                        animationDuration * (Math.abs(view.getRotationX()) / MAX_OVERSHOOT_ANGLE)));
+                overshootAnimation.setDuration(
+                        Math.round(animationDuration * (Math.abs(view.getRotationX()) / maxAngle)));
                 overshootAnimation.setInterpolator(interpolator);
                 overshootAnimation.rotationX(0);
                 overshootAnimation.setStartDelay(0);
