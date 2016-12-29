@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
@@ -29,7 +30,6 @@ import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
-import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -52,7 +52,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.gesture.DragHelper;
 
@@ -235,7 +234,7 @@ public class TabSwitcher extends FrameLayout {
 
     private static class ViewHolder {
 
-        private CardView cardView;
+        private ViewGroup cardView;
 
         private ViewGroup titleContainer;
 
@@ -244,6 +243,8 @@ public class TabSwitcher extends FrameLayout {
         private ImageButton closeButton;
 
         private ViewGroup childContainer;
+
+        private View borderView;
 
     }
 
@@ -361,6 +362,8 @@ public class TabSwitcher extends FrameLayout {
      */
     private List<Tab> tabs;
 
+    private int tabBackgroundColor;
+
     /**
      * An instance of the class {@link DragHelper}, which is used to recognize drag gestures.
      */
@@ -392,7 +395,9 @@ public class TabSwitcher extends FrameLayout {
 
     private float closedTabSize;
 
-    private int cardViewMargin;
+    private int tabInset;
+
+    private int tabBorderWidth;
 
     private ScrollDirection scrollDirection;
 
@@ -456,7 +461,8 @@ public class TabSwitcher extends FrameLayout {
         closedTabSize = typedValue.getFloat();
         resources.getValue(R.dimen.closed_tab_alpha, typedValue, true);
         closedTabAlpha = typedValue.getFloat();
-        cardViewMargin = resources.getDimensionPixelSize(R.dimen.card_view_margin);
+        tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
+        tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
@@ -467,7 +473,7 @@ public class TabSwitcher extends FrameLayout {
         FrameLayout frameLayout = new FrameLayout(getContext());
         ViewHolder viewHolder = new ViewHolder();
         viewHolder.cardView =
-                (CardView) layoutInflater.inflate(R.layout.card_view, frameLayout, false);
+                (ViewGroup) layoutInflater.inflate(R.layout.card_view, frameLayout, false);
         frameLayout.addView(viewHolder.cardView);
         viewHolder.titleContainer =
                 (ViewGroup) viewHolder.cardView.findViewById(R.id.tab_title_container);
@@ -485,6 +491,7 @@ public class TabSwitcher extends FrameLayout {
         View view = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
         viewHolder.childContainer.addView(view, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        viewHolder.borderView = viewHolder.cardView.findViewById(R.id.border_view);
         frameLayout.setTag(R.id.tag_view_holder, viewHolder);
         return frameLayout;
     }
@@ -627,6 +634,7 @@ public class TabSwitcher extends FrameLayout {
 
         try {
             obtainBackground(typedArray);
+            obtainTabBackgroundColor(typedArray);
         } finally {
             typedArray.recycle();
         }
@@ -651,6 +659,19 @@ public class TabSwitcher extends FrameLayout {
                     typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
             setBackgroundColor(color);
         }
+    }
+
+    /**
+     * Obtains the background color of tabs from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background color should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
+        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
+        tabBackgroundColor =
+                typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
     }
 
     public TabSwitcher(@NonNull final Context context) {
@@ -809,13 +830,17 @@ public class TabSwitcher extends FrameLayout {
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-            viewHolder.cardView.setUseCompatPadding(true);
-            viewHolder.cardView.setRadius(
-                    getResources().getDimensionPixelSize(R.dimen.card_view_corner_radius));
+            Drawable backgroundDrawable =
+                    ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
+            backgroundDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+            ViewUtil.setBackground(viewHolder.cardView, backgroundDrawable);
+            int padding = tabInset + tabBorderWidth;
+            viewHolder.cardView.setPadding(padding, tabInset, padding, padding);
             viewHolder.titleContainer.setVisibility(View.VISIBLE);
-            int padding = getResources().getDimensionPixelSize(R.dimen.card_view_padding);
-            int actionBarSize = ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize);
-            viewHolder.childContainer.setPadding(padding, actionBarSize, padding, padding);
+            Drawable borderDrawable =
+                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
+            borderDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
             calculateTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
         }
@@ -987,10 +1012,10 @@ public class TabSwitcher extends FrameLayout {
 
     private Pair<Float, State> calculateBottomMostPosition(@NonNull final TabView tabView) {
         if (tabView.index <= STACKED_TAB_COUNT) {
-            float position = getHeight() - cardViewMargin - stackedTabSpacing * tabView.index;
+            float position = getHeight() - tabInset - (stackedTabSpacing * tabView.index);
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
-            float position = getHeight() - cardViewMargin - stackedTabSpacing * STACKED_TAB_COUNT;
+            float position = getHeight() - tabInset - (stackedTabSpacing * STACKED_TAB_COUNT);
             return Pair.create(position, State.BOTTOM_MOST_HIDDEN);
         }
     }

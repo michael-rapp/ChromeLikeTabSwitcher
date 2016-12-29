@@ -15,13 +15,11 @@ License.
 -->
 <resources>
 
-    <dimen name="card_view_corner_radius">8dp</dimen>
-    <dimen name="card_view_padding">6dp</dimen>
-    <dimen name="card_view_elevation">12dp</dimen>
-    <dimen name="card_view_margin">20dp</dimen>
+    <dimen name="tab_inset">16dp</dimen>
+    <dimen name="tab_border_width">4dp</dimen>
+    <dimen name="tab_title_container_height">48dp</dimen>
     <dimen name="tab_title_padding">12dp</dimen>
     <dimen name="tab_title_drawable_padding">8dp</dimen>
-    <dimen name="tab_border_width">1dp</dimen>
     <dimen name="min_tab_spacing">64dp</dimen>
     <dimen name="max_tab_spacing">112dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>

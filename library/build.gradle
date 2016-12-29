@@ -21,7 +21,6 @@ dependencies {
     compile 'com.github.michael-rapp:android-util:1.12.0'
     compile 'com.android.support:support-annotations:24.2.1'
     compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:cardview-v7:24.2.1'
     testCompile 'junit:junit:4.12'
 }
 

@@ -15,8 +15,12 @@ License.
 -->
 <resources>
 
-    <color name="tab_switcher_background_color">#ff14181c</color>
-    <color name="tab_background_color">#fff2f2f2</color>
-    <color name="tab_title_color">#a8000000</color>
+    <style name="Tab.Title" parent="@style/TextAppearance.AppCompat.Small">
+        <item name="android:drawablePadding">@dimen/tab_title_drawable_padding</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/tab_title_color</item>
+    </style>
 
 </resources>

@@ -17,6 +17,7 @@ License.
 
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>
+        <attr name="tabBackgroundColor" format="color"/>
     </declare-styleable>
 
 </resources>
