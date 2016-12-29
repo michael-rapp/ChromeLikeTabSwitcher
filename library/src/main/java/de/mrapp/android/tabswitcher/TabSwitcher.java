@@ -1332,7 +1332,7 @@ public class TabSwitcher extends FrameLayout {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
-        overshootUpAnimation.setDuration(animationDuration);
+        overshootUpAnimation.setDuration(animationDuration); // TODO: Calculate duration based on overshoot distance
         overshootUpAnimation.setInterpolator(interpolator);
         overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
         startAnimation(overshootUpAnimation);
