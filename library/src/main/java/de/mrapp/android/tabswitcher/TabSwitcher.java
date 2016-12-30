@@ -391,7 +391,7 @@ public class TabSwitcher extends FrameLayout {
 
     private float closedTabAlpha;
 
-    private float closedTabSize;
+    private float closedTabScale;
 
     private int tabInset;
 
@@ -455,8 +455,8 @@ public class TabSwitcher extends FrameLayout {
         maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         minCloseFlingVelocity = resources.getDimensionPixelSize(R.dimen.min_close_fling_velocity);
         TypedValue typedValue = new TypedValue();
-        resources.getValue(R.dimen.closed_tab_size, typedValue, true);
-        closedTabSize = typedValue.getFloat();
+        resources.getValue(R.dimen.closed_tab_scale, typedValue, true);
+        closedTabScale = typedValue.getFloat();
         resources.getValue(R.dimen.closed_tab_alpha, typedValue, true);
         closedTabAlpha = typedValue.getFloat();
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
@@ -526,8 +526,8 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.setListener(createCloseAnimationListener(tabView, close));
         closeAnimation.setDuration(animationDuration);
         closeAnimation.x(targetX);
-        closeAnimation.scaleX(close ? closedTabSize : 1);
-        closeAnimation.scaleY(close ? closedTabSize : 1);
+        closeAnimation.scaleX(close ? closedTabScale : 1);
+        closeAnimation.scaleY(close ? closedTabScale : 1);
         closeAnimation.alpha(close ? closedTabAlpha : 1);
         closeAnimation.setStartDelay(0);
         closeAnimation.start();
@@ -1221,7 +1221,7 @@ public class TabSwitcher extends FrameLayout {
         View view = draggedTabView.view;
         view.setX(dragDistance);
         float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
-        float size = closedTabSize + ratio * (1 - closedTabSize);
+        float size = closedTabScale + ratio * (1 - closedTabScale);
         view.setScaleX(size);
         view.setScaleY(size);
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));

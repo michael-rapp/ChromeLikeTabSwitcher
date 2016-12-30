@@ -27,7 +27,7 @@ License.
     <dimen name="min_close_fling_velocity">1024dp</dimen>
     <dimen name="drag_threshold">8dp</dimen>
     <dimen name="close_drag_threshold">24dp</dimen>
-    <item name="closed_tab_size" format="float" type="dimen">0.5</item>
+    <item name="closed_tab_scale" format="float" type="dimen">0.5</item>
     <item name="closed_tab_alpha" format="float" type="dimen">0</item>
 
 </resources>
