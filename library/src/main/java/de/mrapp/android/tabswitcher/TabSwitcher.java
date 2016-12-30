@@ -288,6 +288,14 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private enum Axis {
+
+        DRAGGING_AXIS,
+
+        ORTHOGONAL_AXIS
+
+    }
+
     private class ShowSwitcherAnimation extends Animation {
 
         @Override
@@ -332,15 +340,16 @@ public class TabSwitcher extends FrameLayout {
 
                     if (tabView.index == 1) {
                         if (startPosition == null) {
-                            startPosition = view.getY();
+                            startPosition = getPosition(Axis.DRAGGING_AXIS, view);
                         }
 
                         float targetPosition = tabView.tag.projectedPosition;
-                        view.setY(startPosition +
+                        setPosition(Axis.DRAGGING_AXIS, view, startPosition +
                                 (targetPosition - startPosition) * interpolatedTime);
                     } else {
                         View firstView = iterator.first().view;
-                        view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
+                        view.setVisibility(getPosition(Axis.DRAGGING_AXIS, firstView) <=
+                                getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
                                 getVisibility(tabView));
                     }
                 }
@@ -509,8 +518,9 @@ public class TabSwitcher extends FrameLayout {
                               final float flingVelocity) {
         View view = tabView.view;
         float closedTabPosition = calculateClosedTabPosition();
-        float targetX = close ? (view.getX() < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
-        float distance = Math.abs(targetX - view.getX());
+        float position = getPosition(Axis.ORTHOGONAL_AXIS, view);
+        float targetX = close ? (position < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
+        float distance = Math.abs(targetX - position);
         long animationDuration;
 
         if (flingVelocity >= minCloseFlingVelocity) {
@@ -525,9 +535,9 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(createCloseAnimationListener(tabView, close));
         closeAnimation.setDuration(animationDuration);
-        closeAnimation.x(targetX);
-        closeAnimation.scaleX(close ? closedTabScale : 1);
-        closeAnimation.scaleY(close ? closedTabScale : 1);
+        animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, targetX);
+        animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale : 1);
+        animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale : 1);
         closeAnimation.alpha(close ? closedTabAlpha : 1);
         closeAnimation.setStartDelay(0);
         closeAnimation.start();
@@ -663,6 +673,75 @@ public class TabSwitcher extends FrameLayout {
         int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
         tabBackgroundColor =
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
+    }
+
+    private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return view.getY();
+        } else {
+            return view.getX();
+        }
+    }
+
+    private void setPosition(@NonNull final Axis axis, @NonNull final View view,
+                             final float position) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            view.setY(position);
+        } else {
+            view.setX(position);
+        }
+    }
+
+    private void animatePosition(@NonNull final Axis axis,
+                                 @NonNull final ViewPropertyAnimator animator,
+                                 final float position) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            animator.y(position);
+        } else {
+            animator.x(position);
+        }
+    }
+
+    private float getRotation(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return view.getRotationY();
+        } else {
+            return view.getRotationX();
+        }
+    }
+
+    private void setRotation(@NonNull final Axis axis, @NonNull final View view,
+                             final float angle) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            view.setRotationY(angle);
+        } else {
+            view.setRotationX(angle);
+        }
+    }
+
+    private void setScale(@NonNull final Axis axis, @NonNull final View view, final float scale) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            view.setScaleY(scale);
+        } else {
+            view.setScaleY(scale);
+        }
+    }
+
+    private void animateScale(@NonNull final Axis axis,
+                              @NonNull final ViewPropertyAnimator animator, final float scale) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            animator.scaleY(scale);
+        } else {
+            animator.scaleX(scale);
+        }
+    }
+
+    private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            view.setPivotY(pivot);
+        } else {
+            view.setPivotX(pivot);
+        }
     }
 
     public TabSwitcher(@NonNull final Context context) {
@@ -863,7 +942,7 @@ public class TabSwitcher extends FrameLayout {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
-            tag.projectedPosition = view.getY();
+            tag.projectedPosition = getPosition(Axis.DRAGGING_AXIS, view);
             tag.distance = 0;
         }
     }
@@ -873,8 +952,8 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
-        view.setY(position);
-        view.setRotationX(0);
+        setPosition(Axis.DRAGGING_AXIS, view, position);
+        setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
     }
 
@@ -1103,8 +1182,8 @@ public class TabSwitcher extends FrameLayout {
                         minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
 
-            view.setPivotY(maxTabSpacing);
-            view.setRotationX(angle);
+            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+            setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
         }
     }
 
@@ -1119,8 +1198,8 @@ public class TabSwitcher extends FrameLayout {
             if (tabView.index == 1) {
                 view.setVisibility(View.VISIBLE);
                 view.setCameraDistance(cameraDistance);
-                view.setPivotY(view.getHeight() / 2f);
-                view.setRotationX(angle);
+                setPivot(Axis.DRAGGING_AXIS, view, view.getHeight() / 2f);
+                setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else {
                 view.setVisibility(View.INVISIBLE);
             }
@@ -1149,10 +1228,12 @@ public class TabSwitcher extends FrameLayout {
 
                     if (tabView.index == 1) {
                         float currentPosition = tabView.tag.projectedPosition;
-                        view.setY(currentPosition - (currentPosition * ratio));
+                        setPosition(Axis.DRAGGING_AXIS, view,
+                                currentPosition - (currentPosition * ratio));
                     } else {
                         View firstView = iterator.first().view;
-                        view.setVisibility(firstView.getY() <= view.getY() ? View.INVISIBLE :
+                        view.setVisibility(getPosition(Axis.DRAGGING_AXIS, firstView) <=
+                                getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
                                 getVisibility(tabView));
                     }
                 }
@@ -1219,11 +1300,11 @@ public class TabSwitcher extends FrameLayout {
     private void handleDragToClose() {
         int dragDistance = closeDragHelper.getDistance();
         View view = draggedTabView.view;
-        view.setX(dragDistance);
+        setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
         float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
-        float size = closedTabScale + ratio * (1 - closedTabScale);
-        view.setScaleX(size);
-        view.setScaleY(size);
+        float scale = closedTabScale + ratio * (1 - closedTabScale);
+        setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+        setScale(Axis.DRAGGING_AXIS, view, scale);
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
     }
 
@@ -1268,7 +1349,7 @@ public class TabSwitcher extends FrameLayout {
 
             View view = draggedTabView.view;
             boolean close = flingVelocity >= minCloseFlingVelocity ||
-                    Math.abs(view.getX()) > view.getWidth() / 4f;
+                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) > view.getWidth() / 4f;
             animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
@@ -1341,12 +1422,12 @@ public class TabSwitcher extends FrameLayout {
         while ((tabView = iterator.next()) != null) {
             View view = tabView.view;
 
-            if (view.getRotationX() != 0) {
+            if (getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
                 result = true;
                 overshootAnimation = view.animate();
                 overshootAnimation.setListener(iterator.hasNext() ? null : listener);
-                overshootAnimation.setDuration(
-                        Math.round(animationDuration * (Math.abs(view.getRotationX()) / maxAngle)));
+                overshootAnimation.setDuration(Math.round(animationDuration *
+                        (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
                 overshootAnimation.setInterpolator(interpolator);
                 overshootAnimation.rotationX(0);
                 overshootAnimation.setStartDelay(0);
