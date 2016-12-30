@@ -234,8 +234,6 @@ public class TabSwitcher extends FrameLayout {
 
     private static class ViewHolder {
 
-        private ViewGroup cardView;
-
         private ViewGroup titleContainer;
 
         private TextView titleTextView;
@@ -470,30 +468,23 @@ public class TabSwitcher extends FrameLayout {
     private ViewGroup inflateLayout(@NonNull final Tab tab) {
         Decorator decorator = tab.getDecorator();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        FrameLayout frameLayout = new FrameLayout(getContext());
         ViewHolder viewHolder = new ViewHolder();
-        viewHolder.cardView =
-                (ViewGroup) layoutInflater.inflate(R.layout.card_view, frameLayout, false);
-        frameLayout.addView(viewHolder.cardView);
-        viewHolder.titleContainer =
-                (ViewGroup) viewHolder.cardView.findViewById(R.id.tab_title_container);
-        viewHolder.titleTextView =
-                (TextView) viewHolder.cardView.findViewById(R.id.tab_title_text_view);
+        ViewGroup tabView = (ViewGroup) layoutInflater.inflate(R.layout.tab_view, this, false);
+        viewHolder.titleContainer = (ViewGroup) tabView.findViewById(R.id.tab_title_container);
+        viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
         viewHolder.titleTextView.setText(tab.getTitle());
         viewHolder.titleTextView
                 .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(), null, null, null);
-        viewHolder.closeButton =
-                (ImageButton) viewHolder.cardView.findViewById(R.id.close_tab_button);
+        viewHolder.closeButton = (ImageButton) tabView.findViewById(R.id.close_tab_button);
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
-        viewHolder.childContainer =
-                (ViewGroup) viewHolder.cardView.findViewById(R.id.child_container);
-        View view = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
-        viewHolder.childContainer.addView(view, 0,
+        viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
+        View childView = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
+        viewHolder.childContainer.addView(childView, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        viewHolder.borderView = viewHolder.cardView.findViewById(R.id.border_view);
-        frameLayout.setTag(R.id.tag_view_holder, viewHolder);
-        return frameLayout;
+        viewHolder.borderView = tabView.findViewById(R.id.border_view);
+        tabView.setTag(R.id.tag_view_holder, viewHolder);
+        return tabView;
     }
 
     private OnClickListener createCloseButtonClickListener(@NonNull final Tab tab) {
@@ -833,9 +824,9 @@ public class TabSwitcher extends FrameLayout {
             Drawable backgroundDrawable =
                     ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
             backgroundDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-            ViewUtil.setBackground(viewHolder.cardView, backgroundDrawable);
+            ViewUtil.setBackground(tabView.view, backgroundDrawable);
             int padding = tabInset + tabBorderWidth;
-            viewHolder.cardView.setPadding(padding, tabInset, padding, padding);
+            tabView.view.setPadding(padding, tabInset, padding, padding);
             viewHolder.titleContainer.setVisibility(View.VISIBLE);
             Drawable borderDrawable =
                     ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
@@ -1332,7 +1323,8 @@ public class TabSwitcher extends FrameLayout {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
-        overshootUpAnimation.setDuration(animationDuration); // TODO: Calculate duration based on overshoot distance
+        overshootUpAnimation.setDuration(
+                animationDuration); // TODO: Calculate duration based on overshoot distance
         overshootUpAnimation.setInterpolator(interpolator);
         overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
         startAnimation(overshootUpAnimation);
