@@ -406,6 +406,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int tabBorderWidth;
 
+    private int tabTitleContainerHeight;
+
     private ScrollDirection scrollDirection;
 
     private TabView draggedTabView;
@@ -470,6 +472,8 @@ public class TabSwitcher extends FrameLayout {
         closedTabAlpha = typedValue.getFloat();
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
+        tabTitleContainerHeight =
+                resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         scrollDirection = ScrollDirection.NONE;
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
@@ -479,6 +483,12 @@ public class TabSwitcher extends FrameLayout {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         ViewHolder viewHolder = new ViewHolder();
         ViewGroup tabView = (ViewGroup) layoutInflater.inflate(R.layout.tab_view, this, false);
+        Drawable backgroundDrawable =
+                ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
+        backgroundDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        ViewUtil.setBackground(tabView, backgroundDrawable);
+        int padding = tabInset + tabBorderWidth;
+        tabView.setPadding(padding, tabInset, padding, padding);
         viewHolder.titleContainer = (ViewGroup) tabView.findViewById(R.id.tab_title_container);
         viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
         viewHolder.titleTextView.setText(tab.getTitle());
@@ -492,6 +502,9 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.childContainer.addView(childView, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
+        Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
+        borderDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         tabView.setTag(R.id.tag_view_holder, viewHolder);
         return tabView;
     }
@@ -517,10 +530,12 @@ public class TabSwitcher extends FrameLayout {
     private void animateClose(@NonNull final TabView tabView, final boolean close,
                               final float flingVelocity) {
         View view = tabView.view;
+        float scale = getScale(view);
         float closedTabPosition = calculateClosedTabPosition();
         float position = getPosition(Axis.ORTHOGONAL_AXIS, view);
-        float targetX = close ? (position < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
-        float distance = Math.abs(targetX - position);
+        float targetPosition =
+                close ? (position < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
+        float distance = Math.abs(targetPosition - position);
         long animationDuration;
 
         if (flingVelocity >= minCloseFlingVelocity) {
@@ -535,12 +550,13 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(createCloseAnimationListener(tabView, close));
         closeAnimation.setDuration(animationDuration);
-        animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, targetX);
-        animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale : 1);
-        animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale : 1);
+        animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition);
+        animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
+        animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
         closeAnimation.alpha(close ? closedTabAlpha : 1);
         closeAnimation.setStartDelay(0);
         closeAnimation.start();
+
     }
 
     private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
@@ -675,30 +691,51 @@ public class TabSwitcher extends FrameLayout {
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
     }
 
+    private float getScale(@NonNull final View view) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        float width = view.getWidth();
+        float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin;
+        return targetWidth / width;
+    }
+
+    private float getSize(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return view.getHeight() * getScale(view);
+        } else {
+            return view.getWidth() * getScale(view);
+        }
+    }
+
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
         if (axis == Axis.DRAGGING_AXIS) {
             return view.getY();
         } else {
-            return view.getX();
+            return view.getX() - layoutParams.leftMargin;
         }
     }
 
     private void setPosition(@NonNull final Axis axis, @NonNull final View view,
                              final float position) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
         if (axis == Axis.DRAGGING_AXIS) {
             view.setY(position);
         } else {
-            view.setX(position);
+            view.setX(position + layoutParams.leftMargin);
         }
     }
 
     private void animatePosition(@NonNull final Axis axis,
                                  @NonNull final ViewPropertyAnimator animator,
-                                 final float position) {
+                                 @NonNull final View view, final float position) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
         if (axis == Axis.DRAGGING_AXIS) {
             animator.y(position);
         } else {
-            animator.x(position);
+            animator.x(position + layoutParams.leftMargin);
         }
     }
 
@@ -723,7 +760,7 @@ public class TabSwitcher extends FrameLayout {
         if (axis == Axis.DRAGGING_AXIS) {
             view.setScaleY(scale);
         } else {
-            view.setScaleY(scale);
+            view.setScaleX(scale);
         }
     }
 
@@ -737,10 +774,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
         if (axis == Axis.DRAGGING_AXIS) {
             view.setPivotY(pivot);
         } else {
-            view.setPivotX(pivot);
+            view.setPivotX(pivot - layoutParams.leftMargin);
         }
     }
 
@@ -772,6 +811,11 @@ public class TabSwitcher extends FrameLayout {
         ViewGroup view = inflateLayout(tab);
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        int borderMargin = -(tabInset + tabBorderWidth);
+        layoutParams.leftMargin = borderMargin;
+        layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
+        layoutParams.rightMargin = borderMargin;
+        layoutParams.bottomMargin = borderMargin;
         addView(view, 0, layoutParams);
     }
 
@@ -904,20 +948,30 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            ViewHolder viewHolder = tabView.viewHolder;
-            Drawable backgroundDrawable =
-                    ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
-            backgroundDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-            ViewUtil.setBackground(tabView.view, backgroundDrawable);
-            int padding = tabInset + tabBorderWidth;
-            tabView.view.setPadding(padding, tabInset, padding, padding);
-            viewHolder.titleContainer.setVisibility(View.VISIBLE);
-            Drawable borderDrawable =
-                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
-            borderDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
+            tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
+            View view = tabView.view;
+
+            System.out.println(
+                    "x_" + tabView.index + " = " + view.getX() + ", y_" + tabView.index + " = " +
+                            view.getY());
+            System.out.println("width_" + tabView.index + " = " + view.getWidth() + ", height_" +
+                    tabView.index + " = " +
+                    view.getHeight());
+            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+            // setPivot(Axis.DRAGGING_AXIS, view, 0);
+            float scale = getScale(view);
+            setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+            // setScale(Axis.DRAGGING_AXIS, view, scale);
             calculateTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
+
+            System.out.println(
+                    "x_" + tabView.index + " = " + view.getX() + ", y_" + tabView.index + " = " +
+                            view.getY());
+            System.out.println("width_" + tabView.index + " = " + view.getWidth() + ", height_" +
+                    tabView.index + " = " +
+                    view.getHeight());
+            System.out.println("---------------------------");
         }
     }
 
@@ -1305,11 +1359,13 @@ public class TabSwitcher extends FrameLayout {
     private void handleDragToClose() {
         int dragDistance = closeDragHelper.getDistance();
         View view = draggedTabView.view;
+        float scale = getScale(view);
         setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
         float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
-        float scale = closedTabScale + ratio * (1 - closedTabScale);
-        setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-        setScale(Axis.DRAGGING_AXIS, view, scale);
+        float scaledClosedTabScale = closedTabScale * scale;
+        float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
+        setScale(Axis.DRAGGING_AXIS, view, targetScale);
+        setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
     }
 
@@ -1354,7 +1410,8 @@ public class TabSwitcher extends FrameLayout {
 
             View view = draggedTabView.view;
             boolean close = flingVelocity >= minCloseFlingVelocity ||
-                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) > view.getWidth() / 4f;
+                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) >
+                            getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
             animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {

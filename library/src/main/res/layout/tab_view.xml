@@ -23,8 +23,7 @@ License.
         android:id="@+id/tab_title_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tab_title_container_height"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/tab_title_text_view"
@@ -56,7 +55,8 @@ License.
         <View
             android:id="@+id/border_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:visibility="invisible"/>
 
     </FrameLayout>
 
