@@ -780,20 +780,17 @@ public class TabSwitcher extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            //view.setPivotY(pivot - layoutParams.topMargin - tabTitleContainerHeight);
-
             float newPivot = pivot - layoutParams.topMargin - tabTitleContainerHeight;
             view.setTranslationY(view.getTranslationY() +
                     (view.getPivotY() - newPivot) * (1 - view.getScaleY()));
             view.setPivotY(newPivot);
-
+            //   view.setPivotY(pivot - layoutParams.topMargin - tabTitleContainerHeight);
         } else {
             float newPivot = pivot - layoutParams.leftMargin;
             view.setTranslationX(view.getTranslationX() +
                     (view.getPivotX() - newPivot) * (1 - view.getScaleX()));
             view.setPivotX(newPivot);
-
-            //view.setPivotX(pivot - layoutParams.leftMargin);
+            //       view.setPivotX(pivot - layoutParams.leftMargin);
         }
     }
 
@@ -1284,6 +1281,7 @@ public class TabSwitcher extends FrameLayout {
             if (tabView.index == 1) {
                 view.setVisibility(View.VISIBLE);
                 view.setCameraDistance(cameraDistance);
+                setPivot(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, view) / 2f);
                 setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else {
                 view.setVisibility(View.INVISIBLE);
@@ -1313,6 +1311,7 @@ public class TabSwitcher extends FrameLayout {
 
                     if (tabView.index == 1) {
                         float currentPosition = tabView.tag.projectedPosition;
+                        setPivot(Axis.DRAGGING_AXIS, view, 0);
                         setPosition(Axis.DRAGGING_AXIS, view,
                                 currentPosition - (currentPosition * ratio));
                     } else {
@@ -1489,6 +1488,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
+        View view = new Iterator().next().view;
+        setPivot(Axis.DRAGGING_AXIS, view, 0);
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
