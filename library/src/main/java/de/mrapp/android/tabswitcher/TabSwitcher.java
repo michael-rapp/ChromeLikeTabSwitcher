@@ -767,7 +767,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void addTab(@NonNull final Tab tab) {
-        addTab(tab, tabs.size());
+        ensureNotNull(tab, "The tab may not be null");
+        tabs.add(tab);
+        ViewGroup view = inflateLayout(tab);
+        LayoutParams layoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        addView(view, 0, layoutParams);
     }
 
     public final void addTab(@NonNull final Tab tab, final int index) {
