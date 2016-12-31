@@ -360,7 +360,7 @@ public class TabSwitcher extends FrameLayout {
 
     private static final int STACKED_TAB_COUNT = 3;
 
-    private static final float MAX_DOWN_OVERSHOOT_ANGLE = 4f;
+    private static final float MAX_DOWN_OVERSHOOT_ANGLE = 3f;
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
@@ -710,7 +710,7 @@ public class TabSwitcher extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return view.getY();
+            return view.getY() - layoutParams.topMargin - tabTitleContainerHeight;
         } else {
             return view.getX() - layoutParams.leftMargin;
         }
@@ -721,7 +721,7 @@ public class TabSwitcher extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            view.setY(position);
+            view.setY(position + layoutParams.topMargin + tabTitleContainerHeight);
         } else {
             view.setX(position + layoutParams.leftMargin);
         }
@@ -733,7 +733,7 @@ public class TabSwitcher extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            animator.y(position);
+            animator.y(position + layoutParams.topMargin + tabTitleContainerHeight);
         } else {
             animator.x(position + layoutParams.leftMargin);
         }
@@ -777,7 +777,7 @@ public class TabSwitcher extends FrameLayout {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            view.setPivotY(pivot);
+            view.setPivotY(pivot - layoutParams.topMargin);
         } else {
             view.setPivotX(pivot - layoutParams.leftMargin);
         }
@@ -957,11 +957,11 @@ public class TabSwitcher extends FrameLayout {
             System.out.println("width_" + tabView.index + " = " + view.getWidth() + ", height_" +
                     tabView.index + " = " +
                     view.getHeight());
-            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
-            // setPivot(Axis.DRAGGING_AXIS, view, 0);
             float scale = getScale(view);
+            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
             setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-            // setScale(Axis.DRAGGING_AXIS, view, scale);
+            setScale(Axis.DRAGGING_AXIS, view, scale);
             calculateTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
 
@@ -1241,7 +1241,6 @@ public class TabSwitcher extends FrameLayout {
                         minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
 
-            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
             setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
         }
     }
@@ -1257,7 +1256,6 @@ public class TabSwitcher extends FrameLayout {
             if (tabView.index == 1) {
                 view.setVisibility(View.VISIBLE);
                 view.setCameraDistance(cameraDistance);
-                setPivot(Axis.DRAGGING_AXIS, view, view.getHeight() / 2f);
                 setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else {
                 view.setVisibility(View.INVISIBLE);
