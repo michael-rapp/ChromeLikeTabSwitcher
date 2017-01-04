@@ -301,7 +301,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime);
+                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime, true);
             }
         }
 
@@ -318,7 +318,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, flingDistance * interpolatedTime);
+                handleDrag(0, flingDistance * interpolatedTime, false);
             }
         }
 
@@ -777,20 +777,31 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot) {
+        setPivot(axis, view, pivot, true);
+    }
+
+    private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot,
+                          final boolean adapt) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            float newPivot = pivot - layoutParams.topMargin - tabTitleContainerHeight;
-            view.setTranslationY(view.getTranslationY() +
-                    (view.getPivotY() - newPivot) * (1 - view.getScaleY()));
-            view.setPivotY(newPivot);
-            //   view.setPivotY(pivot - layoutParams.topMargin - tabTitleContainerHeight);
+            if (adapt) {
+                float newPivot = pivot - layoutParams.topMargin - tabTitleContainerHeight;
+                view.setTranslationY(view.getTranslationY() +
+                        (view.getPivotY() - newPivot) * (1 - view.getScaleY()));
+                view.setPivotY(newPivot);
+            } else {
+                view.setPivotY(pivot - layoutParams.topMargin - tabTitleContainerHeight);
+            }
         } else {
-            float newPivot = pivot - layoutParams.leftMargin;
-            view.setTranslationX(view.getTranslationX() +
-                    (view.getPivotX() - newPivot) * (1 - view.getScaleX()));
-            view.setPivotX(newPivot);
-            //       view.setPivotX(pivot - layoutParams.leftMargin);
+            if (adapt) {
+                float newPivot = pivot - layoutParams.leftMargin;
+                view.setTranslationX(view.getTranslationX() +
+                        (view.getPivotX() - newPivot) * (1 - view.getScaleX()));
+                view.setPivotX(newPivot);
+            } else {
+                view.setPivotX(pivot - layoutParams.leftMargin);
+            }
         }
     }
 
@@ -857,7 +868,7 @@ public class TabSwitcher extends FrameLayout {
 
             while (dragging) {
                 drag += 20;
-                dragging = handleDrag(0, drag);
+                dragging = handleDrag(0, drag, false);
             }
 
             handleRelease(null);
@@ -868,7 +879,7 @@ public class TabSwitcher extends FrameLayout {
 
             while (dragging) {
                 drag -= 20;
-                dragging = handleDrag(0, drag);
+                dragging = handleDrag(0, drag, false);
             }
 
             handleRelease(null);
@@ -919,12 +930,19 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
-    private Animator.AnimatorListener createOvershootAnimationListener() {
+    private Animator.AnimatorListener createOvershootDownAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+                Iterator iterator = new Iterator();
+                TabView tabView;
+
+                while ((tabView = iterator.next()) != null) {
+                    setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
+                }
+
                 handleRelease(null);
                 overshootAnimation = null;
             }
@@ -1036,6 +1054,7 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, 0);
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
@@ -1193,7 +1212,7 @@ public class TabSwitcher extends FrameLayout {
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(event.getX(0), event.getY(0));
+                        handleDrag(event.getX(0), event.getY(0), true);
                     } else {
                         handleRelease(null);
                         handleDown(event);
@@ -1243,30 +1262,33 @@ public class TabSwitcher extends FrameLayout {
         return tag.projectedPosition >= maxTabSpacing;
     }
 
-    private void tiltOnOvershootDown(final float angle) {
-        float maxCameraDistance = getMaxCameraDistance();
-        float minCameraDistance = maxCameraDistance / 2f;
-        int firstVisibleIndex = -1;
-        Iterator iterator = new Iterator();
-        TabView tabView;
+    private void tiltOnOvershootDown(final float angle, boolean tilt) {
+        if (tilt) {
+            float maxCameraDistance = getMaxCameraDistance();
+            float minCameraDistance = maxCameraDistance / 2f;
+            int firstVisibleIndex = -1;
+            Iterator iterator = new Iterator();
+            TabView tabView;
 
-        while ((tabView = iterator.next()) != null) {
-            View view = tabView.view;
+            while ((tabView = iterator.next()) != null) {
+                View view = tabView.view;
 
-            if (firstVisibleIndex == -1) {
-                view.setCameraDistance(minCameraDistance);
+                if (firstVisibleIndex == -1) {
+                    view.setCameraDistance(minCameraDistance);
 
-                if (tabView.tag.state == State.VISIBLE) {
-                    firstVisibleIndex = tabView.index;
+                    if (tabView.tag.state == State.VISIBLE) {
+                        firstVisibleIndex = tabView.index;
+                    }
+                } else {
+                    int diff = tabView.index - firstVisibleIndex;
+                    float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
+                    view.setCameraDistance(
+                            minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
                 }
-            } else {
-                int diff = tabView.index - firstVisibleIndex;
-                float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
-                view.setCameraDistance(
-                        minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
-            }
 
-            setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+                setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+                setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+            }
         }
     }
 
@@ -1295,7 +1317,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @SuppressWarnings("WrongConstant")
-    private boolean handleDrag(final float x, final float y) {
+    private boolean handleDrag(final float x, final float y, final boolean tilt) {
         if (y <= topDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
@@ -1331,7 +1353,7 @@ public class TabSwitcher extends FrameLayout {
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE);
+            tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE, tilt);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
@@ -1458,9 +1480,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootDown() {
-        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootAnimationListener(),
+        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootDownAnimationListener(),
                 MAX_DOWN_OVERSHOOT_ANGLE);
-
     }
 
     private void animateOvershootUp() {
@@ -1486,8 +1507,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
-        View view = new Iterator().next().view;
-        setPivot(Axis.DRAGGING_AXIS, view, 0);
+        setPivot(Axis.DRAGGING_AXIS, new Iterator().next().view, 0);
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
