@@ -586,7 +586,8 @@ public class TabSwitcher extends FrameLayout {
                                 createRelocateAnimationListener(tabView, previous.tag));
                         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                         closeAnimation.setDuration(animationDuration);
-                        closeAnimation.y(previous.tag.projectedPosition);
+                        animatePosition(Axis.DRAGGING_AXIS, closeAnimation, view,
+                                previous.tag.projectedPosition);
                         closeAnimation.setStartDelay((start + 1 - tabView.index) * startDelay);
                         closeAnimation.start();
                     }
@@ -1067,21 +1068,15 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
-
-        if (tabView.index == 6) {
-            System.out.println("1: pivot=" + view.getPivotY() + ", y=" + view.getY());
-        }
-
         setPivot(Axis.DRAGGING_AXIS, view, 0);
-
-        if (tabView.index == 6) {
-            System.out.println("2: pivot=" + view.getPivotY() + ", y=" + view.getY());
-            System.out.println("------------------------");
-        }
-
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
+
+        if (tabView.index == 4) {
+            System.out.println("4: y=" + view.getY() + ", proj=" + tabView.tag.projectedPosition);
+            System.out.println("------------------------");
+        }
     }
 
     private int getVisibility(@NonNull final TabView tabView) {
@@ -1473,7 +1468,9 @@ public class TabSwitcher extends FrameLayout {
         if (draggedTabView == null && flingDirection == ScrollDirection.OVERSHOOT_UP) {
             animateOvershootUp();
         } else {
-            updateTags();
+            if (draggedTabView == null) {
+                updateTags();
+            }
 
             if (draggedTabView != null) {
                 float flingVelocity = 0;
