@@ -930,19 +930,29 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
+    private Animator.AnimatorListener createOvershotAnimationListenerWrapper(
+            @NonNull final View view, @Nullable final Animator.AnimatorListener listener) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                setPivot(Axis.DRAGGING_AXIS, view, 0);
+
+                if (listener != null) {
+                    listener.onAnimationEnd(animation);
+                }
+            }
+
+        };
+    }
+
     private Animator.AnimatorListener createOvershootDownAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                Iterator iterator = new Iterator();
-                TabView tabView;
-
-                while ((tabView = iterator.next()) != null) {
-                    setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
-                }
-
                 handleRelease(null);
                 overshootAnimation = null;
             }
@@ -1532,7 +1542,8 @@ public class TabSwitcher extends FrameLayout {
             if (getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
                 result = true;
                 overshootAnimation = view.animate();
-                overshootAnimation.setListener(iterator.hasNext() ? null : listener);
+                overshootAnimation.setListener(createOvershotAnimationListenerWrapper(view,
+                        iterator.hasNext() ? null : listener));
                 overshootAnimation.setDuration(Math.round(animationDuration *
                         (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
                 overshootAnimation.setInterpolator(interpolator);
