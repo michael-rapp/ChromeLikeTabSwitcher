@@ -602,9 +602,9 @@ public class TabSwitcher extends FrameLayout {
                     tabs.remove(tabView.index - 1);
                 } else {
                     setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
+                    handleRelease(null);
                 }
 
-                handleRelease(null);
                 closeAnimation = null;
                 draggedTabView = null;
             }
