@@ -1423,34 +1423,32 @@ public class TabSwitcher extends FrameLayout {
         this.bottomDragThreshold = Float.MAX_VALUE;
         this.scrollDirection = ScrollDirection.NONE;
 
-        if (draggedTabView != null) {
-            updateTags();
-            float flingVelocity = 0;
-
-            if (event != null && velocityTracker != null) {
-                int pointerId = event.getPointerId(0);
-                velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-                flingVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));
-            }
-
-            View view = draggedTabView.view;
-            boolean close = flingVelocity >= minCloseFlingVelocity ||
-                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) >
-                            getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
-            animateClose(draggedTabView, close, flingVelocity);
-        } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
-                flingDirection == ScrollDirection.DRAGGING_DOWN) {
-            updateTags();
-
-            if (event != null && velocityTracker != null && thresholdReached) {
-                animateFling(event, flingDirection);
-            }
-        } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN) {
-            animateOvershootDown();
-        } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
+        if (draggedTabView == null && flingDirection == ScrollDirection.OVERSHOOT_UP) {
             animateOvershootUp();
         } else {
             updateTags();
+
+            if (draggedTabView != null) {
+                float flingVelocity = 0;
+
+                if (event != null && velocityTracker != null) {
+                    int pointerId = event.getPointerId(0);
+                    velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+                    flingVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));
+                }
+
+                View view = draggedTabView.view;
+                boolean close = flingVelocity >= minCloseFlingVelocity ||
+                        Math.abs(view.getX()) > view.getWidth() / 4f;
+                animateClose(draggedTabView, close, flingVelocity);
+            } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
+                    flingDirection == ScrollDirection.DRAGGING_DOWN) {
+                if (event != null && velocityTracker != null && thresholdReached) {
+                    animateFling(event, flingDirection);
+                }
+            } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN) {
+                animateOvershootDown();
+            }
         }
 
         if (velocityTracker != null) {
