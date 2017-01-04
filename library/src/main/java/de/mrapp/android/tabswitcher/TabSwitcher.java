@@ -1528,12 +1528,16 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
-        setPivot(Axis.DRAGGING_AXIS, new Iterator().next().view, 0);
+        TabView tabView = new Iterator().next();
+        View view = tabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, 0);
+        float position = getPosition(Axis.DRAGGING_AXIS, view);
+        float targetPosition = tabView.tag.projectedPosition;
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
-        overshootUpAnimation.setDuration(
-                animationDuration); // TODO: Calculate duration based on overshoot distance
+        overshootUpAnimation.setDuration(Math.round(animationDuration *
+                ((targetPosition - position) / (float) (STACKED_TAB_COUNT * stackedTabSpacing))));
         overshootUpAnimation.setInterpolator(interpolator);
         overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
         startAnimation(overshootUpAnimation);
