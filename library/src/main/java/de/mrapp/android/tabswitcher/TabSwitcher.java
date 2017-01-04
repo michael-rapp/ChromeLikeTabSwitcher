@@ -600,8 +600,11 @@ public class TabSwitcher extends FrameLayout {
                 if (close) {
                     removeView(tabView.view);
                     tabs.remove(tabView.index - 1);
+                } else {
+                    setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
                 }
 
+                handleRelease(null);
                 closeAnimation = null;
                 draggedTabView = null;
             }
@@ -1064,7 +1067,18 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
+
+        if (tabView.index == 6) {
+            System.out.println("1: pivot=" + view.getPivotY() + ", y=" + view.getY());
+        }
+
         setPivot(Axis.DRAGGING_AXIS, view, 0);
+
+        if (tabView.index == 6) {
+            System.out.println("2: pivot=" + view.getPivotY() + ", y=" + view.getY());
+            System.out.println("------------------------");
+        }
+
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
@@ -1416,6 +1430,7 @@ public class TabSwitcher extends FrameLayout {
     private void handleDragToClose() {
         int dragDistance = closeDragHelper.getDistance();
         View view = draggedTabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
         float scale = getScale(view);
         setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
         float ratio = 1 - (float) Math.abs(dragDistance) / (float) calculateClosedTabPosition();
