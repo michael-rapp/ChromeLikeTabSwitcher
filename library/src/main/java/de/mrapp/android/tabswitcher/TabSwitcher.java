@@ -542,7 +542,7 @@ public class TabSwitcher extends FrameLayout {
             animationDuration = Math.round((distance / flingVelocity) * 1000);
         } else {
             animationDuration = Math.round(
-                    getResources().getInteger(android.R.integer.config_mediumAnimTime) *
+                    getResources().getInteger(android.R.integer.config_longAnimTime) *
                             (distance / closedTabPosition));
         }
 
