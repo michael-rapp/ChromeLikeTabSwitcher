@@ -301,7 +301,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime, true);
+                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime);
             }
         }
 
@@ -318,7 +318,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, flingDistance * interpolatedTime, false);
+                handleDrag(0, flingDistance * interpolatedTime);
             }
         }
 
@@ -1200,7 +1200,7 @@ public class TabSwitcher extends FrameLayout {
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(event.getX(0), event.getY(0), true);
+                        handleDrag(event.getX(0), event.getY(0));
                     } else {
                         handleRelease(null);
                         handleDown(event);
@@ -1250,33 +1250,31 @@ public class TabSwitcher extends FrameLayout {
         return tag.projectedPosition >= maxTabSpacing;
     }
 
-    private void tiltOnOvershootDown(final float angle, boolean tilt) {
-        if (tilt) {
-            float maxCameraDistance = getMaxCameraDistance();
-            float minCameraDistance = maxCameraDistance / 2f;
-            int firstVisibleIndex = -1;
-            Iterator iterator = new Iterator();
-            TabView tabView;
+    private void tiltOnOvershootDown(final float angle) {
+        float maxCameraDistance = getMaxCameraDistance();
+        float minCameraDistance = maxCameraDistance / 2f;
+        int firstVisibleIndex = -1;
+        Iterator iterator = new Iterator();
+        TabView tabView;
 
-            while ((tabView = iterator.next()) != null) {
-                View view = tabView.view;
+        while ((tabView = iterator.next()) != null) {
+            View view = tabView.view;
 
-                if (firstVisibleIndex == -1) {
-                    view.setCameraDistance(minCameraDistance);
+            if (firstVisibleIndex == -1) {
+                view.setCameraDistance(minCameraDistance);
 
-                    if (tabView.tag.state == State.VISIBLE) {
-                        firstVisibleIndex = tabView.index;
-                    }
-                } else {
-                    int diff = tabView.index - firstVisibleIndex;
-                    float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
-                    view.setCameraDistance(
-                            minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
+                if (tabView.tag.state == State.VISIBLE) {
+                    firstVisibleIndex = tabView.index;
                 }
-
-                setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
-                setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+            } else {
+                int diff = tabView.index - firstVisibleIndex;
+                float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
+                view.setCameraDistance(
+                        minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
+
+            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+            setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
         }
     }
 
@@ -1305,7 +1303,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @SuppressWarnings("WrongConstant")
-    private boolean handleDrag(final float x, final float y, final boolean tilt) {
+    private void handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
@@ -1341,7 +1339,7 @@ public class TabSwitcher extends FrameLayout {
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE, tilt);
+            tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             int previousDistance = dragHelper.getDistance();
@@ -1384,11 +1382,7 @@ public class TabSwitcher extends FrameLayout {
                     dragToTopThresholdPosition();
                 }
             }
-
-            return true;
         }
-
-        return false;
     }
 
     private void handleDragToClose() {
