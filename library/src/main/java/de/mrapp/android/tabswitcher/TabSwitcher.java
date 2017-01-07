@@ -865,14 +865,13 @@ public class TabSwitcher extends FrameLayout {
         if (!isSwitcherShown()) {
             switcherShown = true;
             dragToTopThresholdPosition();
-            printProjectedPositions();
 
             boolean dragging = true;
             int drag = 0;
 
             while (dragging) {
-                drag += 20;
                 dragging = handleDrag(0, drag, false);
+                drag += 1;
             }
 
             handleRelease(null);
@@ -882,12 +881,16 @@ public class TabSwitcher extends FrameLayout {
             drag = 0;
 
             while (dragging) {
-                drag -= 20;
                 dragging = handleDrag(0, drag, false);
+                drag -= 1;
             }
 
             handleRelease(null);
             printProjectedPositions();
+            System.out.println("stacked tab spacing is " + stackedTabSpacing);
+            System.out.println("min tab spacing is " + minTabSpacing);
+            System.out.println("max tab spacing is " + maxTabSpacing);
+            System.out.println("attached position is " + attachedPosition);
 
             /*
             dragAnimation = new ShowSwitcherAnimation();
@@ -993,13 +996,6 @@ public class TabSwitcher extends FrameLayout {
         while ((tabView = iterator.next()) != null) {
             tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
             View view = tabView.view;
-
-            System.out.println(
-                    "x_" + tabView.index + " = " + view.getX() + ", y_" + tabView.index + " = " +
-                            view.getY());
-            System.out.println("width_" + tabView.index + " = " + view.getWidth() + ", height_" +
-                    tabView.index + " = " +
-                    view.getHeight());
             float scale = getScale(view);
             setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
             setPivot(Axis.DRAGGING_AXIS, view, 0);
@@ -1007,14 +1003,6 @@ public class TabSwitcher extends FrameLayout {
             setScale(Axis.DRAGGING_AXIS, view, scale);
             calculateTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
-
-            System.out.println(
-                    "x_" + tabView.index + " = " + view.getX() + ", y_" + tabView.index + " = " +
-                            view.getY());
-            System.out.println("width_" + tabView.index + " = " + view.getWidth() + ", height_" +
-                    tabView.index + " = " +
-                    view.getHeight());
-            System.out.println("---------------------------");
         }
     }
 
@@ -1072,11 +1060,6 @@ public class TabSwitcher extends FrameLayout {
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
-
-        if (tabView.index == 4) {
-            System.out.println("4: y=" + view.getY() + ", proj=" + tabView.tag.projectedPosition);
-            System.out.println("------------------------");
-        }
     }
 
     private int getVisibility(@NonNull final TabView tabView) {
