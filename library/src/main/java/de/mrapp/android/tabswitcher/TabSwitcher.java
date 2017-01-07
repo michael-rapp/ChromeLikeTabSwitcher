@@ -188,12 +188,11 @@ public class TabSwitcher extends FrameLayout {
         public Iterator(final boolean reverse, final int start) {
             this.reverse = reverse;
             this.previous = null;
-            this.index = start != -1 ? start : (reverse ? getChildCount() : 1);
+            this.index = start != -1 ? start : (reverse ? getCount() : 1);
             int previousIndex = reverse ? this.index + 1 : this.index - 1;
 
-            if (previousIndex >= 1 && previousIndex <= getChildCount()) {
-                this.current =
-                        new TabView(previousIndex, getChildAt(getChildCount() - previousIndex));
+            if (previousIndex >= 1 && previousIndex <= getCount()) {
+                this.current = new TabView(previousIndex, getChildAt(getCount() - previousIndex));
             } else {
                 this.current = null;
             }
@@ -209,13 +208,13 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         public boolean hasNext() {
-            return reverse ? index >= 1 : getChildCount() - index >= 0;
+            return reverse ? index >= 1 : getCount() - index >= 0;
         }
 
         @Override
         public TabView next() {
             if (hasNext()) {
-                View view = getChildAt(getChildCount() - index);
+                View view = getChildAt(getCount() - index);
                 previous = current;
 
                 if (first == null) {
@@ -520,7 +519,7 @@ public class TabSwitcher extends FrameLayout {
                 int index = tabs.indexOf(tab);
 
                 if (index != -1) {
-                    int childIndex = getChildCount() - (index + 1);
+                    int childIndex = getCount() - (index + 1);
                     View view = getChildAt(childIndex);
                     TabView tabView = new TabView(index + 1, view);
                     animateClose(tabView, true, 0);
@@ -1022,7 +1021,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void calculateBottomThresholdPosition(@NonNull final TabView tabView,
                                                   @Nullable final TabView previous) {
-        float position = (getChildCount() - tabView.index) * maxTabSpacing;
+        float position = (getCount() - tabView.index) * maxTabSpacing;
         clipDraggedTabPosition(position, tabView, previous);
     }
 
@@ -1057,7 +1056,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
                                       @Nullable final TabView previous) {
-        if (getChildCount() - tabView.index > 0) {
+        if (getCount() - tabView.index > 0) {
             float distance = dragDistance - tabView.tag.distance;
             tabView.tag.distance = dragDistance;
 
@@ -1234,7 +1233,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isTopDragThresholdReached() {
-        View view = getChildAt(getChildCount() - 1);
+        View view = getChildAt(getCount() - 1);
         Tag tag = (Tag) view.getTag(R.id.tag_properties);
         return tag.state == State.TOP_MOST;
     }
@@ -1263,7 +1262,7 @@ public class TabSwitcher extends FrameLayout {
                 }
             } else {
                 int diff = tabView.index - firstVisibleIndex;
-                float ratio = (float) diff / (float) (getChildCount() - firstVisibleIndex);
+                float ratio = (float) diff / (float) (getCount() - firstVisibleIndex);
                 view.setCameraDistance(
                         minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
