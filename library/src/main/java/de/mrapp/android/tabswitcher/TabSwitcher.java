@@ -864,28 +864,8 @@ public class TabSwitcher extends FrameLayout {
     public final void showSwitcher() {
         if (!isSwitcherShown()) {
             switcherShown = true;
+            attachedPosition = calculateAttachedPosition();
             dragToTopThresholdPosition();
-
-            boolean dragging = true;
-            int drag = 0;
-
-            while (dragging) {
-                dragging = handleDrag(0, drag, false);
-                drag += 1;
-            }
-
-            handleRelease(null);
-            printProjectedPositions();
-
-            dragging = true;
-            drag = 0;
-
-            while (dragging) {
-                dragging = handleDrag(0, drag, false);
-                drag -= 1;
-            }
-
-            handleRelease(null);
             printProjectedPositions();
             System.out.println("stacked tab spacing is " + stackedTabSpacing);
             System.out.println("min tab spacing is " + minTabSpacing);
@@ -902,6 +882,10 @@ public class TabSwitcher extends FrameLayout {
             startAnimation(dragAnimation);
             */
         }
+    }
+
+    private float calculateAttachedPosition() {
+        return maxTabSpacing - minTabSpacing + calculateFirstTabTopThresholdPosition();
     }
 
     private void printProjectedPositions() {
@@ -1006,24 +990,26 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private float calculatePivot(@NonNull final Axis axis, @NonNull final View view) {
-        if (axis == Axis.DRAGGING_AXIS) {
-            if (scrollDirection == ScrollDirection.OVERSHOOT_UP) {
-                return getSize(axis, view) / 2f;
-            } else if (scrollDirection == ScrollDirection.OVERSHOOT_DOWN) {
-                return maxTabSpacing;
-            }
-
-            return 0;
-        } else {
-            return getSize(axis, view) / 2f;
-        }
-    }
-
     private void calculateTopThresholdPosition(@NonNull final TabView tabView,
                                                @Nullable final TabView previous) {
-        float thresholdPosition = 0 - (tabView.index - 1) * minTabSpacing;
-        clipDraggedTabPosition(thresholdPosition, tabView, previous);
+        float position;
+
+        if (previous == null) {
+            position = calculateFirstTabTopThresholdPosition();
+        } else {
+            if (tabView.index == 2) {
+                position = previous.tag.actualPosition - minTabSpacing;
+            } else {
+                position = previous.tag.actualPosition - maxTabSpacing;
+            }
+        }
+
+        clipDraggedTabPosition(position, tabView, previous);
+    }
+
+    private float calculateFirstTabTopThresholdPosition() {
+        return getCount() > STACKED_TAB_COUNT ? STACKED_TAB_COUNT * stackedTabSpacing :
+                (getCount() - 1) * stackedTabSpacing;
     }
 
     private void dragToBottomThresholdPosition() {
@@ -1097,19 +1083,13 @@ public class TabSwitcher extends FrameLayout {
         if (previous != null && previous.tag.state == State.VISIBLE &&
                 tabView.tag.state == State.VISIBLE) {
             float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, tabView);
-            boolean attached = false;
 
             if (previous.tag.projectedPosition - newPosition >= maxTabSpacing) {
                 lastAttachedIndex = tabView.index;
                 newPosition = previous.tag.projectedPosition - maxTabSpacing;
-                attached = true;
             }
 
             clipDraggedTabPosition(newPosition, tabView, previous);
-
-            if (attached && attachedPosition == 0) {
-                attachedPosition = tabView.tag.projectedPosition;
-            }
         }
     }
 
