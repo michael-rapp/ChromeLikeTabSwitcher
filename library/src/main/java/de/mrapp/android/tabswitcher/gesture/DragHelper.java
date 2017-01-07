@@ -26,7 +26,7 @@ public class DragHelper {
     /**
      * The distance in pixels, the gesture must last until it is recognized.
      */
-    private final int threshold;
+    private int threshold;
 
     /**
      * The distance, which has been passed while dragging, in pixels or 0, if the threshold has not
@@ -55,7 +55,7 @@ public class DragHelper {
      * True, if the method <code>reset():void</code> has been called since the last value has been
      * added, false otherwise.
      */
-    private boolean reseted;
+    private boolean reset;
 
     /**
      * True, if the threshold has already been reached, false otherwise.
@@ -92,25 +92,64 @@ public class DragHelper {
     }
 
     /**
-     * Marks the instance to be reseted. This will cause all properties to be reseted to default
-     * values, when a value is added by calling the method <code>update(float):void</code> the next
-     * time. Therefore this method may be used to start recognizing a new drag gesture, whenever a
-     * value is added the next time, while the values of the previous recognition can be still
-     * retrieved until recognizing the new gesture begins.
+     * Returns the distance in pixels, the gesture must last until it is recognized.
+     *
+     * @return The distance in pixels, the gesture must last until it is recognized, as an {@link
+     * Integer} value. The value must be at least 0
      */
-    public final void reset() {
-        reseted = true;
+    public final int getThreshold() {
+        return threshold;
     }
 
     /**
-     * Returns, whether the instance has been marked to be reseted, since the method
+     * Marks the instance to be reset. This will cause all properties to be reset to default values,
+     * when a value is added by calling the method <code>update(float):void</code> the next time.
+     * Therefore this method may be used to start recognizing a new drag gesture, whenever a value
+     * is added the next time, while the values of the previous recognition can be still retrieved
+     * until recognizing the new gesture begins.
+     */
+    public final void reset() {
+        reset = true;
+    }
+
+    /**
+     * Marks the instance to be reset. This will cause all properties to be reset to default values,
+     * when a value is added by calling the method <code>update(float):void</code> the next time.
+     * Therefore this method may be used to start recognizing a new drag gesture, whenever a value
+     * is added the next time, while the values of the previous recognition can be still retrieved
+     * until recognizing the new gesture begins. Furthermore, this method changes the threshold,
+     * which is used by the instance.
+     *
+     * @param threshold
+     *         The distance in pixels, the gesture must last until it is recognized, as an {@link
+     *         Integer} value. The value must be at least 0
+     */
+    public final void reset(final int threshold) {
+        reset();
+        this.threshold = threshold;
+    }
+
+    /**
+     * Returns, whether the instance has been marked to be reset, since the method
      * <code>update(float):void</code> has been called the last time. See method
      * <code>reset():void</code> for further information.
      *
-     * @return True, if the instance has been marked to be reseted, false otherwise
+     * @return True, if the instance has been marked to be reset, false otherwise
      */
+    @Deprecated
     public final boolean isReseted() {
-        return reseted;
+        return reset;
+    }
+
+    /**
+     * Returns, whether the instance has been marked to be reset, since the method
+     * <code>update(float):void</code> has been called the last time. See method
+     * <code>reset():void</code> for further information.
+     *
+     * @return True, if the instance has been marked to be reset, false otherwise
+     */
+    public final boolean isReset() {
+        return reset;
     }
 
     /**
@@ -121,23 +160,23 @@ public class DragHelper {
      *         The position, which should be added, as a {@link Float} value
      */
     public final void update(final float position) {
-        if (reseted) {
-            reseted = false;
+        if (reset) {
+            reset = false;
             distance = 0;
             thresholdReachedPosition = -1;
             dragStartTime = -1;
             dragStartPosition = position;
             reachedThreshold = false;
-        } else {
-            if (!reachedThreshold) {
-                if (reachedThreshold(position - dragStartPosition)) {
-                    dragStartTime = System.currentTimeMillis();
-                    reachedThreshold = true;
-                    thresholdReachedPosition = position;
-                }
-            } else {
-                distance = position - thresholdReachedPosition;
+        }
+
+        if (!reachedThreshold) {
+            if (reachedThreshold(position - dragStartPosition)) {
+                dragStartTime = System.currentTimeMillis();
+                reachedThreshold = true;
+                thresholdReachedPosition = position;
             }
+        } else {
+            distance = position - thresholdReachedPosition;
         }
     }
 
