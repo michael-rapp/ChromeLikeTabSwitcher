@@ -865,6 +865,19 @@ public class TabSwitcher extends FrameLayout {
         if (!isSwitcherShown()) {
             switcherShown = true;
             attachedPosition = calculateAttachedPosition();
+            Iterator iterator = new Iterator();
+            TabView tabView;
+
+            while ((tabView = iterator.next()) != null) {
+                tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
+                View view = tabView.view;
+                float scale = getScale(view);
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPivot(Axis.DRAGGING_AXIS, view, 0);
+                setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                setScale(Axis.DRAGGING_AXIS, view, scale);
+            }
+
             dragToTopThresholdPosition();
             printProjectedPositions();
             System.out.println("stacked tab spacing is " + stackedTabSpacing);
@@ -978,13 +991,6 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
-            View view = tabView.view;
-            float scale = getScale(view);
-            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
-            setPivot(Axis.DRAGGING_AXIS, view, 0);
-            setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-            setScale(Axis.DRAGGING_AXIS, view, scale);
             calculateTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
         }
@@ -1375,7 +1381,7 @@ public class TabSwitcher extends FrameLayout {
                 } else if (isTopDragThresholdReached()) {
                     topDragThreshold = y;
                     scrollDirection = ScrollDirection.OVERSHOOT_UP;
-                    // TODO: dragToTopThresholdPosition();
+                    dragToTopThresholdPosition();
                 }
             }
 
