@@ -371,6 +371,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int tabBackgroundColor;
 
+    private int dragThreshold;
+
     /**
      * An instance of the class {@link DragHelper}, which is used to recognize drag gestures.
      */
@@ -453,7 +455,8 @@ public class TabSwitcher extends FrameLayout {
         tabs = new ArrayList<>();
         switcherShown = false;
         Resources resources = getResources();
-        dragHelper = new DragHelper(resources.getDimensionPixelSize(R.dimen.drag_threshold));
+        dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
+        dragHelper = new DragHelper(dragThreshold);
         overshootDragHelper = new DragHelper(0);
         closeDragHelper =
                 new DragHelper(resources.getDimensionPixelSize(R.dimen.close_drag_threshold));
@@ -1024,9 +1027,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void updateTags() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            View view = tabView.view;
+            Tag tag = tabView.tag;
             tag.projectedPosition = getPosition(Axis.DRAGGING_AXIS, view);
             tag.distance = 0;
         }
@@ -1294,6 +1300,11 @@ public class TabSwitcher extends FrameLayout {
     @SuppressWarnings("WrongConstant")
     private void handleDrag(final float x, final float y) {
         if (y <= topDragThreshold) {
+            if (!dragHelper.isReset()) {
+                dragHelper.reset(0);
+                updateTags();
+            }
+
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             overshootDragHelper.update(y);
             float overshootDistance = Math.abs(overshootDragHelper.getDragDistance());
@@ -1324,6 +1335,11 @@ public class TabSwitcher extends FrameLayout {
                 tiltOnOvershootUp(ratio * MAX_UP_OVERSHOOT_ANGLE);
             }
         } else if (y >= bottomDragThreshold) {
+            if (!dragHelper.isReset()) {
+                dragHelper.reset(0);
+                updateTags();
+            }
+
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             overshootDragHelper.update(y);
             float overshootDistance = overshootDragHelper.getDragDistance();
@@ -1331,7 +1347,7 @@ public class TabSwitcher extends FrameLayout {
             tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
-            float previousDistance = dragHelper.getDragDistance();
+            float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
             dragHelper.update(y);
             closeDragHelper.update(x);
 
@@ -1345,8 +1361,14 @@ public class TabSwitcher extends FrameLayout {
             }
 
             if (draggedTabView == null && dragHelper.hasThresholdBeenReached()) {
-                scrollDirection = previousDistance - dragHelper.getDragDistance() < 0 ?
-                        ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
+                if (scrollDirection == ScrollDirection.OVERSHOOT_UP) {
+                    scrollDirection = ScrollDirection.DRAGGING_DOWN;
+                } else if (scrollDirection == ScrollDirection.OVERSHOOT_DOWN) {
+                    scrollDirection = ScrollDirection.DRAGGING_UP;
+                } else {
+                    scrollDirection = previousDistance - dragHelper.getDragDistance() <= 0 ?
+                            ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
+                }
             }
 
             if (draggedTabView != null) {
@@ -1411,7 +1433,7 @@ public class TabSwitcher extends FrameLayout {
     private void handleRelease(@Nullable final MotionEvent event) {
         boolean thresholdReached = dragHelper.hasThresholdBeenReached();
         ScrollDirection flingDirection = this.scrollDirection;
-        this.dragHelper.reset();
+        this.dragHelper.reset(dragThreshold);
         this.overshootDragHelper.reset();
         this.closeDragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
