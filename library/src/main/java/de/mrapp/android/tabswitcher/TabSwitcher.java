@@ -416,6 +416,8 @@ public class TabSwitcher extends FrameLayout {
 
     private ViewPropertyAnimator showSwitcherAnimation;
 
+    private ViewPropertyAnimator hideSwitcherAnimation;
+
     private Animation dragAnimation;
 
     private ViewPropertyAnimator overshootAnimation;
@@ -908,7 +910,7 @@ public class TabSwitcher extends FrameLayout {
 
     @SuppressWarnings("WrongConstant")
     public final void showSwitcher() {
-        if (!isSwitcherShown()) {
+        if (!isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = true;
             attachedPosition = calculateAttachedPosition();
             Iterator iterator = new Iterator();
@@ -935,13 +937,56 @@ public class TabSwitcher extends FrameLayout {
                 showSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                 showSwitcherAnimation.setListener(
                         createShowSwitcherAnimationListener(tabView, !iterator.hasNext()));
-                animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
                 animateScale(Axis.DRAGGING_AXIS, showSwitcherAnimation, scale);
+                animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
                 animatePosition(Axis.DRAGGING_AXIS, showSwitcherAnimation, view,
                         tabView.tag.projectedPosition);
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
             }
+        }
+    }
+
+    public final void hideSwitcher() {
+        if (isSwitcherShown() && !isAnimationRunning()) {
+            Iterator iterator = new Iterator();
+            TabView tabView;
+
+            while ((tabView = iterator.next()) != null) {
+                View view = tabView.view;
+
+                hideSwitcherAnimation = view.animate();
+                hideSwitcherAnimation.setDuration(
+                        getResources().getInteger(android.R.integer.config_longAnimTime));
+                hideSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                hideSwitcherAnimation.setListener(
+                        createHideSwitcherAnimationListener(tabView, !iterator.hasNext()));
+                animateScale(Axis.DRAGGING_AXIS, hideSwitcherAnimation, 1);
+                animateScale(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, 1);
+
+                if (tabView.index - 1 < selectedTabIndex) {
+                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view, getHeight());
+                } else if (tabView.index - 1 > selectedTabIndex) {
+                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
+                            -view.getHeight());
+                } else {
+                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
+                            layoutParams.topMargin);
+                }
+
+                hideSwitcherAnimation.setStartDelay(0);
+                hideSwitcherAnimation.start();
+
+            }
+        }
+    }
+
+    public final void toggleSwitcherVisibility() {
+        if (switcherShown) {
+            hideSwitcher();
+        } else {
+            showSwitcher();
         }
     }
 
@@ -956,6 +1001,29 @@ public class TabSwitcher extends FrameLayout {
 
                 if (reset) {
                     showSwitcherAnimation = null;
+                }
+            }
+
+        };
+    }
+
+    private Animator.AnimatorListener createHideSwitcherAnimationListener(
+            @NonNull final TabView tabView, final boolean reset) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                View view = tabView.view;
+
+                if (tabView.index - 1 != selectedTabIndex) {
+                    view.setVisibility(View.INVISIBLE);
+
+                }
+
+                if (reset) {
+                    switcherShown = false;
+                    hideSwitcherAnimation = null;
                 }
             }
 
@@ -1280,8 +1348,9 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isAnimationRunning() {
-        return showSwitcherAnimation != null || overshootAnimation != null ||
-                overshootUpAnimation != null || closeAnimation != null || relocateAnimation != null;
+        return showSwitcherAnimation != null || hideSwitcherAnimation != null ||
+                overshootAnimation != null || overshootUpAnimation != null ||
+                closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
@@ -1479,12 +1548,13 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @Nullable
-    private TabView getFocusedTabView(@NonNull final float position) {
+    private TabView getFocusedTabView(final float position) {
         Iterator iterator = new Iterator();
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            if ((tabView.tag.state == State.VISIBLE || tabView.tag.state == State.STACKED_TOP) &&
+            if ((tabView.tag.state == State.VISIBLE || tabView.tag.state == State.STACKED_TOP ||
+                    tabView.tag.state == State.TOP_MOST) &&
                     tabView.tag.projectedPosition <= position) {
                 return tabView;
             }
@@ -1543,7 +1613,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void handleClick(@NonNull final MotionEvent event) {
-        System.out.println("Registered click at " + event.getX() + ", " + event.getY());
+        TabView tabView = getFocusedTabView(getPosition(Axis.DRAGGING_AXIS, event));
+
+        if (tabView != null) {
+            selectedTabIndex = tabView.index - 1;
+            hideSwitcher();
+        }
     }
 
     private void animateOvershootDown() {
