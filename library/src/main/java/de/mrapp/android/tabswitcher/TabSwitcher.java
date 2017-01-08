@@ -368,6 +368,8 @@ public class TabSwitcher extends FrameLayout {
      */
     private List<Tab> tabs;
 
+    private int selectedTabIndex;
+
     private int tabBackgroundColor;
 
     private int dragThreshold;
@@ -452,6 +454,7 @@ public class TabSwitcher extends FrameLayout {
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         tabs = new ArrayList<>();
+        selectedTabIndex = -1;
         switcherShown = false;
         Resources resources = getResources();
         dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
@@ -625,6 +628,12 @@ public class TabSwitcher extends FrameLayout {
                 if (close) {
                     removeView(tabView.view);
                     tabs.remove(tabView.index - 1);
+
+                    if (tabs.isEmpty()) {
+                        selectedTabIndex = -1;
+                    } else if (selectedTabIndex == tabView.index - 1 && selectedTabIndex > 0) {
+                        selectedTabIndex--;
+                    }
                 } else {
                     setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
                     handleRelease(null);
@@ -863,6 +872,11 @@ public class TabSwitcher extends FrameLayout {
 
     public final void addTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
+
+        if (tabs.isEmpty()) {
+            selectedTabIndex = 0;
+        }
+
         tabs.add(tab);
         ViewGroup view = inflateLayout(tab);
         LayoutParams layoutParams =
@@ -873,6 +887,15 @@ public class TabSwitcher extends FrameLayout {
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = borderMargin;
         addView(view, 0, layoutParams);
+    }
+
+    @Nullable
+    public final Tab getSelectedTab() {
+        return selectedTabIndex != -1 ? tabs.get(selectedTabIndex) : null;
+    }
+
+    public final int getSelectedTabIndex() {
+        return selectedTabIndex;
     }
 
     public final int getCount() {
