@@ -118,6 +118,22 @@ public class MainActivity extends AppCompatActivity {
         TabSwitcher.Tab tab8 = new TabSwitcher.Tab(tabTitle8, new Decorator(tabTitle8));
         tab8.setIcon(this, R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab8);
+        String tabTitle9 = "Tab 9";
+        TabSwitcher.Tab tab9 = new TabSwitcher.Tab(tabTitle9, new Decorator(tabTitle9));
+        tab9.setIcon(this, R.drawable.ic_file_outline_18dp);
+        tabSwitcher.addTab(tab9);
+        String tabTitle10 = "Tab 10";
+        TabSwitcher.Tab tab10 = new TabSwitcher.Tab(tabTitle10, new Decorator(tabTitle10));
+        tab10.setIcon(this, R.drawable.ic_file_outline_18dp);
+        tabSwitcher.addTab(tab10);
+        String tabTitle11 = "Tab 11";
+        TabSwitcher.Tab tab11 = new TabSwitcher.Tab(tabTitle11, new Decorator(tabTitle11));
+        tab11.setIcon(this, R.drawable.ic_file_outline_18dp);
+        tabSwitcher.addTab(tab11);
+        String tabTitle12 = "Tab 12";
+        TabSwitcher.Tab tab12 = new TabSwitcher.Tab(tabTitle12, new Decorator(tabTitle12));
+        tab12.setIcon(this, R.drawable.ic_file_outline_18dp);
+        tabSwitcher.addTab(tab12);
     }
 
 }
