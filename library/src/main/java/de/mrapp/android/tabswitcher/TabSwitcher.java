@@ -516,13 +516,15 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onClick(final View v) {
-                int index = tabs.indexOf(tab);
+                if (!isAnimationRunning()) {
+                    int index = tabs.indexOf(tab);
 
-                if (index != -1) {
-                    int childIndex = getCount() - (index + 1);
-                    View view = getChildAt(childIndex);
-                    TabView tabView = new TabView(index + 1, view);
-                    animateClose(tabView, true, 0);
+                    if (index != -1) {
+                        int childIndex = getCount() - (index + 1);
+                        View view = getChildAt(childIndex);
+                        TabView tabView = new TabView(index + 1, view);
+                        animateClose(tabView, true, 0);
+                    }
                 }
             }
 
@@ -577,19 +579,41 @@ public class TabSwitcher extends FrameLayout {
                     int start = tabView.index - 1;
                     Iterator iterator = new Iterator(true, start);
                     TabView tabView;
+                    int firstStackedTabIndex = -1;
 
-                    while ((tabView = iterator.next()) != null) {
-                        TabView previous = iterator.previous();
+                    while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
+                        if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                                tabView.tag.state == State.STACKED_BOTTOM) {
+                            firstStackedTabIndex = tabView.index;
+                        }
+
                         View view = tabView.view;
-                        closeAnimation = view.animate();
-                        closeAnimation.setListener(
-                                createRelocateAnimationListener(tabView, previous.tag));
-                        closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                        closeAnimation.setDuration(animationDuration);
-                        animatePosition(Axis.DRAGGING_AXIS, closeAnimation, view,
+                        TabView previous = iterator.previous();
+                        relocateAnimation = view.animate();
+                        relocateAnimation.setListener(
+                                createRelocateAnimationListener(tabView, previous.tag,
+                                        !iterator.hasNext() || firstStackedTabIndex != -1));
+                        relocateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                        relocateAnimation.setDuration(animationDuration);
+                        animatePosition(Axis.DRAGGING_AXIS, relocateAnimation, view,
                                 previous.tag.projectedPosition);
-                        closeAnimation.setStartDelay((start + 1 - tabView.index) * startDelay);
-                        closeAnimation.start();
+                        relocateAnimation.setStartDelay((start + 1 - tabView.index) * startDelay);
+                        relocateAnimation.start();
+                    }
+
+                    if (firstStackedTabIndex != -1) {
+                        iterator = new Iterator(true, firstStackedTabIndex);
+                        Float previousActualPosition = null;
+
+                        while ((tabView = iterator.next()) != null) {
+                            float actualPosition = tabView.tag.actualPosition;
+
+                            if (previousActualPosition != null) {
+                                tabView.tag.actualPosition = previousActualPosition;
+                            }
+
+                            previousActualPosition = actualPosition;
+                        }
                     }
                 }
             }
@@ -614,8 +638,15 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private Animator.AnimatorListener createRelocateAnimationListener(
-            @NonNull final TabView tabView, @NonNull final Tag tag) {
+            @NonNull final TabView tabView, @NonNull final Tag tag, final boolean reset) {
         return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+                View view = tabView.view;
+                view.setVisibility(View.VISIBLE);
+            }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
@@ -625,7 +656,7 @@ public class TabSwitcher extends FrameLayout {
                 tabView.tag = tag;
                 applyTag(tabView);
 
-                if (tabView.index == 1) {
+                if (reset) {
                     relocateAnimation = null;
                 }
             }
