@@ -1407,7 +1407,7 @@ public class TabSwitcher extends FrameLayout {
 
             if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
                     closeDragHelper.hasThresholdBeenReached()) {
-                TabView tabView = getDraggedTabView(dragHelper.getDragStartPosition());
+                TabView tabView = getFocusedTabView(dragHelper.getDragStartPosition());
 
                 if (tabView != null && tabs.get(tabView.index - 1).isCloseable()) {
                     draggedTabView = tabView;
@@ -1470,13 +1470,13 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @Nullable
-    private TabView getDraggedTabView(final float y) {
+    private TabView getFocusedTabView(@NonNull final float position) {
         Iterator iterator = new Iterator();
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
             if ((tabView.tag.state == State.VISIBLE || tabView.tag.state == State.STACKED_TOP) &&
-                    tabView.tag.projectedPosition <= y) {
+                    tabView.tag.projectedPosition <= position) {
                 return tabView;
             }
         }
@@ -1505,7 +1505,7 @@ public class TabSwitcher extends FrameLayout {
 
             View view = draggedTabView.view;
             boolean close = flingVelocity >= minCloseFlingVelocity ||
-                    Math.abs(view.getX()) > view.getWidth() / 4f;
+                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) > view.getWidth() / 4f;
             animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
@@ -1519,6 +1519,10 @@ public class TabSwitcher extends FrameLayout {
             animateOvershootDown();
         } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
             animateOvershootUp();
+        } else if (event != null && !dragHelper.hasThresholdBeenReached() &&
+                !closeDragHelper.hasThresholdBeenReached() &&
+                !overshootDragHelper.hasThresholdBeenReached()) {
+            handleClick(event);
         } else {
             updateTags();
         }
@@ -1527,6 +1531,10 @@ public class TabSwitcher extends FrameLayout {
             velocityTracker.recycle();
             velocityTracker = null;
         }
+    }
+
+    private void handleClick(@NonNull final MotionEvent event) {
+        System.out.println("Registered click at " + event.getX() + ", " + event.getY());
     }
 
     private void animateOvershootDown() {
