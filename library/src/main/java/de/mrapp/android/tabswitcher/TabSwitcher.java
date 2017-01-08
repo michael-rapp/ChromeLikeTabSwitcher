@@ -306,7 +306,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (dragAnimation != null) {
-                handleDrag(0, flingDistance * interpolatedTime);
+                handleDrag(flingDistance * interpolatedTime, 0);
             }
         }
 
@@ -740,6 +740,14 @@ public class TabSwitcher extends FrameLayout {
             return view.getHeight() * getScale(view);
         } else {
             return view.getWidth() * getScale(view);
+        }
+    }
+
+    private float getPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return event.getY();
+        } else {
+            return event.getX();
         }
     }
 
@@ -1249,7 +1257,8 @@ public class TabSwitcher extends FrameLayout {
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(event.getX(0), event.getY(0));
+                        handleDrag(getPosition(Axis.DRAGGING_AXIS, event),
+                                getPosition(Axis.ORTHOGONAL_AXIS, event));
                     } else {
                         handleRelease(null);
                         handleDown(event);
@@ -1352,15 +1361,15 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @SuppressWarnings("WrongConstant")
-    private void handleDrag(final float x, final float y) {
-        if (y <= topDragThreshold) {
+    private void handleDrag(final float dragPosition, final float orthogonalPosition) {
+        if (dragPosition <= topDragThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
                 updateTags();
             }
 
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
-            overshootDragHelper.update(y);
+            overshootDragHelper.update(dragPosition);
             float overshootDistance = Math.abs(overshootDragHelper.getDragDistance());
 
             if (overshootDistance <= maxOvershootDistance) {
@@ -1388,22 +1397,22 @@ public class TabSwitcher extends FrameLayout {
                         (overshootDistance - maxOvershootDistance) / maxOvershootDistance));
                 tiltOnOvershootUp(ratio * MAX_UP_OVERSHOOT_ANGLE);
             }
-        } else if (y >= bottomDragThreshold) {
+        } else if (dragPosition >= bottomDragThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
                 updateTags();
             }
 
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
-            overshootDragHelper.update(y);
+            overshootDragHelper.update(dragPosition);
             float overshootDistance = overshootDragHelper.getDragDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
             tiltOnOvershootDown(ratio * -MAX_DOWN_OVERSHOOT_ANGLE);
         } else {
             overshootDragHelper.reset();
             float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
-            dragHelper.update(y);
-            closeDragHelper.update(x);
+            dragHelper.update(dragPosition);
+            closeDragHelper.update(orthogonalPosition);
 
             if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
                     closeDragHelper.hasThresholdBeenReached()) {
@@ -1439,11 +1448,11 @@ public class TabSwitcher extends FrameLayout {
                 }
 
                 if (isBottomDragThresholdReached()) {
-                    bottomDragThreshold = y;
+                    bottomDragThreshold = dragPosition;
                     scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
                     dragToBottomThresholdPosition();
                 } else if (isTopDragThresholdReached()) {
-                    topDragThreshold = y;
+                    topDragThreshold = dragPosition;
                     scrollDirection = ScrollDirection.OVERSHOOT_UP;
                     dragToTopThresholdPosition();
                 }
