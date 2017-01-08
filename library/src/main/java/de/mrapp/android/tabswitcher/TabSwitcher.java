@@ -295,17 +295,6 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
-    private class ShowSwitcherAnimation extends Animation {
-
-        @Override
-        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            if (dragAnimation != null) {
-                handleDrag(0, (2 * maxTabSpacing + minTabSpacing) * interpolatedTime);
-            }
-        }
-
-    }
-
     private class FlingAnimation extends Animation {
 
         private final float flingDistance;
@@ -424,6 +413,8 @@ public class TabSwitcher extends FrameLayout {
     private float bottomDragThreshold = Float.MAX_VALUE;
 
     private int pointerId = -1;
+
+    private ViewPropertyAnimator showSwitcherAnimation;
 
     private Animation dragAnimation;
 
@@ -872,11 +863,6 @@ public class TabSwitcher extends FrameLayout {
 
     public final void addTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
-
-        if (tabs.isEmpty()) {
-            selectedTabIndex = 0;
-        }
-
         tabs.add(tab);
         ViewGroup view = inflateLayout(tab);
         LayoutParams layoutParams =
@@ -887,6 +873,12 @@ public class TabSwitcher extends FrameLayout {
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = borderMargin;
         addView(view, 0, layoutParams);
+
+        if (tabs.size() == 1) {
+            selectedTabIndex = 0;
+        } else {
+            view.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Nullable
@@ -906,6 +898,7 @@ public class TabSwitcher extends FrameLayout {
         return switcherShown;
     }
 
+    @SuppressWarnings("WrongConstant")
     public final void showSwitcher() {
         if (!isSwitcherShown()) {
             switcherShown = true;
@@ -916,45 +909,53 @@ public class TabSwitcher extends FrameLayout {
             while ((tabView = iterator.next()) != null) {
                 tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
                 View view = tabView.view;
-                float scale = getScale(view);
                 setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                 setPivot(Axis.DRAGGING_AXIS, view, 0);
-                setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-                setScale(Axis.DRAGGING_AXIS, view, scale);
+                float scale = getScale(view);
+                calculateTopThresholdPosition(tabView, iterator.previous());
+                view.setVisibility(getVisibility(tabView));
+
+                if (tabView.index - 1 < selectedTabIndex) {
+                    setPosition(Axis.DRAGGING_AXIS, view, getHeight());
+                } else if (tabView.index - 1 > selectedTabIndex) {
+                    setPosition(Axis.DRAGGING_AXIS, view, -view.getHeight());
+                }
+
+                showSwitcherAnimation = view.animate();
+                showSwitcherAnimation.setDuration(
+                        getResources().getInteger(android.R.integer.config_longAnimTime));
+                showSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                showSwitcherAnimation.setListener(
+                        createShowSwitcherAnimationListener(tabView, !iterator.hasNext()));
+                animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
+                animateScale(Axis.DRAGGING_AXIS, showSwitcherAnimation, scale);
+                animatePosition(Axis.DRAGGING_AXIS, showSwitcherAnimation, view,
+                        tabView.tag.projectedPosition);
+                showSwitcherAnimation.setStartDelay(0);
+                showSwitcherAnimation.start();
+            }
+        }
+    }
+
+    private Animator.AnimatorListener createShowSwitcherAnimationListener(
+            @NonNull final TabView tabView, final boolean reset) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                applyTag(tabView);
+
+                if (reset) {
+                    showSwitcherAnimation = null;
+                }
             }
 
-            dragToTopThresholdPosition();
-            printProjectedPositions();
-            System.out.println("stacked tab spacing is " + stackedTabSpacing);
-            System.out.println("min tab spacing is " + minTabSpacing);
-            System.out.println("max tab spacing is " + maxTabSpacing);
-            System.out.println("attached position is " + attachedPosition);
-
-            /*
-            dragAnimation = new ShowSwitcherAnimation();
-            dragAnimation.setFillAfter(true);
-            dragAnimation.setAnimationListener(createDragAnimationListener());
-            dragAnimation
-                    .setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
-            dragAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-            startAnimation(dragAnimation);
-            */
-        }
+        };
     }
 
     private float calculateAttachedPosition() {
         return maxTabSpacing - minTabSpacing + calculateFirstTabTopThresholdPosition();
-    }
-
-    private void printProjectedPositions() {
-        Iterator iterator = new Iterator();
-        TabView tabView;
-
-        while ((tabView = iterator.next()) != null) {
-            System.out.println(tabView.index + ": " + tabView.tag.actualPosition);
-        }
-
-        System.out.println("-----------------------");
     }
 
     private Animation.AnimationListener createDragAnimationListener() {
@@ -1270,8 +1271,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isAnimationRunning() {
-        return overshootAnimation != null || overshootUpAnimation != null ||
-                closeAnimation != null || relocateAnimation != null;
+        return showSwitcherAnimation != null || overshootAnimation != null ||
+                overshootUpAnimation != null || closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
