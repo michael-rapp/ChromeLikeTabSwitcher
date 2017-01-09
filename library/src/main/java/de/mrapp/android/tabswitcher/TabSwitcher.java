@@ -1602,8 +1602,7 @@ public class TabSwitcher extends FrameLayout {
         } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
             animateOvershootUp();
         } else if (event != null && !dragHelper.hasThresholdBeenReached() &&
-                !closeDragHelper.hasThresholdBeenReached() &&
-                !overshootDragHelper.hasThresholdBeenReached()) {
+                !closeDragHelper.hasThresholdBeenReached()) {
             handleClick(event);
         } else {
             updateTags();
