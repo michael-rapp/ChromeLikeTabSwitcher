@@ -923,12 +923,14 @@ public class TabSwitcher extends FrameLayout {
                 setPivot(Axis.DRAGGING_AXIS, view, 0);
                 float scale = getScale(view);
                 calculateTopThresholdPosition(tabView, iterator.previous());
-                view.setVisibility(getVisibility(tabView));
+                view.setVisibility(tabView.index - 1 == selectedTabIndex ? View.VISIBLE :
+                        getVisibility(tabView));
 
                 if (tabView.index - 1 < selectedTabIndex) {
                     setPosition(Axis.DRAGGING_AXIS, view, getHeight());
                 } else if (tabView.index - 1 > selectedTabIndex) {
-                    setPosition(Axis.DRAGGING_AXIS, view, -view.getHeight());
+                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                    setPosition(Axis.DRAGGING_AXIS, view, layoutParams.topMargin);
                 }
 
                 showSwitcherAnimation = view.animate();
@@ -954,7 +956,6 @@ public class TabSwitcher extends FrameLayout {
 
             while ((tabView = iterator.next()) != null) {
                 View view = tabView.view;
-
                 hideSwitcherAnimation = view.animate();
                 hideSwitcherAnimation.setDuration(
                         getResources().getInteger(android.R.integer.config_longAnimTime));
@@ -967,8 +968,9 @@ public class TabSwitcher extends FrameLayout {
                 if (tabView.index - 1 < selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view, getHeight());
                 } else if (tabView.index - 1 > selectedTabIndex) {
+                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            -view.getHeight());
+                            layoutParams.topMargin);
                 } else {
                     LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
@@ -1015,6 +1017,7 @@ public class TabSwitcher extends FrameLayout {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 View view = tabView.view;
+                tabView.viewHolder.borderView.setVisibility(View.INVISIBLE);
 
                 if (tabView.index - 1 != selectedTabIndex) {
                     view.setVisibility(View.INVISIBLE);
