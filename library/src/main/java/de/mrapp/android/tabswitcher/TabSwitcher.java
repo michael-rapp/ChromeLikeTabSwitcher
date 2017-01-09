@@ -1308,15 +1308,23 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isTopDragThresholdReached() {
-        View view = getChildAt(getCount() - 1);
-        Tag tag = (Tag) view.getTag(R.id.tag_properties);
-        return tag.state == State.TOP_MOST;
+        if (getCount() <= 1) {
+            return true;
+        } else {
+            View view = getChildAt(getCount() - 1);
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+            return tag.state == State.TOP_MOST;
+        }
     }
 
     private boolean isBottomDragThresholdReached() {
-        View view = getChildAt(1);
-        Tag tag = (Tag) view.getTag(R.id.tag_properties);
-        return tag.projectedPosition >= maxTabSpacing;
+        if (getCount() <= 1) {
+            return true;
+        } else {
+            View view = getChildAt(1);
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+            return tag.projectedPosition >= maxTabSpacing;
+        }
     }
 
     private void tiltOnOvershootDown(final float angle) {
@@ -1458,16 +1466,22 @@ public class TabSwitcher extends FrameLayout {
                     applyTag(tabView);
                 }
 
-                if (isBottomDragThresholdReached()) {
-                    bottomDragThreshold = dragPosition;
-                    scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
-                    dragToBottomThresholdPosition();
-                } else if (isTopDragThresholdReached()) {
-                    topDragThreshold = dragPosition;
-                    scrollDirection = ScrollDirection.OVERSHOOT_UP;
-                    dragToTopThresholdPosition();
-                }
+                checkIfDragThresholdReached(dragPosition);
             }
+        }
+    }
+
+    private void checkIfDragThresholdReached(final float dragPosition) {
+        if (isBottomDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_DOWN ||
+                scrollDirection == ScrollDirection.OVERSHOOT_DOWN)) {
+            bottomDragThreshold = dragPosition;
+            scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
+            dragToBottomThresholdPosition();
+        } else if (isTopDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_UP ||
+                scrollDirection == ScrollDirection.OVERSHOOT_UP)) {
+            topDragThreshold = dragPosition;
+            scrollDirection = ScrollDirection.OVERSHOOT_UP;
+            dragToTopThresholdPosition();
         }
     }
 
