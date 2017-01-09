@@ -23,10 +23,8 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -56,7 +54,6 @@ import de.mrapp.android.tabswitcher.gesture.DragHelper;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -70,72 +67,8 @@ public class TabSwitcher extends FrameLayout {
     public interface Decorator {
 
         @NonNull
-        View inflateLayout(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent);
-
-    }
-
-    public static class Tab {
-
-        private final Decorator decorator;
-
-        private final CharSequence title;
-
-        private Drawable icon;
-
-        private boolean closeable;
-
-        public Tab(@NonNull final CharSequence title, @NonNull final Decorator decorator) {
-            ensureNotNull(title, "The title may not be null");
-            ensureNotEmpty(title, "The title may not be empty");
-            ensureNotNull(decorator, "The decorator may not be null");
-            this.decorator = decorator;
-            this.title = title;
-            this.closeable = true;
-            this.icon = null;
-        }
-
-        public Tab(@NonNull final Context context, @StringRes final int resourceId,
-                   @NonNull final Decorator decorator) {
-            ensureNotNull(context, "The context may not be null");
-            ensureNotNull(decorator, "The decorator may not be null");
-            this.decorator = decorator;
-            this.title = context.getString(resourceId);
-            this.closeable = true;
-            this.icon = null;
-        }
-
-        @NonNull
-        public final Decorator getDecorator() {
-            return decorator;
-        }
-
-        @NonNull
-        public final CharSequence getTitle() {
-            return title;
-        }
-
-        @Nullable
-        public final Drawable getIcon() {
-            return icon;
-        }
-
-        public final void setIcon(@NonNull final Context context,
-                                  @DrawableRes final int resourceId) {
-            ensureNotNull(context, "The context may not be null");
-            this.icon = ContextCompat.getDrawable(context, resourceId);
-        }
-
-        public final void setIcon(@Nullable final Drawable icon) {
-            this.icon = icon;
-        }
-
-        public final boolean isCloseable() {
-            return closeable;
-        }
-
-        public final void setCloseable(final boolean closeable) {
-            this.closeable = closeable;
-        }
+        View inflateLayout(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent,
+                           @NonNull Tab tab);
 
     }
 
@@ -352,6 +285,8 @@ public class TabSwitcher extends FrameLayout {
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
+    private Decorator decorator;
+
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -477,13 +412,14 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private ViewGroup inflateLayout(@NonNull final Tab tab) {
-        Decorator decorator = tab.getDecorator();
+        int color = tab.getColor();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         ViewHolder viewHolder = new ViewHolder();
         ViewGroup tabView = (ViewGroup) layoutInflater.inflate(R.layout.tab_view, this, false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
-        backgroundDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        backgroundDrawable
+                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
         ViewUtil.setBackground(tabView, backgroundDrawable);
         int padding = tabInset + tabBorderWidth;
         tabView.setPadding(padding, tabInset, padding, padding);
@@ -491,17 +427,20 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
         viewHolder.titleTextView.setText(tab.getTitle());
         viewHolder.titleTextView
-                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(), null, null, null);
+                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(getContext()), null, null,
+                        null);
         viewHolder.closeButton = (ImageButton) tabView.findViewById(R.id.close_tab_button);
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
-        View childView = decorator.inflateLayout(layoutInflater, viewHolder.childContainer);
+        View childView =
+                getDecorator().inflateLayout(layoutInflater, viewHolder.childContainer, tab);
         viewHolder.childContainer.addView(childView, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
         Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
-        borderDrawable.setColorFilter(tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        borderDrawable
+                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         tabView.setTag(R.id.tag_view_holder, viewHolder);
         return tabView;
@@ -1714,6 +1653,16 @@ public class TabSwitcher extends FrameLayout {
             dragAnimation.setInterpolator(new DecelerateInterpolator());
             startAnimation(dragAnimation);
         }
+    }
+
+    public final void setDecorator(@NonNull final Decorator decorator) {
+        ensureNotNull(decorator, "The decorator may not be null");
+        this.decorator = decorator;
+    }
+
+    public final Decorator getDecorator() {
+        ensureNotNull(decorator, "No decorator has been set", IllegalStateException.class);
+        return decorator;
     }
 
 }

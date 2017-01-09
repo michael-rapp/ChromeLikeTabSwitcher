@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.example;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -24,10 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-
-import static de.mrapp.android.util.Condition.ensureNotEmpty;
-import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * The example app's main activity.
@@ -38,21 +37,13 @@ public class MainActivity extends AppCompatActivity {
 
     public final class Decorator implements TabSwitcher.Decorator {
 
-        private CharSequence title;
-
-        public Decorator(@NonNull final CharSequence title) {
-            ensureNotNull(title, "The title may not be null");
-            ensureNotEmpty(title, "The title may not be empty");
-            this.title = title;
-        }
-
         @NonNull
         @Override
         public final View inflateLayout(@NonNull final LayoutInflater inflater,
-                                        @NonNull final ViewGroup parent) {
+                                        @NonNull final ViewGroup parent, @NonNull final Tab tab) {
             View view = inflater.inflate(R.layout.tab, parent, false);
             TextView textView = (TextView) view.findViewById(android.R.id.title);
-            textView.setText(title);
+            textView.setText(tab.getTitle());
             return view;
         }
 
@@ -86,53 +77,54 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
+        tabSwitcher.setDecorator(new Decorator());
         String tabTitle1 = "Tab 1";
-        TabSwitcher.Tab tab1 = new TabSwitcher.Tab(tabTitle1, new Decorator(tabTitle1));
-        tab1.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab1 = new Tab(tabTitle1);
+        tab1.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab1);
         String tabTitle2 = "Tab 2";
-        TabSwitcher.Tab tab2 = new TabSwitcher.Tab(tabTitle2, new Decorator(tabTitle2));
-        tab2.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab2 = new Tab(tabTitle2);
+        tab2.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab2);
         String tabTitle3 = "Tab 3";
-        TabSwitcher.Tab tab3 = new TabSwitcher.Tab(tabTitle3, new Decorator(tabTitle3));
-        tab3.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab3 = new Tab(tabTitle3);
+        tab3.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab3);
         String tabTitle4 = "Tab 4";
-        TabSwitcher.Tab tab4 = new TabSwitcher.Tab(tabTitle4, new Decorator(tabTitle4));
-        tab4.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab4 = new Tab(tabTitle4);
+        tab4.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab4);
         String tabTitle5 = "Tab 5";
-        TabSwitcher.Tab tab5 = new TabSwitcher.Tab(tabTitle5, new Decorator(tabTitle5));
-        tab5.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab5 = new Tab(tabTitle5);
+        tab5.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab5);
         String tabTitle6 = "Tab 6";
-        TabSwitcher.Tab tab6 = new TabSwitcher.Tab(tabTitle6, new Decorator(tabTitle6));
-        tab6.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab6 = new Tab(tabTitle6);
+        tab6.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab6);
         String tabTitle7 = "Tab 7";
-        TabSwitcher.Tab tab7 = new TabSwitcher.Tab(tabTitle7, new Decorator(tabTitle7));
-        tab7.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab7 = new Tab(tabTitle7);
+        tab7.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab7);
         String tabTitle8 = "Tab 8";
-        TabSwitcher.Tab tab8 = new TabSwitcher.Tab(tabTitle8, new Decorator(tabTitle8));
-        tab8.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab8 = new Tab(tabTitle8);
+        tab8.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab8);
         String tabTitle9 = "Tab 9";
-        TabSwitcher.Tab tab9 = new TabSwitcher.Tab(tabTitle9, new Decorator(tabTitle9));
-        tab9.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab9 = new Tab(tabTitle9);
+        tab9.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab9);
         String tabTitle10 = "Tab 10";
-        TabSwitcher.Tab tab10 = new TabSwitcher.Tab(tabTitle10, new Decorator(tabTitle10));
-        tab10.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab10 = new Tab(tabTitle10);
+        tab10.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab10);
         String tabTitle11 = "Tab 11";
-        TabSwitcher.Tab tab11 = new TabSwitcher.Tab(tabTitle11, new Decorator(tabTitle11));
-        tab11.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab11 = new Tab(tabTitle11);
+        tab11.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab11);
         String tabTitle12 = "Tab 12";
-        TabSwitcher.Tab tab12 = new TabSwitcher.Tab(tabTitle12, new Decorator(tabTitle12));
-        tab12.setIcon(this, R.drawable.ic_file_outline_18dp);
+        Tab tab12 = new Tab(tabTitle12);
+        tab12.setIcon(R.drawable.ic_file_outline_18dp);
         tabSwitcher.addTab(tab12);
     }
 
