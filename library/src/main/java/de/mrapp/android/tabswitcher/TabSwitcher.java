@@ -51,10 +51,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mrapp.android.tabswitcher.gesture.DragHelper;
+import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
+import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
  * A chrome-like tab switcher.
@@ -669,6 +671,18 @@ public class TabSwitcher extends FrameLayout {
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
     }
 
+    private Axis getOrientationInvariantAxis(@NonNull final Axis axis) {
+        if (isDraggingHorizontally()) {
+            return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
+        }
+
+        return axis;
+    }
+
+    private boolean isDraggingHorizontally() {
+        return getOrientation(getContext()) == Orientation.LANDSCAPE;
+    }
+
     private float getScale(@NonNull final View view) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
@@ -677,7 +691,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float getSize(@NonNull final Axis axis, @NonNull final View view) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getHeight() * getScale(view);
         } else {
             return view.getWidth() * getScale(view);
@@ -685,7 +699,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float getPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return event.getY();
         } else {
             return event.getX();
@@ -695,7 +709,7 @@ public class TabSwitcher extends FrameLayout {
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getY();
         } else {
             return view.getX() - layoutParams.leftMargin;
@@ -706,7 +720,7 @@ public class TabSwitcher extends FrameLayout {
                              final float position) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setY(position);
         } else {
             view.setX(position + layoutParams.leftMargin);
@@ -718,7 +732,7 @@ public class TabSwitcher extends FrameLayout {
                                  @NonNull final View view, final float position) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.y(position);
         } else {
             animator.x(position + layoutParams.leftMargin);
@@ -726,7 +740,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float getRotation(@NonNull final Axis axis, @NonNull final View view) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getRotationY();
         } else {
             return view.getRotationX();
@@ -735,7 +749,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void setRotation(@NonNull final Axis axis, @NonNull final View view,
                              final float angle) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setRotationY(angle);
         } else {
             view.setRotationX(angle);
@@ -743,7 +757,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void setScale(@NonNull final Axis axis, @NonNull final View view, final float scale) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setScaleY(scale);
         } else {
             view.setScaleX(scale);
@@ -752,7 +766,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void animateScale(@NonNull final Axis axis,
                               @NonNull final ViewPropertyAnimator animator, final float scale) {
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.scaleY(scale);
         } else {
             animator.scaleX(scale);
@@ -760,31 +774,18 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot) {
-        setPivot(axis, view, pivot, true);
-    }
-
-    private void setPivot(@NonNull final Axis axis, @NonNull final View view, final float pivot,
-                          final boolean adapt) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        if (axis == Axis.DRAGGING_AXIS) {
-            if (adapt) {
-                float newPivot = pivot - layoutParams.topMargin - tabTitleContainerHeight;
-                view.setTranslationY(view.getTranslationY() +
-                        (view.getPivotY() - newPivot) * (1 - view.getScaleY()));
-                view.setPivotY(newPivot);
-            } else {
-                view.setPivotY(pivot - layoutParams.topMargin - tabTitleContainerHeight);
-            }
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            float newPivot = pivot - layoutParams.topMargin - tabTitleContainerHeight;
+            view.setTranslationY(view.getTranslationY() +
+                    (view.getPivotY() - newPivot) * (1 - view.getScaleY()));
+            view.setPivotY(newPivot);
         } else {
-            if (adapt) {
-                float newPivot = pivot - layoutParams.leftMargin;
-                view.setTranslationX(view.getTranslationX() +
-                        (view.getPivotX() - newPivot) * (1 - view.getScaleX()));
-                view.setPivotX(newPivot);
-            } else {
-                view.setPivotX(pivot - layoutParams.leftMargin);
-            }
+            float newPivot = pivot - layoutParams.leftMargin;
+            view.setTranslationX(view.getTranslationX() +
+                    (view.getPivotX() - newPivot) * (1 - view.getScaleX()));
+            view.setPivotX(newPivot);
         }
     }
 
@@ -858,8 +859,10 @@ public class TabSwitcher extends FrameLayout {
             while ((tabView = iterator.next()) != null) {
                 tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
                 View view = tabView.view;
-                setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
-                setPivot(Axis.DRAGGING_AXIS, view, 0);
+                setPivot(Axis.DRAGGING_AXIS, view,
+                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                 float scale = getScale(view);
                 calculateTopThresholdPosition(tabView, iterator.previous());
                 view.setVisibility(tabView.index - 1 == selectedTabIndex ? View.VISIBLE :
@@ -882,6 +885,11 @@ public class TabSwitcher extends FrameLayout {
                 animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
                 animatePosition(Axis.DRAGGING_AXIS, showSwitcherAnimation, view,
                         tabView.tag.projectedPosition);
+
+                if (isDraggingHorizontally()) {
+                    animatePosition(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, view, 0);
+                }
+
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
             }
@@ -1115,7 +1123,8 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
-        setPivot(Axis.DRAGGING_AXIS, view, 0);
+        setPivot(Axis.DRAGGING_AXIS, view,
+                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         view.setVisibility(getVisibility(tabView));
@@ -1240,10 +1249,12 @@ public class TabSwitcher extends FrameLayout {
 
     private Pair<Float, State> calculateBottomMostPosition(@NonNull final TabView tabView) {
         if (tabView.index <= STACKED_TAB_COUNT) {
-            float position = getHeight() - tabInset - (stackedTabSpacing * tabView.index);
+            float position = getSize(Axis.DRAGGING_AXIS, this) - tabInset -
+                    (stackedTabSpacing * tabView.index);
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
-            float position = getHeight() - tabInset - (stackedTabSpacing * STACKED_TAB_COUNT);
+            float position = getSize(Axis.DRAGGING_AXIS, this) - tabInset -
+                    (stackedTabSpacing * STACKED_TAB_COUNT);
             return Pair.create(position, State.BOTTOM_MOST_HIDDEN);
         }
     }
@@ -1491,7 +1502,7 @@ public class TabSwitcher extends FrameLayout {
         setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
         float scale = getScale(view);
         setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
-        float ratio = 1 - (Math.abs(dragDistance) / (float) calculateClosedTabPosition());
+        float ratio = 1 - (Math.abs(dragDistance) / calculateClosedTabPosition());
         float scaledClosedTabScale = closedTabScale * scale;
         float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
         setScale(Axis.DRAGGING_AXIS, view, targetScale);
@@ -1499,8 +1510,8 @@ public class TabSwitcher extends FrameLayout {
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
     }
 
-    private int calculateClosedTabPosition() {
-        return getWidth();
+    private float calculateClosedTabPosition() {
+        return getSize(Axis.ORTHOGONAL_AXIS, this);
     }
 
     @Nullable
@@ -1540,7 +1551,8 @@ public class TabSwitcher extends FrameLayout {
 
             View view = draggedTabView.view;
             boolean close = flingVelocity >= minCloseFlingVelocity ||
-                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) > view.getWidth() / 4f;
+                    Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) >
+                            getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
             animateClose(draggedTabView, close, flingVelocity);
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
