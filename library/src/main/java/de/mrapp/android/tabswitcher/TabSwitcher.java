@@ -848,8 +848,12 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void addTab(@NonNull final Tab tab) {
+        addTab(tab, getCount());
+    }
+
+    public final void addTab(@NonNull final Tab tab, final int index) {
         ensureNotNull(tab, "The tab may not be null");
-        tabs.add(tab);
+        tabs.add(index, tab);
         ViewGroup view = inflateLayout(tab);
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -858,7 +862,7 @@ public class TabSwitcher extends FrameLayout {
         layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = borderMargin;
-        addView(view, 0, layoutParams);
+        addView(view, getChildCount() - index, layoutParams);
 
         if (tabs.size() == 1) {
             selectedTabIndex = 0;
