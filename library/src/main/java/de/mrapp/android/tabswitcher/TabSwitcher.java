@@ -48,9 +48,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import de.mrapp.android.tabswitcher.gesture.DragHelper;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -67,6 +69,48 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout {
+
+    /**
+     * Defines the interface, a class, which should be notified about a tab switcher's events, must
+     * implement.
+     */
+    public interface Listener {
+
+        /**
+         * The method, which is invoked, when the currently selected tab has been changed.
+         *
+         * @param selectedTabIndex
+         *         The index of the currently selected tab as an {@link Integer} value or -1, if the
+         *         tab switcher does not contain any tabs
+         * @param selectedTab
+         *         The currently selected tab as an instance of the class {@link Tab} or null, if
+         *         the tab switcher does not contain any tabs
+         */
+        void onSelectionChanged(int selectedTabIndex, @Nullable Tab selectedTab);
+
+        /**
+         * The method, which is invoked, when a tab has been added to the tab switcher.
+         *
+         * @param index
+         *         The index of the tab, which has been added, as an {@link Integer} value
+         * @param tab
+         *         The tab, which has been added, as an instance of the class {@link Tab}. The tab
+         *         may not be null
+         */
+        void onTabAdded(int index, @NonNull Tab tab);
+
+        /**
+         * The method, which is invoked, when a tab has been removed from the tab switcher.
+         *
+         * @param index
+         *         The index of the tab, which has been removed, as an {@link Integer} value
+         * @param tab
+         *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
+         *         may not be null
+         */
+        void onTabRemoved(int index, @NonNull Tab tab);
+
+    }
 
     public interface Decorator {
 
@@ -309,6 +353,8 @@ public class TabSwitcher extends FrameLayout {
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
+    private Set<Listener> listeners;
+
     private Decorator decorator;
 
     private Queue<Runnable> pendingActions;
@@ -407,6 +453,7 @@ public class TabSwitcher extends FrameLayout {
     private void initialize(@Nullable final AttributeSet attributeSet,
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
+        listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
         tabs = new ArrayList<>();
         selectedTabIndex = -1;
@@ -471,6 +518,25 @@ public class TabSwitcher extends FrameLayout {
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         tabView.setTag(R.id.tag_view_holder, viewHolder);
         return tabView;
+    }
+
+    private void notifyOnSelectionChanged(final int selectedTabIndex,
+                                          @Nullable final Tab selectedTab) {
+        for (Listener listener : listeners) {
+            listener.onSelectionChanged(selectedTabIndex, selectedTab);
+        }
+    }
+
+    private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
+        for (Listener listener : listeners) {
+            listener.onTabAdded(index, tab);
+        }
+    }
+
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
+        for (Listener listener : listeners) {
+            listener.onTabRemoved(index, tab);
+        }
     }
 
     private OnClickListener createCloseButtonClickListener(@NonNull final Tab tab) {
@@ -578,12 +644,19 @@ public class TabSwitcher extends FrameLayout {
 
                 if (close) {
                     removeView(view);
-                    tabs.remove(tabView.index - 1);
+                    int index = tabView.index - 1;
+                    Tab tab = tabs.remove(index);
+                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
-                    } else if (selectedTabIndex == tabView.index - 1 && selectedTabIndex > 0) {
-                        selectedTabIndex--;
+                        notifyOnSelectionChanged(-1, null);
+                    } else {
+                        if (selectedTabIndex == tabView.index - 1 && selectedTabIndex > 0) {
+                            selectedTabIndex--;
+                        }
+
+                        notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
                     adaptTopMostTabViewWhenClosingAborted(tabView);
@@ -861,9 +934,12 @@ public class TabSwitcher extends FrameLayout {
 
         if (tabs.size() == 1) {
             selectedTabIndex = 0;
+            notifyOnSelectionChanged(0, tab);
         } else {
             view.setVisibility(View.INVISIBLE);
         }
+
+        notifyOnTabAdded(index, tab);
     }
 
     public final void removeTab(@NonNull final Tab tab) {
@@ -877,11 +953,17 @@ public class TabSwitcher extends FrameLayout {
                 if (!isSwitcherShown()) {
                     tabs.remove(index);
                     removeViewAt(childIndex);
+                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
-                    } else if (selectedTabIndex == index && selectedTabIndex > 0) {
-                        selectedTabIndex--;
+                        notifyOnSelectionChanged(-1, null);
+                    } else {
+                        if (selectedTabIndex == index && selectedTabIndex > 0) {
+                            selectedTabIndex--;
+                        }
+
+                        notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
                     View view = getChildAt(childIndex);
@@ -890,6 +972,24 @@ public class TabSwitcher extends FrameLayout {
                     tabView.tag.closing = true;
                     setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
                     animateClose(tabView, true, 0);
+                }
+            }
+
+        });
+    }
+
+    public final void selectTab(@NonNull final Tab tab) {
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                int index = tabs.indexOf(tab);
+                selectedTabIndex = index;
+
+                if (!isSwitcherShown()) {
+                    notifyOnSelectionChanged(index, tab);
+                } else {
+                    hideSwitcher();
                 }
             }
 
@@ -921,7 +1021,7 @@ public class TabSwitcher extends FrameLayout {
 
     @Nullable
     public final Tab getSelectedTab() {
-        return selectedTabIndex != -1 ? tabs.get(selectedTabIndex) : null;
+        return selectedTabIndex != -1 ? getTab(selectedTabIndex) : null;
     }
 
     public final int getSelectedTabIndex() {
@@ -934,6 +1034,10 @@ public class TabSwitcher extends FrameLayout {
 
     public final int getCount() {
         return tabs.size();
+    }
+
+    public final Tab getTab(final int index) {
+        return tabs.get(index);
     }
 
     public final boolean isSwitcherShown() {
@@ -1070,6 +1174,7 @@ public class TabSwitcher extends FrameLayout {
                 if (reset) {
                     switcherShown = false;
                     hideSwitcherAnimation = null;
+                    notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     executePendingAction();
                 }
             }
@@ -1568,7 +1673,7 @@ public class TabSwitcher extends FrameLayout {
                     closeDragHelper.hasThresholdBeenReached()) {
                 TabView tabView = getFocusedTabView(dragHelper.getDragStartPosition());
 
-                if (tabView != null && tabs.get(tabView.index - 1).isCloseable()) {
+                if (tabView != null && getTab(tabView.index - 1).isCloseable()) {
                     draggedTabView = tabView;
                 }
             }
@@ -1749,8 +1854,8 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView = getFocusedTabView(getPosition(Axis.DRAGGING_AXIS, event));
 
         if (tabView != null) {
-            selectedTabIndex = tabView.index - 1;
-            hideSwitcher();
+            Tab tab = getTab(tabView.index - 1);
+            selectTab(tab);
         }
     }
 
@@ -1859,6 +1964,16 @@ public class TabSwitcher extends FrameLayout {
     public final Decorator getDecorator() {
         ensureNotNull(decorator, "No decorator has been set", IllegalStateException.class);
         return decorator;
+    }
+
+    public final void addListener(@NonNull final Listener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        this.listeners.add(listener);
+    }
+
+    public final void removeListener(@NonNull final Listener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        this.listeners.remove(listener);
     }
 
 }

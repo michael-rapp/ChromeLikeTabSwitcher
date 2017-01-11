@@ -13,9 +13,9 @@
  */
 package de.mrapp.android.tabswitcher.example;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -33,7 +34,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  *
  * @author Michael Rapp
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TabSwitcher.Listener {
 
     public final class Decorator implements TabSwitcher.Decorator {
 
@@ -53,6 +54,26 @@ public class MainActivity extends AppCompatActivity {
      * The activity's tab switcher.
      */
     private TabSwitcher tabSwitcher;
+
+    @Override
+    public final void onSelectionChanged(final int selectedTabIndex,
+                                         @Nullable final Tab selectedTab) {
+        if (selectedTab != null) {
+            CharSequence toast =
+                    getString(R.string.selection_changed_toast, selectedTab.getTitle());
+            Toast.makeText(this, toast, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public final void onTabAdded(final int index, @NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onTabRemoved(final int index, @NonNull final Tab tab) {
+
+    }
 
     @Override
     public final boolean onCreateOptionsMenu(final Menu menu) {
@@ -78,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
         tabSwitcher.setDecorator(new Decorator());
+        tabSwitcher.addListener(this);
         String tabTitle1 = "Tab 1";
         Tab tab1 = new Tab(tabTitle1);
         tab1.setIcon(R.drawable.ic_file_outline_18dp);
