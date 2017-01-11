@@ -48,7 +48,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import de.mrapp.android.tabswitcher.gesture.DragHelper;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -309,6 +311,8 @@ public class TabSwitcher extends FrameLayout {
 
     private Decorator decorator;
 
+    private Queue<Runnable> pendingActions;
+
     /**
      * A list, which contains the tab switcher's tabs.
      */
@@ -403,6 +407,7 @@ public class TabSwitcher extends FrameLayout {
     private void initialize(@Nullable final AttributeSet attributeSet,
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
+        pendingActions = new LinkedList<>();
         tabs = new ArrayList<>();
         selectedTabIndex = -1;
         switcherShown = false;
@@ -473,9 +478,7 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onClick(final View v) {
-                if (!isAnimationRunning()) {
-                    removeTag(tabs.indexOf(tab));
-                }
+                removeTab(tab);
             }
 
         };
@@ -592,6 +595,7 @@ public class TabSwitcher extends FrameLayout {
 
                 closeAnimation = null;
                 draggedTabView = null;
+                executePendingAction();
             }
 
         };
@@ -618,6 +622,7 @@ public class TabSwitcher extends FrameLayout {
 
                 if (reset) {
                     relocateAnimation = null;
+                    executePendingAction();
                 }
             }
 
@@ -861,25 +866,56 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    public final void removeTag(final int index) {
-        int childIndex = getCount() - (index + 1);
+    public final void removeTab(@NonNull final Tab tab) {
+        enqueuePendingAction(new Runnable() {
 
-        if (!isSwitcherShown()) {
-            tabs.remove(index);
-            removeViewAt(childIndex);
+            @Override
+            public void run() {
+                int index = tabs.indexOf(tab);
+                int childIndex = getCount() - (index + 1);
 
-            if (isEmpty()) {
-                selectedTabIndex = -1;
-            } else if (selectedTabIndex == index && selectedTabIndex > 0) {
-                selectedTabIndex--;
+                if (!isSwitcherShown()) {
+                    tabs.remove(index);
+                    removeViewAt(childIndex);
+
+                    if (isEmpty()) {
+                        selectedTabIndex = -1;
+                    } else if (selectedTabIndex == index && selectedTabIndex > 0) {
+                        selectedTabIndex--;
+                    }
+                } else {
+                    View view = getChildAt(childIndex);
+                    TabView tabView = new TabView(index + 1, view);
+                    adaptTopMostTabViewWhenClosing(tabView);
+                    tabView.tag.closing = true;
+                    setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+                    animateClose(tabView, true, 0);
+                }
             }
-        } else {
-            View view = getChildAt(childIndex);
-            TabView tabView = new TabView(index + 1, view);
-            adaptTopMostTabViewWhenClosing(tabView);
-            tabView.tag.closing = true;
-            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
-            animateClose(tabView, true, 0);
+
+        });
+    }
+
+    private void enqueuePendingAction(@NonNull final Runnable action) {
+        pendingActions.add(action);
+        executePendingAction();
+    }
+
+    private void executePendingAction() {
+        if (!isAnimationRunning()) {
+            final Runnable action = pendingActions.poll();
+
+            if (action != null) {
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+                        action.run();
+                        executePendingAction();
+                    }
+
+                }.run();
+            }
         }
     }
 
@@ -1009,6 +1045,7 @@ public class TabSwitcher extends FrameLayout {
 
                 if (reset) {
                     showSwitcherAnimation = null;
+                    executePendingAction();
                 }
             }
 
@@ -1033,6 +1070,7 @@ public class TabSwitcher extends FrameLayout {
                 if (reset) {
                     switcherShown = false;
                     hideSwitcherAnimation = null;
+                    executePendingAction();
                 }
             }
 
@@ -1055,6 +1093,7 @@ public class TabSwitcher extends FrameLayout {
             public void onAnimationEnd(final Animation animation) {
                 handleRelease(null);
                 dragAnimation = null;
+                executePendingAction();
             }
 
             @Override
@@ -1093,6 +1132,7 @@ public class TabSwitcher extends FrameLayout {
                 super.onAnimationEnd(animation);
                 handleRelease(null);
                 overshootAnimation = null;
+                executePendingAction();
             }
 
         };
@@ -1110,6 +1150,7 @@ public class TabSwitcher extends FrameLayout {
             public void onAnimationEnd(Animation animation) {
                 handleRelease(null);
                 overshootUpAnimation = null;
+                executePendingAction();
             }
 
             @Override
@@ -1735,6 +1776,7 @@ public class TabSwitcher extends FrameLayout {
                 super.onAnimationEnd(animation);
                 animateOvershootUp(new DecelerateInterpolator());
                 overshootAnimation = null;
+                executePendingAction();
             }
 
         };
