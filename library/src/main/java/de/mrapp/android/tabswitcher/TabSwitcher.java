@@ -880,10 +880,12 @@ public class TabSwitcher extends FrameLayout {
                         getVisibility(tabView));
 
                 if (tabView.index - 1 < selectedTabIndex) {
-                    setPosition(Axis.DRAGGING_AXIS, view, getHeight());
+                    setPosition(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, this));
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-                    setPosition(Axis.DRAGGING_AXIS, view, layoutParams.topMargin);
+                    setPosition(Axis.DRAGGING_AXIS, view,
+                            isDraggingHorizontally() ? layoutParams.leftMargin :
+                                    layoutParams.topMargin);
                 }
 
                 showSwitcherAnimation = view.animate();
