@@ -180,7 +180,7 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
-    private static class Tag {
+    private static class Tag implements Cloneable {
 
         private float projectedPosition;
 
@@ -189,6 +189,26 @@ public class TabSwitcher extends FrameLayout {
         private float distance;
 
         private State state;
+
+        private boolean closing;
+
+        @Override
+        public Tag clone() {
+            Tag clone;
+
+            try {
+                clone = (Tag) super.clone();
+            } catch (ClassCastException | CloneNotSupportedException e) {
+                clone = new Tag();
+            }
+
+            clone.projectedPosition = projectedPosition;
+            clone.actualPosition = actualPosition;
+            clone.distance = distance;
+            clone.state = state;
+            clone.closing = closing;
+            return clone;
+        }
 
     }
 
@@ -460,6 +480,9 @@ public class TabSwitcher extends FrameLayout {
                         int childIndex = getCount() - (index + 1);
                         View view = getChildAt(childIndex);
                         TabView tabView = new TabView(index + 1, view);
+                        adaptTopMostTabViewWhenClosing(tabView);
+                        tabView.tag.closing = true;
+                        setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
                         animateClose(tabView, true, 0);
                     }
                 }
@@ -570,6 +593,8 @@ public class TabSwitcher extends FrameLayout {
                         selectedTabIndex--;
                     }
                 } else {
+                    adaptTopMostTabViewWhenClosingAborted(tabView);
+                    tabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view,
                             isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
                     handleRelease(null);
@@ -875,7 +900,7 @@ public class TabSwitcher extends FrameLayout {
                 setPivot(Axis.ORTHOGONAL_AXIS, view,
                         isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                 float scale = getScale(view);
-                calculateTopThresholdPosition(tabView, iterator.previous());
+                calculateAndClipTopThresholdPosition(tabView, iterator.previous());
                 view.setVisibility(tabView.index - 1 == selectedTabIndex ? View.VISIBLE :
                         getVisibility(tabView));
 
@@ -1080,26 +1105,28 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            calculateTopThresholdPosition(tabView, iterator.previous());
+            calculateAndClipTopThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
         }
     }
 
-    private void calculateTopThresholdPosition(@NonNull final TabView tabView,
-                                               @Nullable final TabView previous) {
-        float position;
+    private void calculateAndClipTopThresholdPosition(@NonNull final TabView tabView,
+                                                      @Nullable final TabView previous) {
+        float position = calculateTopThresholdPosition(tabView, previous);
+        clipDraggedTabPosition(position, tabView, previous);
+    }
 
+    private float calculateTopThresholdPosition(@NonNull final TabView tabView,
+                                                @Nullable final TabView previous) {
         if (previous == null) {
-            position = calculateFirstTabTopThresholdPosition();
+            return calculateFirstTabTopThresholdPosition();
         } else {
             if (tabView.index == 2) {
-                position = previous.tag.actualPosition - minTabSpacing;
+                return previous.tag.actualPosition - minTabSpacing;
             } else {
-                position = previous.tag.actualPosition - maxTabSpacing;
+                return previous.tag.actualPosition - maxTabSpacing;
             }
         }
-
-        clipDraggedTabPosition(position, tabView, previous);
     }
 
     private float calculateFirstTabTopThresholdPosition() {
@@ -1112,15 +1139,19 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            calculateBottomThresholdPosition(tabView, iterator.previous());
+            calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
             applyTag(tabView);
         }
     }
 
-    private void calculateBottomThresholdPosition(@NonNull final TabView tabView,
-                                                  @Nullable final TabView previous) {
-        float position = (getCount() - tabView.index) * maxTabSpacing;
+    private void calculateAndClipBottomThresholdPosition(@NonNull final TabView tabView,
+                                                         @Nullable final TabView previous) {
+        float position = calculateBottomThresholdPosition(tabView);
         clipDraggedTabPosition(position, tabView, previous);
+    }
+
+    private float calculateBottomThresholdPosition(@NonNull final TabView tabView) {
+        return (getCount() - tabView.index) * maxTabSpacing;
     }
 
     private void updateTags() {
@@ -1135,7 +1166,6 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    @SuppressWarnings("WrongConstant")
     private void applyTag(@NonNull final TabView tabView) {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
@@ -1144,6 +1174,12 @@ public class TabSwitcher extends FrameLayout {
                 isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
+        adaptVisibility(tabView);
+    }
+
+    @SuppressWarnings("WrongConstant")
+    private void adaptVisibility(@NonNull final TabView tabView) {
+        View view = tabView.view;
         view.setVisibility(getVisibility(tabView));
     }
 
@@ -1520,8 +1556,14 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void handleDragToClose() {
-        float dragDistance = closeDragHelper.getDragDistance();
         View view = draggedTabView.view;
+
+        if (!draggedTabView.tag.closing) {
+            adaptTopMostTabViewWhenClosing(draggedTabView);
+        }
+
+        draggedTabView.tag.closing = true;
+        float dragDistance = closeDragHelper.getDragDistance();
         setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
         float scale = getScale(view);
         setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
@@ -1531,6 +1573,46 @@ public class TabSwitcher extends FrameLayout {
         setScale(Axis.DRAGGING_AXIS, view, targetScale);
         setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
+    }
+
+    private void adaptTopMostTabViewWhenClosing(@NonNull final TabView closedTabView) {
+        if (closedTabView.tag.state == State.TOP_MOST) {
+            Iterator iterator = new Iterator(false, closedTabView.index);
+            TabView tabView;
+            Tag previousTag = null;
+
+            while ((tabView = iterator.next()) != null) {
+                Tag tag = tabView.tag.clone();
+
+                if (previousTag != null) {
+                    if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                        tabView.tag.state = previousTag.state;
+                    }
+
+                    tabView.tag.actualPosition = previousTag.actualPosition;
+                    adaptVisibility(tabView);
+                }
+
+                previousTag = tag;
+            }
+        }
+    }
+
+    private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView) {
+        if (closedTabView.tag.state == State.TOP_MOST) {
+            Iterator iterator = new Iterator(false, closedTabView.index + 1);
+            TabView tabView;
+
+            while ((tabView = iterator.next()) != null) {
+                if (tabView.tag.state == State.TOP_MOST) {
+                    tabView.tag.state = State.TOP_MOST_HIDDEN;
+                }
+
+                TabView previous = iterator.previous();
+                tabView.tag.actualPosition = calculateTopThresholdPosition(tabView, previous);
+                adaptVisibility(tabView);
+            }
+        }
     }
 
     private float calculateClosedTabPosition() {
