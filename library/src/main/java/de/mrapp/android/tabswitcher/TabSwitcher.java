@@ -474,17 +474,7 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onClick(final View v) {
                 if (!isAnimationRunning()) {
-                    int index = tabs.indexOf(tab);
-
-                    if (index != -1) {
-                        int childIndex = getCount() - (index + 1);
-                        View view = getChildAt(childIndex);
-                        TabView tabView = new TabView(index + 1, view);
-                        adaptTopMostTabViewWhenClosing(tabView);
-                        tabView.tag.closing = true;
-                        setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
-                        animateClose(tabView, true, 0);
-                    }
+                    removeTag(tabs.indexOf(tab));
                 }
             }
 
@@ -587,7 +577,7 @@ public class TabSwitcher extends FrameLayout {
                     removeView(view);
                     tabs.remove(tabView.index - 1);
 
-                    if (tabs.isEmpty()) {
+                    if (isEmpty()) {
                         selectedTabIndex = -1;
                     } else if (selectedTabIndex == tabView.index - 1 && selectedTabIndex > 0) {
                         selectedTabIndex--;
@@ -871,6 +861,28 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
+    public final void removeTag(final int index) {
+        int childIndex = getCount() - (index + 1);
+
+        if (!isSwitcherShown()) {
+            tabs.remove(index);
+            removeViewAt(childIndex);
+
+            if (isEmpty()) {
+                selectedTabIndex = -1;
+            } else if (selectedTabIndex == index && selectedTabIndex > 0) {
+                selectedTabIndex--;
+            }
+        } else {
+            View view = getChildAt(childIndex);
+            TabView tabView = new TabView(index + 1, view);
+            adaptTopMostTabViewWhenClosing(tabView);
+            tabView.tag.closing = true;
+            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+            animateClose(tabView, true, 0);
+        }
+    }
+
     @Nullable
     public final Tab getSelectedTab() {
         return selectedTabIndex != -1 ? tabs.get(selectedTabIndex) : null;
@@ -878,6 +890,10 @@ public class TabSwitcher extends FrameLayout {
 
     public final int getSelectedTabIndex() {
         return selectedTabIndex;
+    }
+
+    public final boolean isEmpty() {
+        return getCount() == 0;
     }
 
     public final int getCount() {
