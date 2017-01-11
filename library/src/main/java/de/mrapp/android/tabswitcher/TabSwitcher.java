@@ -558,9 +558,10 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+                View view = tabView.view;
 
                 if (close) {
-                    removeView(tabView.view);
+                    removeView(view);
                     tabs.remove(tabView.index - 1);
 
                     if (tabs.isEmpty()) {
@@ -569,7 +570,8 @@ public class TabSwitcher extends FrameLayout {
                         selectedTabIndex--;
                     }
                 } else {
-                    setPivot(Axis.DRAGGING_AXIS, tabView.view, 0);
+                    setPivot(Axis.DRAGGING_AXIS, view,
+                            isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
                     handleRelease(null);
                 }
 
@@ -750,9 +752,18 @@ public class TabSwitcher extends FrameLayout {
     private void setRotation(@NonNull final Axis axis, @NonNull final View view,
                              final float angle) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setRotationY(angle);
+            view.setRotationY(isDraggingHorizontally() ? -1 * angle : angle);
         } else {
-            view.setRotationX(angle);
+            view.setRotationX(isDraggingHorizontally() ? -1 * angle : angle);
+        }
+    }
+
+    private void animateRotation(@NonNull final Axis axis,
+                                 @NonNull final ViewPropertyAnimator animator, final float angle) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            animator.rotationY(isDraggingHorizontally() ? -1 * angle : angle);
+        } else {
+            animator.rotationX(isDraggingHorizontally() ? -1 * angle : angle);
         }
     }
 
@@ -1006,14 +1017,17 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
-    private Animator.AnimatorListener createOvershotAnimationListenerWrapper(
+    private Animator.AnimatorListener createOvershootAnimationListenerWrapper(
             @NonNull final View view, @Nullable final Animator.AnimatorListener listener) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                setPivot(Axis.DRAGGING_AXIS, view, 0);
+                setPivot(Axis.DRAGGING_AXIS, view,
+                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
 
                 if (listener != null) {
                     listener.onAnimationEnd(animation);
@@ -1362,6 +1376,7 @@ public class TabSwitcher extends FrameLayout {
             }
 
             setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
             setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
         }
     }
@@ -1378,6 +1393,7 @@ public class TabSwitcher extends FrameLayout {
                 view.setVisibility(View.VISIBLE);
                 view.setCameraDistance(cameraDistance);
                 setPivot(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, view) / 2f);
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                 setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else {
                 view.setVisibility(View.INVISIBLE);
@@ -1412,7 +1428,11 @@ public class TabSwitcher extends FrameLayout {
 
                     if (tabView.index == 1) {
                         float currentPosition = tabView.tag.projectedPosition;
-                        setPivot(Axis.DRAGGING_AXIS, view, 0);
+                        setPivot(Axis.DRAGGING_AXIS, view,
+                                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f :
+                                        0);
+                        setPivot(Axis.ORTHOGONAL_AXIS, view, isDraggingHorizontally() ? 0 :
+                                getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                         setPosition(Axis.DRAGGING_AXIS, view,
                                 currentPosition - (currentPosition * ratio));
                     } else {
@@ -1618,14 +1638,17 @@ public class TabSwitcher extends FrameLayout {
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
         TabView tabView = new Iterator().next();
         View view = tabView.view;
-        setPivot(Axis.DRAGGING_AXIS, view, 0);
+        setPivot(Axis.DRAGGING_AXIS, view,
+                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+        setPivot(Axis.ORTHOGONAL_AXIS, view,
+                isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
         float position = getPosition(Axis.DRAGGING_AXIS, view);
         float targetPosition = tabView.tag.projectedPosition;
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         overshootUpAnimation = new OvershootUpAnimation();
         overshootUpAnimation.setFillAfter(true);
-        overshootUpAnimation.setDuration(Math.round(animationDuration *
-                ((targetPosition - position) / (float) (STACKED_TAB_COUNT * stackedTabSpacing))));
+        overshootUpAnimation.setDuration(Math.round(animationDuration * Math.abs(
+                (targetPosition - position) / (float) (STACKED_TAB_COUNT * stackedTabSpacing))));
         overshootUpAnimation.setInterpolator(interpolator);
         overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
         startAnimation(overshootUpAnimation);
@@ -1645,12 +1668,12 @@ public class TabSwitcher extends FrameLayout {
             if (getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
                 result = true;
                 overshootAnimation = view.animate();
-                overshootAnimation.setListener(createOvershotAnimationListenerWrapper(view,
+                overshootAnimation.setListener(createOvershootAnimationListenerWrapper(view,
                         iterator.hasNext() ? null : listener));
                 overshootAnimation.setDuration(Math.round(animationDuration *
                         (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
                 overshootAnimation.setInterpolator(interpolator);
-                overshootAnimation.rotationX(0);
+                animateRotation(Axis.ORTHOGONAL_AXIS, overshootAnimation, 0);
                 overshootAnimation.setStartDelay(0);
                 overshootAnimation.start();
             }
