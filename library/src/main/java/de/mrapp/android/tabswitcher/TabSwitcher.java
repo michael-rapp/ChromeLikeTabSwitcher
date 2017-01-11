@@ -884,8 +884,7 @@ public class TabSwitcher extends FrameLayout {
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     setPosition(Axis.DRAGGING_AXIS, view,
-                            isDraggingHorizontally() ? layoutParams.leftMargin :
-                                    layoutParams.topMargin);
+                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 }
 
                 showSwitcherAnimation = view.animate();
@@ -924,17 +923,19 @@ public class TabSwitcher extends FrameLayout {
                         createHideSwitcherAnimationListener(tabView, !iterator.hasNext()));
                 animateScale(Axis.DRAGGING_AXIS, hideSwitcherAnimation, 1);
                 animateScale(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, 1);
+                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                animatePosition(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, view,
+                        isDraggingHorizontally() ? layoutParams.topMargin : 0);
 
                 if (tabView.index - 1 < selectedTabIndex) {
-                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view, getHeight());
+                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
+                            getSize(Axis.DRAGGING_AXIS, this));
                 } else if (tabView.index - 1 > selectedTabIndex) {
-                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            layoutParams.topMargin);
+                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 } else {
-                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            layoutParams.topMargin);
+                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 }
 
                 hideSwitcherAnimation.setStartDelay(0);
