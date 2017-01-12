@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.example;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,13 +57,23 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
      */
     private TabSwitcher tabSwitcher;
 
+    private View.OnClickListener createRemovedTabSnackbarListener() {
+        return new View.OnClickListener() {
+
+            @Override
+            public void onClick(final View view) {
+
+            }
+
+        };
+    }
+
     @Override
     public final void onSelectionChanged(final int selectedTabIndex,
                                          @Nullable final Tab selectedTab) {
         if (selectedTab != null) {
-            CharSequence toast =
-                    getString(R.string.selection_changed_toast, selectedTab.getTitle());
-            Toast.makeText(this, toast, Toast.LENGTH_SHORT).show();
+            CharSequence text = getString(R.string.selection_changed_toast, selectedTab.getTitle());
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -74,7 +85,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    @NonNull final RemoveAction action) {
-
+        CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
+        Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
+                .setAction(R.string.undo, createRemovedTabSnackbarListener()).show();
     }
 
     @Override
