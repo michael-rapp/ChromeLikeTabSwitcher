@@ -1018,6 +1018,7 @@ public class TabSwitcher extends FrameLayout {
                     View selectedView = getChildAt(selectedChildIndex);
                     selectedView.setVisibility(View.VISIBLE);
                     selectedTabIndex = index;
+                    notifyOnSelectionChanged(selectedChildIndex, tab);
                 } else {
                     selectedTabIndex = index;
                     hideSwitcher();
@@ -1203,7 +1204,6 @@ public class TabSwitcher extends FrameLayout {
 
                 if (tabView.index - 1 != selectedTabIndex) {
                     view.setVisibility(View.INVISIBLE);
-
                 }
 
                 if (reset) {
