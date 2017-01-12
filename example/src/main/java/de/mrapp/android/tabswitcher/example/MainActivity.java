@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     /**
+     * The number of tabs, which are contained by the example app's tab switcher.
+     */
+    private static final int TAB_COUNT = 12;
+
+    /**
      * The activity's tab switcher.
      */
     private TabSwitcher tabSwitcher;
@@ -115,54 +120,13 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
-        String tabTitle1 = "Tab 1";
-        Tab tab1 = new Tab(tabTitle1);
-        tab1.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab1);
-        String tabTitle2 = "Tab 2";
-        Tab tab2 = new Tab(tabTitle2);
-        tab2.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab2);
-        String tabTitle3 = "Tab 3";
-        Tab tab3 = new Tab(tabTitle3);
-        tab3.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab3);
-        String tabTitle4 = "Tab 4";
-        Tab tab4 = new Tab(tabTitle4);
-        tab4.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab4);
-        String tabTitle5 = "Tab 5";
-        Tab tab5 = new Tab(tabTitle5);
-        tab5.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab5);
-        String tabTitle6 = "Tab 6";
-        Tab tab6 = new Tab(tabTitle6);
-        tab6.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab6);
-        String tabTitle7 = "Tab 7";
-        Tab tab7 = new Tab(tabTitle7);
-        tab7.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab7);
-        String tabTitle8 = "Tab 8";
-        Tab tab8 = new Tab(tabTitle8);
-        tab8.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab8);
-        String tabTitle9 = "Tab 9";
-        Tab tab9 = new Tab(tabTitle9);
-        tab9.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab9);
-        String tabTitle10 = "Tab 10";
-        Tab tab10 = new Tab(tabTitle10);
-        tab10.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab10);
-        String tabTitle11 = "Tab 11";
-        Tab tab11 = new Tab(tabTitle11);
-        tab11.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab11);
-        String tabTitle12 = "Tab 12";
-        Tab tab12 = new Tab(tabTitle12);
-        tab12.setIcon(R.drawable.ic_file_outline_18dp);
-        tabSwitcher.addTab(tab12);
+
+        for (int i = 1; i <= TAB_COUNT; i++) {
+            CharSequence title = getString(R.string.tab_title, i);
+            Tab tab = new Tab(title);
+            tab.setIcon(R.drawable.ic_file_outline_18dp);
+            tabSwitcher.addTab(tab);
+        }
     }
 
 }
