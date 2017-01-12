@@ -107,20 +107,13 @@ public class TabSwitcher extends FrameLayout {
          * @param tab
          *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
          *         may not be null
-         * @param animation
-         *         The animation, which has been used to remove the tab, as a value of the enum
-         *         {@link AnimationType} or null, if no animation has been used. The animation may
-         *         be <code>SWIPE_LEFT</code> or <code>SWIPE_RIGHT</code>
          */
-        void onTabRemoved(int index, @NonNull Tab tab, @Nullable AnimationType animation);
+        void onTabRemoved(int index, @NonNull Tab tab);
 
-    }
-
-    public enum AnimationType {
-
-        SWIPE_LEFT,
-
-        SWIPE_RIGHT,
+        /**
+         * The method, which is invoked, when all tabs have been removed from the tab switcher.
+         */
+        void onAllTabsRemoved();
 
     }
 
@@ -545,10 +538,15 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
-                                    @Nullable final AnimationType animation) {
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
         for (Listener listener : listeners) {
-            listener.onTabRemoved(index, tab, animation);
+            listener.onTabRemoved(index, tab);
+        }
+    }
+
+    private void notifyOnAllTabsRemoved() {
+        for (Listener listener : listeners) {
+            listener.onAllTabsRemoved();
         }
     }
 
@@ -564,14 +562,14 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void animateClose(@NonNull final TabView tabView, final boolean close,
-                              final float flingVelocity) {
+                              final float flingVelocity, final long startDelay,
+                              @Nullable final Animator.AnimatorListener listener) {
         View view = tabView.view;
         float scale = getScale(view);
         float closedTabPosition = calculateClosedTabPosition();
         float position = getPosition(Axis.ORTHOGONAL_AXIS, view);
         float targetPosition =
                 close ? (position < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
-        AnimationType action = position < 0 ? AnimationType.SWIPE_LEFT : AnimationType.SWIPE_RIGHT;
         float distance = Math.abs(targetPosition - position);
         long animationDuration;
 
@@ -585,20 +583,49 @@ public class TabSwitcher extends FrameLayout {
 
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        closeAnimation.setListener(createCloseAnimationListener(tabView, close, action));
+        closeAnimation.setListener(createCloseAnimationListenerWrapper(tabView, close, listener));
         closeAnimation.setDuration(animationDuration);
         animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition);
         animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
         animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
         closeAnimation.alpha(close ? closedTabAlpha : 1);
-        closeAnimation.setStartDelay(0);
+        closeAnimation.setStartDelay(startDelay);
         closeAnimation.start();
 
     }
 
+    private Animator.AnimatorListener createCloseAnimationListenerWrapper(
+            @NonNull final TabView tabView, final boolean close,
+            @Nullable final Animator.AnimatorListener listener) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (listener != null) {
+                    listener.onAnimationStart(animation);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+
+                if (close) {
+                    removeView(tabView.view);
+                }
+
+                if (listener != null) {
+                    listener.onAnimationEnd(animation);
+                }
+            }
+
+        };
+    }
+
     private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
-                                                                   final boolean close,
-                                                                   @NonNull final AnimationType action) {
+                                                                   final boolean close) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -655,13 +682,11 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                View view = tabView.view;
 
                 if (close) {
-                    removeView(view);
                     int index = tabView.index - 1;
                     Tab tab = tabs.remove(index);
-                    notifyOnTabRemoved(index, tab, action);
+                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
@@ -674,6 +699,7 @@ public class TabSwitcher extends FrameLayout {
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
+                    View view = tabView.view;
                     adaptTopMostTabViewWhenClosingAborted(tabView);
                     tabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view,
@@ -967,9 +993,9 @@ public class TabSwitcher extends FrameLayout {
                 int childIndex = getChildIndex(index);
 
                 if (!isSwitcherShown()) {
-                    tabs.remove(index);
                     removeViewAt(childIndex);
-                    notifyOnTabRemoved(index, tab, null);
+                    tabs.remove(index);
+                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
@@ -990,11 +1016,62 @@ public class TabSwitcher extends FrameLayout {
                     adaptTopMostTabViewWhenClosing(tabView);
                     tabView.tag.closing = true;
                     setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
-                    animateClose(tabView, true, 0);
+                    animateClose(tabView, true, 0, 0, createCloseAnimationListener(tabView, true));
                 }
             }
 
         });
+    }
+
+    public final void clear() {
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                if (!isSwitcherShown()) {
+                    tabs.clear();
+                    selectedTabIndex = -1;
+                    removeAllViews();
+                    notifyOnSelectionChanged(-1, null);
+                    notifyOnAllTabsRemoved();
+                } else {
+                    Iterator iterator = new Iterator(true);
+                    TabView tabView;
+                    int startDelay = 0;
+
+                    while ((tabView = iterator.next()) != null) {
+                        TabView previous = iterator.previous();
+
+                        if (tabView.tag.state == State.VISIBLE ||
+                                previous != null && previous.tag.state == State.VISIBLE) {
+                            startDelay += getResources()
+                                    .getInteger(android.R.integer.config_shortAnimTime);
+                        }
+
+                        animateClose(tabView, true, 0, startDelay,
+                                !iterator.hasNext() ? createClearAnimationListener() : null);
+                    }
+                }
+            }
+
+        });
+    }
+
+    private Animator.AnimatorListener createClearAnimationListener() {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                tabs.clear();
+                selectedTabIndex = -1;
+                notifyOnAllTabsRemoved();
+                notifyOnSelectionChanged(-1, null);
+                closeAnimation = null;
+                executePendingAction();
+            }
+
+        };
     }
 
     public final void selectTab(@NonNull final Tab tab) {
@@ -1853,7 +1930,8 @@ public class TabSwitcher extends FrameLayout {
             boolean close = flingVelocity >= minCloseFlingVelocity ||
                     Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) >
                             getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
-            animateClose(draggedTabView, close, flingVelocity);
+            animateClose(draggedTabView, close, flingVelocity, 0,
+                    createCloseAnimationListener(draggedTabView, close));
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
             updateTags();

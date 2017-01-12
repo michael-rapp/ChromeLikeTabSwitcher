@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.TabSwitcher.AnimationType;
 
 /**
  * The example app's main activity.
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
      */
     private TabSwitcher tabSwitcher;
 
-    private View.OnClickListener createRemovedTabSnackbarListener() {
+    private View.OnClickListener createUndoSnackbarListener() {
         return new View.OnClickListener() {
 
             @Override
@@ -88,11 +87,17 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
-    public final void onTabRemoved(final int index, @NonNull final Tab tab,
-                                   @Nullable final AnimationType animation) {
+    public final void onTabRemoved(final int index, @NonNull final Tab tab) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo, createRemovedTabSnackbarListener()).show();
+                .setAction(R.string.undo, createUndoSnackbarListener()).show();
+    }
+
+    @Override
+    public final void onAllTabsRemoved() {
+        CharSequence text = getString(R.string.cleared_tabs_snackbar);
+        Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
+                .setAction(R.string.undo, createUndoSnackbarListener()).show();
     }
 
     @Override
@@ -107,6 +112,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         switch (item.getItemId()) {
             case R.id.switch_tab_menu_item:
                 tabSwitcher.showSwitcher();
+                return true;
+            case R.id.clear_tabs_menu_item:
+                tabSwitcher.clear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
