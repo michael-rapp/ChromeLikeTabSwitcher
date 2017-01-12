@@ -581,9 +581,10 @@ public class TabSwitcher extends FrameLayout {
                             (distance / closedTabPosition));
         }
 
+        view.setVisibility(View.VISIBLE);
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        closeAnimation.setListener(createCloseAnimationListenerWrapper(tabView, close, listener));
+        closeAnimation.setListener(listener);
         closeAnimation.setDuration(animationDuration);
         animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition);
         animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
@@ -591,37 +592,6 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.alpha(close ? closedTabAlpha : 1);
         closeAnimation.setStartDelay(startDelay);
         closeAnimation.start();
-
-    }
-
-    private Animator.AnimatorListener createCloseAnimationListenerWrapper(
-            @NonNull final TabView tabView, final boolean close,
-            @Nullable final Animator.AnimatorListener listener) {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(final Animator animation) {
-                super.onAnimationStart(animation);
-
-                if (listener != null) {
-                    listener.onAnimationStart(animation);
-                }
-            }
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-
-                if (close) {
-                    removeView(tabView.view);
-                }
-
-                if (listener != null) {
-                    listener.onAnimationEnd(animation);
-                }
-            }
-
-        };
     }
 
     private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
@@ -632,7 +602,7 @@ public class TabSwitcher extends FrameLayout {
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
 
-                if (close && tabView.index > 1) {
+                if (close) {
                     long animationDuration =
                             getResources().getInteger(android.R.integer.config_mediumAnimTime);
                     long startDelay =
@@ -685,6 +655,7 @@ public class TabSwitcher extends FrameLayout {
 
                 if (close) {
                     int index = tabView.index - 1;
+                    removeViewAt(getChildIndex(index));
                     Tab tab = tabs.remove(index);
                     notifyOnTabRemoved(index, tab);
 
