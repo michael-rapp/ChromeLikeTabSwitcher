@@ -666,8 +666,8 @@ public class TabSwitcher extends FrameLayout {
                     if (isEmpty()) {
                         selectedTabIndex = -1;
                         notifyOnSelectionChanged(-1, null);
-                    } else {
-                        if (selectedTabIndex == tabView.index - 1 && selectedTabIndex > 0) {
+                    } else if (selectedTabIndex == tabView.index - 1) {
+                        if (selectedTabIndex > 0) {
                             selectedTabIndex--;
                         }
 
@@ -974,8 +974,8 @@ public class TabSwitcher extends FrameLayout {
                     if (isEmpty()) {
                         selectedTabIndex = -1;
                         notifyOnSelectionChanged(-1, null);
-                    } else {
-                        if (selectedTabIndex == index && selectedTabIndex > 0) {
+                    } else if (selectedTabIndex == index) {
+                        if (selectedTabIndex > 0) {
                             selectedTabIndex--;
                         }
 
