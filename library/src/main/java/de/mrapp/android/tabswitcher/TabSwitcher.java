@@ -979,6 +979,9 @@ public class TabSwitcher extends FrameLayout {
                             selectedTabIndex--;
                         }
 
+                        int selectedChildIndex = getChildIndex(selectedTabIndex);
+                        View selectedView = getChildAt(selectedChildIndex);
+                        selectedView.setVisibility(View.VISIBLE);
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
