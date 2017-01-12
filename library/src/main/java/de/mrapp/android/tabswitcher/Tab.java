@@ -27,8 +27,6 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
-import java.io.Serializable;
-
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -40,7 +38,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class Tab implements Serializable, Parcelable {
+public class Tab implements Parcelable {
 
     /**
      * A creator, which allows to create instances of the class {@link Tab} from parcels.
@@ -240,45 +238,6 @@ public class Tab implements Serializable, Parcelable {
         parcel.writeParcelable(iconBitmap, flags);
         parcel.writeInt(closeable ? 1 : 0);
         parcel.writeInt(color);
-    }
-
-    @Override
-    public final String toString() {
-        return "Tab [title=" + title + "iconId=" + iconId + ", iconBitmap=" + iconBitmap +
-                ", closeable=" + closeable + ", color=" + color + "]";
-    }
-
-    @Override
-    public final int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + title.hashCode();
-        result = prime * result + iconId;
-        result = prime * result + (iconBitmap == null ? 0 : iconBitmap.hashCode());
-        result = prime * result + (closeable ? 1231 : 1237);
-        result = prime * result + color;
-        return result;
-    }
-
-    @Override
-    public final boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Tab other = (Tab) obj;
-        if (!title.equals(other.title))
-            return false;
-        if (iconId != other.iconId)
-            return false;
-        if (iconBitmap == null) {
-            if (other.iconBitmap != null)
-                return false;
-        } else if (!iconBitmap.equals(other.iconBitmap))
-            return false;
-        return closeable == other.closeable && color == other.color;
     }
 
 }
