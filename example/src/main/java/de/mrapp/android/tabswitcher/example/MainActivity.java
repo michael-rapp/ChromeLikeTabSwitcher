@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcher.RemoveAction;
 
 /**
  * The example app's main activity.
@@ -71,7 +72,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
-    public final void onTabRemoved(final int index, @NonNull final Tab tab) {
+    public final void onTabRemoved(final int index, @NonNull final Tab tab,
+                                   @NonNull final RemoveAction action) {
 
     }
 
