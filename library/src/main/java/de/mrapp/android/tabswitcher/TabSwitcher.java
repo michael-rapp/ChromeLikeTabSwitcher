@@ -940,6 +940,7 @@ public class TabSwitcher extends FrameLayout {
         addTab(tab, getCount());
     }
 
+    // TODO: Add support for adding tab, while switcher is shown
     public final void addTab(@NonNull final Tab tab, final int index) {
         ensureNotNull(tab, "The tab may not be null");
         tabs.add(index, tab);
