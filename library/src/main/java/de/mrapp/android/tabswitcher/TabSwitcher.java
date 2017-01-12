@@ -973,7 +973,7 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void run() {
                 int index = tabs.indexOf(tab);
-                int childIndex = getCount() - (index + 1);
+                int childIndex = getChildIndex(index);
 
                 if (!isSwitcherShown()) {
                     tabs.remove(index);
@@ -1009,16 +1009,26 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void run() {
                 int index = tabs.indexOf(tab);
-                selectedTabIndex = index;
 
                 if (!isSwitcherShown()) {
-                    notifyOnSelectionChanged(index, tab);
+                    int previouslySelectedChildIndex = getChildIndex(selectedTabIndex);
+                    View previouslySelectedView = getChildAt(previouslySelectedChildIndex);
+                    previouslySelectedView.setVisibility(View.INVISIBLE);
+                    int selectedChildIndex = getChildIndex(index);
+                    View selectedView = getChildAt(selectedChildIndex);
+                    selectedView.setVisibility(View.VISIBLE);
+                    selectedTabIndex = index;
                 } else {
+                    selectedTabIndex = index;
                     hideSwitcher();
                 }
             }
 
         });
+    }
+
+    private int getChildIndex(final int index) {
+        return getCount() - (index + 1);
     }
 
     private void enqueuePendingAction(@NonNull final Runnable action) {
