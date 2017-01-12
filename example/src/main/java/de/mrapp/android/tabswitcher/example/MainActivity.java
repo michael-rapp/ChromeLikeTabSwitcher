@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.TabSwitcher.RemoveAction;
+import de.mrapp.android.tabswitcher.TabSwitcher.AnimationType;
 
 /**
  * The example app's main activity.
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
 
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
-                                   @NonNull final RemoveAction action) {
+                                   @Nullable final AnimationType animation) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, createRemovedTabSnackbarListener()).show();

@@ -107,25 +107,20 @@ public class TabSwitcher extends FrameLayout {
          * @param tab
          *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
          *         may not be null
-         * @param action
-         *         The action, which has been used to remove the tab, as a value of the enum {@link
-         *         RemoveAction}. The action may be <code>SWIPE_TO_LEFT</code>,
-         *         <code>SWIPE_TO_RIGHT</code>, <code>BUTTON_CLICK</code> or
-         *         <code>PROGRAMMATICALLY</code>
+         * @param animation
+         *         The animation, which has been used to remove the tab, as a value of the enum
+         *         {@link AnimationType} or null, if no animation has been used. The animation may
+         *         be <code>SWIPE_LEFT</code> or <code>SWIPE_RIGHT</code>
          */
-        void onTabRemoved(int index, @NonNull Tab tab, @NonNull RemoveAction action);
+        void onTabRemoved(int index, @NonNull Tab tab, @Nullable AnimationType animation);
 
     }
 
-    public enum RemoveAction {
+    public enum AnimationType {
 
-        SWIPE_TO_LEFT,
+        SWIPE_LEFT,
 
-        SWIPE_TO_RIGHT,
-
-        BUTTON_CLICK,
-
-        PROGRAMMATICALLY
+        SWIPE_RIGHT,
 
     }
 
@@ -551,9 +546,9 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
-                                    @NonNull final RemoveAction action) {
+                                    @Nullable final AnimationType animation) {
         for (Listener listener : listeners) {
-            listener.onTabRemoved(index, tab, action);
+            listener.onTabRemoved(index, tab, animation);
         }
     }
 
@@ -562,7 +557,7 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void onClick(final View v) {
-                removeTab(tab, RemoveAction.BUTTON_CLICK);
+                removeTab(tab);
             }
 
         };
@@ -576,8 +571,7 @@ public class TabSwitcher extends FrameLayout {
         float position = getPosition(Axis.ORTHOGONAL_AXIS, view);
         float targetPosition =
                 close ? (position < 0 ? -1 * closedTabPosition : closedTabPosition) : 0;
-        RemoveAction action =
-                position < 0 ? RemoveAction.SWIPE_TO_LEFT : RemoveAction.SWIPE_TO_RIGHT;
+        AnimationType action = position < 0 ? AnimationType.SWIPE_LEFT : AnimationType.SWIPE_RIGHT;
         float distance = Math.abs(targetPosition - position);
         long animationDuration;
 
@@ -604,7 +598,7 @@ public class TabSwitcher extends FrameLayout {
 
     private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
                                                                    final boolean close,
-                                                                   @NonNull final RemoveAction action) {
+                                                                   @NonNull final AnimationType action) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -965,10 +959,6 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void removeTab(@NonNull final Tab tab) {
-        removeTab(tab, RemoveAction.PROGRAMMATICALLY);
-    }
-
-    private void removeTab(@NonNull final Tab tab, @NonNull final RemoveAction action) {
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -979,7 +969,7 @@ public class TabSwitcher extends FrameLayout {
                 if (!isSwitcherShown()) {
                     tabs.remove(index);
                     removeViewAt(childIndex);
-                    notifyOnTabRemoved(index, tab, action);
+                    notifyOnTabRemoved(index, tab, null);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
