@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -114,6 +115,14 @@ public class TabSwitcher extends FrameLayout {
          * The method, which is invoked, when all tabs have been removed from the tab switcher.
          */
         void onAllTabsRemoved();
+
+    }
+
+    public enum AnimationType {
+
+        SWIPE_LEFT,
+
+        SWIPE_RIGHT
 
     }
 
@@ -593,7 +602,7 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(listener);
-        closeAnimation.setDuration(animationDuration);
+        closeAnimation.setDuration(3000);
         animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition);
         animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
         animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
@@ -1027,11 +1036,102 @@ public class TabSwitcher extends FrameLayout {
         addTab(tab, getCount());
     }
 
-    // TODO: Add support for adding tab, while switcher is shown
     public final void addTab(@NonNull final Tab tab, final int index) {
+        addTab(tab, index, AnimationType.SWIPE_RIGHT);
+    }
+
+    // TODO: Add support for adding tab, while switcher is shown
+    public final void addTab(@NonNull final Tab tab, final int index,
+                             @NonNull final AnimationType animationType) {
         ensureNotNull(tab, "The tab may not be null");
-        tabs.add(index, tab);
+        ensureNotNull(animationType, "The animation type may not be null");
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                if (!isSwitcherShown()) {
+                    tabs.add(index, tab);
+                    TabView tabView = addTabView(tab, index);
+
+                    if (tabs.size() == 1) {
+                        selectedTabIndex = 0;
+                        tabView.view.setVisibility(View.VISIBLE);
+                        notifyOnSelectionChanged(0, tab);
+                    }
+
+                    notifyOnTabAdded(index, tab);
+                } else {
+                    TabView tabView = addTabView(tab, index);
+                    View view = tabView.view;
+                    view.getViewTreeObserver().addOnGlobalLayoutListener(
+                            createAddTabViewLayoutListener(tabView, animationType));
+                }
+            }
+
+        });
+    }
+
+    private ViewTreeObserver.OnGlobalLayoutListener createAddTabViewLayoutListener(
+            @NonNull final TabView tabView, @NonNull final AnimationType animationType) {
+        return new ViewTreeObserver.OnGlobalLayoutListener() {
+
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onGlobalLayout() {
+                View view = tabView.view;
+
+                // TODO: Add method including API check to ViewUtil
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                } else {
+                    view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+
+                view.setVisibility(View.VISIBLE);
+                view.setAlpha(closedTabAlpha);
+                float closedPosition = calculateClosedTabPosition();
+                float dragPosition = getPosition(Axis.DRAGGING_AXIS,
+                        getChildAt(getChildIndex(tabView.index - 1)));
+                float scale = getScale(view);
+                setPivot(Axis.DRAGGING_AXIS, view,
+                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPosition(Axis.ORTHOGONAL_AXIS, view,
+                        animationType == AnimationType.SWIPE_LEFT ? -1 * closedPosition :
+                                closedPosition);
+                setPosition(Axis.DRAGGING_AXIS, view, dragPosition);
+                setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                setScale(Axis.DRAGGING_AXIS, view, scale);
+                setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+                setScale(Axis.ORTHOGONAL_AXIS, view, closedTabScale * scale);
+                setScale(Axis.DRAGGING_AXIS, view, closedTabScale * scale);
+                animateClose(tabView, false, 0, 0, createAddAnimationListener(tabView));
+            }
+
+        };
+    }
+
+    private Animator.AnimatorListener createAddAnimationListener(@NonNull final TabView tabView) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                applyTag(tabView);
+                int index = tabView.index - 1;
+                Tab tab = getTab(index);
+                notifyOnTabAdded(index, tab);
+                closeAnimation = null;
+                executePendingAction();
+            }
+
+        };
+    }
+
+    private TabView addTabView(@NonNull final Tab tab, final int index) {
         ViewGroup view = inflateLayout(tab);
+        view.setVisibility(View.INVISIBLE);
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         int borderMargin = -(tabInset + tabBorderWidth);
@@ -1040,15 +1140,7 @@ public class TabSwitcher extends FrameLayout {
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = borderMargin;
         addView(view, getChildCount() - index, layoutParams);
-
-        if (tabs.size() == 1) {
-            selectedTabIndex = 0;
-            notifyOnSelectionChanged(0, tab);
-        } else {
-            view.setVisibility(View.INVISIBLE);
-        }
-
-        notifyOnTabAdded(index, tab);
+        return new TabView(index + 1, view);
     }
 
     public final void removeTab(@NonNull final Tab tab) {
