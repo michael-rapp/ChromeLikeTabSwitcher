@@ -1049,20 +1049,19 @@ public class TabSwitcher extends FrameLayout {
 
             @Override
             public void run() {
-                if (!isSwitcherShown()) {
-                    tabs.add(index, tab);
-                    TabView tabView = addTabView(tab, index);
+                tabs.add(index, tab);
+                TabView tabView = addTabView(tab, index);
+                View view = tabView.view;
 
-                    if (tabs.size() == 1) {
-                        selectedTabIndex = 0;
-                        tabView.view.setVisibility(View.VISIBLE);
-                        notifyOnSelectionChanged(0, tab);
-                    }
+                if (tabs.size() == 1) {
+                    selectedTabIndex = 0;
+                    view.setVisibility(View.VISIBLE);
+                    notifyOnSelectionChanged(0, tab);
+                }
 
-                    notifyOnTabAdded(index, tab);
-                } else {
-                    TabView tabView = addTabView(tab, index);
-                    View view = tabView.view;
+                notifyOnTabAdded(index, tab);
+
+                if (isSwitcherShown()) {
                     view.getViewTreeObserver().addOnGlobalLayoutListener(
                             createAddTabViewLayoutListener(tabView, animationType));
                 }
@@ -1119,9 +1118,6 @@ public class TabSwitcher extends FrameLayout {
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 applyTag(tabView);
-                int index = tabView.index - 1;
-                Tab tab = getTab(index);
-                notifyOnTabAdded(index, tab);
                 closeAnimation = null;
                 executePendingAction();
             }
