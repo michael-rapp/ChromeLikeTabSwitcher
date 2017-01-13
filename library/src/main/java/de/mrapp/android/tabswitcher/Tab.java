@@ -38,6 +38,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
+// TODO: When changing attributes while the switcher is shown, the corresponding tab view must be adapted
 public class Tab implements Parcelable {
 
     /**
