@@ -1293,6 +1293,7 @@ public class TabSwitcher extends FrameLayout {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
                             isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 } else {
+                    view.setVisibility(View.VISIBLE);
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
                             isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 }
