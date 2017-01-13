@@ -1052,6 +1052,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void removeTab(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -1142,6 +1143,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void selectTab(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
         enqueuePendingAction(new Runnable() {
 
             @Override
