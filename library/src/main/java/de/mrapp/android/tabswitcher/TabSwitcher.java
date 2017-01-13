@@ -192,6 +192,15 @@ public class TabSwitcher extends FrameLayout {
             return previous;
         }
 
+        public TabView peek() {
+            if (hasNext()) {
+                View view = getChildAt(getCount() - index);
+                return new TabView(index, view);
+            }
+
+            return null;
+        }
+
         @Override
         public boolean hasNext() {
             return reverse ? index >= 1 : getCount() - index >= 0;
@@ -581,7 +590,6 @@ public class TabSwitcher extends FrameLayout {
                             (distance / closedTabPosition));
         }
 
-        view.setVisibility(View.VISIBLE);
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(listener);
@@ -598,53 +606,137 @@ public class TabSwitcher extends FrameLayout {
                                                                    final boolean close) {
         return new AnimatorListenerAdapter() {
 
+            private void adjustActualPositionOfStackedTabViews(final boolean reverse) {
+                Iterator iterator = new Iterator(reverse, tabView.index);
+                TabView currentTabView;
+                Float previousActualPosition = null;
+
+                while ((currentTabView = iterator.next()) != null) {
+                    float actualPosition = currentTabView.tag.actualPosition;
+
+                    if (previousActualPosition != null) {
+                        currentTabView.tag.actualPosition = previousActualPosition;
+                        applyTag(tabView);
+                    }
+
+                    previousActualPosition = actualPosition;
+                }
+            }
+
+            private void relocateWhenStackedTabViewWasRemoved(final boolean top) {
+                long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                int start = tabView.index + (top ? -1 : 1);
+                Iterator iterator = new Iterator(top, tabView.index);
+                TabView currentTabView;
+                Float previousProjectedPosition = null;
+
+                while ((currentTabView = iterator.next()) != null &&
+                        (currentTabView.tag.state == State.TOP_MOST_HIDDEN ||
+                                currentTabView.tag.state == State.STACKED_TOP ||
+                                currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                                currentTabView.tag.state == State.STACKED_BOTTOM)) {
+                    float projectedPosition = currentTabView.tag.projectedPosition;
+
+                    if (previousProjectedPosition != null) {
+                        if (currentTabView.tag.state == State.TOP_MOST_HIDDEN ||
+                                currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
+                            TabView previous = iterator.previous();
+                            currentTabView.tag.state = previous.tag.state;
+
+                            if (top) {
+                                currentTabView.tag.projectedPosition = previousProjectedPosition;
+                                long delay = (start + 1 - currentTabView.index) * startDelay;
+                                animateRelocate(currentTabView, null, previousProjectedPosition,
+                                        delay, true);
+                            } else {
+                                adaptVisibility(currentTabView);
+                            }
+
+                            break;
+                        } else {
+                            TabView peek = iterator.peek();
+                            State peekState = peek != null ? peek.tag.state : null;
+                            boolean reset = !iterator.hasNext() ||
+                                    (peekState != State.STACKED_TOP &&
+                                            peekState != State.STACKED_BOTTOM);
+                            currentTabView.tag.projectedPosition = previousProjectedPosition;
+                            long delay = (top ? (start + 1 - currentTabView.index) :
+                                    (currentTabView.index - start)) * startDelay;
+                            animateRelocate(currentTabView, null, previousProjectedPosition, delay,
+                                    reset);
+                        }
+                    }
+
+                    previousProjectedPosition = projectedPosition;
+                }
+
+                adjustActualPositionOfStackedTabViews(!top);
+            }
+
+            private void relocateWhenVisibleTabViewWasRemoved() {
+                long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                int start = tabView.index - 1;
+                Iterator iterator = new Iterator(true, start);
+                TabView currentTabView;
+                int firstStackedTabIndex = -1;
+
+                while ((currentTabView = iterator.next()) != null && firstStackedTabIndex == -1) {
+                    if (currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                            currentTabView.tag.state == State.STACKED_BOTTOM) {
+                        firstStackedTabIndex = currentTabView.index;
+                    }
+
+                    TabView previous = iterator.previous();
+                    boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
+                    animateRelocate(currentTabView, previous.tag, previous.tag.projectedPosition,
+                            (start + 1 - currentTabView.index) * startDelay, reset);
+                }
+
+                if (firstStackedTabIndex != -1) {
+                    iterator = new Iterator(true, firstStackedTabIndex);
+                    Float previousActualPosition = null;
+
+                    while ((currentTabView = iterator.next()) != null) {
+                        float actualPosition = currentTabView.tag.actualPosition;
+
+                        if (previousActualPosition != null) {
+                            currentTabView.tag.actualPosition = previousActualPosition;
+                        }
+
+                        previousActualPosition = actualPosition;
+                    }
+                }
+            }
+
+            private void animateRelocate(@NonNull final TabView tabView, @Nullable final Tag tag,
+                                         final float relocatePosition, final long startDelay,
+                                         final boolean reset) {
+                View view = tabView.view;
+                relocateAnimation = view.animate();
+                relocateAnimation.setListener(createRelocateAnimationListener(tabView, tag, reset));
+                relocateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+                relocateAnimation.setDuration(
+                        getResources().getInteger(android.R.integer.config_mediumAnimTime));
+                animatePosition(Axis.DRAGGING_AXIS, relocateAnimation, view, relocatePosition);
+                relocateAnimation.setStartDelay(startDelay);
+                relocateAnimation.start();
+            }
+
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
 
                 if (close) {
-                    long animationDuration =
-                            getResources().getInteger(android.R.integer.config_mediumAnimTime);
-                    long startDelay =
-                            getResources().getInteger(android.R.integer.config_shortAnimTime);
-                    int start = tabView.index - 1;
-                    Iterator iterator = new Iterator(true, start);
-                    TabView tabView;
-                    int firstStackedTabIndex = -1;
-
-                    while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
-                        if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                                tabView.tag.state == State.STACKED_BOTTOM) {
-                            firstStackedTabIndex = tabView.index;
-                        }
-
-                        View view = tabView.view;
-                        TabView previous = iterator.previous();
-                        relocateAnimation = view.animate();
-                        relocateAnimation.setListener(
-                                createRelocateAnimationListener(tabView, previous.tag,
-                                        !iterator.hasNext() || firstStackedTabIndex != -1));
-                        relocateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                        relocateAnimation.setDuration(animationDuration);
-                        animatePosition(Axis.DRAGGING_AXIS, relocateAnimation, view,
-                                previous.tag.projectedPosition);
-                        relocateAnimation.setStartDelay((start + 1 - tabView.index) * startDelay);
-                        relocateAnimation.start();
-                    }
-
-                    if (firstStackedTabIndex != -1) {
-                        iterator = new Iterator(true, firstStackedTabIndex);
-                        Float previousActualPosition = null;
-
-                        while ((tabView = iterator.next()) != null) {
-                            float actualPosition = tabView.tag.actualPosition;
-
-                            if (previousActualPosition != null) {
-                                tabView.tag.actualPosition = previousActualPosition;
-                            }
-
-                            previousActualPosition = actualPosition;
-                        }
+                    if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
+                        adjustActualPositionOfStackedTabViews(true);
+                    } else if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                        adjustActualPositionOfStackedTabViews(false);
+                    } else if (tabView.tag.state == State.STACKED_BOTTOM) {
+                        relocateWhenStackedTabViewWasRemoved(false);
+                    } else if (tabView.tag.state == State.STACKED_TOP) {
+                        relocateWhenStackedTabViewWasRemoved(true);
+                    } else {
+                        relocateWhenVisibleTabViewWasRemoved();
                     }
                 }
             }
@@ -687,7 +779,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private Animator.AnimatorListener createRelocateAnimationListener(
-            @NonNull final TabView tabView, @NonNull final Tag tag, final boolean reset) {
+            @NonNull final TabView tabView, @Nullable final Tag tag, final boolean reset) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -700,9 +792,13 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                View view = tabView.view;
-                view.setTag(R.id.tag_properties, tag);
-                tabView.tag = tag;
+
+                if (tag != null) {
+                    View view = tabView.view;
+                    view.setTag(R.id.tag_properties, tag);
+                    tabView.tag = tag;
+                }
+
                 applyTag(tabView);
 
                 if (reset) {
@@ -1428,8 +1524,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int getVisibility(@NonNull final TabView tabView) {
         State state = tabView.tag.state;
-        return state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN ?
-                View.INVISIBLE : View.VISIBLE;
+        return (state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN) &&
+                !tabView.tag.closing ? View.INVISIBLE : View.VISIBLE;
     }
 
     private void calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
