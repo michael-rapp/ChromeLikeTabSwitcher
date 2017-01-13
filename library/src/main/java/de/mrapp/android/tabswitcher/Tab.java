@@ -59,14 +59,9 @@ public class Tab implements Parcelable {
     };
 
     /**
-     * The constant serial version UID.
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
      * The tab's title.
      */
-    private final CharSequence title;
+    private CharSequence title;
 
     /**
      * The resource id of the tab's icon.
@@ -111,9 +106,7 @@ public class Tab implements Parcelable {
      *         neither be null, nor empty
      */
     public Tab(@NonNull final CharSequence title) {
-        ensureNotNull(title, "The title may not be null");
-        ensureNotEmpty(title, "The title may not be empty");
-        this.title = title;
+        setTitle(title);
         this.closeable = true;
         this.iconId = -1;
         this.iconBitmap = null;
@@ -137,12 +130,39 @@ public class Tab implements Parcelable {
     /**
      * Returns the tab's title.
      *
-     * @return The tabs title as an instance of the type {@link CharSequence}. The title may neither
-     * be null, nor empty
+     * @return The tab's title as an instance of the type {@link CharSequence}. The title may
+     * neither be null, nor empty
      */
     @NonNull
     public final CharSequence getTitle() {
         return title;
+    }
+
+    /**
+     * Sets the tab's title.
+     *
+     * @param title
+     *         The title, which should be set, as an instance of the type {@link CharSequence}. The
+     *         title may neither be null, nor empty
+     */
+    public final void setTitle(@NonNull final CharSequence title) {
+        ensureNotNull(title, "The title may not be null");
+        ensureNotEmpty(title, "The title may not be empty");
+        this.title = title;
+    }
+
+    /**
+     * Sets the tab's title.
+     *
+     * @param context
+     *         The context, which should be used, as an instance of the class {@link Context}. The
+     *         context may not be null
+     * @param resourceId
+     *         The resource id of the title, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid string resource
+     */
+    public final void setTitle(@NonNull final Context context, @StringRes final int resourceId) {
+        setTitle(context.getText(resourceId));
     }
 
     /**
