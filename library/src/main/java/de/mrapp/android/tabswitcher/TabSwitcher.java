@@ -604,7 +604,7 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation = view.animate();
         closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         closeAnimation.setListener(listener);
-        closeAnimation.setDuration(3000);
+        closeAnimation.setDuration(animationDuration);
         animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition);
         animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
         animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
@@ -776,8 +776,7 @@ public class TabSwitcher extends FrameLayout {
                     View view = tabView.view;
                     adaptTopMostTabViewWhenClosingAborted(tabView);
                     tabView.tag.closing = false;
-                    setPivot(Axis.DRAGGING_AXIS, view,
-                            isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+                    setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                     handleRelease(null);
                 }
 
@@ -787,6 +786,34 @@ public class TabSwitcher extends FrameLayout {
             }
 
         };
+    }
+
+    private float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return isDraggingHorizontally() ? getSize(axis, view) / 2f : 0;
+        } else {
+            return isDraggingHorizontally() ? 0 : getSize(axis, view) / 2f;
+        }
+    }
+
+    private float getPivotWhenClosing(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return maxTabSpacing;
+        } else {
+            return getDefaultPivot(axis, view);
+        }
+    }
+
+    private float getPivotOnOvershootDown(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS) {
+            return maxTabSpacing;
+        } else {
+            return getSize(axis, view) / 2f;
+        }
+    }
+
+    private float getPivotOnOvershootUp(@NonNull final Axis axis, @NonNull final View view) {
+        return getSize(axis, view) / 2f;
     }
 
     private Animator.AnimatorListener createRelocateAnimationListener(
@@ -1094,17 +1121,17 @@ public class TabSwitcher extends FrameLayout {
                 float dragPosition = getPosition(Axis.DRAGGING_AXIS,
                         getChildAt(getChildIndex(tabView.index - 1)));
                 float scale = getScale(view);
-                setPivot(Axis.DRAGGING_AXIS, view,
-                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
-                setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
                 setPosition(Axis.ORTHOGONAL_AXIS, view,
                         animationType == AnimationType.SWIPE_LEFT ? -1 * closedPosition :
                                 closedPosition);
                 setPosition(Axis.DRAGGING_AXIS, view, dragPosition);
                 setScale(Axis.ORTHOGONAL_AXIS, view, scale);
                 setScale(Axis.DRAGGING_AXIS, view, scale);
-                setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+                setPivot(Axis.DRAGGING_AXIS, view, getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
                 setScale(Axis.ORTHOGONAL_AXIS, view, closedTabScale * scale);
                 setScale(Axis.DRAGGING_AXIS, view, closedTabScale * scale);
                 animateClose(tabView, false, 0, 0, createAddAnimationListener(tabView));
@@ -1173,7 +1200,10 @@ public class TabSwitcher extends FrameLayout {
                     TabView tabView = new TabView(index + 1, view);
                     adaptTopMostTabViewWhenClosing(tabView);
                     tabView.tag.closing = true;
-                    setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+                    setPivot(Axis.DRAGGING_AXIS, view,
+                            getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+                    setPivot(Axis.ORTHOGONAL_AXIS, view,
+                            getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
                     animateClose(tabView, true, 0, 0, createCloseAnimationListener(tabView, true));
                 }
             }
@@ -1321,10 +1351,8 @@ public class TabSwitcher extends FrameLayout {
             while ((tabView = iterator.next()) != null) {
                 tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
                 View view = tabView.view;
-                setPivot(Axis.DRAGGING_AXIS, view,
-                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
-                setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
                 calculateAndClipTopThresholdPosition(tabView, iterator.previous());
             }
 
@@ -1518,10 +1546,8 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                setPivot(Axis.DRAGGING_AXIS, view,
-                        isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
-                setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
 
                 if (listener != null) {
                     listener.onAnimationEnd(animation);
@@ -1638,8 +1664,7 @@ public class TabSwitcher extends FrameLayout {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
-        setPivot(Axis.DRAGGING_AXIS, view,
-                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
+        setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
         adaptVisibility(tabView);
@@ -1882,8 +1907,9 @@ public class TabSwitcher extends FrameLayout {
                         minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
 
-            setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
-            setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+            setPivot(Axis.DRAGGING_AXIS, view, getPivotOnOvershootDown(Axis.DRAGGING_AXIS, view));
+            setPivot(Axis.ORTHOGONAL_AXIS, view,
+                    getPivotOnOvershootDown(Axis.ORTHOGONAL_AXIS, view));
             setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
         }
     }
@@ -1899,8 +1925,9 @@ public class TabSwitcher extends FrameLayout {
             if (tabView.index == 1) {
                 view.setVisibility(View.VISIBLE);
                 view.setCameraDistance(cameraDistance);
-                setPivot(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, view) / 2f);
-                setPivot(Axis.ORTHOGONAL_AXIS, view, getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                setPivot(Axis.DRAGGING_AXIS, view, getPivotOnOvershootUp(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getPivotOnOvershootUp(Axis.ORTHOGONAL_AXIS, view));
                 setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else {
                 view.setVisibility(View.INVISIBLE);
@@ -1936,10 +1963,9 @@ public class TabSwitcher extends FrameLayout {
                     if (tabView.index == 1) {
                         float currentPosition = tabView.tag.projectedPosition;
                         setPivot(Axis.DRAGGING_AXIS, view,
-                                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f :
-                                        0);
-                        setPivot(Axis.ORTHOGONAL_AXIS, view, isDraggingHorizontally() ? 0 :
-                                getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                                getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                        setPivot(Axis.ORTHOGONAL_AXIS, view,
+                                getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
                         setPosition(Axis.DRAGGING_AXIS, view,
                                 currentPosition - (currentPosition * ratio));
                     } else {
@@ -2040,7 +2066,8 @@ public class TabSwitcher extends FrameLayout {
 
         draggedTabView.tag.closing = true;
         float dragDistance = closeDragHelper.getDragDistance();
-        setPivot(Axis.DRAGGING_AXIS, view, maxTabSpacing);
+        setPivot(Axis.DRAGGING_AXIS, view, getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
         float scale = getScale(view);
         setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
         float ratio = 1 - (Math.abs(dragDistance) / calculateClosedTabPosition());
@@ -2201,10 +2228,8 @@ public class TabSwitcher extends FrameLayout {
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
         TabView tabView = new Iterator().next();
         View view = tabView.view;
-        setPivot(Axis.DRAGGING_AXIS, view,
-                isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
-        setPivot(Axis.ORTHOGONAL_AXIS, view,
-                isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+        setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
         float position = getPosition(Axis.DRAGGING_AXIS, view);
         float targetPosition = tabView.tag.projectedPosition;
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
