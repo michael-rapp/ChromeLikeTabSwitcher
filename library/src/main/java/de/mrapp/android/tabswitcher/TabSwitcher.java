@@ -372,6 +372,8 @@ public class TabSwitcher extends FrameLayout {
 
     private static final int STACKED_TAB_COUNT = 3;
 
+    private static final float NON_LINEAR_DRAG_FACTOR = 0.5f;
+
     private static final float MAX_DOWN_OVERSHOOT_ANGLE = 3f;
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
@@ -1482,7 +1484,8 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float calculateAttachedPosition() {
-        return maxTabSpacing - minTabSpacing + calculateFirstTabTopThresholdPosition();
+        return ((maxTabSpacing - minTabSpacing) / (1 - NON_LINEAR_DRAG_FACTOR)) *
+                NON_LINEAR_DRAG_FACTOR + calculateFirstTabTopThresholdPosition();
     }
 
     private Animation.AnimationListener createDragAnimationListener() {
@@ -1721,8 +1724,8 @@ public class TabSwitcher extends FrameLayout {
 
     private float calculateNonLinearPosition(final float dragDistance, final float currentPosition,
                                              @NonNull final TabView tabView) {
-        return currentPosition +
-                (float) (dragDistance * Math.pow(0.5, tabView.index - lastAttachedIndex));
+        return currentPosition + (float) (dragDistance *
+                Math.pow(NON_LINEAR_DRAG_FACTOR, tabView.index - lastAttachedIndex));
     }
 
     private void clipDraggedTabPosition(final float dragPosition, @NonNull final TabView tabView,
