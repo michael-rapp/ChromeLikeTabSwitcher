@@ -1323,10 +1323,36 @@ public class TabSwitcher extends FrameLayout {
                         isDraggingHorizontally() ? getSize(Axis.DRAGGING_AXIS, view) / 2f : 0);
                 setPivot(Axis.ORTHOGONAL_AXIS, view,
                         isDraggingHorizontally() ? 0 : getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
-                float scale = getScale(view);
                 calculateAndClipTopThresholdPosition(tabView, iterator.previous());
+            }
+
+            TabView selectedTabView = new Iterator(false, selectedTabIndex + 1).next();
+            float targetPosition = getSize(Axis.DRAGGING_AXIS, this) / 2f;
+            System.out.println("minTabSpacing = " + minTabSpacing);
+            System.out.println("maxTabSpacing = " + maxTabSpacing);
+            System.out.println("attachedPosition = " + attachedPosition);
+            System.out.println(
+                    "targetPosition of tab " + (selectedTabIndex + 1) + " = " + targetPosition);
+            float drag = 0;
+
+            while (getPosition(Axis.DRAGGING_AXIS, selectedTabView.view) < targetPosition) {
+                drag++;
+
+                if (!handleDrag(drag, 0)) {
+                    break;
+                }
+            }
+
+            handleRelease(null);
+            printActualPositions();
+
+            iterator = new Iterator();
+
+            while ((tabView = iterator.next()) != null) {
+                View view = tabView.view;
                 view.setVisibility(tabView.index - 1 == selectedTabIndex ? View.VISIBLE :
                         getVisibility(tabView));
+                float scale = getScale(view);
 
                 if (tabView.index - 1 < selectedTabIndex) {
                     setPosition(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, this));
@@ -1354,6 +1380,15 @@ public class TabSwitcher extends FrameLayout {
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
             }
+        }
+    }
+
+    private void printActualPositions() {
+        Iterator iterator = new Iterator(true);
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            System.out.println(tabView.index + ": " + tabView.tag.actualPosition);
         }
     }
 
@@ -1619,6 +1654,23 @@ public class TabSwitcher extends FrameLayout {
                 !tabView.tag.closing ? View.INVISIBLE : View.VISIBLE;
     }
 
+    private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
+                                                            @NonNull final TabView tabView,
+                                                            @Nullable final TabView previous,
+                                                            final float currentPosition) {
+        if (previous != null && previous.tag.state == State.VISIBLE &&
+                tabView.tag.state == State.VISIBLE) {
+            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, tabView);
+
+            if (previous.tag.projectedPosition - newPosition >= maxTabSpacing) {
+                lastAttachedIndex = tabView.index;
+                newPosition = previous.tag.projectedPosition - maxTabSpacing;
+            }
+
+            clipDraggedTabPosition(newPosition, tabView, previous);
+        }
+    }
+
     private void calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
                                       @Nullable final TabView previous) {
         if (getCount() - tabView.index > 0) {
@@ -1638,23 +1690,6 @@ public class TabSwitcher extends FrameLayout {
                             currentPosition);
                 }
             }
-        }
-    }
-
-    private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
-                                                            @NonNull final TabView tabView,
-                                                            @Nullable final TabView previous,
-                                                            final float currentPosition) {
-        if (previous != null && previous.tag.state == State.VISIBLE &&
-                tabView.tag.state == State.VISIBLE) {
-            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, tabView);
-
-            if (previous.tag.projectedPosition - newPosition >= maxTabSpacing) {
-                lastAttachedIndex = tabView.index;
-                newPosition = previous.tag.projectedPosition - maxTabSpacing;
-            }
-
-            clipDraggedTabPosition(newPosition, tabView, previous);
         }
     }
 
@@ -1876,7 +1911,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     @SuppressWarnings("WrongConstant")
-    private void handleDrag(final float dragPosition, final float orthogonalPosition) {
+    private boolean handleDrag(final float dragPosition, final float orthogonalPosition) {
         if (dragPosition <= topDragThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
@@ -1968,21 +2003,29 @@ public class TabSwitcher extends FrameLayout {
 
                 checkIfDragThresholdReached(dragPosition);
             }
+
+            return true;
         }
+
+        return false;
     }
 
-    private void checkIfDragThresholdReached(final float dragPosition) {
+    private boolean checkIfDragThresholdReached(final float dragPosition) {
         if (isBottomDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_DOWN ||
                 scrollDirection == ScrollDirection.OVERSHOOT_DOWN)) {
             bottomDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
             dragToBottomThresholdPosition();
+            return true;
         } else if (isTopDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_UP ||
                 scrollDirection == ScrollDirection.OVERSHOOT_UP)) {
             topDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
             dragToTopThresholdPosition();
+            return true;
         }
+
+        return false;
     }
 
     private void handleDragToClose() {
