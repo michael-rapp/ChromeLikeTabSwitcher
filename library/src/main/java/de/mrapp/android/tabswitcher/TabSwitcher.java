@@ -613,21 +613,21 @@ public class TabSwitcher extends FrameLayout {
         closeAnimation.start();
     }
 
-    private Animator.AnimatorListener createCloseAnimationListener(@NonNull final TabView tabView,
-                                                                   final boolean close) {
+    private Animator.AnimatorListener createCloseAnimationListener(
+            @NonNull final TabView closedTabView, final boolean close) {
         return new AnimatorListenerAdapter() {
 
             private void adjustActualPositionOfStackedTabViews(final boolean reverse) {
-                Iterator iterator = new Iterator(reverse, tabView.index);
-                TabView currentTabView;
+                Iterator iterator = new Iterator(reverse, closedTabView.index);
+                TabView tabView;
                 Float previousActualPosition = null;
 
-                while ((currentTabView = iterator.next()) != null) {
-                    float actualPosition = currentTabView.tag.actualPosition;
+                while ((tabView = iterator.next()) != null) {
+                    float actualPosition = tabView.tag.actualPosition;
 
                     if (previousActualPosition != null) {
-                        currentTabView.tag.actualPosition = previousActualPosition;
-                        applyTag(tabView);
+                        tabView.tag.actualPosition = previousActualPosition;
+                        applyTag(closedTabView);
                     }
 
                     previousActualPosition = actualPosition;
@@ -636,31 +636,31 @@ public class TabSwitcher extends FrameLayout {
 
             private void relocateWhenStackedTabViewWasRemoved(final boolean top) {
                 long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
-                int start = tabView.index + (top ? -1 : 1);
-                Iterator iterator = new Iterator(top, tabView.index);
-                TabView currentTabView;
+                int start = closedTabView.index + (top ? -1 : 1);
+                Iterator iterator = new Iterator(top, closedTabView.index);
+                TabView tabView;
                 Float previousProjectedPosition = null;
 
-                while ((currentTabView = iterator.next()) != null &&
-                        (currentTabView.tag.state == State.TOP_MOST_HIDDEN ||
-                                currentTabView.tag.state == State.STACKED_TOP ||
-                                currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                                currentTabView.tag.state == State.STACKED_BOTTOM)) {
-                    float projectedPosition = currentTabView.tag.projectedPosition;
+                while ((tabView = iterator.next()) != null &&
+                        (tabView.tag.state == State.TOP_MOST_HIDDEN ||
+                                tabView.tag.state == State.STACKED_TOP ||
+                                tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                                tabView.tag.state == State.STACKED_BOTTOM)) {
+                    float projectedPosition = tabView.tag.projectedPosition;
 
                     if (previousProjectedPosition != null) {
-                        if (currentTabView.tag.state == State.TOP_MOST_HIDDEN ||
-                                currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
+                        if (tabView.tag.state == State.TOP_MOST_HIDDEN ||
+                                tabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
                             TabView previous = iterator.previous();
-                            currentTabView.tag.state = previous.tag.state;
+                            tabView.tag.state = previous.tag.state;
 
                             if (top) {
-                                currentTabView.tag.projectedPosition = previousProjectedPosition;
-                                long delay = (start + 1 - currentTabView.index) * startDelay;
-                                animateRelocate(currentTabView, null, previousProjectedPosition,
-                                        delay, true);
+                                tabView.tag.projectedPosition = previousProjectedPosition;
+                                long delay = (start + 1 - tabView.index) * startDelay;
+                                animateRelocate(tabView, null, previousProjectedPosition, delay,
+                                        true);
                             } else {
-                                adaptVisibility(currentTabView);
+                                adaptVisibility(tabView);
                             }
 
                             break;
@@ -670,11 +670,11 @@ public class TabSwitcher extends FrameLayout {
                             boolean reset = !iterator.hasNext() ||
                                     (peekState != State.STACKED_TOP &&
                                             peekState != State.STACKED_BOTTOM);
-                            currentTabView.tag.projectedPosition = previousProjectedPosition;
-                            long delay = (top ? (start + 1 - currentTabView.index) :
-                                    (currentTabView.index - start)) * startDelay;
-                            animateRelocate(currentTabView, null, previousProjectedPosition, delay,
-                                    reset);
+                            tabView.tag.projectedPosition = previousProjectedPosition;
+                            long delay =
+                                    (top ? (start + 1 - tabView.index) : (tabView.index - start)) *
+                                            startDelay;
+                            animateRelocate(tabView, null, previousProjectedPosition, delay, reset);
                         }
                     }
 
@@ -686,32 +686,32 @@ public class TabSwitcher extends FrameLayout {
 
             private void relocateWhenVisibleTabViewWasRemoved() {
                 long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
-                int start = tabView.index - 1;
+                int start = closedTabView.index - 1;
                 Iterator iterator = new Iterator(true, start);
-                TabView currentTabView;
+                TabView tabView;
                 int firstStackedTabIndex = -1;
 
-                while ((currentTabView = iterator.next()) != null && firstStackedTabIndex == -1) {
-                    if (currentTabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                            currentTabView.tag.state == State.STACKED_BOTTOM) {
-                        firstStackedTabIndex = currentTabView.index;
+                while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
+                    if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                            tabView.tag.state == State.STACKED_BOTTOM) {
+                        firstStackedTabIndex = tabView.index;
                     }
 
                     TabView previous = iterator.previous();
                     boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
-                    animateRelocate(currentTabView, previous.tag, previous.tag.projectedPosition,
-                            (start + 1 - currentTabView.index) * startDelay, reset);
+                    animateRelocate(tabView, previous.tag, previous.tag.projectedPosition,
+                            (start + 1 - tabView.index) * startDelay, reset);
                 }
 
                 if (firstStackedTabIndex != -1) {
                     iterator = new Iterator(true, firstStackedTabIndex);
                     Float previousActualPosition = null;
 
-                    while ((currentTabView = iterator.next()) != null) {
-                        float actualPosition = currentTabView.tag.actualPosition;
+                    while ((tabView = iterator.next()) != null) {
+                        float actualPosition = tabView.tag.actualPosition;
 
                         if (previousActualPosition != null) {
-                            currentTabView.tag.actualPosition = previousActualPosition;
+                            tabView.tag.actualPosition = previousActualPosition;
                         }
 
                         previousActualPosition = actualPosition;
@@ -738,13 +738,13 @@ public class TabSwitcher extends FrameLayout {
                 super.onAnimationStart(animation);
 
                 if (close) {
-                    if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
+                    if (closedTabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
                         adjustActualPositionOfStackedTabViews(true);
-                    } else if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                    } else if (closedTabView.tag.state == State.TOP_MOST_HIDDEN) {
                         adjustActualPositionOfStackedTabViews(false);
-                    } else if (tabView.tag.state == State.STACKED_BOTTOM) {
+                    } else if (closedTabView.tag.state == State.STACKED_BOTTOM) {
                         relocateWhenStackedTabViewWasRemoved(false);
-                    } else if (tabView.tag.state == State.STACKED_TOP) {
+                    } else if (closedTabView.tag.state == State.STACKED_TOP) {
                         relocateWhenStackedTabViewWasRemoved(true);
                     } else {
                         relocateWhenVisibleTabViewWasRemoved();
@@ -757,7 +757,7 @@ public class TabSwitcher extends FrameLayout {
                 super.onAnimationEnd(animation);
 
                 if (close) {
-                    int index = tabView.index - 1;
+                    int index = closedTabView.index - 1;
                     removeViewAt(getChildIndex(index));
                     Tab tab = tabs.remove(index);
                     notifyOnTabRemoved(index, tab);
@@ -765,7 +765,7 @@ public class TabSwitcher extends FrameLayout {
                     if (isEmpty()) {
                         selectedTabIndex = -1;
                         notifyOnSelectionChanged(-1, null);
-                    } else if (selectedTabIndex == tabView.index - 1) {
+                    } else if (selectedTabIndex == closedTabView.index - 1) {
                         if (selectedTabIndex > 0) {
                             selectedTabIndex--;
                         }
@@ -773,9 +773,9 @@ public class TabSwitcher extends FrameLayout {
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
-                    View view = tabView.view;
-                    adaptTopMostTabViewWhenClosingAborted(tabView);
-                    tabView.tag.closing = false;
+                    View view = closedTabView.view;
+                    adaptTopMostTabViewWhenClosingAborted(closedTabView);
+                    closedTabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                     handleRelease(null);
                 }
