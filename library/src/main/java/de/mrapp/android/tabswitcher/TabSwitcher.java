@@ -1828,7 +1828,9 @@ public class TabSwitcher extends FrameLayout {
                                                                 @Nullable final TabView previous) {
         if ((getCount() - tabView.index) < STACKED_TAB_COUNT) {
             float position = stackedTabSpacing * (getCount() - tabView.index);
-            return Pair.create(position, State.STACKED_TOP);
+            return Pair.create(position,
+                    (previous == null || previous.tag.state == State.VISIBLE) ? State.TOP_MOST :
+                            State.STACKED_TOP);
         } else {
             float position = stackedTabSpacing * STACKED_TAB_COUNT;
             return Pair.create(position,
