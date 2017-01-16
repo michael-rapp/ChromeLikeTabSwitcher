@@ -1726,13 +1726,13 @@ public class TabSwitcher extends FrameLayout {
                                                           @Nullable final TabView previous,
                                                           final float currentPosition) {
         if (tabView.tag.state == State.VISIBLE) {
-            boolean attached = tabView.tag.projectedPosition <= attachedPosition;
+            boolean attached = tabView.tag.projectedPosition > attachedPosition;
 
-            if (previous == null || !attached) {
+            if (previous == null || attached) {
                 lastAttachedIndex = tabView.index;
             }
 
-            if (previous != null && attached) {
+            if (previous != null && !attached) {
                 float newPosition =
                         calculateNonLinearPosition(dragDistance, currentPosition, tabView);
 
