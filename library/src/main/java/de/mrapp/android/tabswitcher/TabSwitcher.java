@@ -1799,7 +1799,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void clipDraggedTabPosition(final float dragPosition, @NonNull final TabView tabView,
                                         @Nullable final TabView previous) {
-        Pair<Float, State> topMostPair = calculateTopMostPosition(tabView, previous);
+        Pair<Float, State> topMostPair = calculateTopMostPositionAndState(tabView, previous);
         float topMostPosition = topMostPair.first;
 
         if (dragPosition <= topMostPosition) {
@@ -1808,7 +1808,7 @@ public class TabSwitcher extends FrameLayout {
             tabView.tag.state = topMostPair.second;
             return;
         } else {
-            Pair<Float, State> bottomMostPair = calculateBottomMostPosition(tabView);
+            Pair<Float, State> bottomMostPair = calculateBottomMostPositionAndState(tabView);
             float bottomMostPosition = bottomMostPair.first;
 
             if (dragPosition >= bottomMostPosition) {
@@ -1824,8 +1824,8 @@ public class TabSwitcher extends FrameLayout {
         tabView.tag.state = State.VISIBLE;
     }
 
-    private Pair<Float, State> calculateTopMostPosition(@NonNull final TabView tabView,
-                                                        @Nullable final TabView previous) {
+    private Pair<Float, State> calculateTopMostPositionAndState(@NonNull final TabView tabView,
+                                                                @Nullable final TabView previous) {
         if ((getCount() - tabView.index) < STACKED_TAB_COUNT) {
             float position = stackedTabSpacing * (getCount() - tabView.index);
             return Pair.create(position, State.STACKED_TOP);
@@ -1837,7 +1837,7 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private Pair<Float, State> calculateBottomMostPosition(@NonNull final TabView tabView) {
+    private Pair<Float, State> calculateBottomMostPositionAndState(@NonNull final TabView tabView) {
         if (tabView.index <= STACKED_TAB_COUNT) {
             float position = getSize(Axis.DRAGGING_AXIS, this) - tabInset -
                     (stackedTabSpacing * tabView.index);
