@@ -166,6 +166,8 @@ public class TabSwitcher extends FrameLayout {
 
         private int index;
 
+        private int end;
+
         private TabView current;
 
         private TabView previous;
@@ -181,7 +183,12 @@ public class TabSwitcher extends FrameLayout {
         }
 
         public Iterator(final boolean reverse, final int start) {
+            this(reverse, start, -1);
+        }
+
+        public Iterator(final boolean reverse, final int start, final int end) {
             this.reverse = reverse;
+            this.end = end != -1 ? (reverse ? end - 1 : end + 1) : -1;
             this.previous = null;
             this.index = start != -1 ? start : (reverse ? getCount() : 1);
             int previousIndex = reverse ? this.index + 1 : this.index - 1;
@@ -212,7 +219,7 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         public boolean hasNext() {
-            return reverse ? index >= 1 : getCount() - index >= 0;
+            return index != end && (reverse ? index >= 1 : getCount() - index >= 0);
         }
 
         @Override
@@ -700,9 +707,12 @@ public class TabSwitcher extends FrameLayout {
 
                     TabView previous = iterator.previous();
                     boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
+                    Animator.AnimatorListener listener =
+                            createRelocateAnimationListener(tabView, previous.tag, reset);
                     animateRelocate(tabView, previous.tag.projectedPosition,
-                            (start + 1 - tabView.index) * startDelay,
-                            createRelocateAnimationListener(tabView, previous.tag, reset));
+                            (start + 1 - tabView.index) * startDelay, tabView.index == start ?
+                                    createRelocateAnimationListenerWrapper(closedTabView,
+                                            listener) : listener);
                 }
 
                 if (firstStackedTabIndex != -1) {
@@ -818,6 +828,33 @@ public class TabSwitcher extends FrameLayout {
         return getSize(axis, view) / 2f;
     }
 
+    private Animator.AnimatorListener createRelocateAnimationListenerWrapper(
+            @NonNull final TabView closedTabView,
+            @Nullable final Animator.AnimatorListener listener) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (listener != null) {
+                    listener.onAnimationStart(animation);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                adaptTopMostTabViewWhenClosingAborted(closedTabView);
+
+                if (listener != null) {
+                    listener.onAnimationEnd(animation);
+                }
+            }
+
+        };
+    }
+
     private Animator.AnimatorListener createRelocateAnimationListener(
             @NonNull final TabView tabView, @Nullable final Tag tag, final boolean reset) {
         return new AnimatorListenerAdapter() {
@@ -842,6 +879,11 @@ public class TabSwitcher extends FrameLayout {
                 applyTag(tabView);
 
                 if (reset) {
+                    for (int i = 0; i < getChildCount(); i++) {
+                        View view = getChildAt(i);
+                        System.out.println(view.getVisibility() == View.VISIBLE);
+                    }
+
                     relocateAnimation = null;
                     executePendingAction();
                 }
@@ -2085,8 +2127,11 @@ public class TabSwitcher extends FrameLayout {
             Iterator iterator = new Iterator(false, closedTabView.index + 1);
             TabView tabView = iterator.next();
 
-            if (tabView != null && tabView.tag.state == State.TOP_MOST_HIDDEN) {
-                tabView.tag.state = State.TOP_MOST;
+            if (tabView != null) {
+                if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                    tabView.tag.state = State.TOP_MOST;
+                }
+
                 adaptVisibility(tabView);
             }
         }
@@ -2094,12 +2139,14 @@ public class TabSwitcher extends FrameLayout {
 
     private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, closedTabView.index + 1);
-            TabView tabView = iterator.next();
+            Iterator iterator = new Iterator(false, closedTabView.index, closedTabView.index + 1);
+            TabView tabView;
 
-            if (tabView != null && tabView.tag.state == State.TOP_MOST) {
-                tabView.tag.state = State.TOP_MOST_HIDDEN;
-                adaptVisibility(tabView);
+            while ((tabView = iterator.next()) != null) {
+                if (tabView.tag.state == State.TOP_MOST) {
+                    tabView.tag.state = State.TOP_MOST_HIDDEN;
+                    adaptVisibility(tabView);
+                }
             }
         }
     }
