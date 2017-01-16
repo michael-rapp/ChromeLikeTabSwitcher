@@ -2080,23 +2080,12 @@ public class TabSwitcher extends FrameLayout {
 
     private void adaptTopMostTabViewWhenClosing(@NonNull final TabView closedTabView) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, closedTabView.index);
-            TabView tabView;
-            Tag previousTag = null;
+            Iterator iterator = new Iterator(false, closedTabView.index + 1);
+            TabView tabView = iterator.next();
 
-            while ((tabView = iterator.next()) != null) {
-                Tag tag = tabView.tag.clone();
-
-                if (previousTag != null) {
-                    if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
-                        tabView.tag.state = previousTag.state;
-                    }
-
-                    tabView.tag.actualPosition = previousTag.actualPosition;
-                    adaptVisibility(tabView);
-                }
-
-                previousTag = tag;
+            if (tabView != null && tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                tabView.tag.state = State.TOP_MOST;
+                adaptVisibility(tabView);
             }
         }
     }
@@ -2104,15 +2093,10 @@ public class TabSwitcher extends FrameLayout {
     private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView) {
         if (closedTabView.tag.state == State.TOP_MOST) {
             Iterator iterator = new Iterator(false, closedTabView.index + 1);
-            TabView tabView;
+            TabView tabView = iterator.next();
 
-            while ((tabView = iterator.next()) != null) {
-                if (tabView.tag.state == State.TOP_MOST) {
-                    tabView.tag.state = State.TOP_MOST_HIDDEN;
-                }
-
-                TabView previous = iterator.previous();
-                tabView.tag.actualPosition = calculateTopThresholdPosition(tabView, previous);
+            if (tabView != null && tabView.tag.state == State.TOP_MOST) {
+                tabView.tag.state = State.TOP_MOST_HIDDEN;
                 adaptVisibility(tabView);
             }
         }
