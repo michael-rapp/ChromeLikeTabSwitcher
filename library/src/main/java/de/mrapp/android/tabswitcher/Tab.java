@@ -17,6 +17,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
@@ -84,6 +85,11 @@ public class Tab implements Parcelable {
     private int color;
 
     /**
+     * Optional parameters, which are associated with the tab.
+     */
+    private Bundle parameters;
+
+    /**
      * Creates a new tab, which can be added to a {@link TabSwitcher} widget.
      *
      * @param source
@@ -93,9 +99,10 @@ public class Tab implements Parcelable {
     private Tab(@NonNull final Parcel source) {
         this.title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         this.iconId = source.readInt();
-        this.iconBitmap = source.readParcelable(Bitmap.class.getClassLoader());
+        this.iconBitmap = source.readParcelable(getClass().getClassLoader());
         this.closeable = source.readInt() > 0;
         this.color = source.readInt();
+        this.parameters = source.readBundle(getClass().getClassLoader());
     }
 
     /**
@@ -111,6 +118,7 @@ public class Tab implements Parcelable {
         this.iconId = -1;
         this.iconBitmap = null;
         this.color = -1;
+        this.parameters = null;
     }
 
     /**
@@ -247,6 +255,30 @@ public class Tab implements Parcelable {
         this.color = color;
     }
 
+    /**
+     * Returns a bundle, which contains the optional parameters, which are associated with the tab.
+     *
+     * @return A bundle, which contains the optional parameters, which are associated with the tab,
+     * as an instance of the class {@link Bundle} or null, if no parameters are associated with the
+     * tab
+     */
+    @Nullable
+    public final Bundle getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Sets a bundle, which contains the optional parameters, which should be associated with the
+     * tab.
+     *
+     * @param parameters
+     *         The bundle, which should be set, as an instance of the class {@link Bundle} or null,
+     *         if no parameters should be associated with the tab
+     */
+    public final void setParameters(@Nullable final Bundle parameters) {
+        this.parameters = parameters;
+    }
+
     @Override
     public final int describeContents() {
         return 0;
@@ -259,6 +291,7 @@ public class Tab implements Parcelable {
         parcel.writeParcelable(iconBitmap, flags);
         parcel.writeInt(closeable ? 1 : 0);
         parcel.writeInt(color);
+        parcel.writeBundle(parameters);
     }
 
 }
