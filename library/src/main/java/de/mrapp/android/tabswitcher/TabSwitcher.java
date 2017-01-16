@@ -657,8 +657,8 @@ public class TabSwitcher extends FrameLayout {
                             if (top) {
                                 tabView.tag.projectedPosition = previousProjectedPosition;
                                 long delay = (start + 1 - tabView.index) * startDelay;
-                                animateRelocate(tabView, null, previousProjectedPosition, delay,
-                                        true);
+                                animateRelocate(tabView, previousProjectedPosition, delay,
+                                        createRelocateAnimationListener(tabView, null, true));
                             } else {
                                 adaptVisibility(tabView);
                             }
@@ -674,7 +674,8 @@ public class TabSwitcher extends FrameLayout {
                             long delay =
                                     (top ? (start + 1 - tabView.index) : (tabView.index - start)) *
                                             startDelay;
-                            animateRelocate(tabView, null, previousProjectedPosition, delay, reset);
+                            animateRelocate(tabView, previousProjectedPosition, delay,
+                                    createRelocateAnimationListener(tabView, null, reset));
                         }
                     }
 
@@ -699,8 +700,9 @@ public class TabSwitcher extends FrameLayout {
 
                     TabView previous = iterator.previous();
                     boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
-                    animateRelocate(tabView, previous.tag, previous.tag.projectedPosition,
-                            (start + 1 - tabView.index) * startDelay, reset);
+                    animateRelocate(tabView, previous.tag.projectedPosition,
+                            (start + 1 - tabView.index) * startDelay,
+                            createRelocateAnimationListener(tabView, previous.tag, reset));
                 }
 
                 if (firstStackedTabIndex != -1) {
@@ -719,12 +721,12 @@ public class TabSwitcher extends FrameLayout {
                 }
             }
 
-            private void animateRelocate(@NonNull final TabView tabView, @Nullable final Tag tag,
+            private void animateRelocate(@NonNull final TabView tabView,
                                          final float relocatePosition, final long startDelay,
-                                         final boolean reset) {
+                                         @Nullable final Animator.AnimatorListener listener) {
                 View view = tabView.view;
                 relocateAnimation = view.animate();
-                relocateAnimation.setListener(createRelocateAnimationListener(tabView, tag, reset));
+                relocateAnimation.setListener(listener);
                 relocateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                 relocateAnimation.setDuration(
                         getResources().getInteger(android.R.integer.config_mediumAnimTime));
