@@ -2146,6 +2146,7 @@ public class TabSwitcher extends FrameLayout {
                 if (tabView.tag.state == State.TOP_MOST) {
                     tabView.tag.state = State.TOP_MOST_HIDDEN;
                     adaptVisibility(tabView);
+                    break;
                 }
             }
         }
