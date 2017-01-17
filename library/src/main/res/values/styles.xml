@@ -15,8 +15,6 @@ License.
 -->
 <resources>
 
-    <style name="TabSwitcher.Toolbar" parent="@style/ThemeOverlay.AppCompat.Dark"/>
-
     <style name="Tab.Title" parent="@style/TextAppearance.AppCompat.Small">
         <item name="android:drawablePadding">@dimen/tab_title_drawable_padding</item>
         <item name="android:ellipsize">marquee</item>
