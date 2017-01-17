@@ -80,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
             @Override
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.toggle_tab_switcher_menu_item:
+                        tabSwitcher.toggleSwitcherVisibility();
+                        return true;
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
                         return true;

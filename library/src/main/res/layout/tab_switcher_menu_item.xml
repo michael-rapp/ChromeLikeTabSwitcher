@@ -13,12 +13,7 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 implied. See the License for the specific language governing permissions and limitations under the
 License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <item
-        android:id="@+id/switch_tab_menu_item"
-        android:title="@string/toggle_tab_switcher_menu_item"
-        app:showAsAction="never"/>
-
-</menu>
+<de.mrapp.android.tabswitcher.view.TabSwitcherButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>

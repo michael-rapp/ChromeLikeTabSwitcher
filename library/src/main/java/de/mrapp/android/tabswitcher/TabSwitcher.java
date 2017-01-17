@@ -19,7 +19,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -37,6 +36,8 @@ import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -62,6 +63,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.gesture.DragHelper;
+import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
@@ -2459,7 +2461,46 @@ public class TabSwitcher extends FrameLayout {
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
         toolbar.inflateMenu(resourceId);
-        toolbar.setOnMenuItemClickListener(listener);
+        OnMenuItemClickListener menuItemClickListener =
+                createToolbarMenuItemListenerWrapper(listener);
+        toolbar.setOnMenuItemClickListener(menuItemClickListener);
+        Menu menu = toolbar.getMenu();
+
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem menuItem = menu.getItem(i);
+            View view = menuItem.getActionView();
+
+            if (view instanceof TabSwitcherButton) {
+                view.setOnClickListener(
+                        createTabSwitcherButtonListener(menuItem, menuItemClickListener));
+                break;
+            }
+        }
+
+    }
+
+    private OnClickListener createTabSwitcherButtonListener(@NonNull final MenuItem menuItem,
+                                                            @NonNull final OnMenuItemClickListener menuItemClickListener) {
+        return new OnClickListener() {
+
+            @Override
+            public void onClick(final View view) {
+                menuItemClickListener.onMenuItemClick(menuItem);
+            }
+
+        };
+    }
+
+    private OnMenuItemClickListener createToolbarMenuItemListenerWrapper(
+            @Nullable final OnMenuItemClickListener listener) {
+        return new OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(final MenuItem item) {
+                return listener != null && listener.onMenuItemClick(item);
+            }
+
+        };
     }
 
     public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
