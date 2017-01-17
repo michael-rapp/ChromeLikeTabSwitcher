@@ -196,10 +196,10 @@ public class TabSwitcher extends FrameLayout {
             this.reverse = reverse;
             this.end = end != -1 ? (reverse ? end - 1 : end + 1) : -1;
             this.previous = null;
-            this.index = start != -1 ? start : (reverse ? getCount() : 1);
+            this.index = start != -1 ? start : (reverse ? tabContainer.getChildCount() : 1);
             int previousIndex = reverse ? this.index + 1 : this.index - 1;
 
-            if (previousIndex >= 1 && previousIndex <= getCount()) {
+            if (previousIndex >= 1 && previousIndex <= tabContainer.getChildCount()) {
                 this.current = new TabView(previousIndex,
                         tabContainer.getChildAt(getCount() - previousIndex));
             } else {
@@ -217,7 +217,7 @@ public class TabSwitcher extends FrameLayout {
 
         public TabView peek() {
             if (hasNext()) {
-                View view = tabContainer.getChildAt(getCount() - index);
+                View view = tabContainer.getChildAt(tabContainer.getChildCount() - index);
                 return new TabView(index, view);
             }
 
@@ -226,13 +226,14 @@ public class TabSwitcher extends FrameLayout {
 
         @Override
         public boolean hasNext() {
-            return index != end && (reverse ? index >= 1 : getCount() - index >= 0);
+            return index != end &&
+                    (reverse ? index >= 1 : tabContainer.getChildCount() - index >= 0);
         }
 
         @Override
         public TabView next() {
             if (hasNext()) {
-                View view = tabContainer.getChildAt(getCount() - index);
+                View view = tabContainer.getChildAt(tabContainer.getChildCount() - index);
                 previous = current;
 
                 if (first == null) {
@@ -1384,7 +1385,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private int getChildIndex(final int index) {
-        return getCount() - (index + 1);
+        return tabContainer.getChildCount() - (index + 1);
     }
 
     private void enqueuePendingAction(@NonNull final Runnable action) {
@@ -1721,8 +1722,9 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float calculateFirstTabTopThresholdPosition() {
-        return getCount() > STACKED_TAB_COUNT ? STACKED_TAB_COUNT * stackedTabSpacing :
-                (getCount() - 1) * stackedTabSpacing;
+        return tabContainer.getChildCount() > STACKED_TAB_COUNT ?
+                STACKED_TAB_COUNT * stackedTabSpacing :
+                (tabContainer.getChildCount() - 1) * stackedTabSpacing;
     }
 
     private void dragToBottomThresholdPosition() {
@@ -1742,7 +1744,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float calculateBottomThresholdPosition(@NonNull final TabView tabView) {
-        return (getCount() - tabView.index) * maxTabSpacing;
+        return (tabContainer.getChildCount() - tabView.index) * maxTabSpacing;
     }
 
     private void updateTags() {
@@ -1798,7 +1800,7 @@ public class TabSwitcher extends FrameLayout {
 
     private void calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
                                       @Nullable final TabView previous) {
-        if (getCount() - tabView.index > 0) {
+        if (tabContainer.getChildCount() - tabView.index > 0) {
             float distance = dragDistance - tabView.tag.distance;
             tabView.tag.distance = dragDistance;
 
@@ -1879,8 +1881,8 @@ public class TabSwitcher extends FrameLayout {
 
     private Pair<Float, State> calculateTopMostPositionAndState(@NonNull final TabView tabView,
                                                                 @Nullable final TabView previous) {
-        if ((getCount() - tabView.index) < STACKED_TAB_COUNT) {
-            float position = stackedTabSpacing * (getCount() - tabView.index);
+        if ((tabContainer.getChildCount() - tabView.index) < STACKED_TAB_COUNT) {
+            float position = stackedTabSpacing * (tabContainer.getChildCount() - tabView.index);
             return Pair.create(position,
                     (previous == null || previous.tag.state == State.VISIBLE) ? State.TOP_MOST :
                             State.STACKED_TOP);
@@ -1964,17 +1966,17 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private boolean isTopDragThresholdReached() {
-        if (getCount() <= 1) {
+        if (tabContainer.getChildCount() <= 1) {
             return true;
         } else {
-            View view = tabContainer.getChildAt(getCount() - 1);
+            View view = tabContainer.getChildAt(tabContainer.getChildCount() - 1);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             return tag.state == State.TOP_MOST;
         }
     }
 
     private boolean isBottomDragThresholdReached() {
-        if (getCount() <= 1) {
+        if (tabContainer.getChildCount() <= 1) {
             return true;
         } else {
             View view = tabContainer.getChildAt(1);
@@ -2001,7 +2003,8 @@ public class TabSwitcher extends FrameLayout {
                 }
             } else {
                 int diff = tabView.index - firstVisibleIndex;
-                float ratio = (float) diff / (float) (getCount() - firstVisibleIndex);
+                float ratio =
+                        (float) diff / (float) (tabContainer.getChildCount() - firstVisibleIndex);
                 view.setCameraDistance(
                         minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
             }
