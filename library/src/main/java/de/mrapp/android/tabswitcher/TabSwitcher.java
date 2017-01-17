@@ -2473,7 +2473,6 @@ public class TabSwitcher extends FrameLayout {
             if (view instanceof TabSwitcherButton) {
                 view.setOnClickListener(
                         createTabSwitcherButtonListener(menuItem, menuItemClickListener));
-                break;
             }
         }
 
