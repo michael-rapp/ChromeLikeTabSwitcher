@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -57,6 +58,7 @@ import java.util.Set;
 
 import de.mrapp.android.tabswitcher.gesture.DragHelper;
 import de.mrapp.android.util.DisplayUtil.Orientation;
+import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
@@ -194,7 +196,8 @@ public class TabSwitcher extends FrameLayout {
             int previousIndex = reverse ? this.index + 1 : this.index - 1;
 
             if (previousIndex >= 1 && previousIndex <= getCount()) {
-                this.current = new TabView(previousIndex, getChildAt(getCount() - previousIndex));
+                this.current = new TabView(previousIndex,
+                        tabContainer.getChildAt(getCount() - previousIndex));
             } else {
                 this.current = null;
             }
@@ -210,7 +213,7 @@ public class TabSwitcher extends FrameLayout {
 
         public TabView peek() {
             if (hasNext()) {
-                View view = getChildAt(getCount() - index);
+                View view = tabContainer.getChildAt(getCount() - index);
                 return new TabView(index, view);
             }
 
@@ -225,7 +228,7 @@ public class TabSwitcher extends FrameLayout {
         @Override
         public TabView next() {
             if (hasNext()) {
-                View view = getChildAt(getCount() - index);
+                View view = tabContainer.getChildAt(getCount() - index);
                 previous = current;
 
                 if (first == null) {
@@ -385,6 +388,10 @@ public class TabSwitcher extends FrameLayout {
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
+    private Toolbar toolbar;
+
+    private ViewGroup tabContainer;
+
     private Set<Listener> listeners;
 
     private Decorator decorator;
@@ -514,7 +521,19 @@ public class TabSwitcher extends FrameLayout {
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         scrollDirection = ScrollDirection.NONE;
+        inflateLayout();
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
+    }
+
+    private void inflateLayout() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        toolbar = (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, this, false);
+        toolbar.setTitle("test");
+        addView(toolbar, LayoutParams.MATCH_PARENT,
+                ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize));
+        tabContainer = new FrameLayout(getContext());
+        addView(tabContainer, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+
     }
 
     private ViewGroup inflateLayout(@NonNull final Tab tab) {
@@ -770,7 +789,7 @@ public class TabSwitcher extends FrameLayout {
 
                 if (close) {
                     int index = closedTabView.index - 1;
-                    removeViewAt(getChildIndex(index));
+                    tabContainer.removeViewAt(getChildIndex(index));
                     Tab tab = tabs.remove(index);
                     notifyOnTabRemoved(index, tab);
 
@@ -879,8 +898,8 @@ public class TabSwitcher extends FrameLayout {
                 applyTag(tabView);
 
                 if (reset) {
-                    for (int i = 0; i < getChildCount(); i++) {
-                        View view = getChildAt(i);
+                    for (int i = 0; i < tabContainer.getChildCount(); i++) {
+                        View view = tabContainer.getChildAt(i);
                         System.out.println(view.getVisibility() == View.VISIBLE);
                     }
 
@@ -1163,7 +1182,7 @@ public class TabSwitcher extends FrameLayout {
                 view.setAlpha(closedTabAlpha);
                 float closedPosition = calculateClosedTabPosition();
                 float dragPosition = getPosition(Axis.DRAGGING_AXIS,
-                        getChildAt(getChildIndex(tabView.index - 1)));
+                        tabContainer.getChildAt(getChildIndex(tabView.index - 1)));
                 float scale = getScale(view);
                 setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
@@ -1208,7 +1227,7 @@ public class TabSwitcher extends FrameLayout {
         layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = borderMargin;
-        addView(view, getChildCount() - index, layoutParams);
+        tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
         return new TabView(index + 1, view);
     }
 
@@ -1222,7 +1241,7 @@ public class TabSwitcher extends FrameLayout {
                 int childIndex = getChildIndex(index);
 
                 if (!isSwitcherShown()) {
-                    removeViewAt(childIndex);
+                    tabContainer.removeViewAt(childIndex);
                     tabs.remove(index);
                     notifyOnTabRemoved(index, tab);
 
@@ -1235,12 +1254,12 @@ public class TabSwitcher extends FrameLayout {
                         }
 
                         int selectedChildIndex = getChildIndex(selectedTabIndex);
-                        View selectedView = getChildAt(selectedChildIndex);
+                        View selectedView = tabContainer.getChildAt(selectedChildIndex);
                         selectedView.setVisibility(View.VISIBLE);
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
-                    View view = getChildAt(childIndex);
+                    View view = tabContainer.getChildAt(childIndex);
                     TabView tabView = new TabView(index + 1, view);
                     adaptTopMostTabViewWhenClosing(tabView);
                     tabView.tag.closing = true;
@@ -1316,10 +1335,11 @@ public class TabSwitcher extends FrameLayout {
 
                 if (!isSwitcherShown()) {
                     int previouslySelectedChildIndex = getChildIndex(selectedTabIndex);
-                    View previouslySelectedView = getChildAt(previouslySelectedChildIndex);
+                    View previouslySelectedView =
+                            tabContainer.getChildAt(previouslySelectedChildIndex);
                     previouslySelectedView.setVisibility(View.INVISIBLE);
                     int selectedChildIndex = getChildIndex(index);
-                    View selectedView = getChildAt(selectedChildIndex);
+                    View selectedView = tabContainer.getChildAt(selectedChildIndex);
                     selectedView.setVisibility(View.VISIBLE);
                     selectedTabIndex = index;
                     notifyOnSelectionChanged(selectedChildIndex, tab);
@@ -1381,7 +1401,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final boolean isSwitcherShown() {
-        return switcherShown;
+        return switcherShown || isEmpty();
     }
 
     @SuppressWarnings("WrongConstant")
@@ -1467,7 +1487,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void hideSwitcher() {
-        if (isSwitcherShown() && !isAnimationRunning()) {
+        if (isSwitcherShown() && !isEmpty() && !isAnimationRunning()) {
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -1914,7 +1934,7 @@ public class TabSwitcher extends FrameLayout {
         if (getCount() <= 1) {
             return true;
         } else {
-            View view = getChildAt(getCount() - 1);
+            View view = tabContainer.getChildAt(getCount() - 1);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             return tag.state == State.TOP_MOST;
         }
@@ -1924,7 +1944,7 @@ public class TabSwitcher extends FrameLayout {
         if (getCount() <= 1) {
             return true;
         } else {
-            View view = getChildAt(1);
+            View view = tabContainer.getChildAt(1);
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
             return tag.projectedPosition >= maxTabSpacing;
         }
@@ -2346,6 +2366,19 @@ public class TabSwitcher extends FrameLayout {
     public final void removeListener(@NonNull final Listener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.remove(listener);
+    }
+
+    @NonNull
+    public final Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    public final void showToolbar(final boolean show) {
+        toolbar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    public final boolean isToolbarShown() {
+        return toolbar.getVisibility() == View.VISIBLE;
     }
 
 }
