@@ -167,11 +167,24 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
-    public interface Decorator {
+    public abstract static class Decorator {
+
+        public int getViewType(@NonNull final Tab tab) {
+            return 0;
+        }
+
+        public int getViewTypeCount() {
+            return 1;
+        }
 
         @NonNull
-        View inflateLayout(@NonNull LayoutInflater inflater, @NonNull ViewGroup parent,
-                           @NonNull Tab tab);
+        public abstract View onInflateView(@NonNull final LayoutInflater inflater,
+                                           @NonNull final ViewGroup parent, final int viewType);
+
+        public abstract void onShowTab(@NonNull final Context context,
+                                       @NonNull final TabSwitcher tabSwitcher,
+                                       @NonNull final View view, @NonNull final Tab tab,
+                                       final int viewType);
 
     }
 
@@ -603,8 +616,10 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
+        int viewType = getDecorator().getViewType(tab);
         View childView =
-                getDecorator().inflateLayout(layoutInflater, viewHolder.childContainer, tab);
+                getDecorator().onInflateView(layoutInflater, viewHolder.childContainer, viewType);
+        getDecorator().onShowTab(getContext(), this, childView, tab, viewType);
         viewHolder.childContainer.addView(childView, 0,
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         viewHolder.borderView = tabView.findViewById(R.id.border_view);

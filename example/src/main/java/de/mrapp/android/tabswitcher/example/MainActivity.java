@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.example;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -39,16 +40,21 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  */
 public class MainActivity extends AppCompatActivity implements TabSwitcher.Listener {
 
-    public final class Decorator implements TabSwitcher.Decorator {
+    public final class Decorator extends TabSwitcher.Decorator {
 
         @NonNull
         @Override
-        public final View inflateLayout(@NonNull final LayoutInflater inflater,
-                                        @NonNull final ViewGroup parent, @NonNull final Tab tab) {
-            View view = inflater.inflate(R.layout.tab, parent, false);
+        public View onInflateView(@NonNull final LayoutInflater inflater,
+                                  @NonNull final ViewGroup parent, final int viewType) {
+            return inflater.inflate(R.layout.tab, parent, false);
+        }
+
+        @Override
+        public void onShowTab(@NonNull final Context context,
+                              @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
+                              @NonNull final Tab tab, final int viewType) {
             TextView textView = (TextView) view.findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
-            return view;
         }
 
     }
