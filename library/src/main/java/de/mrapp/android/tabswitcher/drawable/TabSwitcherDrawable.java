@@ -14,9 +14,12 @@
 package de.mrapp.android.tabswitcher.drawable;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import de.mrapp.android.tabswitcher.R;
@@ -30,11 +33,47 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcherDrawable extends LayerDrawable {
+public class TabSwitcherDrawable extends Drawable {
+
+    private final int size;
+
+    private final Drawable background;
 
     public TabSwitcherDrawable(@NonNull final Context context) {
-        super(new Drawable[]{
-                ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background)});
+        size = context.getResources().getDimensionPixelSize(R.dimen.tab_switcher_drawable_size);
+        background =
+                ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background);
+    }
+
+    @Override
+    public final void draw(@NonNull final Canvas canvas) {
+        background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        background.draw(canvas);
+    }
+
+    @Override
+    public final int getIntrinsicWidth() {
+        return size;
+    }
+
+    @Override
+    public final int getIntrinsicHeight() {
+        return size;
+    }
+
+    @Override
+    public final void setAlpha(final int alpha) {
+        background.setAlpha(alpha);
+    }
+
+    @Override
+    public final void setColorFilter(@Nullable final ColorFilter colorFilter) {
+        background.setColorFilter(colorFilter);
+    }
+
+    @Override
+    public final int getOpacity() {
+        return PixelFormat.TRANSLUCENT;
     }
 
 }
