@@ -1019,22 +1019,21 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getY();
         } else {
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin;
         }
     }
 
     private void setPosition(@NonNull final Axis axis, @NonNull final View view,
                              final float position) {
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setY(position);
         } else {
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin);
         }
     }
@@ -1042,11 +1041,10 @@ public class TabSwitcher extends FrameLayout {
     private void animatePosition(@NonNull final Axis axis,
                                  @NonNull final ViewPropertyAnimator animator,
                                  @NonNull final View view, final float position) {
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.y(position);
         } else {
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin);
         }
     }
