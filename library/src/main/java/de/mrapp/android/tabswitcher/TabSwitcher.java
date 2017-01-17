@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -461,6 +462,8 @@ public class TabSwitcher extends FrameLayout {
 
     private int tabTitleContainerHeight;
 
+    private int tabShadowWidth;
+
     private ScrollDirection scrollDirection;
 
     private TabView draggedTabView;
@@ -537,6 +540,7 @@ public class TabSwitcher extends FrameLayout {
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
+        tabShadowWidth = resources.getDimensionPixelSize(R.dimen.tab_shadow_width);
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -1044,7 +1048,8 @@ public class TabSwitcher extends FrameLayout {
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getY() -
-                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0);
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
+                            0);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin;
@@ -1054,8 +1059,9 @@ public class TabSwitcher extends FrameLayout {
     private void setPosition(@NonNull final Axis axis, @NonNull final View view,
                              final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setY((isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0) +
-                    position);
+            view.setY(
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
+                            0) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin);
@@ -1066,8 +1072,9 @@ public class TabSwitcher extends FrameLayout {
                                  @NonNull final ViewPropertyAnimator animator,
                                  @NonNull final View view, final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            animator.y((isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0) +
-                    position);
+            animator.y(
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
+                            0) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin);
