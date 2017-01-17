@@ -1019,9 +1019,9 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
-
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getY();
+            return view.getY() -
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin;
@@ -1031,7 +1031,8 @@ public class TabSwitcher extends FrameLayout {
     private void setPosition(@NonNull final Axis axis, @NonNull final View view,
                              final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setY(position);
+            view.setY((isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0) +
+                    position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin);
@@ -1042,7 +1043,8 @@ public class TabSwitcher extends FrameLayout {
                                  @NonNull final ViewPropertyAnimator animator,
                                  @NonNull final View view, final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            animator.y(position);
+            animator.y((isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() * 0.75f : 0) +
+                    position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin);
@@ -1519,6 +1521,7 @@ public class TabSwitcher extends FrameLayout {
 
     public final void hideSwitcher() {
         if (isSwitcherShown() && !isAnimationRunning()) {
+            switcherShown = false;
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -1596,7 +1599,6 @@ public class TabSwitcher extends FrameLayout {
                 }
 
                 if (reset) {
-                    switcherShown = false;
                     hideSwitcherAnimation = null;
                     notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     executePendingAction();
