@@ -802,7 +802,7 @@ public class TabSwitcher extends FrameLayout {
                     if (isEmpty()) {
                         selectedTabIndex = -1;
                         notifyOnSelectionChanged(-1, null);
-                        animateToolbarVisibility(true);
+                        animateToolbarVisibility(isToolbarShown(), 0);
                     } else if (selectedTabIndex == closedTabView.index - 1) {
                         if (selectedTabIndex > 0) {
                             selectedTabIndex--;
@@ -816,7 +816,7 @@ public class TabSwitcher extends FrameLayout {
                     closedTabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                     handleRelease(null);
-                    animateToolbarVisibility(false);
+                    animateToolbarVisibility(false, 0);
                 }
 
                 closeAnimation = null;
@@ -1318,7 +1318,7 @@ public class TabSwitcher extends FrameLayout {
         });
     }
 
-    private void animateToolbarVisibility(final boolean visible) {
+    private void animateToolbarVisibility(final boolean visible, final long startDelay) {
         if (toolbarAnimation != null) {
             toolbarAnimation.cancel();
         }
@@ -1330,6 +1330,7 @@ public class TabSwitcher extends FrameLayout {
             toolbarAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
             toolbarAnimation
                     .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+            toolbarAnimation.setStartDelay(startDelay);
             toolbarAnimation.alpha(targetAlpha);
             toolbarAnimation.start();
         }
@@ -1345,7 +1346,7 @@ public class TabSwitcher extends FrameLayout {
                 selectedTabIndex = -1;
                 notifyOnAllTabsRemoved();
                 notifyOnSelectionChanged(-1, null);
-                animateToolbarVisibility(true);
+                animateToolbarVisibility(isToolbarShown(), 0);
                 closeAnimation = null;
                 executePendingAction();
             }
@@ -1429,7 +1430,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final boolean isSwitcherShown() {
-        return switcherShown || isEmpty();
+        return switcherShown;
     }
 
     @SuppressWarnings("WrongConstant")
@@ -1501,6 +1502,8 @@ public class TabSwitcher extends FrameLayout {
 
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
+                animateToolbarVisibility(isToolbarShown(),
+                        getResources().getInteger(android.R.integer.config_shortAnimTime));
             }
         }
     }
@@ -1515,7 +1518,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     public final void hideSwitcher() {
-        if (isSwitcherShown() && !isEmpty() && !isAnimationRunning()) {
+        if (isSwitcherShown() && !isAnimationRunning()) {
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -1547,7 +1550,7 @@ public class TabSwitcher extends FrameLayout {
 
                 hideSwitcherAnimation.setStartDelay(0);
                 hideSwitcherAnimation.start();
-
+                animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
             }
         }
     }
