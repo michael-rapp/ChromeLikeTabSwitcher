@@ -1656,7 +1656,6 @@ public class TabSwitcher extends FrameLayout {
 
                 if (reset) {
                     hideSwitcherAnimation = null;
-                    notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     executePendingAction();
                 }
             }
