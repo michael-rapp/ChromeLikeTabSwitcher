@@ -533,7 +533,6 @@ public class TabSwitcher extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar = (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, this, false);
         toolbar.setVisibility(View.INVISIBLE);
-        toolbar.setTitle("test");
         addView(toolbar, LayoutParams.MATCH_PARENT,
                 ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize));
         tabContainer = new FrameLayout(getContext());

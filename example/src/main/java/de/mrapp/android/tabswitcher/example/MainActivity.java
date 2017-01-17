@@ -18,11 +18,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,8 +63,36 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
      */
     private TabSwitcher tabSwitcher;
 
-    private View.OnClickListener createUndoSnackbarListener() {
-        return new View.OnClickListener() {
+    private OnClickListener createAddTabListener() {
+        return new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+
+            }
+
+        };
+    }
+
+    private OnMenuItemClickListener createToolbarMenuListener() {
+        return new OnMenuItemClickListener() {
+
+            @Override
+            public boolean onMenuItemClick(final MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.clear_tabs_menu_item:
+                        tabSwitcher.clear();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+        };
+    }
+
+    private OnClickListener createUndoSnackbarListener() {
+        return new OnClickListener() {
 
             @Override
             public void onClick(final View view) {
@@ -103,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     @Override
     public final boolean onCreateOptionsMenu(final Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_main, menu);
+        inflater.inflate(R.menu.tab, menu);
         return true;
     }
 
@@ -112,9 +142,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         switch (item.getItemId()) {
             case R.id.switch_tab_menu_item:
                 tabSwitcher.showSwitcher();
-                return true;
-            case R.id.clear_tabs_menu_item:
-                tabSwitcher.clear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -128,6 +155,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
+        tabSwitcher.showToolbar(true);
+        tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
+        tabSwitcher
+                .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
 
         for (int i = 1; i <= TAB_COUNT; i++) {
             CharSequence title = getString(R.string.tab_title, i);
