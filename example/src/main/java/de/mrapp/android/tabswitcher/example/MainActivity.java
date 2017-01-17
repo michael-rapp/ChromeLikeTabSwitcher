@@ -103,6 +103,16 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
+    public final void onSwitcherShown() {
+
+    }
+
+    @Override
+    public final void onSwitcherHidden() {
+
+    }
+
+    @Override
     public final void onSelectionChanged(final int selectedTabIndex,
                                          @Nullable final Tab selectedTab) {
         if (selectedTab != null) {

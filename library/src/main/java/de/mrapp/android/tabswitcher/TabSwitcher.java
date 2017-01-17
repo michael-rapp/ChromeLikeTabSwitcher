@@ -84,6 +84,16 @@ public class TabSwitcher extends FrameLayout {
     public interface Listener {
 
         /**
+         * The method, which is invoked, when the tab switcher has been shown.
+         */
+        void onSwitcherShown();
+
+        /**
+         * The method, which is invoked, when the tab switcher has been hidden.
+         */
+        void onSwitcherHidden();
+
+        /**
          * The method, which is invoked, when the currently selected tab has been changed.
          *
          * @param selectedTabIndex
@@ -576,6 +586,18 @@ public class TabSwitcher extends FrameLayout {
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         tabView.setTag(R.id.tag_view_holder, viewHolder);
         return tabView;
+    }
+
+    private void notifyOnSwitcherShown() {
+        for (Listener listener : listeners) {
+            listener.onSwitcherShown();
+        }
+    }
+
+    private void notifyOnSwitcherHidden() {
+        for (Listener listener : listeners) {
+            listener.onSwitcherHidden();
+        }
     }
 
     private void notifyOnSelectionChanged(final int selectedTabIndex,
@@ -1440,6 +1462,7 @@ public class TabSwitcher extends FrameLayout {
     public final void showSwitcher() {
         if (!isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = true;
+            notifyOnSwitcherShown();
             attachedPosition = calculateAttachedPosition();
             Iterator iterator = new Iterator();
             TabView tabView;
@@ -1523,6 +1546,7 @@ public class TabSwitcher extends FrameLayout {
     public final void hideSwitcher() {
         if (isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = false;
+            notifyOnSwitcherHidden();
             Iterator iterator = new Iterator();
             TabView tabView;
 
