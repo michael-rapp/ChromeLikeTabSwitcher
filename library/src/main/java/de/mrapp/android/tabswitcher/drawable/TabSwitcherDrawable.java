@@ -14,13 +14,14 @@
 package de.mrapp.android.tabswitcher.drawable;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -33,7 +34,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 /**
  * A drawable, which allows to show the number of tabs, which are currently contained by a {@link
  * TabSwitcher}. It must be registered at a {@link TabSwitcher} instance in order to keep the
- * displayed count up to date.
+ * displayed label up to date.
  *
  * @author Michael Rapp
  * @since 1.0.0
@@ -42,37 +43,55 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listene
 
     private final int size;
 
+    private final int textSizeNormal;
+
+    private final int textSizeSmall;
+
     private final Drawable background;
 
     private final Paint paint;
 
-    private Rect bounds;
-
-    private int count;
+    private String label;
 
     private void update(@NonNull final TabSwitcher tabSwitcher) {
-        count = tabSwitcher.getCount();
+        label = Integer.toString(tabSwitcher.getCount());
+
+        if (label.length() > 2) {
+            label = "99+";
+            paint.setTextSize(textSizeSmall);
+        } else {
+            paint.setTextSize(textSizeNormal);
+        }
+
         invalidateSelf();
     }
 
     public TabSwitcherDrawable(@NonNull final Context context) {
-        size = context.getResources().getDimensionPixelSize(R.dimen.tab_switcher_drawable_size);
+        Resources resources = context.getResources();
+        size = resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_size);
+        textSizeNormal =
+                resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_normal);
+        textSizeSmall =
+                resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_small);
         background =
                 ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.WHITE);
         paint.setTextAlign(Align.CENTER);
-        bounds = new Rect();
-        count = 0;
+        paint.setTextSize(textSizeNormal);
+        paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+        label = Integer.toString(0);
     }
 
     @Override
     public final void draw(@NonNull final Canvas canvas) {
-        bounds.set(0, 0, canvas.getWidth(), canvas.getHeight());
-        background.setBounds(bounds);
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
+        background.setBounds(0, 0, width, height);
         background.draw(canvas);
-        CharSequence text = Integer.toString(count);
-        canvas.drawText(text, 0, text.length(), bounds.centerX(), bounds.centerY(), paint);
+        float x = width / 2f;
+        float y = (height / 2f) - ((paint.descent() + paint.ascent()) / 2f);
+        canvas.drawText(label, x, y, paint);
     }
 
     @Override
