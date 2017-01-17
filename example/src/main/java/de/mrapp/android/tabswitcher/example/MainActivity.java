@@ -106,17 +106,18 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
-    public final void onSwitcherShown() {
+    public final void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher) {
 
     }
 
     @Override
-    public final void onSwitcherHidden() {
+    public final void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher) {
 
     }
 
     @Override
-    public final void onSelectionChanged(final int selectedTabIndex,
+    public final void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher,
+                                         final int selectedTabIndex,
                                          @Nullable final Tab selectedTab) {
         if (selectedTab != null) {
             CharSequence text = getString(R.string.selection_changed_toast, selectedTab.getTitle());
@@ -125,19 +126,21 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
-    public final void onTabAdded(final int index, @NonNull final Tab tab) {
+    public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                 @NonNull final Tab tab) {
 
     }
 
     @Override
-    public final void onTabRemoved(final int index, @NonNull final Tab tab) {
+    public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                   @NonNull final Tab tab) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, createUndoSnackbarListener()).show();
     }
 
     @Override
-    public final void onAllTabsRemoved() {
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, createUndoSnackbarListener()).show();

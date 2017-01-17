@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.widget.ImageButton;
 
 import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.drawable.TabSwitcherDrawable;
 import de.mrapp.android.util.ThemeUtil;
@@ -37,10 +38,13 @@ import de.mrapp.android.util.ViewUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcherButton extends ImageButton {
+public class TabSwitcherButton extends ImageButton implements TabSwitcher.Listener {
+
+    private TabSwitcherDrawable drawable;
 
     private void initialize() {
-        setImageDrawable(new TabSwitcherDrawable(getContext()));
+        drawable = new TabSwitcherDrawable(getContext());
+        setImageDrawable(drawable);
         ViewUtil.setBackground(this,
                 ThemeUtil.getDrawable(getContext(), R.attr.selectableItemBackgroundBorderless));
         setContentDescription(null);
@@ -72,6 +76,40 @@ public class TabSwitcherButton extends ImageButton {
                              @StyleRes final int defaultStyleResource) {
         super(context, attributeSet, defaultStyleAttribute, defaultStyleResource);
         initialize();
+    }
+
+    @Override
+    public final void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher) {
+        drawable.onSwitcherShown(tabSwitcher);
+    }
+
+    @Override
+    public final void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher) {
+        drawable.onSwitcherHidden(tabSwitcher);
+    }
+
+    @Override
+    public final void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher,
+                                         final int selectedTabIndex,
+                                         @Nullable final Tab selectedTab) {
+        drawable.onSelectionChanged(tabSwitcher, selectedTabIndex, selectedTab);
+    }
+
+    @Override
+    public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                 @NonNull final Tab tab) {
+        drawable.onTabAdded(tabSwitcher, index, tab);
+    }
+
+    @Override
+    public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                   @NonNull final Tab tab) {
+        drawable.onTabRemoved(tabSwitcher, index, tab);
+    }
+
+    @Override
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
+        drawable.onAllTabsRemoved(tabSwitcher);
     }
 
 }

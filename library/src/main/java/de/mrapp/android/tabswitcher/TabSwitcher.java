@@ -88,17 +88,28 @@ public class TabSwitcher extends FrameLayout {
 
         /**
          * The method, which is invoked, when the tab switcher has been shown.
+         *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          */
-        void onSwitcherShown();
+        void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher);
 
         /**
          * The method, which is invoked, when the tab switcher has been hidden.
+         *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          */
-        void onSwitcherHidden();
+        void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher);
 
         /**
          * The method, which is invoked, when the currently selected tab has been changed.
          *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          * @param selectedTabIndex
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
@@ -106,34 +117,45 @@ public class TabSwitcher extends FrameLayout {
          *         The currently selected tab as an instance of the class {@link Tab} or null, if
          *         the tab switcher does not contain any tabs
          */
-        void onSelectionChanged(int selectedTabIndex, @Nullable Tab selectedTab);
+        void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher, int selectedTabIndex,
+                                @Nullable Tab selectedTab);
 
         /**
          * The method, which is invoked, when a tab has been added to the tab switcher.
          *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          * @param index
          *         The index of the tab, which has been added, as an {@link Integer} value
          * @param tab
          *         The tab, which has been added, as an instance of the class {@link Tab}. The tab
          *         may not be null
          */
-        void onTabAdded(int index, @NonNull Tab tab);
+        void onTabAdded(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
 
         /**
          * The method, which is invoked, when a tab has been removed from the tab switcher.
          *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          * @param index
          *         The index of the tab, which has been removed, as an {@link Integer} value
          * @param tab
          *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
          *         may not be null
          */
-        void onTabRemoved(int index, @NonNull Tab tab);
+        void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
 
         /**
          * The method, which is invoked, when all tabs have been removed from the tab switcher.
+         *
+         * @param tabSwitcher
+         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
+         *         tab switcher may not be null
          */
-        void onAllTabsRemoved();
+        void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher);
 
     }
 
@@ -596,38 +618,38 @@ public class TabSwitcher extends FrameLayout {
 
     private void notifyOnSwitcherShown() {
         for (Listener listener : listeners) {
-            listener.onSwitcherShown();
+            listener.onSwitcherShown(this);
         }
     }
 
     private void notifyOnSwitcherHidden() {
         for (Listener listener : listeners) {
-            listener.onSwitcherHidden();
+            listener.onSwitcherHidden(this);
         }
     }
 
     private void notifyOnSelectionChanged(final int selectedTabIndex,
                                           @Nullable final Tab selectedTab) {
         for (Listener listener : listeners) {
-            listener.onSelectionChanged(selectedTabIndex, selectedTab);
+            listener.onSelectionChanged(this, selectedTabIndex, selectedTab);
         }
     }
 
     private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
         for (Listener listener : listeners) {
-            listener.onTabAdded(index, tab);
+            listener.onTabAdded(this, index, tab);
         }
     }
 
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
         for (Listener listener : listeners) {
-            listener.onTabRemoved(index, tab);
+            listener.onTabRemoved(this, index, tab);
         }
     }
 
     private void notifyOnAllTabsRemoved() {
         for (Listener listener : listeners) {
-            listener.onAllTabsRemoved();
+            listener.onAllTabsRemoved(this);
         }
     }
 
@@ -2471,8 +2493,10 @@ public class TabSwitcher extends FrameLayout {
             View view = menuItem.getActionView();
 
             if (view instanceof TabSwitcherButton) {
-                view.setOnClickListener(
+                TabSwitcherButton tabSwitcherButton = (TabSwitcherButton) view;
+                tabSwitcherButton.setOnClickListener(
                         createTabSwitcherButtonListener(menuItem, menuItemClickListener));
+                addListener(tabSwitcherButton);
             }
         }
 
