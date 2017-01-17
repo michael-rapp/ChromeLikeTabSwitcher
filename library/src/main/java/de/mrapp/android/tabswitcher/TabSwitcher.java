@@ -1485,6 +1485,11 @@ public class TabSwitcher extends FrameLayout {
         return tabs.get(index);
     }
 
+    public final int indexOf(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
+        return tabs.indexOf(tab);
+    }
+
     public final boolean isSwitcherShown() {
         return switcherShown;
     }
