@@ -2505,7 +2505,7 @@ public class TabSwitcher extends FrameLayout {
         OnMenuItemClickListener menuItemClickListener =
                 createToolbarMenuItemListenerWrapper(listener);
         toolbar.setOnMenuItemClickListener(menuItemClickListener);
-        Menu menu = toolbar.getMenu();
+        Menu menu = getToolbarMenu();
 
         for (int i = 0; i < menu.size(); i++) {
             MenuItem menuItem = menu.getItem(i);
@@ -2518,7 +2518,10 @@ public class TabSwitcher extends FrameLayout {
                 addListener(tabSwitcherButton);
             }
         }
+    }
 
+    public final Menu getToolbarMenu() {
+        return toolbar.getMenu();
     }
 
     private OnClickListener createTabSwitcherButtonListener(@NonNull final MenuItem menuItem,
