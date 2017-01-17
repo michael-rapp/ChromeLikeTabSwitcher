@@ -23,12 +23,16 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -528,6 +532,7 @@ public class TabSwitcher extends FrameLayout {
     private void inflateLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar = (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, this, false);
+        toolbar.setVisibility(View.INVISIBLE);
         toolbar.setTitle("test");
         addView(toolbar, LayoutParams.MATCH_PARENT,
                 ThemeUtil.getDimensionPixelSize(getContext(), R.attr.actionBarSize));
@@ -2379,6 +2384,31 @@ public class TabSwitcher extends FrameLayout {
 
     public final boolean isToolbarShown() {
         return toolbar.getVisibility() == View.VISIBLE;
+    }
+
+    public final void setToolbarTitle(@Nullable final CharSequence title) {
+        toolbar.setTitle(title);
+    }
+
+    public final void setToolbarTitle(@StringRes final int resourceId) {
+        setToolbarTitle(getContext().getText(resourceId));
+    }
+
+    public final void inflateToolbarMenu(@MenuRes final int resourceId,
+                                         @Nullable final OnMenuItemClickListener listener) {
+        toolbar.inflateMenu(resourceId);
+        toolbar.setOnMenuItemClickListener(listener);
+    }
+
+    public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
+                                               @Nullable final OnClickListener listener) {
+        toolbar.setNavigationIcon(icon);
+        toolbar.setNavigationOnClickListener(listener);
+    }
+
+    public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
+                                               @Nullable final OnClickListener listener) {
+        setToolbarNavigationIcon(ContextCompat.getDrawable(getContext(), resourceId), listener);
     }
 
 }
