@@ -1330,8 +1330,8 @@ public class TabSwitcher extends FrameLayout {
         if (toolbar.getAlpha() != targetAlpha) {
             toolbarAnimation = toolbar.animate();
             toolbarAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-            toolbarAnimation
-                    .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+            toolbarAnimation.setDuration(
+                    getResources().getInteger(android.R.integer.config_mediumAnimTime));
             toolbarAnimation.setStartDelay(startDelay);
             toolbarAnimation.alpha(targetAlpha);
             toolbarAnimation.start();
