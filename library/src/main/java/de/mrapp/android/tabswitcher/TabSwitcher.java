@@ -816,7 +816,7 @@ public class TabSwitcher extends FrameLayout {
                     closedTabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                     handleRelease(null);
-                    animateToolbarVisibility(false, 0);
+                    animateToolbarVisibility(true, 0);
                 }
 
                 closeAnimation = null;
