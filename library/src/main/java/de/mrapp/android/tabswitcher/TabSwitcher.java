@@ -1536,7 +1536,7 @@ public class TabSwitcher extends FrameLayout {
             }
 
             TabView selectedTabView = new Iterator(false, selectedTabIndex + 1).next();
-            float targetPosition = getSize(Axis.DRAGGING_AXIS, this) / 2f;
+            float targetPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
             System.out.println("minTabSpacing = " + minTabSpacing);
             System.out.println("maxTabSpacing = " + maxTabSpacing);
             System.out.println("attachedPosition = " + attachedPosition);
@@ -1564,7 +1564,8 @@ public class TabSwitcher extends FrameLayout {
                 float scale = getScale(view);
 
                 if (tabView.index - 1 < selectedTabIndex) {
-                    setPosition(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, this));
+                    setPosition(Axis.DRAGGING_AXIS, view,
+                            getSize(Axis.DRAGGING_AXIS, tabContainer));
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                     setPosition(Axis.DRAGGING_AXIS, view,
@@ -1626,7 +1627,7 @@ public class TabSwitcher extends FrameLayout {
 
                 if (tabView.index - 1 < selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            getSize(Axis.DRAGGING_AXIS, this));
+                            getSize(Axis.DRAGGING_AXIS, tabContainer));
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
                             isDraggingHorizontally() ? 0 : layoutParams.topMargin);
@@ -1979,12 +1980,15 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private Pair<Float, State> calculateBottomMostPositionAndState(@NonNull final TabView tabView) {
+        int toolbarHeight = isToolbarShown() && !isDraggingHorizontally() ?
+                toolbar.getHeight() - tabShadowWidth : 0;
+
         if (tabView.index <= STACKED_TAB_COUNT) {
-            float position = getSize(Axis.DRAGGING_AXIS, this) - tabInset -
+            float position = getSize(Axis.DRAGGING_AXIS, tabContainer) - toolbarHeight - tabInset -
                     (stackedTabSpacing * tabView.index);
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
-            float position = getSize(Axis.DRAGGING_AXIS, this) - tabInset -
+            float position = getSize(Axis.DRAGGING_AXIS, tabContainer) - toolbarHeight - tabInset -
                     (stackedTabSpacing * STACKED_TAB_COUNT);
             return Pair.create(position, State.BOTTOM_MOST_HIDDEN);
         }
@@ -2295,7 +2299,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private float calculateClosedTabPosition() {
-        return getSize(Axis.ORTHOGONAL_AXIS, this);
+        return getSize(Axis.ORTHOGONAL_AXIS, tabContainer);
     }
 
     @Nullable
