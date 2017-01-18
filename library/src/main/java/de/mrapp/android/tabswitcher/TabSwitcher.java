@@ -631,6 +631,14 @@ public class TabSwitcher extends FrameLayout {
         return tabView;
     }
 
+    private void updateView(@NonNull final TabView tabView) {
+        Tab tab = getTab(tabView.index - 1);
+        int viewType = getDecorator().getViewType(tab);
+        getDecorator()
+                .onShowTab(getContext(), this, tabView.viewHolder.childContainer.getChildAt(0), tab,
+                        viewType);
+    }
+
     private void notifyOnSwitcherShown() {
         for (Listener listener : listeners) {
             listener.onSwitcherShown(this);
@@ -1520,6 +1528,7 @@ public class TabSwitcher extends FrameLayout {
 
             while ((tabView = iterator.next()) != null) {
                 tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
+                updateView(tabView);
                 View view = tabView.view;
                 setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
@@ -1669,6 +1678,7 @@ public class TabSwitcher extends FrameLayout {
                 super.onAnimationEnd(animation);
                 View view = tabView.view;
                 tabView.viewHolder.borderView.setVisibility(View.INVISIBLE);
+                updateView(tabView);
 
                 if (tabView.index - 1 != selectedTabIndex) {
                     view.setVisibility(View.INVISIBLE);
@@ -2502,10 +2512,19 @@ public class TabSwitcher extends FrameLayout {
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
         toolbar.inflateMenu(resourceId);
-        OnMenuItemClickListener menuItemClickListener =
-                createToolbarMenuItemListenerWrapper(listener);
-        toolbar.setOnMenuItemClickListener(menuItemClickListener);
-        Menu menu = getToolbarMenu();
+        toolbar.setOnMenuItemClickListener(listener);
+
+    }
+
+    public final Menu getToolbarMenu() {
+        return toolbar.getMenu();
+    }
+
+    public static void setupWithMenu(@NonNull final TabSwitcher tabSwitcher,
+                                     @NonNull final Menu menu,
+                                     @Nullable final OnClickListener listener) {
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureNotNull(menu, "The menu may not be null");
 
         for (int i = 0; i < menu.size(); i++) {
             MenuItem menuItem = menu.getItem(i);
@@ -2513,19 +2532,14 @@ public class TabSwitcher extends FrameLayout {
 
             if (view instanceof TabSwitcherButton) {
                 TabSwitcherButton tabSwitcherButton = (TabSwitcherButton) view;
-                tabSwitcherButton.setOnClickListener(
-                        createTabSwitcherButtonListener(menuItem, menuItemClickListener));
-                addListener(tabSwitcherButton);
+                tabSwitcherButton.setOnClickListener(listener);
+                tabSwitcher.addListener(tabSwitcherButton);
             }
         }
     }
 
-    public final Menu getToolbarMenu() {
-        return toolbar.getMenu();
-    }
-
-    private OnClickListener createTabSwitcherButtonListener(@NonNull final MenuItem menuItem,
-                                                            @NonNull final OnMenuItemClickListener menuItemClickListener) {
+    private static OnClickListener createTabSwitcherButtonListener(@NonNull final MenuItem menuItem,
+                                                                   @NonNull final OnMenuItemClickListener menuItemClickListener) {
         return new OnClickListener() {
 
             @Override
@@ -2536,7 +2550,7 @@ public class TabSwitcher extends FrameLayout {
         };
     }
 
-    private OnMenuItemClickListener createToolbarMenuItemListenerWrapper(
+    private static OnMenuItemClickListener createToolbarMenuItemListenerWrapper(
             @Nullable final OnMenuItemClickListener listener) {
         return new OnMenuItemClickListener() {
 

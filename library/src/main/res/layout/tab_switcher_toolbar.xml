@@ -19,5 +19,5 @@ License.
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="@android:color/transparent"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>

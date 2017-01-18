@@ -15,10 +15,14 @@ License.
 -->
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="Toolbar" parent="@style/ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">?android:attr/textColorSecondary</item>
     </style>
 
 </resources>

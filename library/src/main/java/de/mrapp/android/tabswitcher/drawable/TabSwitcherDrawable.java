@@ -21,6 +21,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -30,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.util.ThemeUtil;
 
 /**
  * A drawable, which allows to show the number of tabs, which are currently contained by a {@link
@@ -74,20 +76,28 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listene
         textSizeSmall =
                 resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_small);
         background =
-                ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background);
+                ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background)
+                        .mutate();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.WHITE);
         paint.setTextAlign(Align.CENTER);
         paint.setTextSize(textSizeNormal);
         paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
         label = Integer.toString(0);
+        int tint = ThemeUtil.getColor(context, android.R.attr.textColorPrimary);
+        setColorFilter(tint, PorterDuff.Mode.MULTIPLY);
     }
 
     @Override
     public final void draw(@NonNull final Canvas canvas) {
         int width = canvas.getWidth();
         int height = canvas.getHeight();
-        background.setBounds(0, 0, width, height);
+        int intrinsicWidth = background.getIntrinsicWidth();
+        int intrinsicHeight = background.getIntrinsicHeight();
+        int left = (width / 2) - (intrinsicWidth / 2);
+        int top = (height / 2) - (intrinsicHeight / 2);
+        background.getIntrinsicWidth();
+        background.setBounds(left, top, left + intrinsicWidth, top + intrinsicHeight);
         background.draw(canvas);
         float x = width / 2f;
         float y = (height / 2f) - ((paint.descent() + paint.ascent()) / 2f);

@@ -19,10 +19,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,7 +46,12 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         @Override
         public View onInflateView(@NonNull final LayoutInflater inflater,
                                   @NonNull final ViewGroup parent, final int viewType) {
-            return inflater.inflate(R.layout.tab, parent, false);
+            View view = inflater.inflate(R.layout.tab, parent, false);
+            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            toolbar.inflateMenu(R.menu.tab);
+            Menu menu = toolbar.getMenu();
+            TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
+            return view;
         }
 
         @Override
@@ -55,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
                               @NonNull final Tab tab, final int viewType) {
             TextView textView = (TextView) view.findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
+            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            toolbar.setVisibility(tabSwitcher.isSwitcherShown() ? View.GONE : View.VISIBLE);
         }
 
     }
@@ -86,15 +93,23 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
             @Override
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.toggle_tab_switcher_menu_item:
-                        tabSwitcher.toggleSwitcherVisibility();
-                        return true;
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
                         return true;
                     default:
                         return false;
                 }
+            }
+
+        };
+    }
+
+    private OnClickListener createTabSwitcherButtonListener() {
+        return new OnClickListener() {
+
+            @Override
+            public void onClick(final View view) {
+                tabSwitcher.toggleSwitcherVisibility();
             }
 
         };
@@ -153,24 +168,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     }
 
     @Override
-    public final boolean onCreateOptionsMenu(final Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.tab, menu);
-        return true;
-    }
-
-    @Override
-    public final boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.switch_tab_menu_item:
-                tabSwitcher.showSwitcher();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -178,9 +175,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
         tabSwitcher.showToolbar(true);
-        tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
+        tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
+        Menu menu = tabSwitcher.getToolbarMenu();
+        TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
 
         for (int i = 1; i <= TAB_COUNT; i++) {
             CharSequence title = getString(R.string.tab_title, i);
