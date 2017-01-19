@@ -35,6 +35,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -441,6 +442,8 @@ public class TabSwitcher extends FrameLayout {
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
 
+    private int[] padding;
+
     private Toolbar toolbar;
 
     private ViewGroup tabContainer;
@@ -549,6 +552,7 @@ public class TabSwitcher extends FrameLayout {
     private void initialize(@Nullable final AttributeSet attributeSet,
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
+        padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
         tabs = new ArrayList<>();
@@ -1057,6 +1061,14 @@ public class TabSwitcher extends FrameLayout {
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
     }
 
+    private int getPadding(@NonNull final Axis axis, final int gravity) {
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            return gravity == Gravity.START ? getPaddingTop() : getPaddingBottom();
+        } else {
+            return gravity == Gravity.START ? getPaddingLeft() : getPaddingRight();
+        }
+    }
+
     private Axis getOrientationInvariantAxis(@NonNull final Axis axis) {
         if (isDraggingHorizontally()) {
             return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
@@ -1072,7 +1084,9 @@ public class TabSwitcher extends FrameLayout {
     private float getScale(@NonNull final View view) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
-        float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin;
+        float targetWidth =
+                width + layoutParams.leftMargin + layoutParams.rightMargin - getPaddingLeft() -
+                        getPaddingRight();
         return targetWidth / width;
     }
 
@@ -1096,10 +1110,10 @@ public class TabSwitcher extends FrameLayout {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getY() -
                     (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0);
+                            0) - getPadding(axis, Gravity.START);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            return view.getX() - layoutParams.leftMargin;
+            return view.getX() - layoutParams.leftMargin - getPadding(axis, Gravity.START);
         }
     }
 
@@ -1108,10 +1122,10 @@ public class TabSwitcher extends FrameLayout {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setY(
                     (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0) + position);
+                            0) + getPadding(axis, Gravity.START) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            view.setX(position + layoutParams.leftMargin);
+            view.setX(position + layoutParams.leftMargin + getPadding(axis, Gravity.START));
         }
     }
 
@@ -1121,7 +1135,7 @@ public class TabSwitcher extends FrameLayout {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.y(
                     (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0) + position);
+                            0) + getPadding(axis, Gravity.START) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin);
@@ -1980,16 +1994,20 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private Pair<Float, State> calculateBottomMostPositionAndState(@NonNull final TabView tabView) {
+        float size = getSize(Axis.DRAGGING_AXIS, tabContainer);
         int toolbarHeight = isToolbarShown() && !isDraggingHorizontally() ?
                 toolbar.getHeight() - tabShadowWidth : 0;
+        int padding = getPadding(Axis.DRAGGING_AXIS, Gravity.START) +
+                getPadding(Axis.DRAGGING_AXIS, Gravity.END);
 
         if (tabView.index <= STACKED_TAB_COUNT) {
-            float position = getSize(Axis.DRAGGING_AXIS, tabContainer) - toolbarHeight - tabInset -
-                    (stackedTabSpacing * tabView.index);
+            float position =
+                    size - toolbarHeight - tabInset - (stackedTabSpacing * tabView.index) - padding;
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
-            float position = getSize(Axis.DRAGGING_AXIS, tabContainer) - toolbarHeight - tabInset -
-                    (stackedTabSpacing * STACKED_TAB_COUNT);
+            float position =
+                    size - toolbarHeight - tabInset - (stackedTabSpacing * STACKED_TAB_COUNT) -
+                            padding;
             return Pair.create(position, State.BOTTOM_MOST_HIDDEN);
         }
     }
@@ -2575,6 +2593,53 @@ public class TabSwitcher extends FrameLayout {
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
         setToolbarNavigationIcon(ContextCompat.getDrawable(getContext(), resourceId), listener);
+    }
+
+    @Override
+    public final void setPadding(final int left, final int top, final int right, final int bottom) {
+        padding = new int[]{left, top, right, bottom};
+        LayoutParams toolbarLayoutParams = (LayoutParams) toolbar.getLayoutParams();
+        toolbarLayoutParams.setMargins(left, top, right, 0);
+    }
+
+    @Override
+    public final int getPaddingLeft() {
+        return padding[0];
+    }
+
+    @Override
+    public final int getPaddingTop() {
+        return padding[1];
+    }
+
+    @Override
+    public final int getPaddingRight() {
+        return padding[2];
+    }
+
+    @Override
+    public final int getPaddingBottom() {
+        return padding[3];
+    }
+
+    @Override
+    public final int getPaddingStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return getLayoutDirection() == LAYOUT_DIRECTION_RTL ? getPaddingRight() :
+                    getPaddingLeft();
+        }
+
+        return getPaddingLeft();
+    }
+
+    @Override
+    public final int getPaddingEnd() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return getLayoutDirection() == LAYOUT_DIRECTION_RTL ? getPaddingLeft() :
+                    getPaddingRight();
+        }
+
+        return getPaddingRight();
     }
 
 }

@@ -18,6 +18,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.OnApplyWindowInsetsListener;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.WindowInsetsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
@@ -75,6 +78,21 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
      * The activity's tab switcher.
      */
     private TabSwitcher tabSwitcher;
+
+    private OnApplyWindowInsetsListener createWindowInsetsListener() {
+        return new OnApplyWindowInsetsListener() {
+
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(final View v,
+                                                          final WindowInsetsCompat insets) {
+                tabSwitcher.setPadding(insets.getSystemWindowInsetLeft(),
+                        insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(),
+                        insets.getSystemWindowInsetBottom());
+                return insets;
+            }
+
+        };
+    }
 
     private OnClickListener createAddTabListener() {
         return new OnClickListener() {
@@ -172,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
+        ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
         tabSwitcher.showToolbar(true);
