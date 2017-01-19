@@ -1549,6 +1549,7 @@ public class TabSwitcher extends FrameLayout {
                 calculateAndClipTopThresholdPosition(tabView, iterator.previous());
             }
 
+            /*
             TabView selectedTabView = new Iterator(false, selectedTabIndex + 1).next();
             float targetPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
             System.out.println("minTabSpacing = " + minTabSpacing);
@@ -1568,6 +1569,7 @@ public class TabSwitcher extends FrameLayout {
 
             handleRelease(null);
             printActualPositions();
+            */
 
             iterator = new Iterator();
 
@@ -1637,18 +1639,20 @@ public class TabSwitcher extends FrameLayout {
                 animateScale(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, 1);
                 LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                 animatePosition(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, view,
-                        isDraggingHorizontally() ? layoutParams.topMargin : 0);
+                        isDraggingHorizontally() ? layoutParams.topMargin - getPaddingTop() : 0);
 
                 if (tabView.index - 1 < selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
                             getSize(Axis.DRAGGING_AXIS, tabContainer));
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
+                            isDraggingHorizontally() ? 0 :
+                                    layoutParams.topMargin - getPaddingTop());
                 } else {
                     view.setVisibility(View.VISIBLE);
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
+                            isDraggingHorizontally() ? 0 :
+                                    layoutParams.topMargin - getPaddingTop());
                 }
 
                 hideSwitcherAnimation.setStartDelay(0);
