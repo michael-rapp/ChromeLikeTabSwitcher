@@ -1138,7 +1138,7 @@ public class TabSwitcher extends FrameLayout {
                             0) + getPadding(axis, Gravity.START) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            animator.x(position + layoutParams.leftMargin);
+            animator.x(position + layoutParams.leftMargin + getPadding(axis, Gravity.START));
         }
     }
 
