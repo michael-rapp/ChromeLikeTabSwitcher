@@ -19,6 +19,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -56,6 +58,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -312,6 +315,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         private ViewGroup childContainer;
 
         private View child;
+
+        private ImageView previewImageView;
 
         private View borderView;
 
@@ -624,6 +629,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
+        viewHolder.previewImageView = (ImageView) tabView.findViewById(R.id.preview_image_view);
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
         Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
         borderDrawable
@@ -633,27 +639,16 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         return tabView;
     }
 
-    private View inflateChildView(@NonNull final LayoutInflater inflater,
-                                  @NonNull final ViewGroup parent, final int viewType) {
+    private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
         View child = childViews.get(viewType);
 
         if (child == null) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
             child = getDecorator().onInflateView(inflater, parent, viewType);
             childViews.put(viewType, child);
         }
 
         return child;
-    }
-
-    private void updateView(@NonNull final TabView tabView) {
-        // TODO: Replace method with rendering into bitmap
-        /*
-        Tab tab = getTab(tabView.index - 1);
-        int viewType = getDecorator().getViewType(tab);
-        getDecorator()
-                .onShowTab(getContext(), this, tabView.viewHolder.childContainer.getChildAt(0), tab,
-                        viewType);
-                        */
     }
 
     private void notifyOnSwitcherShown() {
@@ -1289,12 +1284,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         if (ViewCompat.isLaidOut(this)) {
             detachChildViews();
             TabView tabView = new Iterator(false, index + 1).next();
-            LayoutInflater inflater = LayoutInflater.from(getContext());
             Tab tab = getTab(tabView.index - 1);
             ViewHolder viewHolder = tabView.viewHolder;
-            int viewType = getDecorator().getViewType(tab);
-            viewHolder.child = inflateChildView(inflater, viewHolder.childContainer, viewType);
-            getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+            int viewType = decorator.getViewType(tab);
+            viewHolder.child = inflateChildView(viewHolder.childContainer, viewType);
+            decorator.onShowTab(getContext(), this, viewHolder.child, tab, viewType);
             LayoutParams childLayoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
@@ -1310,11 +1304,32 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
 
-            if (viewHolder.childContainer.getChildCount() > 1) {
+            if (viewHolder.childContainer.getChildCount() > 2) {
                 viewHolder.childContainer.removeViewAt(0);
             }
 
             viewHolder.child = null;
+            viewHolder.previewImageView.setImageBitmap(null);
+        }
+    }
+
+    // TODO: Do only render visible views
+    private void renderChildViews() {
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            ViewHolder viewHolder = tabView.viewHolder;
+            Tab tab = getTab(tabView.index - 1);
+            int viewType = decorator.getViewType(tab);
+            View child = inflateChildView(viewHolder.childContainer, viewType);
+            decorator.onShowTab(getContext(), this, child, tab, viewType);
+            // TODO: Bitmap is too small because margin is not taken into consideration
+            Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
+                    Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            child.draw(canvas);
+            viewHolder.previewImageView.setImageBitmap(bitmap);
         }
     }
 
@@ -1572,12 +1587,15 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             switcherShown = true;
             notifyOnSwitcherShown();
             attachedPosition = calculateAttachedPosition();
+
+            detachChildViews();
+            renderChildViews();
+
             Iterator iterator = new Iterator();
             TabView tabView;
 
             while ((tabView = iterator.next()) != null) {
                 tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
-                updateView(tabView);
                 View view = tabView.view;
                 setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
