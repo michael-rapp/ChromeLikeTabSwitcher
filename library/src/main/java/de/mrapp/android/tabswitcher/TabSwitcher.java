@@ -630,6 +630,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
         viewHolder.previewImageView = (ImageView) tabView.findViewById(R.id.preview_image_view);
+        adaptChildAndPreviewMargins(viewHolder);
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
         Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
         borderDrawable
@@ -1324,7 +1325,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             int viewType = decorator.getViewType(tab);
             View child = inflateChildView(viewHolder.childContainer, viewType);
             decorator.onShowTab(getContext(), this, child, tab, viewType);
-            // TODO: Bitmap is too small because margin is not taken into consideration
             Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
                     Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -2640,13 +2640,21 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-
-            if (viewHolder.child != null) {
-                LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-                childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                        getPaddingBottom());
-            }
+            adaptChildAndPreviewMargins(viewHolder);
         }
+    }
+
+    private void adaptChildAndPreviewMargins(@NonNull final ViewHolder viewHolder) {
+        if (viewHolder.child != null) {
+            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
+            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                    getPaddingBottom());
+        }
+
+        LayoutParams previewLayoutParams =
+                (LayoutParams) viewHolder.previewImageView.getLayoutParams();
+        previewLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                getPaddingBottom());
     }
 
     @Override
