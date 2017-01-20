@@ -34,6 +34,7 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -597,11 +598,13 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
+    private SparseArray<View> childViews = new SparseArray<>();
+
     private ViewGroup inflateTabView(@NonNull final Tab tab) {
         int color = tab.getColor();
-        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
         ViewHolder viewHolder = new ViewHolder();
-        ViewGroup tabView = (ViewGroup) layoutInflater.inflate(R.layout.tab_view, this, false);
+        ViewGroup tabView = (ViewGroup) inflater.inflate(R.layout.tab_view, this, false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
         backgroundDrawable
@@ -619,15 +622,6 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
-        int viewType = getDecorator().getViewType(tab);
-        viewHolder.child =
-                getDecorator().onInflateView(layoutInflater, viewHolder.childContainer, viewType);
-        getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
-        LayoutParams childLayoutParams =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                getPaddingBottom());
-        viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
         Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
         borderDrawable
@@ -637,12 +631,27 @@ public class TabSwitcher extends FrameLayout {
         return tabView;
     }
 
+    private View inflateChildView(@NonNull final LayoutInflater inflater,
+                                  @NonNull final ViewGroup parent, final int viewType) {
+        View child = childViews.get(viewType);
+
+        if (child == null) {
+            child = getDecorator().onInflateView(inflater, parent, viewType);
+            childViews.put(viewType, child);
+        }
+
+        return child;
+    }
+
     private void updateView(@NonNull final TabView tabView) {
+        // TODO: Replace method with rendering into bitmap
+        /*
         Tab tab = getTab(tabView.index - 1);
         int viewType = getDecorator().getViewType(tab);
         getDecorator()
                 .onShowTab(getContext(), this, tabView.viewHolder.childContainer.getChildAt(0), tab,
                         viewType);
+                        */
     }
 
     private void notifyOnSwitcherShown() {
@@ -1242,12 +1251,22 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void run() {
                 tabs.add(index, tab);
-                TabView tabView = addTabView(tab, index);
-                View view = tabView.view;
+                ViewGroup view = inflateTabView(tab);
+                view.setVisibility(View.INVISIBLE);
+                LayoutParams layoutParams =
+                        new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                int borderMargin = -(tabInset + tabBorderWidth);
+                layoutParams.leftMargin = borderMargin;
+                layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
+                layoutParams.rightMargin = borderMargin;
+                layoutParams.bottomMargin = borderMargin;
+                tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
+                TabView tabView = new TabView(index + 1, view);
 
                 if (tabs.size() == 1) {
                     selectedTabIndex = 0;
                     view.setVisibility(View.VISIBLE);
+                    addChildView(index);
                     notifyOnSelectionChanged(0, tab);
                 }
 
@@ -1262,6 +1281,37 @@ public class TabSwitcher extends FrameLayout {
             }
 
         });
+    }
+
+    private void addChildView(final int index) {
+        detachChildViews();
+        TabView tabView = new Iterator(false, index + 1).next();
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        Tab tab = getTab(tabView.index - 1);
+        ViewHolder viewHolder = tabView.viewHolder;
+        int viewType = getDecorator().getViewType(tab);
+        viewHolder.child = inflateChildView(inflater, viewHolder.childContainer, viewType);
+        getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+        LayoutParams childLayoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                getPaddingBottom());
+        viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
+    }
+
+    private void detachChildViews() {
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            ViewHolder viewHolder = tabView.viewHolder;
+
+            if (viewHolder.childContainer.getChildCount() > 1) {
+                viewHolder.childContainer.removeViewAt(0);
+            }
+
+            viewHolder.child = null;
+        }
     }
 
     private ViewTreeObserver.OnGlobalLayoutListener createAddTabViewLayoutListener(
@@ -1317,20 +1367,6 @@ public class TabSwitcher extends FrameLayout {
             }
 
         };
-    }
-
-    private TabView addTabView(@NonNull final Tab tab, final int index) {
-        ViewGroup view = inflateTabView(tab);
-        view.setVisibility(View.INVISIBLE);
-        LayoutParams layoutParams =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        int borderMargin = -(tabInset + tabBorderWidth);
-        layoutParams.leftMargin = borderMargin;
-        layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
-        layoutParams.rightMargin = borderMargin;
-        layoutParams.bottomMargin = borderMargin;
-        tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
-        return new TabView(index + 1, view);
     }
 
     public final void removeTab(@NonNull final Tab tab) {
@@ -2586,9 +2622,12 @@ public class TabSwitcher extends FrameLayout {
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                    getPaddingBottom());
+
+            if (viewHolder.child != null) {
+                LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
+                childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                        getPaddingBottom());
+            }
         }
     }
 
