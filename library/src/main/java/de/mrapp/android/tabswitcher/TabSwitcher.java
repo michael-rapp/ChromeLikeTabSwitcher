@@ -1599,11 +1599,7 @@ public class TabSwitcher extends FrameLayout {
                 animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
                 animatePosition(Axis.DRAGGING_AXIS, showSwitcherAnimation, view,
                         tabView.tag.projectedPosition);
-
-                if (isDraggingHorizontally()) {
-                    animatePosition(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, view, 0);
-                }
-
+                animatePosition(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, view, 0);
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
                 animateToolbarVisibility(isToolbarShown(),
