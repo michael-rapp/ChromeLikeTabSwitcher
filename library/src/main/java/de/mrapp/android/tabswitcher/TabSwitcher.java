@@ -2564,30 +2564,6 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private static OnClickListener createTabSwitcherButtonListener(@NonNull final MenuItem menuItem,
-                                                                   @NonNull final OnMenuItemClickListener menuItemClickListener) {
-        return new OnClickListener() {
-
-            @Override
-            public void onClick(final View view) {
-                menuItemClickListener.onMenuItemClick(menuItem);
-            }
-
-        };
-    }
-
-    private static OnMenuItemClickListener createToolbarMenuItemListenerWrapper(
-            @Nullable final OnMenuItemClickListener listener) {
-        return new OnMenuItemClickListener() {
-
-            @Override
-            public boolean onMenuItemClick(final MenuItem item) {
-                return listener != null && listener.onMenuItemClick(item);
-            }
-
-        };
-    }
-
     public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
                                                @Nullable final OnClickListener listener) {
         toolbar.setNavigationIcon(icon);
