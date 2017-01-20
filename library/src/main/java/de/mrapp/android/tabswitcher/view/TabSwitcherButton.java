@@ -78,6 +78,10 @@ public class TabSwitcherButton extends ImageButton implements TabSwitcher.Listen
         initialize();
     }
 
+    public final void setCount(final int count) {
+        drawable.setCount(count);
+    }
+
     @Override
     public final void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher) {
         drawable.onSwitcherShown(tabSwitcher);

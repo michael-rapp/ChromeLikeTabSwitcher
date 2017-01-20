@@ -55,8 +55,8 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listene
 
     private String label;
 
-    private void update(@NonNull final TabSwitcher tabSwitcher) {
-        label = Integer.toString(tabSwitcher.getCount());
+    private void update(final int count) {
+        label = Integer.toString(count);
 
         if (label.length() > 2) {
             label = "99+";
@@ -86,6 +86,10 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listene
         label = Integer.toString(0);
         int tint = ThemeUtil.getColor(context, android.R.attr.textColorPrimary);
         setColorFilter(tint, PorterDuff.Mode.MULTIPLY);
+    }
+
+    public final void setCount(final int count) {
+        update(count);
     }
 
     @Override
@@ -151,18 +155,18 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listene
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
                                  @NonNull final Tab tab) {
-        update(tabSwitcher);
+        update(tabSwitcher.getCount());
     }
 
     @Override
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
                                    @NonNull final Tab tab) {
-        update(tabSwitcher);
+        update(tabSwitcher.getCount());
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
-        update(tabSwitcher);
+        update(tabSwitcher.getCount());
     }
 
 }

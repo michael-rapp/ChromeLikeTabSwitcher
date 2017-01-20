@@ -2613,6 +2613,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             if (view instanceof TabSwitcherButton) {
                 TabSwitcherButton tabSwitcherButton = (TabSwitcherButton) view;
                 tabSwitcherButton.setOnClickListener(listener);
+                tabSwitcherButton.setCount(tabSwitcher.getCount());
                 tabSwitcher.addListener(tabSwitcherButton);
             }
         }
