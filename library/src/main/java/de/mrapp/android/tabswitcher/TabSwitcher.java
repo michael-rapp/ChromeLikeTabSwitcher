@@ -1498,6 +1498,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                     View selectedView = tabContainer.getChildAt(selectedChildIndex);
                     selectedView.setVisibility(View.VISIBLE);
                     selectedTabIndex = index;
+                    addChildView(index);
                     notifyOnSelectionChanged(selectedChildIndex, tab);
                 } else {
                     selectedTabIndex = index;
