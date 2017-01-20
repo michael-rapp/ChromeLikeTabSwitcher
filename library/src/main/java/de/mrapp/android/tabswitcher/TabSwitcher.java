@@ -309,6 +309,8 @@ public class TabSwitcher extends FrameLayout {
 
         private ViewGroup childContainer;
 
+        private View child;
+
         private View borderView;
 
     }
@@ -618,11 +620,14 @@ public class TabSwitcher extends FrameLayout {
         viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
         viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
         int viewType = getDecorator().getViewType(tab);
-        View childView =
+        viewHolder.child =
                 getDecorator().onInflateView(layoutInflater, viewHolder.childContainer, viewType);
-        getDecorator().onShowTab(getContext(), this, childView, tab, viewType);
-        viewHolder.childContainer.addView(childView, 0,
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+        LayoutParams childLayoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                getPaddingBottom());
+        viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
         viewHolder.borderView = tabView.findViewById(R.id.border_view);
         Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
         borderDrawable
@@ -2599,6 +2604,15 @@ public class TabSwitcher extends FrameLayout {
         padding = new int[]{left, top, right, bottom};
         LayoutParams toolbarLayoutParams = (LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setMargins(left, top, right, 0);
+        Iterator iterator = new Iterator();
+        TabView tabView;
+
+        while ((tabView = iterator.next()) != null) {
+            ViewHolder viewHolder = tabView.viewHolder;
+            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
+            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                    getPaddingBottom());
+        }
     }
 
     @Override
