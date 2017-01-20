@@ -1636,19 +1636,20 @@ public class TabSwitcher extends FrameLayout {
                 animateScale(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, 1);
                 LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
                 animatePosition(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, view,
-                        isDraggingHorizontally() ? layoutParams.topMargin - getPaddingTop() : 0);
+                        isDraggingHorizontally() ? layoutParams.topMargin - getPaddingTop() :
+                                -getPaddingLeft());
 
                 if (tabView.index - 1 < selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
                             getSize(Axis.DRAGGING_AXIS, tabContainer));
                 } else if (tabView.index - 1 > selectedTabIndex) {
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 :
+                            isDraggingHorizontally() ? -getPaddingLeft() :
                                     layoutParams.topMargin - getPaddingTop());
                 } else {
                     view.setVisibility(View.VISIBLE);
                     animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 :
+                            isDraggingHorizontally() ? -getPaddingLeft() :
                                     layoutParams.topMargin - getPaddingTop());
                 }
 
