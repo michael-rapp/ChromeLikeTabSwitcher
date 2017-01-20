@@ -2328,9 +2328,13 @@ public class TabSwitcher extends FrameLayout {
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            if ((tabView.tag.state == State.VISIBLE || tabView.tag.state == State.TOP_MOST) &&
-                    tabView.view.getY() <= position) {
-                return tabView;
+            if (tabView.tag.state == State.VISIBLE || tabView.tag.state == State.TOP_MOST) {
+                View view = tabView.view;
+                float viewPosition = isDraggingHorizontally() ? view.getX() : view.getY();
+
+                if (viewPosition <= position) {
+                    return tabView;
+                }
             }
         }
 
