@@ -31,6 +31,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
@@ -80,7 +81,7 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout {
+public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGlobalLayoutListener {
 
     /**
      * Defines the interface, a class, which should be notified about a tab switcher's events, must
@@ -553,6 +554,7 @@ public class TabSwitcher extends FrameLayout {
     private void initialize(@Nullable final AttributeSet attributeSet,
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
+        getViewTreeObserver().addOnGlobalLayoutListener(this);
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
@@ -1284,19 +1286,21 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private void addChildView(final int index) {
-        detachChildViews();
-        TabView tabView = new Iterator(false, index + 1).next();
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        Tab tab = getTab(tabView.index - 1);
-        ViewHolder viewHolder = tabView.viewHolder;
-        int viewType = getDecorator().getViewType(tab);
-        viewHolder.child = inflateChildView(inflater, viewHolder.childContainer, viewType);
-        getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
-        LayoutParams childLayoutParams =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                getPaddingBottom());
-        viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
+        if (ViewCompat.isLaidOut(this)) {
+            detachChildViews();
+            TabView tabView = new Iterator(false, index + 1).next();
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            Tab tab = getTab(tabView.index - 1);
+            ViewHolder viewHolder = tabView.viewHolder;
+            int viewType = getDecorator().getViewType(tab);
+            viewHolder.child = inflateChildView(inflater, viewHolder.childContainer, viewType);
+            getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+            LayoutParams childLayoutParams =
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                    getPaddingBottom());
+            viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
+        }
     }
 
     private void detachChildViews() {
@@ -1322,14 +1326,7 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onGlobalLayout() {
                 View view = tabView.view;
-
-                // TODO: Add method including API check to ViewUtil
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-
+                removeOnGlobalLayoutListener(view);
                 view.setVisibility(View.VISIBLE);
                 view.setAlpha(closedTabAlpha);
                 float closedPosition = calculateClosedTabPosition();
@@ -2669,6 +2666,24 @@ public class TabSwitcher extends FrameLayout {
         }
 
         return getPaddingRight();
+    }
+
+    @Override
+    public final void onGlobalLayout() {
+        removeOnGlobalLayoutListener(this);
+
+        if (selectedTabIndex != -1) {
+            addChildView(selectedTabIndex);
+        }
+    }
+
+    // TODO: Add method including API check to ViewUtil
+    private void removeOnGlobalLayoutListener(@NonNull final View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        } else {
+            view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        }
     }
 
 }
