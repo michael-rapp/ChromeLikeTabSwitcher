@@ -597,7 +597,7 @@ public class TabSwitcher extends FrameLayout {
 
     }
 
-    private ViewGroup inflateLayout(@NonNull final Tab tab) {
+    private ViewGroup inflateTabView(@NonNull final Tab tab) {
         int color = tab.getColor();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         ViewHolder viewHolder = new ViewHolder();
@@ -1320,7 +1320,7 @@ public class TabSwitcher extends FrameLayout {
     }
 
     private TabView addTabView(@NonNull final Tab tab, final int index) {
-        ViewGroup view = inflateLayout(tab);
+        ViewGroup view = inflateTabView(tab);
         view.setVisibility(View.INVISIBLE);
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
