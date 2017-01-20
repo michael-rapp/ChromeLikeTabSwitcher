@@ -502,8 +502,6 @@ public class TabSwitcher extends FrameLayout {
 
     private int tabTitleContainerHeight;
 
-    private int tabShadowWidth;
-
     private ScrollDirection scrollDirection;
 
     private TabView draggedTabView;
@@ -581,7 +579,6 @@ public class TabSwitcher extends FrameLayout {
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        tabShadowWidth = resources.getDimensionPixelSize(R.dimen.tab_shadow_width);
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -1109,8 +1106,8 @@ public class TabSwitcher extends FrameLayout {
     private float getPosition(@NonNull final Axis axis, @NonNull final View view) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getY() -
-                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0) - getPadding(axis, Gravity.START);
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabInset : 0) -
+                    getPadding(axis, Gravity.START);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin - getPadding(axis, Gravity.START);
@@ -1120,9 +1117,8 @@ public class TabSwitcher extends FrameLayout {
     private void setPosition(@NonNull final Axis axis, @NonNull final View view,
                              final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setY(
-                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0) + getPadding(axis, Gravity.START) + position);
+            view.setY((isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabInset : 0) +
+                    getPadding(axis, Gravity.START) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin + getPadding(axis, Gravity.START));
@@ -1134,8 +1130,8 @@ public class TabSwitcher extends FrameLayout {
                                  @NonNull final View view, final float position) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.y(
-                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabShadowWidth :
-                            0) + getPadding(axis, Gravity.START) + position);
+                    (isToolbarShown() && isSwitcherShown() ? toolbar.getHeight() - tabInset : 0) +
+                            getPadding(axis, Gravity.START) + position);
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin + getPadding(axis, Gravity.START));
@@ -1999,8 +1995,8 @@ public class TabSwitcher extends FrameLayout {
 
     private Pair<Float, State> calculateBottomMostPositionAndState(@NonNull final TabView tabView) {
         float size = getSize(Axis.DRAGGING_AXIS, tabContainer);
-        int toolbarHeight = isToolbarShown() && !isDraggingHorizontally() ?
-                toolbar.getHeight() - tabShadowWidth : 0;
+        int toolbarHeight =
+                isToolbarShown() && !isDraggingHorizontally() ? toolbar.getHeight() - tabInset : 0;
         int padding = getPadding(Axis.DRAGGING_AXIS, Gravity.START) +
                 getPadding(Axis.DRAGGING_AXIS, Gravity.END);
 

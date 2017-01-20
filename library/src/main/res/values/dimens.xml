@@ -20,7 +20,6 @@ License.
     <dimen name="tab_title_container_height">48dp</dimen>
     <dimen name="tab_title_padding">12dp</dimen>
     <dimen name="tab_title_drawable_padding">8dp</dimen>
-    <dimen name="tab_shadow_width">15dp</dimen>
     <dimen name="min_tab_spacing">64dp</dimen>
     <dimen name="max_tab_spacing">112dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>
