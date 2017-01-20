@@ -1729,9 +1729,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 super.onAnimationEnd(animation);
                 View view = tabView.view;
                 tabView.viewHolder.borderView.setVisibility(View.INVISIBLE);
-                updateView(tabView);
 
-                if (tabView.index - 1 != selectedTabIndex) {
+                if (tabView.index - 1 == selectedTabIndex) {
+                    addChildView(tabView.index - 1);
+                } else {
                     view.setVisibility(View.INVISIBLE);
                 }
 
