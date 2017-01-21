@@ -892,7 +892,7 @@ public class TabSwitcher extends FrameLayout {
                     }
                 } else {
                     View view = closedTabView.view;
-                    adaptTopMostTabViewWhenClosingAborted(closedTabView);
+                    adaptTopMostTabViewWhenClosingAborted(closedTabView, closedTabView.index + 1);
                     closedTabView.tag.closing = false;
                     setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
                     handleRelease(null);
@@ -952,7 +952,7 @@ public class TabSwitcher extends FrameLayout {
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                adaptTopMostTabViewWhenClosingAborted(closedTabView);
+                adaptTopMostTabViewWhenClosingAborted(closedTabView, closedTabView.index);
 
                 if (listener != null) {
                     listener.onAnimationEnd(animation);
@@ -1364,7 +1364,7 @@ public class TabSwitcher extends FrameLayout {
                 } else {
                     View view = tabContainer.getChildAt(childIndex);
                     TabView tabView = new TabView(index + 1, view);
-                    adaptTopMostTabViewWhenClosing(tabView);
+                    adaptTopMostTabViewWhenClosing(tabView, tabView.index + 1);
                     tabView.tag.closing = true;
                     setPivot(Axis.DRAGGING_AXIS, view,
                             getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
@@ -2271,7 +2271,7 @@ public class TabSwitcher extends FrameLayout {
         View view = draggedTabView.view;
 
         if (!draggedTabView.tag.closing) {
-            adaptTopMostTabViewWhenClosing(draggedTabView);
+            adaptTopMostTabViewWhenClosing(draggedTabView, draggedTabView.index + 1);
         }
 
         draggedTabView.tag.closing = true;
@@ -2288,9 +2288,10 @@ public class TabSwitcher extends FrameLayout {
         view.setAlpha(closedTabAlpha + ratio * (1 - closedTabAlpha));
     }
 
-    private void adaptTopMostTabViewWhenClosing(@NonNull final TabView closedTabView) {
+    private void adaptTopMostTabViewWhenClosing(@NonNull final TabView closedTabView,
+                                                final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, closedTabView.index + 1);
+            Iterator iterator = new Iterator(false, index);
             TabView tabView = iterator.next();
 
             if (tabView != null) {
@@ -2303,16 +2304,16 @@ public class TabSwitcher extends FrameLayout {
         }
     }
 
-    private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView) {
+    private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView,
+                                                       final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, closedTabView.index, closedTabView.index + 1);
-            TabView tabView;
+            Iterator iterator = new Iterator(false, index);
+            TabView tabView = iterator.next();
 
-            while ((tabView = iterator.next()) != null) {
+            if (tabView != null) {
                 if (tabView.tag.state == State.TOP_MOST) {
                     tabView.tag.state = State.TOP_MOST_HIDDEN;
                     adaptVisibility(tabView);
-                    break;
                 }
             }
         }
