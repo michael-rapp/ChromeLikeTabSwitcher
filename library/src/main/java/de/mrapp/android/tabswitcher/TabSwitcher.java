@@ -1287,9 +1287,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             TabView tabView = new Iterator(false, index + 1).next();
             Tab tab = getTab(tabView.index - 1);
             ViewHolder viewHolder = tabView.viewHolder;
-            int viewType = decorator.getViewType(tab);
+            int viewType = getDecorator().getViewType(tab);
             viewHolder.child = inflateChildView(viewHolder.childContainer, viewType);
-            decorator.onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+            getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
             LayoutParams childLayoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
@@ -1322,9 +1322,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
             Tab tab = getTab(tabView.index - 1);
-            int viewType = decorator.getViewType(tab);
+            int viewType = getDecorator().getViewType(tab);
             View child = inflateChildView(viewHolder.childContainer, viewType);
-            decorator.onShowTab(getContext(), this, child, tab, viewType);
+            getDecorator().onShowTab(getContext(), this, child, tab, viewType);
             Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
                     Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
