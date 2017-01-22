@@ -1332,7 +1332,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-            Tab tab = getTab(tabView.index - 1);
+            Tab tab = getTab(tabView.index);
             int viewType = getDecorator().getViewType(tab);
             View child = inflateChildView(viewHolder.childContainer, viewType);
             getDecorator().onShowTab(getContext(), this, child, tab, viewType);
