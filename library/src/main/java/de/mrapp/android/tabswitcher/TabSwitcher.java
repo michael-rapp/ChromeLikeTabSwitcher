@@ -2104,7 +2104,9 @@ public class TabSwitcher extends FrameLayout {
         while ((tabView = iterator.next()) != null) {
             View view = tabView.view;
 
-            if (firstVisibleIndex == -1) {
+            if (!iterator.hasNext()) {
+                view.setCameraDistance(maxCameraDistance);
+            } else if (firstVisibleIndex == -1) {
                 view.setCameraDistance(minCameraDistance);
 
                 if (tabView.tag.state == State.VISIBLE) {
