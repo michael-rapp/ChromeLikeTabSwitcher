@@ -612,7 +612,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
-    private SparseArray<View> childViews = new SparseArray<>();
+    private SparseArray<View> childViews;
 
     private ViewGroup inflateTabView(@NonNull final Tab tab) {
         int color = tab.getColor();
@@ -648,7 +648,13 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
-        View child = childViews.get(viewType);
+        View child = null;
+
+        if (childViews == null) {
+            childViews = new SparseArray<>(getDecorator().getViewTypeCount());
+        } else {
+            child = childViews.get(viewType);
+        }
 
         if (child == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -2567,6 +2573,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     public final void setDecorator(@NonNull final Decorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
+        this.childViews = null;
     }
 
     public final Decorator getDecorator() {
