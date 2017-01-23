@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
     /**
      * The number of tabs, which are contained by the example app's tab switcher.
      */
-    private static final int TAB_COUNT = 12;
+    private static final int TAB_COUNT = 2;
 
     /**
      * The activity's tab switcher.

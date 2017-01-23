@@ -15,6 +15,8 @@ package de.mrapp.android.tabswitcher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -533,6 +535,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     private int pointerId = -1;
 
     private ViewPropertyAnimator showSwitcherAnimation;
+
+    private ValueAnimator marginAnimation;
 
     private ViewPropertyAnimator hideSwitcherAnimation;
 
@@ -1598,6 +1602,13 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         return switcherShown;
     }
 
+    private int calculateTabViewMargin(@NonNull final View view) {
+        Axis axis = isDraggingHorizontally() ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
+        return Math.round(getSize(axis, view) - (getSize(axis, tabContainer) - tabInset -
+                (isDraggingHorizontally() ? 0 : STACKED_TAB_COUNT * stackedTabSpacing) -
+                (isToolbarShown() ? toolbar.getHeight() - tabInset : 0)));
+    }
+
     @SuppressWarnings("WrongConstant")
     public final void showSwitcher() {
         if (!isSwitcherShown() && !isAnimationRunning()) {
@@ -1658,9 +1669,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             isDraggingHorizontally() ? 0 : layoutParams.topMargin);
                 }
 
+                long animationDuration =
+                        getResources().getInteger(android.R.integer.config_longAnimTime);
+                animateMargin(view, calculateTabViewMargin(view), animationDuration);
                 showSwitcherAnimation = view.animate();
-                showSwitcherAnimation.setDuration(
-                        getResources().getInteger(android.R.integer.config_longAnimTime));
+                showSwitcherAnimation.setDuration(animationDuration);
                 showSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                 showSwitcherAnimation.setListener(
                         createShowSwitcherAnimationListener(tabView, !iterator.hasNext()));
@@ -1671,10 +1684,37 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 animatePosition(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, view, 0, true);
                 showSwitcherAnimation.setStartDelay(0);
                 showSwitcherAnimation.start();
+
                 animateToolbarVisibility(isToolbarShown(),
                         getResources().getInteger(android.R.integer.config_shortAnimTime));
             }
         }
+    }
+
+    private void animateMargin(@NonNull final View view, final int targetMargin,
+                               final long animationDuration) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        int initialMargin = layoutParams.bottomMargin;
+        marginAnimation = ValueAnimator.ofInt(targetMargin - initialMargin);
+        marginAnimation.setDuration(animationDuration);
+        marginAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        marginAnimation.setStartDelay(0);
+        marginAnimation.addUpdateListener(createMarginAnimatorUpdateListener(view, initialMargin));
+        marginAnimation.start();
+    }
+
+    private AnimatorUpdateListener createMarginAnimatorUpdateListener(@NonNull final View view,
+                                                                      final int initialMargin) {
+        return new AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                layoutParams.bottomMargin = initialMargin + (int) animation.getAnimatedValue();
+                view.setLayoutParams(layoutParams);
+            }
+
+        };
     }
 
     private void printActualPositions() {
@@ -1695,9 +1735,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
             while ((tabView = iterator.next()) != null) {
                 View view = tabView.view;
+                long animationDuration =
+                        getResources().getInteger(android.R.integer.config_longAnimTime);
+                animateMargin(view, -(tabInset + tabBorderWidth), animationDuration);
                 hideSwitcherAnimation = view.animate();
-                hideSwitcherAnimation.setDuration(
-                        getResources().getInteger(android.R.integer.config_longAnimTime));
+                hideSwitcherAnimation.setDuration(animationDuration);
                 hideSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                 hideSwitcherAnimation.setListener(
                         createHideSwitcherAnimationListener(tabView, !iterator.hasNext()));
@@ -1745,6 +1787,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                 if (reset) {
                     showSwitcherAnimation = null;
+                    marginAnimation = null;
                     executePendingAction();
                 }
             }
@@ -1770,6 +1813,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                 if (reset) {
                     hideSwitcherAnimation = null;
+                    marginAnimation = null;
                     executePendingAction();
                 }
             }
@@ -2125,9 +2169,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private boolean isAnimationRunning() {
-        return showSwitcherAnimation != null || hideSwitcherAnimation != null ||
-                overshootAnimation != null || overshootUpAnimation != null ||
-                closeAnimation != null || relocateAnimation != null;
+        return showSwitcherAnimation != null || marginAnimation != null ||
+                hideSwitcherAnimation != null || overshootAnimation != null ||
+                overshootUpAnimation != null || closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {

@@ -57,7 +57,7 @@ License.
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="@null"
-            android:scaleType="fitStart"/>
+            android:scaleType="matrix"/>
 
         <View
             android:id="@+id/border_view"
