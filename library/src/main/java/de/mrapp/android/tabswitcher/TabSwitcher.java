@@ -275,9 +275,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         private int index;
 
-        private View view;
+        private Tab tab;
 
         private Tag tag;
+
+        private View view;
 
         private ViewHolder viewHolder;
 
@@ -285,6 +287,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             ensureAtLeast(index, 0, "The index must be at least 0");
             ensureNotNull(view, "The view may not be null");
             this.index = index;
+            this.tab = getTab(index);
             this.view = view;
             this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             this.tag = (Tag) view.getTag(R.id.tag_properties);
@@ -926,8 +929,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 if (close) {
                     int index = closedTabView.index;
                     tabContainer.removeViewAt(getChildIndex(index));
-                    Tab tab = tabs.remove(index);
-                    notifyOnTabRemoved(index, tab);
+                    tabs.remove(index);
+                    notifyOnTabRemoved(index, closedTabView.tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
@@ -938,7 +941,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             selectedTabIndex--;
                         }
 
-                        notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
+                        notifyOnSelectionChanged(selectedTabIndex, closedTabView.tab);
                     }
                 } else {
                     View view = closedTabView.view;
@@ -1298,7 +1301,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 View view = viewRecycler.inflateTabView(tab, index);
                 TabView tabView = new TabView(index, view);
 
-                if (tabs.size() == 1) {
+                if (getCount() == 1) {
                     selectedTabIndex = 0;
                     addChildView(index);
                     notifyOnSelectionChanged(0, tab);
@@ -1320,11 +1323,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     private void addChildView(final int index) {
         if (ViewCompat.isLaidOut(this)) {
             TabView tabView = new Iterator(false, index).next();
-            Tab tab = getTab(tabView.index);
             ViewHolder viewHolder = tabView.viewHolder;
-            int viewType = getDecorator().getViewType(tab);
+            int viewType = getDecorator().getViewType(tabView.tab);
             viewHolder.child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
-            getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
+            getDecorator().onShowTab(getContext(), this, viewHolder.child, tabView.tab, viewType);
             LayoutParams childLayoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
@@ -1353,10 +1355,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-            Tab tab = getTab(tabView.index);
-            int viewType = getDecorator().getViewType(tab);
+            int viewType = getDecorator().getViewType(tabView.tab);
             View child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
-            getDecorator().onShowTab(getContext(), this, child, tab, viewType);
+            getDecorator().onShowTab(getContext(), this, child, tabView.tab, viewType);
             Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
                     Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
@@ -2342,7 +2343,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                     closeDragHelper.hasThresholdBeenReached()) {
                 TabView tabView = getFocusedTabView(dragHelper.getDragStartPosition());
 
-                if (tabView != null && getTab(tabView.index).isCloseable()) {
+                if (tabView != null && tabView.tab.isCloseable()) {
                     draggedTabView = tabView;
                 }
             }
@@ -2530,8 +2531,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         TabView tabView = getFocusedTabView(getPosition(Axis.DRAGGING_AXIS, event));
 
         if (tabView != null) {
-            Tab tab = getTab(tabView.index);
-            selectTab(tab);
+            selectTab(tabView.tab);
         }
     }
 
