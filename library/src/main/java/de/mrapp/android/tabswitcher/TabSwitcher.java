@@ -1304,7 +1304,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private void addChildView(final int index) {
         if (ViewCompat.isLaidOut(this)) {
-            detachChildViews();
             TabView tabView = new Iterator(false, index).next();
             Tab tab = getTab(tabView.index);
             ViewHolder viewHolder = tabView.viewHolder;
@@ -1319,20 +1318,17 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         }
     }
 
-    private void detachChildViews() {
-        Iterator iterator = new Iterator();
-        TabView tabView;
+    private void detachChildView(final int index) {
+        TabView tabView = new Iterator(false, index).next();
+        ViewHolder viewHolder = tabView.viewHolder;
 
-        while ((tabView = iterator.next()) != null) {
-            ViewHolder viewHolder = tabView.viewHolder;
-
-            if (viewHolder.childContainer.getChildCount() > 2) {
-                viewHolder.childContainer.removeViewAt(0);
-            }
-
-            viewHolder.child = null;
-            viewHolder.previewImageView.setImageBitmap(null);
+        if (viewHolder.childContainer.getChildCount() > 2) {
+            viewHolder.childContainer.removeViewAt(0);
         }
+
+        viewHolder.child = null;
+        viewHolder.previewImageView.setImageBitmap(null);
+        viewHolder.previewImageView.setVisibility(View.GONE);
     }
 
     // TODO: Do only render visible views
@@ -1351,6 +1347,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             Canvas canvas = new Canvas(bitmap);
             child.draw(canvas);
             viewHolder.previewImageView.setImageBitmap(bitmap);
+            viewHolder.previewImageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1427,6 +1424,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                         int selectedChildIndex = getChildIndex(selectedTabIndex);
                         View selectedView = tabContainer.getChildAt(selectedChildIndex);
+                        addChildView(selectedTabIndex);
                         selectedView.setVisibility(View.VISIBLE);
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
@@ -1616,9 +1614,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             notifyOnSwitcherShown();
             attachedPosition = calculateAttachedPosition();
 
-            detachChildViews();
-            renderChildViews();
+            if (selectedTabIndex != -1) {
+                detachChildView(selectedTabIndex);
+            }
 
+            renderChildViews();
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -1804,6 +1804,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 super.onAnimationEnd(animation);
                 View view = tabView.view;
                 tabView.viewHolder.borderView.setVisibility(View.INVISIBLE);
+                detachChildView(tabView.index);
 
                 if (tabView.index == selectedTabIndex) {
                     addChildView(tabView.index);
