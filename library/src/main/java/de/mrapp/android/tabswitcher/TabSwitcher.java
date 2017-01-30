@@ -200,6 +200,53 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         private SparseArray<View> childViews;
 
+        private View inflateTabView(@NonNull final Tab tab) {
+            int color = tab.getColor();
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            ViewHolder viewHolder = new ViewHolder();
+            View tabView = inflater.inflate(R.layout.tab_view, tabContainer, false);
+            Drawable backgroundDrawable =
+                    ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
+            backgroundDrawable.setColorFilter(color != -1 ? color : tabBackgroundColor,
+                    PorterDuff.Mode.MULTIPLY);
+            ViewUtil.setBackground(tabView, backgroundDrawable);
+            int padding = tabInset + tabBorderWidth;
+            tabView.setPadding(padding, tabInset, padding, padding);
+            viewHolder.titleContainer = (ViewGroup) tabView.findViewById(R.id.tab_title_container);
+            viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
+            viewHolder.titleTextView.setText(tab.getTitle());
+            viewHolder.titleTextView
+                    .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(getContext()), null, null,
+                            null);
+            viewHolder.closeButton = (ImageButton) tabView.findViewById(R.id.close_tab_button);
+            viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
+            viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
+            viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
+            viewHolder.previewImageView = (ImageView) tabView.findViewById(R.id.preview_image_view);
+            adaptChildAndPreviewMargins(viewHolder);
+            viewHolder.borderView = tabView.findViewById(R.id.border_view);
+            Drawable borderDrawable =
+                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
+            borderDrawable.setColorFilter(color != -1 ? color : tabBackgroundColor,
+                    PorterDuff.Mode.MULTIPLY);
+            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
+            tabView.setTag(R.id.tag_view_holder, viewHolder);
+            return tabView;
+        }
+
+        public View inflateTabView(@NonNull final Tab tab, final int index) {
+            View view = inflateTabView(tab);
+            LayoutParams layoutParams =
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            int borderMargin = -(tabInset + tabBorderWidth);
+            layoutParams.leftMargin = borderMargin;
+            layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
+            layoutParams.rightMargin = borderMargin;
+            layoutParams.bottomMargin = borderMargin;
+            tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
+            return view;
+        }
+
         public View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
             View child = null;
 
@@ -645,39 +692,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         tabContainer = new FrameLayout(getContext());
         addView(tabContainer, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
-    }
-
-    private ViewGroup inflateTabView(@NonNull final Tab tab) {
-        int color = tab.getColor();
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        ViewHolder viewHolder = new ViewHolder();
-        ViewGroup tabView = (ViewGroup) inflater.inflate(R.layout.tab_view, this, false);
-        Drawable backgroundDrawable =
-                ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
-        backgroundDrawable
-                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-        ViewUtil.setBackground(tabView, backgroundDrawable);
-        int padding = tabInset + tabBorderWidth;
-        tabView.setPadding(padding, tabInset, padding, padding);
-        viewHolder.titleContainer = (ViewGroup) tabView.findViewById(R.id.tab_title_container);
-        viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
-        viewHolder.titleTextView.setText(tab.getTitle());
-        viewHolder.titleTextView
-                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(getContext()), null, null,
-                        null);
-        viewHolder.closeButton = (ImageButton) tabView.findViewById(R.id.close_tab_button);
-        viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
-        viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
-        viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
-        viewHolder.previewImageView = (ImageView) tabView.findViewById(R.id.preview_image_view);
-        adaptChildAndPreviewMargins(viewHolder);
-        viewHolder.borderView = tabView.findViewById(R.id.border_view);
-        Drawable borderDrawable = ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
-        borderDrawable
-                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-        ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
-        tabView.setTag(R.id.tag_view_holder, viewHolder);
-        return tabView;
     }
 
     private void notifyOnSwitcherShown() {
@@ -1281,21 +1295,11 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             @Override
             public void run() {
                 tabs.add(index, tab);
-                ViewGroup view = inflateTabView(tab);
-                view.setVisibility(View.INVISIBLE);
-                LayoutParams layoutParams =
-                        new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                int borderMargin = -(tabInset + tabBorderWidth);
-                layoutParams.leftMargin = borderMargin;
-                layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
-                layoutParams.rightMargin = borderMargin;
-                layoutParams.bottomMargin = borderMargin;
-                tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
+                View view = viewRecycler.inflateTabView(tab, index);
                 TabView tabView = new TabView(index, view);
 
                 if (tabs.size() == 1) {
                     selectedTabIndex = 0;
-                    view.setVisibility(View.VISIBLE);
                     addChildView(index);
                     notifyOnSelectionChanged(0, tab);
                 }
