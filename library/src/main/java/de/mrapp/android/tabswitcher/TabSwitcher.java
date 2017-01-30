@@ -196,6 +196,34 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
+    private class ViewRecycler {
+
+        private SparseArray<View> childViews;
+
+        public View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
+            View child = null;
+
+            if (childViews == null) {
+                childViews = new SparseArray<>(getDecorator().getViewTypeCount());
+            } else {
+                child = childViews.get(viewType);
+            }
+
+            if (child == null) {
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+                child = getDecorator().onInflateView(inflater, parent, viewType);
+                childViews.put(viewType, child);
+            }
+
+            return child;
+        }
+
+        public void reset() {
+            childViews = null;
+        }
+
+    }
+
     private class TabView {
 
         private int index;
@@ -468,6 +496,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private Set<Listener> listeners;
 
+    private ViewRecycler viewRecycler;
+
     private Decorator decorator;
 
     private Queue<Runnable> pendingActions;
@@ -571,6 +601,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         getViewTreeObserver().addOnGlobalLayoutListener(this);
+        viewRecycler = new ViewRecycler();
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
@@ -616,8 +647,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
-    private SparseArray<View> childViews;
-
     private ViewGroup inflateTabView(@NonNull final Tab tab) {
         int color = tab.getColor();
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -649,24 +678,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         tabView.setTag(R.id.tag_view_holder, viewHolder);
         return tabView;
-    }
-
-    private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
-        View child = null;
-
-        if (childViews == null) {
-            childViews = new SparseArray<>(getDecorator().getViewTypeCount());
-        } else {
-            child = childViews.get(viewType);
-        }
-
-        if (child == null) {
-            LayoutInflater inflater = LayoutInflater.from(getContext());
-            child = getDecorator().onInflateView(inflater, parent, viewType);
-            childViews.put(viewType, child);
-        }
-
-        return child;
     }
 
     private void notifyOnSwitcherShown() {
@@ -1308,7 +1319,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             Tab tab = getTab(tabView.index);
             ViewHolder viewHolder = tabView.viewHolder;
             int viewType = getDecorator().getViewType(tab);
-            viewHolder.child = inflateChildView(viewHolder.childContainer, viewType);
+            viewHolder.child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
             getDecorator().onShowTab(getContext(), this, viewHolder.child, tab, viewType);
             LayoutParams childLayoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -1340,7 +1351,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             ViewHolder viewHolder = tabView.viewHolder;
             Tab tab = getTab(tabView.index);
             int viewType = getDecorator().getViewType(tab);
-            View child = inflateChildView(viewHolder.childContainer, viewType);
+            View child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
             getDecorator().onShowTab(getContext(), this, child, tab, viewType);
             Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
                     Bitmap.Config.ARGB_8888);
@@ -2618,7 +2629,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     public final void setDecorator(@NonNull final Decorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.childViews = null;
+        this.viewRecycler.reset();
     }
 
     public final Decorator getDecorator() {
