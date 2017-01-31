@@ -283,12 +283,12 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         private ViewHolder viewHolder;
 
-        public TabView(final int index, @NonNull final View view) {
+        public TabView(final int index) {
             ensureAtLeast(index, 0, "The index must be at least 0");
-            ensureNotNull(view, "The view may not be null");
             this.index = index;
             this.tab = getTab(index);
-            this.view = view;
+            int childIndex = getChildIndex(index);
+            this.view = tabContainer.getChildAt(childIndex);
             this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             this.tag = (Tag) view.getTag(R.id.tag_properties);
 
@@ -334,8 +334,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             int previousIndex = reverse ? this.index + 1 : this.index - 1;
 
             if (previousIndex >= 0 && previousIndex < getCount()) {
-                this.current = new TabView(previousIndex,
-                        tabContainer.getChildAt(getCount() - previousIndex - 1));
+                this.current = new TabView(previousIndex);
             } else {
                 this.current = null;
             }
@@ -351,8 +350,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         public TabView peek() {
             if (hasNext()) {
-                View view = tabContainer.getChildAt(getCount() - index - 1);
-                return new TabView(index, view);
+                return new TabView(index);
             }
 
             return null;
@@ -374,14 +372,13 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         @Override
         public TabView next() {
             if (hasNext()) {
-                View view = tabContainer.getChildAt(getCount() - index - 1);
                 previous = current;
 
                 if (first == null) {
                     first = current;
                 }
 
-                current = new TabView(index, view);
+                current = new TabView(index);
                 index += reverse ? -1 : 1;
                 return current;
             }
@@ -1294,7 +1291,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             public void run() {
                 tabs.add(index, tab);
                 View view = viewRecycler.inflateTabView(tab, index);
-                TabView tabView = new TabView(index, view);
+                TabView tabView = new TabView(index);
 
                 if (getCount() == 1) {
                     selectedTabIndex = 0;
@@ -1417,9 +1414,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             @Override
             public void run() {
                 int index = tabs.indexOf(tab);
-                int childIndex = getChildIndex(index);
 
                 if (!isSwitcherShown()) {
+                    int childIndex = getChildIndex(index);
                     tabContainer.removeViewAt(childIndex);
                     tabs.remove(index);
                     notifyOnTabRemoved(index, tab);
@@ -1440,10 +1437,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
-                    View view = tabContainer.getChildAt(childIndex);
-                    TabView tabView = new TabView(index, view);
+                    TabView tabView = new TabView(index);
                     adaptTopMostTabViewWhenClosing(tabView, tabView.index + 1);
                     tabView.tag.closing = true;
+                    View view = tabView.view;
                     setPivot(Axis.DRAGGING_AXIS, view,
                             getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
                     setPivot(Axis.ORTHOGONAL_AXIS, view,
