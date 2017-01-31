@@ -33,10 +33,11 @@ class ViewRecycler<Type> {
 
     private final Map<Type, View> activeViews;
 
-    public ViewRecycler(@NonNull final Context context, @NonNull final Adapter<Type> adapter) {
-        ensureNotNull(context, "The context may not be null");
+    public ViewRecycler(@NonNull final LayoutInflater inflater,
+                        @NonNull final Adapter<Type> adapter) {
+        ensureNotNull(inflater, "The layout inflater may not be null");
         ensureNotNull(adapter, "The adapter may not be null");
-        this.inflater = LayoutInflater.from(context);
+        this.inflater = inflater;
         this.adapter = adapter;
         this.activeViews = new HashMap<>();
 

@@ -269,7 +269,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             }
 
             if (child == null) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
                 child = getDecorator().onInflateView(inflater, parent, viewType);
                 childViews.put(viewType, child);
             }
@@ -564,6 +563,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private Set<Listener> listeners;
 
+    private LayoutInflater inflater;
+
     private ViewRecycler<TabView> viewRecycler;
 
     private LegacyViewRecycler legacyViewRecycler;
@@ -671,7 +672,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         getViewTreeObserver().addOnGlobalLayoutListener(this);
-        viewRecycler = new ViewRecycler<>(getContext(), new RecycleAdapter());
+        inflater = LayoutInflater.from(getContext());
+        viewRecycler = new ViewRecycler<>(inflater, new RecycleAdapter());
         legacyViewRecycler = new LegacyViewRecycler();
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
@@ -708,7 +710,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private void inflateLayout() {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar = (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, this, false);
         toolbar.setVisibility(View.INVISIBLE);
         addView(toolbar, LayoutParams.MATCH_PARENT,
