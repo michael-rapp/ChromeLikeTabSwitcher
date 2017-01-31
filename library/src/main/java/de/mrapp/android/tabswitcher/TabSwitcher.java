@@ -1338,7 +1338,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private void addChildView(final int index) {
         if (ViewCompat.isLaidOut(this)) {
-            TabView tabView = new Iterator(false, index).next();
+            TabView tabView = new TabView(index);
             ViewHolder viewHolder = tabView.viewHolder;
             int viewType = getDecorator().getViewType(tabView.tab);
             viewHolder.child =
@@ -1353,7 +1353,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private void detachChildView(final int index) {
-        TabView tabView = new Iterator(false, index).next();
+        TabView tabView = new TabView(index);
         ViewHolder viewHolder = tabView.viewHolder;
 
         if (viewHolder.childContainer.getChildCount() > 2) {
@@ -2437,30 +2437,23 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     private void adaptTopMostTabViewWhenClosing(@NonNull final TabView closedTabView,
                                                 final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, index);
-            TabView tabView = iterator.next();
-
-            if (tabView != null) {
-                if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
-                    tabView.tag.state = State.TOP_MOST;
-                }
-
-                adaptVisibility(tabView);
+            TabView tabView = new TabView(index);
+            if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
+                tabView.tag.state = State.TOP_MOST;
             }
+
+            adaptVisibility(tabView);
         }
     }
 
     private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabView closedTabView,
                                                        final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
-            Iterator iterator = new Iterator(false, index);
-            TabView tabView = iterator.next();
+            TabView tabView = new TabView(index);
 
-            if (tabView != null) {
-                if (tabView.tag.state == State.TOP_MOST) {
-                    tabView.tag.state = State.TOP_MOST_HIDDEN;
-                    adaptVisibility(tabView);
-                }
+            if (tabView.tag.state == State.TOP_MOST) {
+                tabView.tag.state = State.TOP_MOST_HIDDEN;
+                adaptVisibility(tabView);
             }
         }
     }
@@ -2578,7 +2571,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
-        TabView tabView = new Iterator().next();
+        TabView tabView = new TabView(0);
         View view = tabView.view;
         setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
         setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
