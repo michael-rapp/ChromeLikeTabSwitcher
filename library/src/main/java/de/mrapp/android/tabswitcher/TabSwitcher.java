@@ -64,6 +64,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -249,8 +251,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
             layoutParams.rightMargin = borderMargin;
             layoutParams.bottomMargin = borderMargin;
-            tabContainer.removeView(view);
-            tabContainer.addView(view, tabContainer.getChildCount() - item.index, layoutParams);
+            view.setLayoutParams(layoutParams);
         }
 
     }
@@ -316,6 +317,15 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 return false;
             TabView other = (TabView) obj;
             return index == other.index;
+        }
+
+    }
+
+    private class TabViewComparator implements Comparator<TabView> {
+
+        @Override
+        public int compare(TabView o1, TabView o2) {
+            return ((Integer) o1.index).compareTo(o2.index);
         }
 
     }
@@ -673,7 +683,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             @StyleRes final int defaultStyleResource) {
         getViewTreeObserver().addOnGlobalLayoutListener(this);
         inflater = LayoutInflater.from(getContext());
-        viewRecycler = new ViewRecycler<>(inflater, new RecycleAdapter());
         legacyViewRecycler = new LegacyViewRecycler();
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
@@ -706,6 +715,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
+        viewRecycler = new ViewRecycler<>(tabContainer, new RecycleAdapter(), inflater,
+                Collections.reverseOrder(new TabViewComparator()));
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
 
