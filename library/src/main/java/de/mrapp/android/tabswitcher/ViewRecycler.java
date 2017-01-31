@@ -7,6 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -28,18 +31,27 @@ class ViewRecycler<Type> {
 
     private final LayoutInflater inflater;
 
+    private final Map<Type, View> activeViews;
+
     public ViewRecycler(@NonNull final Context context, @NonNull final Adapter<Type> adapter) {
         ensureNotNull(context, "The context may not be null");
         ensureNotNull(adapter, "The adapter may not be null");
         this.inflater = LayoutInflater.from(context);
         this.adapter = adapter;
+        this.activeViews = new HashMap<>();
 
     }
 
     public View inflate(@NonNull final Type item, @Nullable final ViewGroup parent) {
         // TODO: Reuse view, if possible
-        View view = adapter.onInflateView(inflater, parent, item);
-        adapter.onShowView(inflater.getContext(), view, item);
+        View view = activeViews.get(item);
+
+        if (view == null) {
+            view = adapter.onInflateView(inflater, parent, item);
+            adapter.onShowView(inflater.getContext(), view, item);
+            activeViews.put(item, view);
+        }
+
         return view;
     }
 

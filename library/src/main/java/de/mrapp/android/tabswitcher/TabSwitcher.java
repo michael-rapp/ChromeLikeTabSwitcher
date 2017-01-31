@@ -196,46 +196,52 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
-    private class ViewRecycler {
+    private class RecycleAdapter implements ViewRecycler.Adapter<TabView> {
 
-        private SparseArray<View> childViews;
-
-        private View inflateTabView(@NonNull final Tab tab) {
-            int color = tab.getColor();
-            LayoutInflater inflater = LayoutInflater.from(getContext());
+        @NonNull
+        @Override
+        public View onInflateView(@NonNull final LayoutInflater inflater,
+                                  @Nullable final ViewGroup parent, @NonNull final TabView item) {
             ViewHolder viewHolder = new ViewHolder();
-            View tabView = inflater.inflate(R.layout.tab_view, tabContainer, false);
+            View view = inflater.inflate(R.layout.tab_view, tabContainer, false);
             Drawable backgroundDrawable =
                     ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
-            backgroundDrawable.setColorFilter(color != -1 ? color : tabBackgroundColor,
-                    PorterDuff.Mode.MULTIPLY);
-            ViewUtil.setBackground(tabView, backgroundDrawable);
+            ViewUtil.setBackground(view, backgroundDrawable);
             int padding = tabInset + tabBorderWidth;
-            tabView.setPadding(padding, tabInset, padding, padding);
-            viewHolder.titleContainer = (ViewGroup) tabView.findViewById(R.id.tab_title_container);
-            viewHolder.titleTextView = (TextView) tabView.findViewById(R.id.tab_title_text_view);
+            view.setPadding(padding, tabInset, padding, padding);
+            viewHolder.titleContainer = (ViewGroup) view.findViewById(R.id.tab_title_container);
+            viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
+            viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
+            viewHolder.childContainer = (ViewGroup) view.findViewById(R.id.child_container);
+            viewHolder.previewImageView = (ImageView) view.findViewById(R.id.preview_image_view);
+            adaptChildAndPreviewMargins(viewHolder);
+            viewHolder.borderView = view.findViewById(R.id.border_view);
+            Drawable borderDrawable =
+                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
+            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
+            view.setTag(R.id.tag_view_holder, viewHolder);
+            view.setTag(R.id.tag_properties, new Tag());
+            return view;
+        }
+
+        @Override
+        public void onShowView(@NonNull final Context context, @NonNull final View view,
+                               @NonNull final TabView item) {
+            Tab tab = item.tab;
+            int color = tab.getColor();
+            Drawable background = view.getBackground();
+            background.setColorFilter(color != -1 ? color : tabBackgroundColor,
+                    PorterDuff.Mode.MULTIPLY);
+            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             viewHolder.titleTextView.setText(tab.getTitle());
             viewHolder.titleTextView
                     .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(getContext()), null, null,
                             null);
-            viewHolder.closeButton = (ImageButton) tabView.findViewById(R.id.close_tab_button);
             viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
             viewHolder.closeButton.setOnClickListener(createCloseButtonClickListener(tab));
-            viewHolder.childContainer = (ViewGroup) tabView.findViewById(R.id.child_container);
-            viewHolder.previewImageView = (ImageView) tabView.findViewById(R.id.preview_image_view);
-            adaptChildAndPreviewMargins(viewHolder);
-            viewHolder.borderView = tabView.findViewById(R.id.border_view);
-            Drawable borderDrawable =
-                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
-            borderDrawable.setColorFilter(color != -1 ? color : tabBackgroundColor,
+            Drawable border = viewHolder.borderView.getBackground();
+            border.setColorFilter(color != -1 ? color : tabBackgroundColor,
                     PorterDuff.Mode.MULTIPLY);
-            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
-            tabView.setTag(R.id.tag_view_holder, viewHolder);
-            return tabView;
-        }
-
-        public View inflateTabView(@NonNull final Tab tab, final int index) {
-            View view = inflateTabView(tab);
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             int borderMargin = -(tabInset + tabBorderWidth);
@@ -243,9 +249,15 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
             layoutParams.rightMargin = borderMargin;
             layoutParams.bottomMargin = borderMargin;
-            tabContainer.addView(view, tabContainer.getChildCount() - index, layoutParams);
-            return view;
+            tabContainer.removeView(view);
+            tabContainer.addView(view, tabContainer.getChildCount() - item.index, layoutParams);
         }
+
+    }
+
+    private class LegacyViewRecycler {
+
+        private SparseArray<View> childViews;
 
         public View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
             View child = null;
@@ -287,15 +299,24 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             ensureAtLeast(index, 0, "The index must be at least 0");
             this.index = index;
             this.tab = getTab(index);
-            int childIndex = getChildIndex(index);
-            this.view = tabContainer.getChildAt(childIndex);
+            this.view = viewRecycler.inflate(this, tabContainer);
             this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             this.tag = (Tag) view.getTag(R.id.tag_properties);
+        }
 
-            if (this.tag == null) {
-                this.tag = new Tag();
-                this.view.setTag(R.id.tag_properties, this.tag);
-            }
+        @Override
+        public int hashCode() {
+            return index;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj == null)
+                return false;
+            if (obj.getClass() != getClass())
+                return false;
+            TabView other = (TabView) obj;
+            return index == other.index;
         }
 
     }
@@ -543,7 +564,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private Set<Listener> listeners;
 
-    private ViewRecycler viewRecycler;
+    private ViewRecycler<TabView> viewRecycler;
+
+    private LegacyViewRecycler legacyViewRecycler;
 
     private Decorator decorator;
 
@@ -648,7 +671,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         getViewTreeObserver().addOnGlobalLayoutListener(this);
-        viewRecycler = new ViewRecycler();
+        viewRecycler = new ViewRecycler<>(getContext(), new RecycleAdapter());
+        legacyViewRecycler = new LegacyViewRecycler();
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
@@ -1290,7 +1314,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             @Override
             public void run() {
                 tabs.add(index, tab);
-                View view = viewRecycler.inflateTabView(tab, index);
                 TabView tabView = new TabView(index);
 
                 if (getCount() == 1) {
@@ -1304,7 +1327,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 if (!isSwitcherShown()) {
                     toolbar.setAlpha(0);
                 } else {
-                    view.getViewTreeObserver().addOnGlobalLayoutListener(
+                    tabView.view.getViewTreeObserver().addOnGlobalLayoutListener(
                             createAddTabViewLayoutListener(tabView, animationType));
                 }
             }
@@ -1317,7 +1340,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             TabView tabView = new Iterator(false, index).next();
             ViewHolder viewHolder = tabView.viewHolder;
             int viewType = getDecorator().getViewType(tabView.tab);
-            viewHolder.child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
+            viewHolder.child =
+                    legacyViewRecycler.inflateChildView(viewHolder.childContainer, viewType);
             getDecorator().onShowTab(getContext(), this, viewHolder.child, tabView.tab, viewType);
             LayoutParams childLayoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -1348,7 +1372,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
             int viewType = getDecorator().getViewType(tabView.tab);
-            View child = viewRecycler.inflateChildView(viewHolder.childContainer, viewType);
+            View child = legacyViewRecycler.inflateChildView(viewHolder.childContainer, viewType);
             getDecorator().onShowTab(getContext(), this, child, tabView.tab, viewType);
             Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
                     Bitmap.Config.ARGB_8888);
@@ -2622,7 +2646,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     public final void setDecorator(@NonNull final Decorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.viewRecycler.reset();
+        this.legacyViewRecycler.reset();
     }
 
     public final Decorator getDecorator() {
