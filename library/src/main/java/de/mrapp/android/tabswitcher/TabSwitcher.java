@@ -299,7 +299,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             ensureAtLeast(index, 0, "The index must be at least 0");
             this.index = index;
             this.tab = getTab(index);
-            this.view = viewRecycler.inflate(this, tabContainer);
+            this.view = viewRecycler.inflate(this);
             this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             this.tag = (Tag) view.getTag(R.id.tag_properties);
         }

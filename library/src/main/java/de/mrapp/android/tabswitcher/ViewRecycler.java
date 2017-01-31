@@ -74,7 +74,7 @@ class ViewRecycler<Type> {
         this.items = comparator != null ? new ArrayList<Type>() : null;
     }
 
-    public View inflate(@NonNull final Type item, @Nullable final ViewGroup parent) {
+    public View inflate(@NonNull final Type item) {
         // TODO: Reuse view, if possible
         View view = activeViews.get(item);
 
@@ -91,9 +91,9 @@ class ViewRecycler<Type> {
                 }
 
                 items.add(index, item);
-                this.parent.addView(view, index);
+                parent.addView(view, index);
             } else {
-                this.parent.addView(view);
+                parent.addView(view);
             }
         }
 
