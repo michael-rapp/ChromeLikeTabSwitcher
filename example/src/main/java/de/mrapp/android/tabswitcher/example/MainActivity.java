@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
             View view = inflater.inflate(R.layout.tab, parent, false);
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.tab);
+            toolbar.setOnMenuItemClickListener(createToolbarMenuListener());
             Menu menu = toolbar.getMenu();
             TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
             return view;
@@ -111,6 +112,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
             @Override
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.add_tab_menu_item:
+                        // TODO: Implement
+                        return true;
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
                         return true;
