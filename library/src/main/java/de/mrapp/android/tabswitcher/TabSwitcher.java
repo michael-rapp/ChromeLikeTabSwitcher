@@ -1832,7 +1832,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                 calculateAndClipTopThresholdPosition(tabView, iterator.previous());
 
                 if (tabView.index == selectedTabIndex || tabView.isVisible()) {
-                    View view = viewRecycler.inflate(tabView);
+                    viewRecycler.inflate(tabView);
+                    View view = tabView.view;
 
                     if (!ViewCompat.isLaidOut(view)) {
                         view.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -2493,9 +2494,15 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                         viewRecycler.remove(tabView);
                     } else if (tabView.isVisible()) {
                         if (!tabView.isInflated()) {
-                            View view = viewRecycler.inflate(tabView);
-                            view.getViewTreeObserver().addOnGlobalLayoutListener(
-                                    createInflateViewLayoutListener(tabView));
+                            boolean inflated = viewRecycler.inflate(tabView);
+
+                            if (inflated) {
+                                View view = tabView.view;
+                                view.getViewTreeObserver().addOnGlobalLayoutListener(
+                                        createInflateViewLayoutListener(tabView));
+                            } else {
+                                applyTag(tabView);
+                            }
                         } else {
                             applyTag(tabView);
                         }
@@ -2911,7 +2918,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         if (selectedTabIndex != -1) {
             TabView tabView = new TabView(selectedTabIndex);
             viewRecycler.inflate(tabView);
-            // TODO addChildView(selectedTabIndex);
         }
     }
 

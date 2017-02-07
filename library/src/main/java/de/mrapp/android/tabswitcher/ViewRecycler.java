@@ -130,8 +130,9 @@ public class ViewRecycler<Type> {
         logger.setLogLevel(logLevel);
     }
 
-    public final View inflate(@NonNull final Type item) {
+    public final boolean inflate(@NonNull final Type item) {
         View view = getView(item);
+        boolean inflated = false;
 
         if (view == null) {
             int viewType = adapter.getViewType(item);
@@ -139,6 +140,7 @@ public class ViewRecycler<Type> {
 
             if (view == null) {
                 view = adapter.onInflateView(inflater, parent, item, viewType);
+                inflated = true;
                 logger.logInfo(getClass(),
                         "Inflated view to visualize item " + item + " using view type " + viewType);
             } else {
@@ -166,7 +168,7 @@ public class ViewRecycler<Type> {
 
         adapter.onShowView(context, view, item);
         logger.logDebug(getClass(), "Updated view of item " + item);
-        return view;
+        return inflated;
     }
 
     public final void remove(@NonNull final Type item) {
