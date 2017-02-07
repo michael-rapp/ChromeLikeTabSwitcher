@@ -208,6 +208,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
         private SparseArray<View> childViews;
 
+        private Map<Tab, Bitmap> bitmaps;
+
         // TODO: Only add child view, if tab view is the selected one
         private void addChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
@@ -233,26 +235,38 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
         private void renderChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
-            View view = viewHolder.child;
-            int viewType = getDecorator().getViewType(tabView.tab);
+            Bitmap bitmap = null;
 
-            if (view == null) {
-                view = inflateChildView(viewHolder.childContainer, viewType);
-                // TODO: Must the view also be added to the parent? This is relevant when showing the switcher when the view is not yet inflated
+            if (bitmaps == null) {
+                bitmaps = new HashMap<>();
             } else {
-                removeChildView(viewHolder);
+                bitmap = bitmaps.get(tabView.tab);
             }
 
-            getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
-            Bitmap bitmap =
-                    Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
+            if (bitmap == null) {
+                View view = viewHolder.child;
+                int viewType = getDecorator().getViewType(tabView.tab);
 
-            // TODO: This is only for debugging purposes
-            Paint paint = new Paint();
-            paint.setColor(Color.RED);
-            canvas.drawRect(0, 0, 100, 100, paint);
+                if (view == null) {
+                    view = inflateChildView(viewHolder.childContainer, viewType);
+                    // TODO: Must the view also be added to the parent? This is relevant when showing the switcher when the view is not yet inflated
+                } else {
+                    removeChildView(viewHolder);
+                }
+
+                getDecorator()
+                        .onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
+                bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                view.draw(canvas);
+
+                // TODO: This is only for debugging purposes
+                Paint paint = new Paint();
+                paint.setColor(Color.RED);
+                canvas.drawCircle(100, 100, 40, paint);
+                bitmaps.put(tabView.tab, bitmap);
+            }
 
             viewHolder.previewImageView.setImageBitmap(bitmap);
             viewHolder.previewImageView.setVisibility(View.VISIBLE);
@@ -283,9 +297,17 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             }
         }
 
-        public void reset() {
+        public void clearCachedChildViews() {
             if (childViews != null) {
                 childViews.clear();
+                childViews = null;
+            }
+        }
+
+        public void clearCachedBitmaps() {
+            if (bitmaps != null) {
+                bitmaps.clear();
+                bitmaps = null;
             }
         }
 
@@ -1922,6 +1944,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         if (isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = false;
             notifyOnSwitcherHidden();
+            recyclerAdapter.clearCachedBitmaps();
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -2761,7 +2784,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
     public final void setDecorator(@NonNull final Decorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.recyclerAdapter.reset();
+        this.recyclerAdapter.clearCachedChildViews();
+        this.recyclerAdapter.clearCachedBitmaps();
     }
 
     public final Decorator getDecorator() {
