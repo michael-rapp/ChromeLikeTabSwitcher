@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -23,6 +24,8 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -51,10 +54,11 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
@@ -66,9 +70,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -88,7 +94,7 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGlobalLayoutListener {
+public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
     /**
      * Defines the interface, a class, which should be notified about a tab switcher's events, must
@@ -198,12 +204,96 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
-    private class RecycleAdapter implements ViewRecycler.Adapter<TabView> {
+    private class RecyclerAdapter extends ViewRecycler.Adapter<TabView> {
+
+        private SparseArray<View> childViews;
+
+        // TODO: Only add child view, if tab view is the selected one
+        private void addChildView(@NonNull final TabView tabView) {
+            ViewHolder viewHolder = tabView.viewHolder;
+            View view = viewHolder.child;
+            int viewType = getDecorator().getViewType(tabView.tab);
+
+            if (view == null) {
+                ViewGroup parent = viewHolder.childContainer;
+                view = inflateChildView(parent, viewType);
+                LayoutParams layoutParams =
+                        new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                layoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
+                        getPaddingBottom());
+                parent.addView(view, 0, layoutParams);
+                viewHolder.child = view;
+            }
+
+            viewHolder.previewImageView.setImageBitmap(null);
+            viewHolder.previewImageView.setVisibility(View.GONE);
+            viewHolder.borderView.setVisibility(View.GONE);
+            getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
+        }
+
+        private void renderChildView(@NonNull final TabView tabView) {
+            ViewHolder viewHolder = tabView.viewHolder;
+            View view = viewHolder.child;
+            int viewType = getDecorator().getViewType(tabView.tab);
+
+            if (view == null) {
+                view = inflateChildView(viewHolder.childContainer, viewType);
+                // TODO: Must the view also be added to the parent? This is relevant when showing the switcher when the view is not yet inflated
+            } else {
+                removeChildView(viewHolder);
+            }
+
+            getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
+            Bitmap bitmap =
+                    Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+
+            // TODO: This is only for debugging purposes
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            canvas.drawRect(0, 0, 100, 100, paint);
+
+            viewHolder.previewImageView.setImageBitmap(bitmap);
+            viewHolder.previewImageView.setVisibility(View.VISIBLE);
+            viewHolder.borderView.setVisibility(View.VISIBLE);
+        }
+
+        private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
+            View child = null;
+
+            if (childViews == null) {
+                childViews = new SparseArray<>(getDecorator().getViewTypeCount());
+            } else {
+                child = childViews.get(viewType);
+            }
+
+            if (child == null) {
+                child = getDecorator().onInflateView(inflater, parent, viewType);
+                childViews.put(viewType, child);
+            }
+
+            return child;
+        }
+
+        private void removeChildView(@NonNull final ViewHolder viewHolder) {
+            if (viewHolder.childContainer.getChildCount() > 2) {
+                viewHolder.childContainer.removeViewAt(0);
+                viewHolder.child = null;
+            }
+        }
+
+        public void reset() {
+            if (childViews != null) {
+                childViews.clear();
+            }
+        }
 
         @NonNull
         @Override
         public View onInflateView(@NonNull final LayoutInflater inflater,
-                                  @Nullable final ViewGroup parent, @NonNull final TabView item) {
+                                  @Nullable final ViewGroup parent, @NonNull final TabView tabView,
+                                  final int viewType) {
             ViewHolder viewHolder = new ViewHolder();
             View view = inflater.inflate(R.layout.tab_view, tabContainer, false);
             Drawable backgroundDrawable =
@@ -221,15 +311,31 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             Drawable borderDrawable =
                     ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
             ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
+            LayoutParams layoutParams =
+                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            int borderMargin = -(tabInset + tabBorderWidth);
+            layoutParams.leftMargin = borderMargin;
+            layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
+            layoutParams.rightMargin = borderMargin;
+            layoutParams.bottomMargin = borderMargin;
+            view.setLayoutParams(layoutParams);
             view.setTag(R.id.tag_view_holder, viewHolder);
-            view.setTag(R.id.tag_properties, new Tag());
+            tabView.view = view;
+            tabView.viewHolder = viewHolder;
+            view.setTag(R.id.tag_properties, tabView.tag);
             return view;
         }
 
         @Override
         public void onShowView(@NonNull final Context context, @NonNull final View view,
-                               @NonNull final TabView item) {
-            Tab tab = item.tab;
+                               @NonNull final TabView tabView) {
+            if (!tabView.isInflated()) {
+                tabView.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+                tabView.view = view;
+                view.setTag(R.id.tag_properties, tabView.tag);
+            }
+
+            Tab tab = tabView.tab;
             int color = tab.getColor();
             Drawable background = view.getBackground();
             background.setColorFilter(color != -1 ? color : tabBackgroundColor,
@@ -244,41 +350,19 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             Drawable border = viewHolder.borderView.getBackground();
             border.setColorFilter(color != -1 ? color : tabBackgroundColor,
                     PorterDuff.Mode.MULTIPLY);
-            LayoutParams layoutParams =
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            int borderMargin = -(tabInset + tabBorderWidth);
-            layoutParams.leftMargin = borderMargin;
-            layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
-            layoutParams.rightMargin = borderMargin;
-            layoutParams.bottomMargin = borderMargin;
-            view.setLayoutParams(layoutParams);
-        }
 
-    }
-
-    private class LegacyViewRecycler {
-
-        private SparseArray<View> childViews;
-
-        public View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
-            View child = null;
-
-            if (childViews == null) {
-                childViews = new SparseArray<>(getDecorator().getViewTypeCount());
+            if (!isSwitcherShown()) {
+                addChildView(tabView);
             } else {
-                child = childViews.get(viewType);
+                renderChildView(tabView);
             }
-
-            if (child == null) {
-                child = getDecorator().onInflateView(inflater, parent, viewType);
-                childViews.put(viewType, child);
-            }
-
-            return child;
         }
 
-        public void reset() {
-            childViews = null;
+        @Override
+        public void onRemoveView(@NonNull final View view, @NonNull final TabView tabView) {
+            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            removeChildView(viewHolder);
+            view.setTag(R.id.tag_properties, null);
         }
 
     }
@@ -287,8 +371,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         private int index;
 
+        @NonNull
         private Tab tab;
 
+        @NonNull
         private Tag tag;
 
         private View view;
@@ -299,9 +385,34 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             ensureAtLeast(index, 0, "The index must be at least 0");
             this.index = index;
             this.tab = getTab(index);
-            this.view = viewRecycler.inflate(this);
-            this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
-            this.tag = (Tag) view.getTag(R.id.tag_properties);
+            this.view = viewRecycler.getView(this);
+
+            if (view != null) {
+                this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            } else {
+                this.viewHolder = null;
+            }
+
+            this.tag = tags.get(tab);
+
+            if (tag == null) {
+                tag = new Tag();
+                tags.put(tab, tag);
+            }
+        }
+
+        public boolean isInflated() {
+            return view != null && viewHolder != null;
+        }
+
+        public boolean isVisible() {
+            return (tag.state != State.TOP_MOST_HIDDEN && tag.state != State.BOTTOM_MOST_HIDDEN) ||
+                    tag.closing;
+        }
+
+        @Override
+        public final String toString() {
+            return "TabView [index = " + index + "]";
         }
 
         @Override
@@ -523,40 +634,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     }
 
-    private class OvershootUpAnimation extends Animation {
-
-        private Float startPosition = null;
-
-        @SuppressWarnings("WrongConstant")
-        @Override
-        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            if (overshootUpAnimation != null) {
-                Iterator iterator = new Iterator();
-                TabView tabView;
-
-                while ((tabView = iterator.next()) != null) {
-                    View view = tabView.view;
-
-                    if (tabView.index == 0) {
-                        if (startPosition == null) {
-                            startPosition = getPosition(Axis.DRAGGING_AXIS, view);
-                        }
-
-                        float targetPosition = tabView.tag.projectedPosition;
-                        setPosition(Axis.DRAGGING_AXIS, view, startPosition +
-                                (targetPosition - startPosition) * interpolatedTime);
-                    } else {
-                        View firstView = iterator.first().view;
-                        view.setVisibility(getPosition(Axis.DRAGGING_AXIS, firstView) <=
-                                getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
-                                getVisibility(tabView));
-                    }
-                }
-            }
-        }
-
-    }
-
     private static final int STACKED_TAB_COUNT = 3;
 
     private static final float NON_LINEAR_DRAG_FACTOR = 0.5f;
@@ -577,7 +654,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private ViewRecycler<TabView> viewRecycler;
 
-    private LegacyViewRecycler legacyViewRecycler;
+    private RecyclerAdapter recyclerAdapter;
 
     private Decorator decorator;
 
@@ -587,6 +664,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
      * A list, which contains the tab switcher's tabs.
      */
     private List<Tab> tabs;
+
+    // TODO: Only inflated views should be associated with tags. This allows to abandon this map.
+    private Map<Tab, Tag> tags;
 
     private int selectedTabIndex;
 
@@ -645,23 +725,17 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private int pointerId = -1;
 
-    private ViewPropertyAnimator showSwitcherAnimation;
-
-    private ValueAnimator marginAnimation;
-
-    private ViewPropertyAnimator hideSwitcherAnimation;
-
     private Animation dragAnimation;
 
-    private ViewPropertyAnimator overshootAnimation;
-
-    private Animation overshootUpAnimation;
-
+    @Deprecated
     private ViewPropertyAnimator closeAnimation;
 
+    @Deprecated
     private ViewPropertyAnimator relocateAnimation;
 
     private ViewPropertyAnimator toolbarAnimation;
+
+    private int runningAnimations;
 
     /**
      * Initializes the view.
@@ -682,12 +756,13 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         getViewTreeObserver().addOnGlobalLayoutListener(this);
+        runningAnimations = 0;
         inflater = LayoutInflater.from(getContext());
-        legacyViewRecycler = new LegacyViewRecycler();
         padding = new int[]{0, 0, 0, 0};
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
         tabs = new ArrayList<>();
+        tags = new HashMap<>();
         selectedTabIndex = -1;
         switcherShown = false;
         Resources resources = getResources();
@@ -715,7 +790,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
-        viewRecycler = new ViewRecycler<>(tabContainer, new RecycleAdapter(), inflater,
+        recyclerAdapter = new RecyclerAdapter();
+        viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(new TabViewComparator()));
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
@@ -780,7 +856,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     private void animateClose(@NonNull final TabView tabView, final boolean close,
                               final float flingVelocity, final long startDelay,
-                              @Nullable final Animator.AnimatorListener listener) {
+                              @Nullable final AnimatorListener listener) {
         View view = tabView.view;
         float scale = getScale(view, true);
         float closedTabPosition = calculateClosedTabPosition();
@@ -810,8 +886,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         closeAnimation.start();
     }
 
-    private Animator.AnimatorListener createCloseAnimationListener(
-            @NonNull final TabView closedTabView, final boolean close) {
+    private AnimatorListener createCloseAnimationListener(@NonNull final TabView closedTabView,
+                                                          final boolean close) {
         return new AnimatorListenerAdapter() {
 
             private void adjustActualPositionOfStackedTabViews(final boolean reverse) {
@@ -897,7 +973,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                     TabView previous = iterator.previous();
                     boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
-                    Animator.AnimatorListener listener =
+                    AnimatorListener listener =
                             createRelocateAnimationListener(tabView, previous.tag, reset);
                     animateRelocate(tabView, previous.tag.projectedPosition,
                             (start + 1 - tabView.index) * startDelay, tabView.index == start ?
@@ -923,7 +999,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
             private void animateRelocate(@NonNull final TabView tabView,
                                          final float relocatePosition, final long startDelay,
-                                         @Nullable final Animator.AnimatorListener listener) {
+                                         @Nullable final AnimatorListener listener) {
                 View view = tabView.view;
                 relocateAnimation = view.animate();
                 relocateAnimation.setListener(listener);
@@ -963,6 +1039,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                     int index = closedTabView.index;
                     tabContainer.removeViewAt(getChildIndex(index));
                     tabs.remove(index);
+                    tags.remove(tabs.get(index));
                     notifyOnTabRemoved(index, closedTabView.tab);
 
                     if (isEmpty()) {
@@ -1021,9 +1098,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         return getSize(axis, view) / 2f;
     }
 
-    private Animator.AnimatorListener createRelocateAnimationListenerWrapper(
-            @NonNull final TabView closedTabView,
-            @Nullable final Animator.AnimatorListener listener) {
+    private AnimatorListener createRelocateAnimationListenerWrapper(
+            @NonNull final TabView closedTabView, @Nullable final AnimatorListener listener) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1048,8 +1124,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         };
     }
 
-    private Animator.AnimatorListener createRelocateAnimationListener(
-            @NonNull final TabView tabView, @Nullable final Tag tag, final boolean reset) {
+    private AnimatorListener createRelocateAnimationListener(@NonNull final TabView tabView,
+                                                             @Nullable final Tag tag,
+                                                             final boolean reset) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1330,7 +1407,6 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                 if (getCount() == 1) {
                     selectedTabIndex = 0;
-                    addChildView(index);
                     notifyOnSelectionChanged(0, tab);
                 }
 
@@ -1347,63 +1423,15 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         });
     }
 
-    private void addChildView(final int index) {
-        if (ViewCompat.isLaidOut(this)) {
-            TabView tabView = new TabView(index);
-            ViewHolder viewHolder = tabView.viewHolder;
-            int viewType = getDecorator().getViewType(tabView.tab);
-            viewHolder.child =
-                    legacyViewRecycler.inflateChildView(viewHolder.childContainer, viewType);
-            getDecorator().onShowTab(getContext(), this, viewHolder.child, tabView.tab, viewType);
-            LayoutParams childLayoutParams =
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                    getPaddingBottom());
-            viewHolder.childContainer.addView(viewHolder.child, 0, childLayoutParams);
-        }
-    }
-
-    private void detachChildView(final int index) {
-        TabView tabView = new TabView(index);
-        ViewHolder viewHolder = tabView.viewHolder;
-
-        if (viewHolder.childContainer.getChildCount() > 2) {
-            viewHolder.childContainer.removeViewAt(0);
-        }
-
-        viewHolder.child = null;
-        viewHolder.previewImageView.setImageBitmap(null);
-        viewHolder.previewImageView.setVisibility(View.GONE);
-    }
-
-    // TODO: Do only render visible views
-    private void renderChildViews() {
-        Iterator iterator = new Iterator();
-        TabView tabView;
-
-        while ((tabView = iterator.next()) != null) {
-            ViewHolder viewHolder = tabView.viewHolder;
-            int viewType = getDecorator().getViewType(tabView.tab);
-            View child = legacyViewRecycler.inflateChildView(viewHolder.childContainer, viewType);
-            getDecorator().onShowTab(getContext(), this, child, tabView.tab, viewType);
-            Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            child.draw(canvas);
-            viewHolder.previewImageView.setImageBitmap(bitmap);
-            viewHolder.previewImageView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private ViewTreeObserver.OnGlobalLayoutListener createAddTabViewLayoutListener(
-            @NonNull final TabView tabView, @NonNull final AnimationType animationType) {
-        return new ViewTreeObserver.OnGlobalLayoutListener() {
+    private OnGlobalLayoutListener createAddTabViewLayoutListener(@NonNull final TabView tabView,
+                                                                  @NonNull final AnimationType animationType) {
+        return new OnGlobalLayoutListener() {
 
             @SuppressWarnings("deprecation")
             @Override
             public void onGlobalLayout() {
                 View view = tabView.view;
-                removeOnGlobalLayoutListener(view);
+                ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
                 view.setVisibility(View.VISIBLE);
                 view.setAlpha(closedTabAlpha);
                 float closedPosition = calculateClosedTabPosition();
@@ -1429,7 +1457,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         };
     }
 
-    private Animator.AnimatorListener createAddAnimationListener(@NonNull final TabView tabView) {
+    private AnimatorListener createAddAnimationListener(@NonNull final TabView tabView) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1455,6 +1483,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                     int childIndex = getChildIndex(index);
                     tabContainer.removeViewAt(childIndex);
                     tabs.remove(index);
+                    tags.remove(tabs.get(index));
                     notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
@@ -1468,7 +1497,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
                         int selectedChildIndex = getChildIndex(selectedTabIndex);
                         View selectedView = tabContainer.getChildAt(selectedChildIndex);
-                        addChildView(selectedTabIndex);
+                        // addChildView(selectedTabIndex);
                         selectedView.setVisibility(View.VISIBLE);
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
@@ -1541,7 +1570,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         }
     }
 
-    private Animator.AnimatorListener createClearAnimationListener() {
+    private AnimatorListener createClearAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1568,16 +1597,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 int index = tabs.indexOf(tab);
 
                 if (!isSwitcherShown()) {
-                    int previouslySelectedChildIndex = getChildIndex(selectedTabIndex);
-                    View previouslySelectedView =
-                            tabContainer.getChildAt(previouslySelectedChildIndex);
-                    previouslySelectedView.setVisibility(View.INVISIBLE);
-                    int selectedChildIndex = getChildIndex(index);
-                    View selectedView = tabContainer.getChildAt(selectedChildIndex);
-                    selectedView.setVisibility(View.VISIBLE);
+                    viewRecycler.remove(new TabView(selectedTabIndex));
+                    viewRecycler.inflate(new TabView(index));
                     selectedTabIndex = index;
-                    addChildView(index);
-                    notifyOnSelectionChanged(selectedChildIndex, tab);
+                    notifyOnSelectionChanged(index, tab);
                 } else {
                     selectedTabIndex = index;
                     hideSwitcher();
@@ -1587,6 +1610,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         });
     }
 
+    @Deprecated
     private int getChildIndex(final int index) {
         return getCount() - (index + 1);
     }
@@ -1651,86 +1675,172 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 (isToolbarShown() ? toolbar.getHeight() - tabInset : 0)));
     }
 
+    private OnGlobalLayoutListener createShowSwitcherLayoutListener(
+            @NonNull final TabView tabView) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                ViewUtil.removeOnGlobalLayoutListener(tabView.view.getViewTreeObserver(), this);
+                animateShowSwitcher(tabView);
+            }
+
+        };
+    }
+
+    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final TabView tabView) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = tabView.view;
+                ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
+                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+                float scale = getScale(view, true);
+                setScale(Axis.DRAGGING_AXIS, view, scale);
+                setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+                layoutParams.bottomMargin = calculateTabViewMargin(view);
+                view.setLayoutParams(layoutParams);
+                applyTag(tabView);
+            }
+
+        };
+    }
+
+    private void animateShowSwitcher(@NonNull final TabView tabView) {
+        View view = tabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+        float scale = getScale(view, true);
+
+        if (tabView.index < selectedTabIndex) {
+            setPosition(Axis.DRAGGING_AXIS, view, getSize(Axis.DRAGGING_AXIS, tabContainer));
+        } else if (tabView.index > selectedTabIndex) {
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            setPosition(Axis.DRAGGING_AXIS, view,
+                    isDraggingHorizontally() ? 0 : layoutParams.topMargin);
+        }
+
+        long animationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+        animateMargin(view, calculateTabViewMargin(view), animationDuration);
+        ViewPropertyAnimator animation = view.animate();
+        animation.setDuration(animationDuration);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setListener(
+                createAnimationListenerWrapper(createShowSwitcherAnimationListener(tabView)));
+        animateScale(Axis.DRAGGING_AXIS, animation, scale);
+        animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
+        animatePosition(Axis.DRAGGING_AXIS, animation, view, tabView.tag.projectedPosition, true);
+        animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
+        animation.setStartDelay(0);
+        animation.start();
+        animateToolbarVisibility(isToolbarShown(),
+                getResources().getInteger(android.R.integer.config_shortAnimTime));
+    }
+
+    private void animateHideSwitcher(@NonNull final TabView tabView) {
+        View view = tabView.view;
+        long animationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+        animateMargin(view, -(tabInset + tabBorderWidth), animationDuration);
+        ViewPropertyAnimator animation = view.animate();
+        animation.setDuration(animationDuration);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setListener(
+                createAnimationListenerWrapper(createHideSwitcherAnimationListener(tabView)));
+        animateScale(Axis.DRAGGING_AXIS, animation, 1);
+        animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
+                isDraggingHorizontally() ? layoutParams.topMargin : 0, false);
+
+        if (tabView.index < selectedTabIndex) {
+            animatePosition(Axis.DRAGGING_AXIS, animation, view, getSize(Axis.DRAGGING_AXIS, this),
+                    false);
+        } else if (tabView.index > selectedTabIndex) {
+            animatePosition(Axis.DRAGGING_AXIS, animation, view,
+                    isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
+        } else {
+            view.setVisibility(View.VISIBLE);
+            animatePosition(Axis.DRAGGING_AXIS, animation, view,
+                    isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
+        }
+
+        animation.setStartDelay(0);
+        animation.start();
+        animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
+    }
+
+    private AnimatorListener createAnimationListenerWrapper(
+            @Nullable final AnimatorListener listener) {
+        return new AnimatorListenerAdapter() {
+
+            private void endAnimation() {
+                if (--runningAnimations == 0) {
+                    executePendingAction();
+                }
+            }
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+                runningAnimations++;
+
+                if (listener != null) {
+                    listener.onAnimationStart(animation);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+
+                if (listener != null) {
+                    listener.onAnimationEnd(animation);
+                }
+
+                endAnimation();
+            }
+
+            @Override
+            public void onAnimationCancel(final Animator animation) {
+                super.onAnimationCancel(animation);
+
+                if (listener != null) {
+                    listener.onAnimationCancel(animation);
+                }
+
+                endAnimation();
+            }
+
+        };
+    }
+
+    // TODO: Calling this method should also work when the view is not yet inflated
+    // TODO: Should this be executed as a pending action?
     @SuppressWarnings("WrongConstant")
     public final void showSwitcher() {
         if (!isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = true;
             notifyOnSwitcherShown();
             attachedPosition = calculateAttachedPosition();
-
-            if (selectedTabIndex != -1) {
-                detachChildView(selectedTabIndex);
-            }
-
-            renderChildViews();
             Iterator iterator = new Iterator();
             TabView tabView;
 
             while ((tabView = iterator.next()) != null) {
-                tabView.viewHolder.borderView.setVisibility(View.VISIBLE);
-                View view = tabView.view;
-                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
-                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
                 calculateAndClipTopThresholdPosition(tabView, iterator.previous());
-            }
 
-            /*
-            TabView selectedTabView = new Iterator(false, selectedTabIndex + 1).next();
-            float targetPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
-            System.out.println("minTabSpacing = " + minTabSpacing);
-            System.out.println("maxTabSpacing = " + maxTabSpacing);
-            System.out.println("attachedPosition = " + attachedPosition);
-            System.out.println(
-                    "targetPosition of tab " + (selectedTabIndex + 1) + " = " + targetPosition);
-            float drag = 0;
+                if (tabView.index == selectedTabIndex || tabView.isVisible()) {
+                    View view = viewRecycler.inflate(tabView);
 
-            while (getPosition(Axis.DRAGGING_AXIS, selectedTabView.view) < targetPosition) {
-                drag++;
-
-                if (!handleDrag(drag, 0)) {
-                    break;
+                    if (!ViewCompat.isLaidOut(view)) {
+                        view.getViewTreeObserver().addOnGlobalLayoutListener(
+                                createShowSwitcherLayoutListener(tabView));
+                    } else {
+                        animateShowSwitcher(tabView);
+                    }
                 }
-            }
-
-            handleRelease(null);
-            printActualPositions();
-            */
-
-            iterator = new Iterator();
-
-            while ((tabView = iterator.next()) != null) {
-                View view = tabView.view;
-                view.setVisibility(
-                        tabView.index == selectedTabIndex ? View.VISIBLE : getVisibility(tabView));
-                float scale = getScale(view, true);
-
-                if (tabView.index < selectedTabIndex) {
-                    setPosition(Axis.DRAGGING_AXIS, view,
-                            getSize(Axis.DRAGGING_AXIS, tabContainer));
-                } else if (tabView.index > selectedTabIndex) {
-                    LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-                    setPosition(Axis.DRAGGING_AXIS, view,
-                            isDraggingHorizontally() ? 0 : layoutParams.topMargin);
-                }
-
-                long animationDuration =
-                        getResources().getInteger(android.R.integer.config_longAnimTime);
-                animateMargin(view, calculateTabViewMargin(view), animationDuration);
-                showSwitcherAnimation = view.animate();
-                showSwitcherAnimation.setDuration(animationDuration);
-                showSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                showSwitcherAnimation.setListener(
-                        createShowSwitcherAnimationListener(tabView, !iterator.hasNext()));
-                animateScale(Axis.DRAGGING_AXIS, showSwitcherAnimation, scale);
-                animateScale(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, scale);
-                animatePosition(Axis.DRAGGING_AXIS, showSwitcherAnimation, view,
-                        tabView.tag.projectedPosition, true);
-                animatePosition(Axis.ORTHOGONAL_AXIS, showSwitcherAnimation, view, 0, true);
-                showSwitcherAnimation.setStartDelay(0);
-                showSwitcherAnimation.start();
-
-                animateToolbarVisibility(isToolbarShown(),
-                        getResources().getInteger(android.R.integer.config_shortAnimTime));
             }
         }
     }
@@ -1739,12 +1849,14 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                                final long animationDuration) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
         int initialMargin = layoutParams.bottomMargin;
-        marginAnimation = ValueAnimator.ofInt(targetMargin - initialMargin);
-        marginAnimation.setDuration(animationDuration);
-        marginAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        marginAnimation.setStartDelay(0);
-        marginAnimation.addUpdateListener(createMarginAnimatorUpdateListener(view, initialMargin));
-        marginAnimation.start();
+        ValueAnimator animation = ValueAnimator.ofInt(targetMargin - initialMargin);
+        animation.setDuration(animationDuration);
+        animation.addListener(createAnimationListenerWrapper(null));
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setStartDelay(0);
+        animation.addUpdateListener(createMarginAnimatorUpdateListener(view, initialMargin));
+        animation.start();
+
     }
 
     private AnimatorUpdateListener createMarginAnimatorUpdateListener(@NonNull final View view,
@@ -1761,6 +1873,39 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         };
     }
 
+    private AnimatorUpdateListener createOvershootUpAnimatorUpdateListener() {
+        return new AnimatorUpdateListener() {
+
+            private Float startPosition;
+
+            @Override
+            public void onAnimationUpdate(final ValueAnimator animation) {
+                Iterator iterator = new Iterator();
+                TabView tabView;
+
+                while ((tabView = iterator.next()) != null) {
+                    if (tabView.index == 0) {
+                        View view = tabView.view;
+
+                        if (startPosition == null) {
+                            startPosition = getPosition(Axis.DRAGGING_AXIS, view);
+                        }
+
+                        setPosition(Axis.DRAGGING_AXIS, view,
+                                startPosition + (float) animation.getAnimatedValue());
+                    } else if (tabView.isInflated()) {
+                        View firstView = iterator.first().view;
+                        View view = tabView.view;
+                        view.setVisibility(getPosition(Axis.DRAGGING_AXIS, firstView) <=
+                                getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
+                                View.VISIBLE);
+                    }
+                }
+            }
+
+        };
+    }
+
     private void printActualPositions() {
         Iterator iterator = new Iterator(true);
         TabView tabView;
@@ -1770,6 +1915,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         }
     }
 
+    // TODO: Calling this method should also work when the view is not yet inflated
+    // TODO: Should this be executed as a pending action?
     public final void hideSwitcher() {
         if (isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = false;
@@ -1778,36 +1925,9 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             TabView tabView;
 
             while ((tabView = iterator.next()) != null) {
-                View view = tabView.view;
-                long animationDuration =
-                        getResources().getInteger(android.R.integer.config_longAnimTime);
-                animateMargin(view, -(tabInset + tabBorderWidth), animationDuration);
-                hideSwitcherAnimation = view.animate();
-                hideSwitcherAnimation.setDuration(animationDuration);
-                hideSwitcherAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                hideSwitcherAnimation.setListener(
-                        createHideSwitcherAnimationListener(tabView, !iterator.hasNext()));
-                animateScale(Axis.DRAGGING_AXIS, hideSwitcherAnimation, 1);
-                animateScale(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, 1);
-                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-                animatePosition(Axis.ORTHOGONAL_AXIS, hideSwitcherAnimation, view,
-                        isDraggingHorizontally() ? layoutParams.topMargin : 0, false);
-
-                if (tabView.index < selectedTabIndex) {
-                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            getSize(Axis.DRAGGING_AXIS, this), false);
-                } else if (tabView.index > selectedTabIndex) {
-                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
-                } else {
-                    view.setVisibility(View.VISIBLE);
-                    animatePosition(Axis.DRAGGING_AXIS, hideSwitcherAnimation, view,
-                            isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
+                if (tabView.isInflated()) {
+                    animateHideSwitcher(tabView);
                 }
-
-                hideSwitcherAnimation.setStartDelay(0);
-                hideSwitcherAnimation.start();
-                animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
             }
         }
     }
@@ -1820,46 +1940,29 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         }
     }
 
-    private Animator.AnimatorListener createShowSwitcherAnimationListener(
-            @NonNull final TabView tabView, final boolean reset) {
+    private AnimatorListener createShowSwitcherAnimationListener(@NonNull final TabView tabView) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 applyTag(tabView);
-
-                if (reset) {
-                    showSwitcherAnimation = null;
-                    marginAnimation = null;
-                    executePendingAction();
-                }
             }
 
         };
     }
 
-    private Animator.AnimatorListener createHideSwitcherAnimationListener(
-            @NonNull final TabView tabView, final boolean reset) {
+    private AnimatorListener createHideSwitcherAnimationListener(@NonNull final TabView tabView) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                View view = tabView.view;
-                tabView.viewHolder.borderView.setVisibility(View.GONE);
-                detachChildView(tabView.index);
 
                 if (tabView.index == selectedTabIndex) {
-                    addChildView(tabView.index);
+                    viewRecycler.inflate(tabView);
                 } else {
-                    view.setVisibility(View.INVISIBLE);
-                }
-
-                if (reset) {
-                    hideSwitcherAnimation = null;
-                    marginAnimation = null;
-                    executePendingAction();
+                    viewRecycler.remove(tabView);
                 }
             }
 
@@ -1871,8 +1974,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 NON_LINEAR_DRAG_FACTOR + calculateFirstTabTopThresholdPosition();
     }
 
-    private Animation.AnimationListener createDragAnimationListener() {
-        return new Animation.AnimationListener() {
+    private AnimationListener createDragAnimationListener() {
+        return new AnimationListener() {
 
             @Override
             public void onAnimationStart(final Animation animation) {
@@ -1894,8 +1997,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         };
     }
 
-    private Animator.AnimatorListener createOvershootAnimationListenerWrapper(
-            @NonNull final View view, @Nullable final Animator.AnimatorListener listener) {
+    private AnimatorListener createOvershootAnimationListenerWrapper(@NonNull final View view,
+                                                                     @Nullable final AnimatorListener listener) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1912,38 +2015,26 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         };
     }
 
-    private Animator.AnimatorListener createOvershootDownAnimationListener() {
+    private AnimatorListener createOvershootDownAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 handleRelease(null);
-                overshootAnimation = null;
                 executePendingAction();
             }
 
         };
     }
 
-    private Animation.AnimationListener createOvershootUpAnimationListener() {
-        return new Animation.AnimationListener() {
+    private AnimatorListener createOvershootUpAnimationListener() {
+        return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
                 handleRelease(null);
-                overshootUpAnimation = null;
-                executePendingAction();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
             }
 
         };
@@ -1955,7 +2046,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             calculateAndClipTopThresholdPosition(tabView, iterator.previous());
-            applyTag(tabView);
+
+            if (tabView.isInflated()) {
+                applyTag(tabView);
+            }
         }
     }
 
@@ -1989,7 +2083,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
-            applyTag(tabView);
+
+            if (tabView.isInflated()) {
+                applyTag(tabView);
+            }
         }
     }
 
@@ -2008,13 +2105,12 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            View view = tabView.view;
             Tag tag = tabView.tag;
-            tag.projectedPosition = getPosition(Axis.DRAGGING_AXIS, view);
             tag.distance = 0;
         }
     }
 
+    // TODO: Move to TabView inner class
     private void applyTag(@NonNull final TabView tabView) {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
@@ -2022,15 +2118,16 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
-        adaptVisibility(tabView);
     }
 
+    @Deprecated
     @SuppressWarnings("WrongConstant")
     private void adaptVisibility(@NonNull final TabView tabView) {
         View view = tabView.view;
         view.setVisibility(getVisibility(tabView));
     }
 
+    @Deprecated
     private int getVisibility(@NonNull final TabView tabView) {
         State state = tabView.tag.state;
         return (state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN) &&
@@ -2212,9 +2309,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private boolean isAnimationRunning() {
-        return showSwitcherAnimation != null || marginAnimation != null ||
-                hideSwitcherAnimation != null || overshootAnimation != null ||
-                overshootUpAnimation != null || closeAnimation != null || relocateAnimation != null;
+        return runningAnimations != 0 || closeAnimation != null || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
@@ -2233,9 +2328,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         if (getCount() <= 1) {
             return true;
         } else {
-            View view = tabContainer.getChildAt(getCount() - 1);
-            Tag tag = (Tag) view.getTag(R.id.tag_properties);
-            return tag.state == State.TOP_MOST;
+            TabView tabView = new TabView(0);
+            return tabView.tag.state == State.TOP_MOST;
         }
     }
 
@@ -2243,9 +2337,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         if (getCount() <= 1) {
             return true;
         } else {
-            View view = tabContainer.getChildAt(1);
-            Tag tag = (Tag) view.getTag(R.id.tag_properties);
-            return tag.projectedPosition >= maxTabSpacing;
+            TabView tabView = new TabView(getCount() - 2);
+            return tabView.tag.projectedPosition >= maxTabSpacing;
         }
     }
 
@@ -2257,32 +2350,34 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            View view = tabView.view;
+            if (tabView.isInflated()) {
+                View view = tabView.view;
 
-            if (!iterator.hasNext()) {
-                view.setCameraDistance(maxCameraDistance);
-            } else if (firstVisibleIndex == -1) {
-                view.setCameraDistance(minCameraDistance);
+                if (!iterator.hasNext()) {
+                    view.setCameraDistance(maxCameraDistance);
+                } else if (firstVisibleIndex == -1) {
+                    view.setCameraDistance(minCameraDistance);
 
-                if (tabView.tag.state == State.VISIBLE) {
-                    firstVisibleIndex = tabView.index;
+                    if (tabView.tag.state == State.VISIBLE) {
+                        firstVisibleIndex = tabView.index;
+                    }
+                } else {
+                    int diff = tabView.index - firstVisibleIndex;
+                    float ratio = (float) diff / (float) (getCount() - firstVisibleIndex);
+                    view.setCameraDistance(
+                            minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
                 }
-            } else {
-                int diff = tabView.index - firstVisibleIndex;
-                float ratio = (float) diff / (float) (getCount() - firstVisibleIndex);
-                view.setCameraDistance(
-                        minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
-            }
 
-            setPivot(Axis.DRAGGING_AXIS, view, getPivotOnOvershootDown(Axis.DRAGGING_AXIS, view));
-            setPivot(Axis.ORTHOGONAL_AXIS, view,
-                    getPivotOnOvershootDown(Axis.ORTHOGONAL_AXIS, view));
-            setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+                setPivot(Axis.DRAGGING_AXIS, view,
+                        getPivotOnOvershootDown(Axis.DRAGGING_AXIS, view));
+                setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getPivotOnOvershootDown(Axis.ORTHOGONAL_AXIS, view));
+                setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+            }
         }
     }
 
     private void tiltOnOvershootUp(final float angle) {
-        float cameraDistance = getMaxCameraDistance();
         Iterator iterator = new Iterator();
         TabView tabView;
 
@@ -2290,14 +2385,13 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
             View view = tabView.view;
 
             if (tabView.index == 0) {
-                view.setVisibility(View.VISIBLE);
-                view.setCameraDistance(cameraDistance);
+                view.setCameraDistance(getMaxCameraDistance());
                 setPivot(Axis.DRAGGING_AXIS, view, getPivotOnOvershootUp(Axis.DRAGGING_AXIS, view));
                 setPivot(Axis.ORTHOGONAL_AXIS, view,
                         getPivotOnOvershootUp(Axis.ORTHOGONAL_AXIS, view));
                 setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
-            } else {
-                view.setVisibility(View.INVISIBLE);
+            } else if (tabView.isInflated()) {
+                tabView.view.setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -2325,9 +2419,8 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 TabView tabView;
 
                 while ((tabView = iterator.next()) != null) {
-                    View view = tabView.view;
-
                     if (tabView.index == 0) {
+                        View view = tabView.view;
                         float currentPosition = tabView.tag.projectedPosition;
                         setPivot(Axis.DRAGGING_AXIS, view,
                                 getDefaultPivot(Axis.DRAGGING_AXIS, view));
@@ -2335,11 +2428,12 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                                 getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
                         setPosition(Axis.DRAGGING_AXIS, view,
                                 currentPosition - (currentPosition * ratio));
-                    } else {
+                    } else if (tabView.isInflated()) {
                         View firstView = iterator.first().view;
+                        View view = tabView.view;
                         view.setVisibility(getPosition(Axis.DRAGGING_AXIS, firstView) <=
                                 getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
-                                getVisibility(tabView));
+                                View.VISIBLE);
                     }
                 }
             } else {
@@ -2394,7 +2488,18 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
                 while ((tabView = iterator.next()) != null) {
                     calculateTabPosition(dragHelper.getDragDistance(), tabView,
                             iterator.previous());
-                    applyTag(tabView);
+
+                    if (tabView.isInflated() && !tabView.isVisible()) {
+                        viewRecycler.remove(tabView);
+                    } else if (tabView.isVisible()) {
+                        if (!tabView.isInflated()) {
+                            View view = viewRecycler.inflate(tabView);
+                            view.getViewTreeObserver().addOnGlobalLayoutListener(
+                                    createInflateViewLayoutListener(tabView));
+                        } else {
+                            applyTag(tabView);
+                        }
+                    }
                 }
 
                 checkIfDragThresholdReached(dragPosition);
@@ -2559,26 +2664,20 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     }
 
     private void animateOvershootUp() {
-        boolean tilted = animateTilt(new AccelerateInterpolator(), createTiltAnimationListener(),
-                MAX_UP_OVERSHOOT_ANGLE);
+        boolean tilted = animateTilt(new AccelerateInterpolator(), null, MAX_UP_OVERSHOOT_ANGLE);
 
-        if (!tilted) {
+        if (tilted) {
+            enqueuePendingAction(new Runnable() {
+
+                @Override
+                public void run() {
+                    animateOvershootUp(new DecelerateInterpolator());
+                }
+
+            });
+        } else {
             animateOvershootUp(new AccelerateDecelerateInterpolator());
         }
-    }
-
-    private Animator.AnimatorListener createTiltAnimationListener() {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                animateOvershootUp(new DecelerateInterpolator());
-                overshootAnimation = null;
-                executePendingAction();
-            }
-
-        };
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
@@ -2589,37 +2688,41 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
         float position = getPosition(Axis.DRAGGING_AXIS, view);
         float targetPosition = tabView.tag.projectedPosition;
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        overshootUpAnimation = new OvershootUpAnimation();
-        overshootUpAnimation.setFillAfter(true);
-        overshootUpAnimation.setDuration(Math.round(animationDuration * Math.abs(
+        ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
+        animation.setDuration(Math.round(animationDuration * Math.abs(
                 (targetPosition - position) / (float) (STACKED_TAB_COUNT * stackedTabSpacing))));
-        overshootUpAnimation.setInterpolator(interpolator);
-        overshootUpAnimation.setAnimationListener(createOvershootUpAnimationListener());
-        startAnimation(overshootUpAnimation);
+        animation.addListener(createAnimationListenerWrapper(createOvershootUpAnimationListener()));
+        animation.setInterpolator(interpolator);
+        animation.setStartDelay(0);
+        animation.addUpdateListener(createOvershootUpAnimatorUpdateListener());
+        animation.start();
     }
 
     private boolean animateTilt(@NonNull final Interpolator interpolator,
-                                @Nullable final Animator.AnimatorListener listener,
-                                final float maxAngle) {
+                                @Nullable final AnimatorListener listener, final float maxAngle) {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         Iterator iterator = new Iterator(true);
         TabView tabView;
         boolean result = false;
 
         while ((tabView = iterator.next()) != null) {
-            View view = tabView.view;
+            if (tabView.isInflated()) {
+                View view = tabView.view;
 
-            if (getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
-                result = true;
-                overshootAnimation = view.animate();
-                overshootAnimation.setListener(createOvershootAnimationListenerWrapper(view,
-                        iterator.hasNext() ? null : listener));
-                overshootAnimation.setDuration(Math.round(animationDuration *
-                        (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
-                overshootAnimation.setInterpolator(interpolator);
-                animateRotation(Axis.ORTHOGONAL_AXIS, overshootAnimation, 0);
-                overshootAnimation.setStartDelay(0);
-                overshootAnimation.start();
+                if (getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
+                    result = true;
+                    ViewPropertyAnimator animation = view.animate();
+                    animation.setListener(createAnimationListenerWrapper(
+                            createOvershootAnimationListenerWrapper(view,
+                                    iterator.hasNext() ? null :
+                                            listener))); // TODO: Iterator.hasNext() will not work
+                    animation.setDuration(Math.round(animationDuration *
+                            (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
+                    animation.setInterpolator(interpolator);
+                    animateRotation(Axis.ORTHOGONAL_AXIS, animation, 0);
+                    animation.setStartDelay(0);
+                    animation.start();
+                }
             }
         }
 
@@ -2651,7 +2754,7 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
     public final void setDecorator(@NonNull final Decorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.legacyViewRecycler.reset();
+        this.recyclerAdapter.reset();
     }
 
     public final Decorator getDecorator() {
@@ -2741,7 +2844,10 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
         while ((tabView = iterator.next()) != null) {
             ViewHolder viewHolder = tabView.viewHolder;
-            adaptChildAndPreviewMargins(viewHolder);
+
+            if (viewHolder != null) {
+                adaptChildAndPreviewMargins(viewHolder);
+            }
         }
     }
 
@@ -2800,19 +2906,12 @@ public class TabSwitcher extends FrameLayout implements ViewTreeObserver.OnGloba
 
     @Override
     public final void onGlobalLayout() {
-        removeOnGlobalLayoutListener(this);
+        ViewUtil.removeOnGlobalLayoutListener(getViewTreeObserver(), this);
 
         if (selectedTabIndex != -1) {
-            addChildView(selectedTabIndex);
-        }
-    }
-
-    // TODO: Add method including API check to ViewUtil
-    private void removeOnGlobalLayoutListener(@NonNull final View view) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-        } else {
-            view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            TabView tabView = new TabView(selectedTabIndex);
+            viewRecycler.inflate(tabView);
+            // TODO addChildView(selectedTabIndex);
         }
     }
 
