@@ -233,6 +233,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
         }
 
+        // TODO: Render bitmaps asynchronously
         private void renderChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
             Bitmap bitmap = null;
