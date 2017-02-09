@@ -189,12 +189,18 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
 
             @Override
             public void run() {
-                task.result = loadData(task.key, task.params);
-                cacheData(task.key, task.result);
-                logger.logInfo(getClass(), "Asynchronously loaded data with key " + task.key);
-                Message message = Message.obtain();
-                message.obj = task;
-                sendMessage(message);
+                try {
+                    task.result = loadData(task.key, task.params);
+                    cacheData(task.key, task.result);
+                    logger.logInfo(getClass(), "Asynchronously loaded data with key " + task.key);
+                } catch (Exception e) {
+                    logger.logError(getClass(),
+                            "An error occurred while loading data with key " + task.key, e);
+                } finally {
+                    Message message = Message.obtain();
+                    message.obj = task;
+                    sendMessage(message);
+                }
             }
 
         });
