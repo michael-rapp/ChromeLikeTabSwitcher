@@ -222,7 +222,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
             @Nullable
             @Override
-            protected Bitmap loadData(@NonNull final Tab key, @NonNull final TabView... params) {
+            protected Bitmap doInBackground(@NonNull final Tab key,
+                                            @NonNull final TabView... params) {
                 TabView tabView = params[0];
                 ViewHolder viewHolder = tabView.viewHolder;
                 View view = viewHolder.child;
@@ -251,8 +252,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             }
 
             @Override
-            protected void showData(@NonNull final ImageView view, @Nullable final Bitmap data,
-                                    @NonNull final TabView... params) {
+            protected void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
+                                         @NonNull final TabView... params) {
                 view.setImageBitmap(data);
                 view.setVisibility(data != null ? View.VISIBLE : View.GONE);
             }

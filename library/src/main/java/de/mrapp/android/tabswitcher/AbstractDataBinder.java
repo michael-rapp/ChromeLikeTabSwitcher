@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.view.View;
 
 import java.lang.ref.SoftReference;
@@ -190,7 +192,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
             @Override
             public void run() {
                 try {
-                    task.result = loadData(task.key, task.params);
+                    task.result = doInBackground(task.key, task.params);
                     cacheData(task.key, task.result);
                     logger.logInfo(getClass(), "Asynchronously loaded data with key " + task.key);
                 } catch (Exception e) {
@@ -207,8 +209,26 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
+     * The method, which is invoked on implementing subclasses prior to loading any data. This
+     * method may be overridden to adapt the appearance of views.
+     *
+     * @param view
+     *         The view, which should be used to display the data, as an instance of the generic
+     *         type ViewType. The view may not be null
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     */
+    @UiThread
+    @SuppressWarnings("unchecked")
+    protected void onPreExecute(@NonNull final ViewType view, @NonNull final ParamType... params) {
+
+    }
+
+    /**
      * The method, which is invoked on implementing subclasses, in order to load the data, which
-     * corresponds to a specific key.
+     * corresponds to a specific key. This method is executed in a background thread and therefore
+     * no views may be modified.
      *
      * @param key
      *         The key of the data, which should be loaded, as an instance of the generic type
@@ -221,8 +241,8 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    protected abstract DataType loadData(@NonNull final KeyType key,
-                                         @NonNull final ParamType... params);
+    protected abstract DataType doInBackground(@NonNull final KeyType key,
+                                               @NonNull final ParamType... params);
 
     /**
      * The method, which is invoked on implementing subclasses, in order to display data after it
@@ -238,9 +258,11 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         An array, which contains optional parameters, as an array of the type ParamType or an
      *         empty array, if no parameters should be used
      */
+    @UiThread
     @SuppressWarnings("unchecked")
-    protected abstract void showData(@NonNull final ViewType view, @Nullable final DataType data,
-                                     @NonNull final ParamType... params);
+    protected abstract void onPostExecute(@NonNull final ViewType view,
+                                          @Nullable final DataType data,
+                                          @NonNull final ParamType... params);
 
     /**
      * Creates a new data binder. Caching is enabled by default. The executor service, which is used
@@ -335,10 +357,10 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
         DataType data = getCachedData(key);
 
         if (data != null) {
-            showData(view, data, params);
+            onPostExecute(view, data, params);
             logger.logInfo(getClass(), "Loaded data with key " + key + " from cache");
         } else {
-            showData(view, null, params);
+            onPreExecute(view, params);
             Task<DataType, KeyType, ViewType, ParamType> task = new Task<>(view, key, params);
             loadDataAsynchronously(task);
         }
@@ -389,7 +411,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
         KeyType key = views.get(task.view);
 
         if (key != null && key.equals(task.key)) {
-            showData(task.view, task.result, task.params);
+            onPostExecute(task.view, task.result, task.params);
         } else {
             logger.logVerbose(getClass(),
                     "Data with key " + task.key + " not displayed. View has been recycled");
