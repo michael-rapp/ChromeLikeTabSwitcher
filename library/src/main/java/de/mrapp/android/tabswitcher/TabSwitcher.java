@@ -42,6 +42,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -206,9 +207,62 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
     private class RecyclerAdapter extends ViewRecycler.Adapter<TabView> {
 
-        private SparseArray<View> childViews;
+        private class PreviewDataBinder
+                extends AbstractDataBinder<Bitmap, Tab, ImageView, TabView> {
 
-        private Map<Tab, Bitmap> bitmaps;
+            /**
+             * Creates a new data binder, which allows to load preview images of tabs.
+             *
+             * @param context
+             *         The context, which should be used by the data binder, as an instance of the
+             *         class {@link Context}. The context may not be null
+             */
+            public PreviewDataBinder(@NonNull final Context context) {
+                super(context);
+            }
+
+            @Nullable
+            @Override
+            protected Bitmap loadData(@NonNull final Tab key, @NonNull final TabView... params) {
+                TabView tabView = params[0];
+                ViewHolder viewHolder = tabView.viewHolder;
+                View view = viewHolder.child;
+                int viewType = getDecorator().getViewType(tabView.tab);
+
+                if (view == null) {
+                    view = inflateChildView(viewHolder.childContainer, viewType);
+                    // TODO: Must the view also be added to the parent? This is relevant when showing the switcher when the view is not yet inflated
+                } else {
+                    viewHolder.child = null;
+                }
+
+                getDecorator()
+                        .onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
+                Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
+                        Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                view.draw(canvas);
+
+                // TODO: This is only for debugging purposes
+                Paint paint = new Paint();
+                paint.setColor(Color.RED);
+                canvas.drawCircle(100, 100, 40, paint);
+
+                return bitmap;
+            }
+
+            @Override
+            protected void showData(@NonNull final ImageView view, @Nullable final Bitmap data,
+                                    @NonNull final TabView... params) {
+                view.setImageBitmap(data);
+                view.setVisibility(data != null ? View.VISIBLE : View.GONE);
+            }
+
+        }
+
+        private final PreviewDataBinder dataBinder;
+
+        private SparseArray<View> childViews;
 
         // TODO: Only add child view, if tab view is the selected one
         private void addChildView(@NonNull final TabView tabView) {
@@ -227,51 +281,17 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                 viewHolder.child = view;
             }
 
-            viewHolder.previewImageView.setImageBitmap(null);
             viewHolder.previewImageView.setVisibility(View.GONE);
+            viewHolder.previewImageView.setImageBitmap(null);
             viewHolder.borderView.setVisibility(View.GONE);
             getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
         }
 
-        // TODO: Render bitmaps asynchronously
         private void renderChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
-            Bitmap bitmap = null;
-
-            if (bitmaps == null) {
-                bitmaps = new HashMap<>();
-            } else {
-                bitmap = bitmaps.get(tabView.tab);
-            }
-
-            if (bitmap == null) {
-                View view = viewHolder.child;
-                int viewType = getDecorator().getViewType(tabView.tab);
-
-                if (view == null) {
-                    view = inflateChildView(viewHolder.childContainer, viewType);
-                    // TODO: Must the view also be added to the parent? This is relevant when showing the switcher when the view is not yet inflated
-                } else {
-                    removeChildView(viewHolder);
-                }
-
-                getDecorator()
-                        .onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
-                bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
-                        Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                view.draw(canvas);
-
-                // TODO: This is only for debugging purposes
-                Paint paint = new Paint();
-                paint.setColor(Color.RED);
-                canvas.drawCircle(100, 100, 40, paint);
-                bitmaps.put(tabView.tab, bitmap);
-            }
-
-            viewHolder.previewImageView.setImageBitmap(bitmap);
-            viewHolder.previewImageView.setVisibility(View.VISIBLE);
             viewHolder.borderView.setVisibility(View.VISIBLE);
+            removeChildView(viewHolder);
+            dataBinder.load(tabView.tab, viewHolder.previewImageView, tabView);
         }
 
         private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
@@ -294,8 +314,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         private void removeChildView(@NonNull final ViewHolder viewHolder) {
             if (viewHolder.childContainer.getChildCount() > 2) {
                 viewHolder.childContainer.removeViewAt(0);
-                viewHolder.child = null;
             }
+        }
+
+        public RecyclerAdapter() {
+            this.dataBinder = new PreviewDataBinder(getContext());
         }
 
         public void clearCachedChildViews() {
@@ -306,10 +329,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         }
 
         public void clearCachedBitmaps() {
-            if (bitmaps != null) {
-                bitmaps.clear();
-                bitmaps = null;
-            }
+            dataBinder.clearCache();
         }
 
         @NonNull
@@ -385,6 +405,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         public void onRemoveView(@NonNull final View view, @NonNull final TabView tabView) {
             ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             removeChildView(viewHolder);
+            viewHolder.child = null;
             view.setTag(R.id.tag_properties, null);
         }
 

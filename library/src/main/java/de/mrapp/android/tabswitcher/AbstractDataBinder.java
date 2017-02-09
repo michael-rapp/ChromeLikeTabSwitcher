@@ -1,0 +1,393 @@
+package de.mrapp.android.tabswitcher;
+
+import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.View;
+
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import de.mrapp.android.util.logging.LogLevel;
+import de.mrapp.android.util.logging.Logger;
+
+import static de.mrapp.android.util.Condition.ensureNotNull;
+
+/**
+ * An abstract base class for all data binders, which allow to asynchronously load data in order to
+ * display it by using views. Such binders are meant to be used, when loading various data items, of
+ * which each one should be displayed by a different view. Once loaded, the data can optionally be
+ * stored in a cache (it therefore must be associated with an unique key). When attempting to reload
+ * already cached data, it is retrieved from the cache and displayed immediately.
+ *
+ * The binder supports to use adapter views, which might be recycled while data is still loaded. In
+ * such case, the recycled view is prevented from showing the data once loading has finished,
+ * because it is already used for other purposes.
+ *
+ * @param <DataType>
+ *         The type of the data, which is bound to views
+ * @param <KeyType>
+ *         The type of the keys, which allow to uniquely identify already loaded data
+ * @param <ViewType>
+ *         The type of the views, which are used to display data
+ * @param <ParamType>
+ *         The type of parameters, which can be passed when loading data
+ * @author Michael Rapp
+ * @since 1.14.0
+ */
+public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends View, ParamType>
+        extends Handler {
+
+    /**
+     * A task, which encapsulates all information, which is required to asynchronously load data and
+     * display it afterwards. It also contains the data once loaded.
+     *
+     * @param <DataType>
+     *         The type of the data, which is bound to views
+     * @param <KeyType>
+     *         The type of the keys, which allow to uniquely identify already loaded data
+     * @param <ViewType>
+     *         The type of the views, which are used to display data
+     * @param <ParamType>
+     *         The type of parameters, which can be passed when loading data
+     */
+    private static class Task<DataType, KeyType, ViewType extends View, ParamType> {
+
+        /**
+         * The view, which should be used to display the data.
+         */
+        private final ViewType view;
+
+        /**
+         * The key of the data, which should be loaded.
+         */
+        private final KeyType key;
+
+        /**
+         * An array, which contains optional parameters.
+         */
+        private final ParamType[] params;
+
+        /**
+         * The data, which has been loaded.
+         */
+        @Nullable
+        private DataType result;
+
+        /**
+         * Creates a new task
+         *
+         * @param view
+         *         The view, which should be used to display the data, as an instance of the class
+         *         {@link View}. The view may not be null
+         * @param key
+         *         The key of the data, which should be loaded, as an instance of the generic type
+         *         KeyType. The key may not be null
+         * @param params
+         *         An array, which contains optional parameters, as an array of the type ParamType
+         *         or an empty array, if no parameters should be used
+         */
+        Task(@NonNull final ViewType view, @NonNull final KeyType key,
+             @NonNull final ParamType[] params) {
+            this.view = view;
+            this.key = key;
+            this.params = params;
+            this.result = null;
+        }
+
+    }
+
+    /**
+     * The context, which is used by the data binder.
+     */
+    private final Context context;
+
+    /**
+     * The logger, which is used by the data binder.
+     */
+    private final Logger logger;
+
+    /**
+     * A map, which is used to cache already loaded data.
+     */
+    private final Map<KeyType, SoftReference<DataType>> cache;
+
+    /**
+     * A map, which is used to manage the views, which have already been used to display data.
+     */
+    private final Map<ViewType, KeyType> views;
+
+    /**
+     * The thread pool, which is used to manage the threads, which are used to asynchronously load
+     * data.
+     */
+    private final ExecutorService threadPool;
+
+    /**
+     * True, if data should be cached, false otherwise.
+     */
+    private boolean useCache;
+
+    /**
+     * Returns the data, which corresponds to a specific key, from the cache.
+     *
+     * @param key
+     *         The key of the data, which should be retrieved, as an instance of the generic type
+     *         KeyType. The key may not be null
+     * @return The data, which has been retrieved, as an instance of the generic type DataType or
+     * null, if no data with the given key is contained by the cache
+     */
+    @Nullable
+    private DataType getCachedData(@NonNull final KeyType key) {
+        synchronized (cache) {
+            SoftReference<DataType> reference = cache.get(key);
+
+            if (reference != null) {
+                return reference.get();
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Adds the data, which corresponds to a specific key, to the cache, if caching is enabled.
+     *
+     * @param key
+     *         The key of the data, which should be added to the cache, as an instance of the
+     *         generic type KeyType. The key may not be null
+     * @param data
+     *         The data, which should be added to the cache, as an instance of the generic type
+     *         DataType
+     */
+    private void cacheData(@NonNull final KeyType key, @Nullable final DataType data) {
+        synchronized (cache) {
+            if (useCache) {
+                cache.put(key, new SoftReference<>(data));
+            }
+        }
+    }
+
+    /**
+     * Asynchronously executes a specific task in order to load the data, and display it
+     * afterwards.
+     *
+     * @param task
+     *         The task, which should be executed, as an instance of the class {@link Task}. The
+     *         task may not be null
+     */
+    private void loadDataAsynchronously(
+            @NonNull final Task<DataType, KeyType, ViewType, ParamType> task) {
+        threadPool.submit(new Runnable() {
+
+            @Override
+            public void run() {
+                task.result = loadData(task.key, task.params);
+                cacheData(task.key, task.result);
+                logger.logInfo(getClass(), "Asynchronously loaded data with key " + task.key);
+                Message message = Message.obtain();
+                message.obj = task;
+                sendMessage(message);
+            }
+
+        });
+    }
+
+    /**
+     * The method, which is invoked on implementing subclasses, in order to load the data, which
+     * corresponds to a specific key.
+     *
+     * @param key
+     *         The key of the data, which should be loaded, as an instance of the generic type
+     *         KeyType. The key may not be null
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     * @return The data, which has been loaded, as an instance of the generic type DataType or null,
+     * if no data has been loaded
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    protected abstract DataType loadData(@NonNull final KeyType key,
+                                         @NonNull final ParamType... params);
+
+    /**
+     * The method, which is invoked on implementing subclasses, in order to display data after it
+     * has been loaded.
+     *
+     * @param view
+     *         The view, which should be used to display the data, as an instance of the generic
+     *         type ViewType. The view may not be null
+     * @param data
+     *         The data, which should be displayed, as an instance of the generic type DataType or
+     *         null, if no data should be displayed
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     */
+    @SuppressWarnings("unchecked")
+    protected abstract void showData(@NonNull final ViewType view, @Nullable final DataType data,
+                                     @NonNull final ParamType... params);
+
+    /**
+     * Creates a new data binder. Caching is enabled by default. The executor service, which is used
+     * to manage asynchronous tasks, is created by using the static method
+     * <code>Executors.newCachedThreadPool</code>. Such executor services are meant to be used when
+     * many short-living tasks are executed and reuse previously created threads.
+     *
+     * @param context
+     *         The context, which should be used by the data binder, as an instance of the class
+     *         {@link Context}. The context may not be null
+     */
+    public AbstractDataBinder(@NonNull final Context context) {
+        this(context, Executors.newCachedThreadPool());
+    }
+
+    /**
+     * Creates a new data binder. Caching is enabled by default.
+     *
+     * @param context
+     *         The context, which should be used by the data binder, as an instance of the class
+     *         {@link Context}. The context may not be null
+     * @param threadPool
+     *         The executor service, which should be used to manage asynchronous tasks, as an
+     *         instance of the type {@link ExecutorService}. The executor service may not be null
+     */
+    public AbstractDataBinder(@NonNull final Context context,
+                              @NonNull final ExecutorService threadPool) {
+        ensureNotNull(context, "The context may not be null");
+        ensureNotNull(threadPool, "The executor service may not be null");
+        this.context = context;
+        this.logger = new Logger(LogLevel.INFO);
+        this.cache = Collections.synchronizedMap(new HashMap<KeyType, SoftReference<DataType>>());
+        this.views = Collections.synchronizedMap(new WeakHashMap<ViewType, KeyType>());
+        this.threadPool = threadPool;
+        this.useCache = true;
+    }
+
+    /**
+     * Returns the context, which is used by the data binder.
+     *
+     * @return The context, which is used by the data binder, as an instance of the class {@link
+     * Context}. The context may not be null
+     */
+    @NonNull
+    public final Context getContext() {
+        return context;
+    }
+
+    /**
+     * Returns the log level, which is used for logging.
+     *
+     * @return The log level, which is used for logging, as a value of the enum {@link LogLevel}.
+     * The log level may not be null
+     */
+    @NonNull
+    public final LogLevel getLogLevel() {
+        return logger.getLogLevel();
+    }
+
+    /**
+     * Sets the log level, which should be used for logging.
+     *
+     * @param logLevel
+     *         The log level, which should be set, as a value of the enum {@link LogLevel}. The log
+     *         level may not be null
+     */
+    public final void setLogLevel(@NonNull final LogLevel logLevel) {
+        logger.setLogLevel(logLevel);
+    }
+
+    /**
+     * Asynchronously loads the the data, which corresponds to a specific key, and displays it in a
+     * specific view. If the data has already been loaded, it will be retrieved from the cache.
+     *
+     * @param key
+     *         The key of the data, which should be loaded, as an instance of the generic type
+     *         KeyType. The key may not be null
+     * @param view
+     *         The view, which should be used to display the data, as an instance of the generic
+     *         type ViewType. The view may not be null
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     */
+    @SafeVarargs
+    public final void load(@NonNull final KeyType key, @NonNull final ViewType view,
+                           @NonNull final ParamType... params) {
+        ensureNotNull(key, "The key may not be null");
+        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(params, "The array may not be null");
+        views.put(view, key);
+        DataType data = getCachedData(key);
+
+        if (data != null) {
+            showData(view, data, params);
+            logger.logInfo(getClass(), "Loaded data with key " + key + " from cache");
+        } else {
+            showData(view, null, params);
+            Task<DataType, KeyType, ViewType, ParamType> task = new Task<>(view, key, params);
+            loadDataAsynchronously(task);
+        }
+    }
+
+    /**
+     * Returns, whether data is cached, or not.
+     *
+     * @return True, if data is cached, false otherwise
+     */
+    public final boolean isCacheUsed() {
+        synchronized (cache) {
+            return useCache;
+        }
+    }
+
+    /**
+     * Sets, whether data should be cached, or not.
+     *
+     * @param useCache
+     *         True, if data should be cached, false otherwise.
+     */
+    public final void useCache(final boolean useCache) {
+        synchronized (cache) {
+            this.useCache = useCache;
+            logger.logDebug(getClass(), useCache ? "Enabled" : "Disabled" + " caching");
+
+            if (!useCache) {
+                clearCache();
+            }
+        }
+    }
+
+    /**
+     * Clears the cache.
+     */
+    public final void clearCache() {
+        synchronized (cache) {
+            cache.clear();
+            logger.logDebug(getClass(), "Cleared cache");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public final void handleMessage(final Message msg) {
+        Task<DataType, KeyType, ViewType, ParamType> task = (Task) msg.obj;
+        KeyType key = views.get(task.view);
+
+        if (key != null && key.equals(task.key)) {
+            showData(task.view, task.result, task.params);
+        } else {
+            logger.logVerbose(getClass(),
+                    "Data with key " + task.key + " not displayed. View has been recycled");
+        }
+    }
+
+}
