@@ -42,7 +42,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -1739,18 +1738,23 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             public void onGlobalLayout() {
                 View view = tabView.view;
                 ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
-                setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
-                setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
-                float scale = getScale(view, true);
-                setScale(Axis.DRAGGING_AXIS, view, scale);
-                setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-                LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-                layoutParams.bottomMargin = calculateTabViewMargin(view);
-                view.setLayoutParams(layoutParams);
+                adaptTabViewSize(tabView);
                 applyTag(tabView);
             }
 
         };
+    }
+
+    private void adaptTabViewSize(@NonNull final TabView tabView) {
+        View view = tabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+        float scale = getScale(view, true);
+        setScale(Axis.DRAGGING_AXIS, view, scale);
+        setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        layoutParams.bottomMargin = calculateTabViewMargin(view);
+        view.setLayoutParams(layoutParams);
     }
 
     private void animateShowSwitcher(@NonNull final TabView tabView) {
@@ -2546,6 +2550,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                                 view.getViewTreeObserver().addOnGlobalLayoutListener(
                                         createInflateViewLayoutListener(tabView));
                             } else {
+                                adaptTabViewSize(tabView);
                                 applyTag(tabView);
                             }
                         } else {
