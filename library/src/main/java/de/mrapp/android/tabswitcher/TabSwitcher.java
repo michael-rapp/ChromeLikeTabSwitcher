@@ -236,6 +236,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                 if (child == null) {
                     child = inflateChildView(viewHolder.childContainer, viewType);
                     // TODO: Must the view also be added to the parent? This is relevant when calling the showSwitcher-method, while the TabSwitcher is not yet inflated
+                } else {
+                    viewHolder.child = null;
                 }
 
                 getDecorator()
@@ -264,8 +266,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                                          @NonNull final TabView... params) {
                 view.setImageBitmap(data);
                 view.setVisibility(data != null ? View.VISIBLE : View.GONE);
-                TabView tabView = params[0];
-                removeChildView(tabView.viewHolder);
             }
 
         }
@@ -300,7 +300,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         private void renderChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
             viewHolder.borderView.setVisibility(View.VISIBLE);
-            dataBinder.load(tabView.tab, viewHolder.previewImageView, tabView);
+            boolean async = viewHolder.child == null;
+            dataBinder.load(tabView.tab, viewHolder.previewImageView, async, tabView);
+
+            if (!async) {
+                removeChildView(viewHolder);
+            }
         }
 
         private View inflateChildView(@NonNull final ViewGroup parent, final int viewType) {
@@ -324,8 +329,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             if (viewHolder.childContainer.getChildCount() > 2) {
                 viewHolder.childContainer.removeViewAt(0);
             }
-
-            viewHolder.child = null;
         }
 
         public RecyclerAdapter() {
@@ -416,6 +419,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         public void onRemoveView(@NonNull final View view, @NonNull final TabView tabView) {
             ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             removeChildView(viewHolder);
+            viewHolder.child = null;
             view.setTag(R.id.tag_properties, null);
         }
 

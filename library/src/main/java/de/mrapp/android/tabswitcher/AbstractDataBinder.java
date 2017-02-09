@@ -6,7 +6,6 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.annotation.WorkerThread;
 import android.view.View;
 
 import java.lang.ref.SoftReference;
@@ -178,8 +177,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
-     * Asynchronously executes a specific task in order to load the data, and display it
-     * afterwards.
+     * Asynchronously executes a specific task in order to load data and to display it afterwards.
      *
      * @param task
      *         The task, which should be executed, as an instance of the class {@link Task}. The
@@ -191,21 +189,36 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
 
             @Override
             public void run() {
-                try {
-                    task.result = doInBackground(task.key, task.params);
-                    cacheData(task.key, task.result);
-                    logger.logInfo(getClass(), "Asynchronously loaded data with key " + task.key);
-                } catch (Exception e) {
-                    logger.logError(getClass(),
-                            "An error occurred while loading data with key " + task.key, e);
-                } finally {
-                    Message message = Message.obtain();
-                    message.obj = task;
-                    sendMessage(message);
-                }
+                task.result = loadData(task);
+                Message message = Message.obtain();
+                message.obj = task;
+                sendMessage(message);
             }
 
         });
+    }
+
+    /**
+     * Executes a specific task in order to load data.
+     *
+     * @param task
+     *         The task, which should be executed, as an instance of the class {@link Task}. The
+     *         task may not be null
+     * @return The data, which has been loaded, as an instance of the generic type DataType or null,
+     * if no data has been loaded
+     */
+    @Nullable
+    private DataType loadData(@NonNull final Task<DataType, KeyType, ViewType, ParamType> task) {
+        try {
+            DataType data = doInBackground(task.key, task.params);
+            cacheData(task.key, task.result);
+            logger.logInfo(getClass(), "Loaded data with key " + task.key);
+            return data;
+        } catch (Exception e) {
+            logger.logError(getClass(), "An error occurred while loading data with key " + task.key,
+                    e);
+            return null;
+        }
     }
 
     /**
@@ -334,8 +347,9 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
-     * Asynchronously loads the the data, which corresponds to a specific key, and displays it in a
-     * specific view. If the data has already been loaded, it will be retrieved from the cache.
+     * Loads the the data, which corresponds to a specific key, and displays it in a specific view.
+     * If the data has already been loaded, it will be retrieved from the cache. By default, the
+     * data is loaded in a background thread.
      *
      * @param key
      *         The key of the data, which should be loaded, as an instance of the generic type
@@ -350,6 +364,28 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     @SafeVarargs
     public final void load(@NonNull final KeyType key, @NonNull final ViewType view,
                            @NonNull final ParamType... params) {
+        load(key, view, true, params);
+    }
+
+    /**
+     * Loads the the data, which corresponds to a specific key, and displays it in a specific view.
+     * If the data has already been loaded, it will be retrieved from the cache.
+     *
+     * @param key
+     *         The key of the data, which should be loaded, as an instance of the generic type
+     *         KeyType. The key may not be null
+     * @param view
+     *         The view, which should be used to display the data, as an instance of the generic
+     *         type ViewType. The view may not be null
+     * @param async
+     *         True, if the data should be loaded in a background thread, false otherwise
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     */
+    @SafeVarargs
+    public final void load(@NonNull final KeyType key, @NonNull final ViewType view,
+                           final boolean async, @NonNull final ParamType... params) {
         ensureNotNull(key, "The key may not be null");
         ensureNotNull(view, "The view may not be null");
         ensureNotNull(params, "The array may not be null");
@@ -362,7 +398,13 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
         } else {
             onPreExecute(view, params);
             Task<DataType, KeyType, ViewType, ParamType> task = new Task<>(view, key, params);
-            loadDataAsynchronously(task);
+
+            if (async) {
+                loadDataAsynchronously(task);
+            } else {
+                data = loadData(task);
+                onPostExecute(view, data, params);
+            }
         }
     }
 
