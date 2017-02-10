@@ -28,6 +28,9 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -58,6 +61,41 @@ public class Tab implements Parcelable {
         }
 
     };
+
+    /**
+     * Defines the interface, a class, which should be notified, when a tab's properties have been
+     * changed, must implement.
+     */
+    public interface Callback {
+
+        /**
+         * The method, which is invoked, when the tab's title has been changed.
+         */
+        void onTitleChanged();
+
+        /**
+         * The method, which is invoked, when the tab's icon has been changed.
+         */
+        void onIconChanged();
+
+        /**
+         * The method, which is invoked, when it has been changed, whether the tab is closeable, or
+         * not.
+         */
+        void onCloseableChanged();
+
+        /**
+         * The method, which is invoked, when the tab's color has been changed.
+         */
+        void onColorChanged();
+
+    }
+
+    /**
+     * A set, which contains the callbacks, which have been registered to be notified, when the
+     * tab's properties have been changed.
+     */
+    private final Set<Callback> callbacks = new LinkedHashSet<>();
 
     /**
      * The tab's title.
@@ -277,6 +315,31 @@ public class Tab implements Parcelable {
      */
     public final void setParameters(@Nullable final Bundle parameters) {
         this.parameters = parameters;
+    }
+
+    /**
+     * Adds a new callback, which should be notified, when the tab's properties have been changed.
+     *
+     * @param callback
+     *         The callback, which should be added, as an instance of the type {@link Callback}. The
+     *         callback may not be null
+     */
+    public final void addCallback(@NonNull final Callback callback) {
+        ensureNotNull(callback, "The callback may not be null");
+        this.callbacks.add(callback);
+    }
+
+    /**
+     * Removes a specific callback, which should not be notified, when the tab's properties have
+     * been changed, anymore.
+     *
+     * @param callback
+     *         The callback, which should be removed, as an instance of the type {@link Callback}.
+     *         The callback may not be null
+     */
+    public final void removeCallback(@NonNull final Callback callback) {
+        ensureNotNull(callback, "The callback may not be null");
+        this.callbacks.remove(callback);
     }
 
     @Override
