@@ -42,7 +42,6 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-// TODO: When changing attributes while the switcher is shown, the corresponding tab view must be adapted
 public class Tab implements Parcelable {
 
     /**
@@ -70,24 +69,40 @@ public class Tab implements Parcelable {
 
         /**
          * The method, which is invoked, when the tab's title has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
          */
-        void onTitleChanged();
+        void onTitleChanged(@NonNull Tab tab);
 
         /**
          * The method, which is invoked, when the tab's icon has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
          */
-        void onIconChanged();
+        void onIconChanged(@NonNull Tab tab);
 
         /**
          * The method, which is invoked, when it has been changed, whether the tab is closeable, or
          * not.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
          */
-        void onCloseableChanged();
+        void onCloseableChanged(@NonNull Tab tab);
 
         /**
          * The method, which is invoked, when the tab's color has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
          */
-        void onColorChanged();
+        void onColorChanged(@NonNull Tab tab);
 
     }
 
@@ -126,6 +141,42 @@ public class Tab implements Parcelable {
      * Optional parameters, which are associated with the tab.
      */
     private Bundle parameters;
+
+    /**
+     * Notifies all callbacks, that the tab's title has been changed.
+     */
+    private void notifyOnTitleChanged() {
+        for (Callback callback : callbacks) {
+            callback.onTitleChanged(this);
+        }
+    }
+
+    /**
+     * Notifies all callbacks, that the tab's icon has been changed.
+     */
+    private void notifyOnIconChanged() {
+        for (Callback callback : callbacks) {
+            callback.onIconChanged(this);
+        }
+    }
+
+    /**
+     * Notifies all callbacks, that it has been changed, whether the tab is closeable, or not.
+     */
+    private void notifyOnCloseableChanged() {
+        for (Callback callback : callbacks) {
+            callback.onCloseableChanged(this);
+        }
+    }
+
+    /**
+     * Notifies all callbacks, that the tab's color has been changed.
+     */
+    private void notifyOnColorChanged() {
+        for (Callback callback : callbacks) {
+            callback.onColorChanged(this);
+        }
+    }
 
     /**
      * Creates a new tab, which can be added to a {@link TabSwitcher} widget.
@@ -195,6 +246,7 @@ public class Tab implements Parcelable {
         ensureNotNull(title, "The title may not be null");
         ensureNotEmpty(title, "The title may not be empty");
         this.title = title;
+        notifyOnTitleChanged();
     }
 
     /**
@@ -239,6 +291,7 @@ public class Tab implements Parcelable {
     public final void setIcon(@DrawableRes final int resourceId) {
         this.iconId = resourceId;
         this.iconBitmap = null;
+        notifyOnIconChanged();
     }
 
     /**
@@ -251,6 +304,7 @@ public class Tab implements Parcelable {
     public final void setIcon(@Nullable final Bitmap icon) {
         this.iconId = -1;
         this.iconBitmap = icon;
+        notifyOnIconChanged();
     }
 
     /**
@@ -270,6 +324,7 @@ public class Tab implements Parcelable {
      */
     public final void setCloseable(final boolean closeable) {
         this.closeable = closeable;
+        notifyOnCloseableChanged();
     }
 
     /**
@@ -291,6 +346,7 @@ public class Tab implements Parcelable {
      */
     public final void setColor(@ColorInt final int color) {
         this.color = color;
+        notifyOnColorChanged();
     }
 
     /**
