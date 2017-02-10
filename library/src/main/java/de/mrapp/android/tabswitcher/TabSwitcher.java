@@ -475,7 +475,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
         @Override
         public int hashCode() {
-            return index;
+            return tab.hashCode();
         }
 
         @Override
@@ -485,7 +485,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             if (obj.getClass() != getClass())
                 return false;
             TabView other = (TabView) obj;
-            return index == other.index;
+            return tab.equals(other.tab);
         }
 
     }
@@ -1017,40 +1017,44 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
             }
 
             private void relocateWhenVisibleTabViewWasRemoved() {
-                long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
                 int start = closedTabView.index - 1;
-                Iterator iterator = new Iterator(true, start);
-                TabView tabView;
-                int firstStackedTabIndex = -1;
 
-                while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
-                    if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                            tabView.tag.state == State.STACKED_BOTTOM) {
-                        firstStackedTabIndex = tabView.index;
-                    }
+                if (start >= 0) {
+                    long startDelay =
+                            getResources().getInteger(android.R.integer.config_shortAnimTime);
+                    Iterator iterator = new Iterator(true, start);
+                    TabView tabView;
+                    int firstStackedTabIndex = -1;
 
-                    TabView previous = iterator.previous();
-                    boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
-                    AnimatorListener listener =
-                            createRelocateAnimationListener(tabView, previous.tag, reset);
-                    animateRelocate(tabView, previous.tag.projectedPosition,
-                            (start + 1 - tabView.index) * startDelay, tabView.index == start ?
-                                    createRelocateAnimationListenerWrapper(closedTabView,
-                                            listener) : listener);
-                }
-
-                if (firstStackedTabIndex != -1) {
-                    iterator = new Iterator(true, firstStackedTabIndex);
-                    Float previousActualPosition = null;
-
-                    while ((tabView = iterator.next()) != null) {
-                        float actualPosition = tabView.tag.actualPosition;
-
-                        if (previousActualPosition != null) {
-                            tabView.tag.actualPosition = previousActualPosition;
+                    while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
+                        if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                                tabView.tag.state == State.STACKED_BOTTOM) {
+                            firstStackedTabIndex = tabView.index;
                         }
 
-                        previousActualPosition = actualPosition;
+                        TabView previous = iterator.previous();
+                        boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
+                        AnimatorListener listener =
+                                createRelocateAnimationListener(tabView, previous.tag, reset);
+                        animateRelocate(tabView, previous.tag.projectedPosition,
+                                (start + 1 - tabView.index) * startDelay, tabView.index == start ?
+                                        createRelocateAnimationListenerWrapper(closedTabView,
+                                                listener) : listener);
+                    }
+
+                    if (firstStackedTabIndex != -1) {
+                        iterator = new Iterator(true, firstStackedTabIndex);
+                        Float previousActualPosition = null;
+
+                        while ((tabView = iterator.next()) != null) {
+                            float actualPosition = tabView.tag.actualPosition;
+
+                            if (previousActualPosition != null) {
+                                tabView.tag.actualPosition = previousActualPosition;
+                            }
+
+                            previousActualPosition = actualPosition;
+                        }
                     }
                 }
             }
@@ -1095,10 +1099,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
                 if (close) {
                     int index = closedTabView.index;
-                    tabContainer.removeViewAt(getChildIndex(index));
-                    tabs.remove(index);
-                    tags.remove(tabs.get(index));
-                    notifyOnTabRemoved(index, closedTabView.tab);
+                    viewRecycler.remove(closedTabView);
+                    Tab tab = tabs.remove(index);
+                    tags.remove(tab);
+                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         selectedTabIndex = -1;
@@ -1109,7 +1113,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
                             selectedTabIndex--;
                         }
 
-                        notifyOnSelectionChanged(selectedTabIndex, closedTabView.tab);
+                        notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
                     View view = closedTabView.view;
@@ -2180,8 +2184,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         Tag tag = tabView.tag;
         float position = tag.projectedPosition;
         View view = tabView.view;
+        view.setAlpha(1f);
         setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
         setPosition(Axis.DRAGGING_AXIS, view, position);
+        setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
