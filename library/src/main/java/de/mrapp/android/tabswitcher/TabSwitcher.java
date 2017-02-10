@@ -1603,8 +1603,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                     .getInteger(android.R.integer.config_shortAnimTime);
                         }
 
-                        animateClose(tabView, true, 0, startDelay,
-                                !iterator.hasNext() ? createClearAnimationListener() : null);
+                        if (tabView.isInflated()) {
+                            animateClose(tabView, true, 0, startDelay,
+                                    !iterator.hasNext() ? createClearAnimationListener() : null);
+                        }
                     }
                 }
             }
@@ -2344,7 +2346,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
-        if (isSwitcherShown()) {
+        if (isSwitcherShown() && !isEmpty()) {
             if (dragAnimation != null) {
                 dragAnimation.cancel();
                 dragAnimation = null;
