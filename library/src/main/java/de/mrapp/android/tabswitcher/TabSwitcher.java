@@ -1570,10 +1570,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             @Override
             public void run() {
                 int index = tabs.indexOf(tab);
+                TabView tabView = new TabView(index);
 
                 if (!isSwitcherShown()) {
-                    int childIndex = getChildIndex(index);
-                    tabContainer.removeViewAt(childIndex);
+                    viewRecycler.remove(tabView);
                     Tab tab = tabs.remove(index);
                     tab.removeCallback(TabSwitcher.this);
                     tags.remove(tab);
@@ -1588,14 +1588,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             selectedTabIndex--;
                         }
 
-                        int selectedChildIndex = getChildIndex(selectedTabIndex);
-                        View selectedView = tabContainer.getChildAt(selectedChildIndex);
-                        // addChildView(selectedTabIndex);
-                        selectedView.setVisibility(View.VISIBLE);
+                        viewRecycler.inflate(new TabView(selectedTabIndex));
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
-                    TabView tabView = new TabView(index);
                     adaptTopMostTabViewWhenClosing(tabView, tabView.index + 1);
                     tabView.tag.closing = true;
                     View view = tabView.view;
