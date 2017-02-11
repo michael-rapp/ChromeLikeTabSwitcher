@@ -25,19 +25,19 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 /**
  * @author Michael Rapp
  */
-public class ViewRecycler<Type> {
+public class ViewRecycler<ItemType> {
 
-    public static abstract class Adapter<T> {
+    public static abstract class Adapter<ItemType> {
 
         @NonNull
         public abstract View onInflateView(@NonNull final LayoutInflater inflater,
-                                           @Nullable final ViewGroup parent, @NonNull final T item,
-                                           final int viewType);
+                                           @Nullable final ViewGroup parent,
+                                           @NonNull final ItemType item, final int viewType);
 
         public abstract void onShowView(@NonNull final Context context, @NonNull final View view,
-                                        @NonNull final T item);
+                                        @NonNull final ItemType item);
 
-        public void onRemoveView(@NonNull final View view, @NonNull final T item) {
+        public void onRemoveView(@NonNull final View view, @NonNull final ItemType item) {
 
         }
 
@@ -45,13 +45,13 @@ public class ViewRecycler<Type> {
             return 1;
         }
 
-        public int getViewType(@NonNull final T item) {
+        public int getViewType(@NonNull final ItemType item) {
             return 0;
         }
 
     }
 
-    private final Adapter<Type> adapter;
+    private final Adapter<ItemType> adapter;
 
     private final Context context;
 
@@ -59,13 +59,13 @@ public class ViewRecycler<Type> {
 
     private final ViewGroup parent;
 
-    private final Comparator<Type> comparator;
+    private final Comparator<ItemType> comparator;
 
-    private final Map<Type, View> activeViews;
+    private final Map<ItemType, View> activeViews;
 
     private final SparseArray<Queue<View>> unusedViews;
 
-    private final List<Type> items;
+    private final List<ItemType> items;
 
     private final Logger logger;
 
@@ -91,23 +91,23 @@ public class ViewRecycler<Type> {
         return null;
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<Type> adapter) {
+    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()));
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<Type> adapter,
-                        @Nullable final Comparator<Type> comparator) {
+    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
+                        @Nullable final Comparator<ItemType> comparator) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()), comparator);
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<Type> adapter,
+    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
                         @NonNull final LayoutInflater inflater) {
         this(parent, adapter, inflater, null);
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<Type> adapter,
+    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
                         @NonNull final LayoutInflater inflater,
-                        @Nullable final Comparator<Type> comparator) {
+                        @Nullable final Comparator<ItemType> comparator) {
         ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(adapter, "The adapter may not be null");
         ensureNotNull(inflater, "The layout inflater may not be null");
@@ -130,7 +130,7 @@ public class ViewRecycler<Type> {
         logger.setLogLevel(logLevel);
     }
 
-    public final boolean inflate(@NonNull final Type item) {
+    public final boolean inflate(@NonNull final ItemType item) {
         View view = getView(item);
         boolean inflated = false;
 
@@ -171,7 +171,7 @@ public class ViewRecycler<Type> {
         return inflated;
     }
 
-    public final void remove(@NonNull final Type item) {
+    public final void remove(@NonNull final ItemType item) {
         ensureNotNull(item, "The item may not be null");
         int index = items.indexOf(item);
 
@@ -190,12 +190,12 @@ public class ViewRecycler<Type> {
     }
 
     @Nullable
-    public final View getView(@NonNull final Type item) {
+    public final View getView(@NonNull final ItemType item) {
         ensureNotNull(item, "The item may not be null");
         return activeViews.get(item);
     }
 
-    public final boolean isInflated(@NonNull final Type item) {
+    public final boolean isInflated(@NonNull final ItemType item) {
         return getView(item) != null;
     }
 
