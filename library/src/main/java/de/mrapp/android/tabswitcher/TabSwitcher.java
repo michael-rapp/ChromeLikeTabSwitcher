@@ -2032,6 +2032,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = false;
             notifyOnSwitcherHidden();
+            tabViewBottomMargin = -1;
             recyclerAdapter.clearCachedBitmaps();
             Iterator iterator = new Iterator();
             TabView tabView;
@@ -2075,6 +2076,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     viewRecycler.inflate(tabView);
                 } else {
                     viewRecycler.remove(tabView);
+                    viewRecycler.clearCache();
                 }
             }
 
