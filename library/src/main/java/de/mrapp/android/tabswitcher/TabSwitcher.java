@@ -204,7 +204,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     }
 
-    private class RecyclerAdapter extends ViewRecycler.Adapter<TabView> {
+    private class RecyclerAdapter extends ViewRecycler.Adapter<TabView, Integer> {
 
         private class PreviewDataBinder
                 extends AbstractDataBinder<Bitmap, Tab, ImageView, TabView> {
@@ -350,7 +350,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         @Override
         public View onInflateView(@NonNull final LayoutInflater inflater,
                                   @Nullable final ViewGroup parent, @NonNull final TabView tabView,
-                                  final int viewType) {
+                                  final int viewType, @NonNull final Integer... params) {
             ViewHolder viewHolder = new ViewHolder();
             View view = inflater.inflate(R.layout.tab_view, tabContainer, false);
             Drawable backgroundDrawable =
@@ -374,7 +374,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             layoutParams.leftMargin = borderMargin;
             layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
             layoutParams.rightMargin = borderMargin;
-            layoutParams.bottomMargin = borderMargin;
+            layoutParams.bottomMargin = params.length > 0 ? params[0] : borderMargin;
             view.setLayoutParams(layoutParams);
             view.setTag(R.id.tag_view_holder, viewHolder);
             tabView.view = view;
@@ -385,7 +385,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
         @Override
         public void onShowView(@NonNull final Context context, @NonNull final View view,
-                               @NonNull final TabView tabView) {
+                               @NonNull final TabView tabView, @NonNull final Integer... params) {
             if (!tabView.isInflated()) {
                 tabView.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
                 tabView.view = view;
@@ -701,7 +701,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private LayoutInflater inflater;
 
-    private ViewRecycler<TabView> viewRecycler;
+    private ViewRecycler<TabView, Integer> viewRecycler;
 
     private RecyclerAdapter recyclerAdapter;
 
@@ -759,6 +759,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private int tabBorderWidth;
 
     private int tabTitleContainerHeight;
+
+    private int tabViewBottomMargin;
 
     private ScrollDirection scrollDirection;
 
@@ -837,6 +839,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
+        tabViewBottomMargin = -1;
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
         recyclerAdapter = new RecyclerAdapter();
@@ -1776,9 +1779,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         float scale = getScale(view, true);
         setScale(Axis.DRAGGING_AXIS, view, scale);
         setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-        layoutParams.bottomMargin = calculateTabViewBottomMargin(view);
-        view.setLayoutParams(layoutParams);
     }
 
     private void animateShowSwitcher(@NonNull final TabView tabView) {
@@ -1793,6 +1793,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             setPosition(Axis.DRAGGING_AXIS, view,
                     isDraggingHorizontally() ? 0 : layoutParams.topMargin);
+        }
+
+        if (tabViewBottomMargin == -1) {
+            tabViewBottomMargin = calculateTabViewBottomMargin(view);
         }
 
         long animationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
@@ -2570,7 +2574,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         viewRecycler.remove(tabView);
                     } else if (tabView.isVisible()) {
                         if (!tabView.isInflated()) {
-                            boolean inflated = viewRecycler.inflate(tabView);
+                            boolean inflated = viewRecycler.inflate(tabView, tabViewBottomMargin);
 
                             if (inflated) {
                                 View view = tabView.view;

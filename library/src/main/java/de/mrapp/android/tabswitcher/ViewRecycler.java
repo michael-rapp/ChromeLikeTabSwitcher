@@ -25,17 +25,21 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 /**
  * @author Michael Rapp
  */
-public class ViewRecycler<ItemType> {
+public class ViewRecycler<ItemType, ParamType> {
 
-    public static abstract class Adapter<ItemType> {
+    public static abstract class Adapter<ItemType, ParamType> {
 
+        @SuppressWarnings("unchecked")
         @NonNull
         public abstract View onInflateView(@NonNull final LayoutInflater inflater,
                                            @Nullable final ViewGroup parent,
-                                           @NonNull final ItemType item, final int viewType);
+                                           @NonNull final ItemType item, final int viewType,
+                                           @NonNull final ParamType... params);
 
+        @SuppressWarnings("unchecked")
         public abstract void onShowView(@NonNull final Context context, @NonNull final View view,
-                                        @NonNull final ItemType item);
+                                        @NonNull final ItemType item,
+                                        @NonNull final ParamType... params);
 
         public void onRemoveView(@NonNull final View view, @NonNull final ItemType item) {
 
@@ -51,7 +55,7 @@ public class ViewRecycler<ItemType> {
 
     }
 
-    private final Adapter<ItemType> adapter;
+    private final Adapter<ItemType, ParamType> adapter;
 
     private final Context context;
 
@@ -91,21 +95,25 @@ public class ViewRecycler<ItemType> {
         return null;
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter) {
+    public ViewRecycler(@NonNull final ViewGroup parent,
+                        @NonNull final Adapter<ItemType, ParamType> adapter) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()));
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
+    public ViewRecycler(@NonNull final ViewGroup parent,
+                        @NonNull final Adapter<ItemType, ParamType> adapter,
                         @Nullable final Comparator<ItemType> comparator) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()), comparator);
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
+    public ViewRecycler(@NonNull final ViewGroup parent,
+                        @NonNull final Adapter<ItemType, ParamType> adapter,
                         @NonNull final LayoutInflater inflater) {
         this(parent, adapter, inflater, null);
     }
 
-    public ViewRecycler(@NonNull final ViewGroup parent, @NonNull final Adapter<ItemType> adapter,
+    public ViewRecycler(@NonNull final ViewGroup parent,
+                        @NonNull final Adapter<ItemType, ParamType> adapter,
                         @NonNull final LayoutInflater inflater,
                         @Nullable final Comparator<ItemType> comparator) {
         ensureNotNull(parent, "The parent may not be null");
@@ -130,7 +138,8 @@ public class ViewRecycler<ItemType> {
         logger.setLogLevel(logLevel);
     }
 
-    public final boolean inflate(@NonNull final ItemType item) {
+    @SafeVarargs
+    public final boolean inflate(@NonNull final ItemType item, @NonNull final ParamType... params) {
         View view = getView(item);
         boolean inflated = false;
 
@@ -139,7 +148,7 @@ public class ViewRecycler<ItemType> {
             view = pollUnusedView(viewType);
 
             if (view == null) {
-                view = adapter.onInflateView(inflater, parent, item, viewType);
+                view = adapter.onInflateView(inflater, parent, item, viewType, params);
                 inflated = true;
                 logger.logInfo(getClass(),
                         "Inflated view to visualize item " + item + " using view type " + viewType);
@@ -166,7 +175,7 @@ public class ViewRecycler<ItemType> {
             logger.logDebug(getClass(), "Added view of item " + item + " at index " + index);
         }
 
-        adapter.onShowView(context, view, item);
+        adapter.onShowView(context, view, item, params);
         logger.logDebug(getClass(), "Updated view of item " + item);
         return inflated;
     }
