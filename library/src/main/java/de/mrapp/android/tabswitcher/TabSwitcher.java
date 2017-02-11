@@ -372,7 +372,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                   @Nullable final ViewGroup parent, @NonNull final TabView tabView,
                                   final int viewType, @NonNull final Integer... params) {
             ViewHolder viewHolder = new ViewHolder();
-            View view = inflater.inflate(R.layout.tab_view, tabContainer, false);
+            View view = inflater.inflate(
+                    isDraggingHorizontally() ? R.layout.tab_view_horizontally : R.layout.tab_view,
+                    tabContainer, false);
             Drawable backgroundDrawable =
                     ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
             ViewUtil.setBackground(view, backgroundDrawable);
