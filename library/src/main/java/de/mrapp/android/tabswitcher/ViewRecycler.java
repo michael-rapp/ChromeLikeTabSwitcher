@@ -73,23 +73,29 @@ public class ViewRecycler<ItemType, ParamType> {
 
     private final Logger logger;
 
+    private boolean useCache;
+
     private void addUnusedView(@NonNull final View view, final int viewType) {
-        Queue<View> queue = unusedViews.get(viewType);
+        if (useCache) {
+            Queue<View> queue = unusedViews.get(viewType);
 
-        if (queue == null) {
-            queue = new LinkedList<>();
-            unusedViews.put(viewType, queue);
+            if (queue == null) {
+                queue = new LinkedList<>();
+                unusedViews.put(viewType, queue);
+            }
+
+            queue.add(view);
         }
-
-        queue.add(view);
     }
 
     @Nullable
     private View pollUnusedView(final int viewType) {
-        Queue<View> queue = unusedViews.get(viewType);
+        if (useCache) {
+            Queue<View> queue = unusedViews.get(viewType);
 
-        if (queue != null) {
-            return queue.poll();
+            if (queue != null) {
+                return queue.poll();
+            }
         }
 
         return null;
@@ -128,6 +134,7 @@ public class ViewRecycler<ItemType, ParamType> {
         this.unusedViews = new SparseArray<>(adapter.getViewTypeCount());
         this.items = new ArrayList<>();
         this.logger = new Logger(LogLevel.INFO);
+        this.useCache = true;
     }
 
     public final LogLevel getLogLevel() {
@@ -206,6 +213,23 @@ public class ViewRecycler<ItemType, ParamType> {
 
     public final boolean isInflated(@NonNull final ItemType item) {
         return getView(item) != null;
+    }
+
+    public final void clearCache() {
+        unusedViews.clear();
+        logger.logDebug(getClass(), "Cleared cache");
+    }
+
+    public final boolean isCacheUsed() {
+        return useCache;
+    }
+
+    public final void useCache(final boolean useCache) {
+        this.useCache = useCache;
+
+        if (!useCache) {
+            clearCache();
+        }
     }
 
 }
