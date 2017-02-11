@@ -1774,9 +1774,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private int calculateTabViewBottomMargin(@NonNull final View view) {
         Axis axis = isDraggingHorizontally() ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
-        return Math.round(getSize(axis, view, true) - (getSize(axis, tabContainer) - tabInset -
-                (STACKED_TAB_COUNT * stackedTabSpacing * (isDraggingHorizontally() ? -1 : 1)) -
-                (isToolbarShown() ? toolbar.getHeight() - tabInset : 0)));
+        float tabHeight = (view.getHeight() - 2 * tabInset) * getScale(view, true);
+        float totalHeight = getSize(axis, tabContainer);
+        int toolbarHeight = isToolbarShown() ? toolbar.getHeight() - tabInset : 0;
+        int stackHeight = isDraggingHorizontally() ? 0 : STACKED_TAB_COUNT * stackedTabSpacing;
+        return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
+                (totalHeight - getPaddingTop() - getPaddingBottom()));
     }
 
     private OnGlobalLayoutListener createShowSwitcherLayoutListener(
