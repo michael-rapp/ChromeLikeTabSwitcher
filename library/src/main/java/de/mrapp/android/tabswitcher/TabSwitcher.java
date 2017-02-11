@@ -75,6 +75,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
@@ -1572,7 +1573,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             @Override
             public void run() {
-                int index = tabs.indexOf(tab);
+                int index = indexOfOrThrowException(tab);
                 TabView tabView = new TabView(index);
 
                 if (!isSwitcherShown()) {
@@ -1697,7 +1698,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             @Override
             public void run() {
-                int index = tabs.indexOf(tab);
+                int index = indexOfOrThrowException(tab);
 
                 if (!isSwitcherShown()) {
                     viewRecycler.remove(new TabView(selectedTabIndex));
@@ -1765,6 +1766,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     public final int indexOf(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         return tabs.indexOf(tab);
+    }
+
+    private int indexOfOrThrowException(@NonNull final Tab tab) {
+        int index = indexOf(tab);
+
+        if (index == -1) {
+            throw new NoSuchElementException("No such tab: " + tab);
+        }
+
+        return index;
     }
 
     public final boolean isSwitcherShown() {
