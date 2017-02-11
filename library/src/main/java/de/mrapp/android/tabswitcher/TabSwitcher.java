@@ -1794,7 +1794,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         };
     }
 
-    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final TabView tabView) {
+    private OnGlobalLayoutListener createInflateTabViewLayoutListener(
+            @NonNull final TabView tabView) {
         return new OnGlobalLayoutListener() {
 
             @Override
@@ -2613,16 +2614,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         viewRecycler.remove(tabView);
                     } else if (tabView.isVisible()) {
                         if (!tabView.isInflated()) {
-                            boolean inflated = viewRecycler.inflate(tabView, tabViewBottomMargin);
-
-                            if (inflated) {
-                                View view = tabView.view;
-                                view.getViewTreeObserver().addOnGlobalLayoutListener(
-                                        createInflateViewLayoutListener(tabView));
-                            } else {
-                                adaptTabViewSize(tabView);
-                                applyTag(tabView);
-                            }
+                            inflateTabView(tabView);
                         } else {
                             applyTag(tabView);
                         }
@@ -2636,6 +2628,19 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
 
         return false;
+    }
+
+    private void inflateTabView(@NonNull final TabView tabView) {
+        boolean inflated = viewRecycler.inflate(tabView, tabViewBottomMargin);
+
+        if (inflated) {
+            View view = tabView.view;
+            view.getViewTreeObserver()
+                    .addOnGlobalLayoutListener(createInflateTabViewLayoutListener(tabView));
+        } else {
+            adaptTabViewSize(tabView);
+            applyTag(tabView);
+        }
     }
 
     private boolean checkIfDragThresholdReached(final float dragPosition) {
@@ -2681,11 +2686,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                                 final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
             TabView tabView = new TabView(index);
+
             if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
                 tabView.tag.state = State.TOP_MOST;
+                inflateTabView(tabView);
             }
-
-            adaptVisibility(tabView);
         }
     }
 
@@ -2696,7 +2701,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             if (tabView.tag.state == State.TOP_MOST) {
                 tabView.tag.state = State.TOP_MOST_HIDDEN;
-                adaptVisibility(tabView);
+                viewRecycler.remove(tabView);
             }
         }
     }
