@@ -1735,7 +1735,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         return switcherShown;
     }
 
-    private int calculateTabViewMargin(@NonNull final View view) {
+    private int calculateTabViewBottomMargin(@NonNull final View view) {
         Axis axis = isDraggingHorizontally() ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         return Math.round(getSize(axis, view) - (getSize(axis, tabContainer) - tabInset -
                 (isDraggingHorizontally() ? 0 : STACKED_TAB_COUNT * stackedTabSpacing) -
@@ -1777,7 +1777,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         setScale(Axis.DRAGGING_AXIS, view, scale);
         setScale(Axis.ORTHOGONAL_AXIS, view, scale);
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-        layoutParams.bottomMargin = calculateTabViewMargin(view);
+        layoutParams.bottomMargin = calculateTabViewBottomMargin(view);
         view.setLayoutParams(layoutParams);
     }
 
@@ -1796,7 +1796,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
 
         long animationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
-        animateMargin(view, calculateTabViewMargin(view), animationDuration);
+        animateMargin(view, calculateTabViewBottomMargin(view), animationDuration);
         ViewPropertyAnimator animation = view.animate();
         animation.setDuration(animationDuration);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
