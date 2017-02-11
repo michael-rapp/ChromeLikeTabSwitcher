@@ -1495,18 +1495,21 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             public void run() {
                 tabs.add(index, tab);
                 tab.addCallback(TabSwitcher.this);
-                TabView tabView = new TabView(index);
+                notifyOnTabAdded(index, tab);
 
                 if (getCount() == 1) {
                     selectedTabIndex = 0;
                     notifyOnSelectionChanged(0, tab);
                 }
 
-                notifyOnTabAdded(index, tab);
-
                 if (!isSwitcherShown()) {
                     toolbar.setAlpha(0);
+
+                    if (selectedTabIndex == index && ViewCompat.isLaidOut(TabSwitcher.this)) {
+                        viewRecycler.inflate(new TabView(index));
+                    }
                 } else {
+                    TabView tabView = new TabView(index);
                     tabView.view.getViewTreeObserver().addOnGlobalLayoutListener(
                             createAddTabViewLayoutListener(tabView, animationType));
                 }
