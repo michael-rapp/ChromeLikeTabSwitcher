@@ -1621,7 +1621,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     }
 
                     selectedTabIndex = -1;
-                    removeAllViews();
+                    viewRecycler.removeAll();
                     notifyOnSelectionChanged(-1, null);
                     notifyOnAllTabsRemoved();
                     toolbar.setAlpha(isToolbarShown() ? 1 : 0);
