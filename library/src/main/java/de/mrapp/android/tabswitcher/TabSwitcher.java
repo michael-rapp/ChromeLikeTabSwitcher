@@ -804,9 +804,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private Animation dragAnimation;
 
     @Deprecated
-    private ViewPropertyAnimator closeAnimation;
-
-    @Deprecated
     private ViewPropertyAnimator relocateAnimation;
 
     private ViewPropertyAnimator toolbarAnimation;
@@ -952,16 +949,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             (distance / closedTabPosition));
         }
 
-        closeAnimation = view.animate();
-        closeAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        closeAnimation.setListener(listener);
-        closeAnimation.setDuration(animationDuration);
-        animatePosition(Axis.ORTHOGONAL_AXIS, closeAnimation, view, targetPosition, true);
-        animateScale(Axis.ORTHOGONAL_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
-        animateScale(Axis.DRAGGING_AXIS, closeAnimation, close ? closedTabScale * scale : scale);
-        closeAnimation.alpha(close ? closedTabAlpha : 1);
-        closeAnimation.setStartDelay(startDelay);
-        closeAnimation.start();
+        ViewPropertyAnimator animation = view.animate();
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setListener(createAnimationListenerWrapper(listener));
+        animation.setDuration(animationDuration);
+        animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, targetPosition, true);
+        animateScale(Axis.ORTHOGONAL_AXIS, animation, close ? closedTabScale * scale : scale);
+        animateScale(Axis.DRAGGING_AXIS, animation, close ? closedTabScale * scale : scale);
+        animation.alpha(close ? closedTabAlpha : 1);
+        animation.setStartDelay(startDelay);
+        animation.start();
     }
 
     private AnimatorListener createCloseAnimationListener(@NonNull final TabView closedTabView,
@@ -1145,9 +1142,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     animateToolbarVisibility(true, 0);
                 }
 
-                closeAnimation = null;
                 draggedTabView = null;
-                executePendingAction();
             }
 
         };
@@ -1560,8 +1555,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 applyTag(tabView);
-                closeAnimation = null;
-                executePendingAction();
             }
 
         };
@@ -1685,8 +1678,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 notifyOnAllTabsRemoved();
                 notifyOnSelectionChanged(-1, null);
                 animateToolbarVisibility(isToolbarShown(), 0);
-                closeAnimation = null;
-                executePendingAction();
             }
 
         };
@@ -2441,7 +2432,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private boolean isAnimationRunning() {
-        return runningAnimations != 0 || closeAnimation != null || relocateAnimation != null;
+        return runningAnimations != 0 || relocateAnimation != null;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
