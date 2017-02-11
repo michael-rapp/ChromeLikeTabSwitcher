@@ -205,6 +205,19 @@ public class ViewRecycler<ItemType, ParamType> {
         }
     }
 
+    public final void removeAll() {
+        for (int i = items.size() - 1; i >= 0; i--) {
+            ItemType item = items.remove(i);
+            View view = activeViews.remove(item);
+            adapter.onRemoveView(view, item);
+            parent.removeViewAt(i);
+            int viewType = adapter.getViewType(item);
+            addUnusedView(view, viewType);
+        }
+
+        logger.logInfo(getClass(), "Removed all views");
+    }
+
     @Nullable
     public final View getView(@NonNull final ItemType item) {
         ensureNotNull(item, "The item may not be null");
