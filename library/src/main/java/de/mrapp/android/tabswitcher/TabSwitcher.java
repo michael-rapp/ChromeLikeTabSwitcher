@@ -1327,15 +1327,21 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
         float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin -
-                (includePadding ? getPaddingLeft() + getPaddingRight() : 0);
+                (includePadding ? getPaddingLeft() + getPaddingRight() : 0) -
+                (isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing : 0);
         return targetWidth / width;
     }
 
     private float getSize(@NonNull final Axis axis, @NonNull final View view) {
+        return getSize(axis, view, false);
+    }
+
+    private float getSize(@NonNull final Axis axis, @NonNull final View view,
+                          final boolean includePadding) {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getHeight() * getScale(view, false);
+            return view.getHeight() * getScale(view, includePadding);
         } else {
-            return view.getWidth() * getScale(view, false);
+            return view.getWidth() * getScale(view, includePadding);
         }
     }
 
@@ -1355,7 +1361,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin - getPaddingLeft() / 2f +
-                    getPaddingRight() / 2f;
+                    getPaddingRight() / 2f +
+                    (isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing / 2f : 0);
         }
     }
 
@@ -1367,7 +1374,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin + getPaddingLeft() / 2f -
-                    getPaddingRight() / 2f);
+                    getPaddingRight() / 2f -
+                    (isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing / 2f : 0));
         }
     }
 
@@ -1382,7 +1390,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         } else {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin +
-                    (includePadding ? getPaddingLeft() / 2f - getPaddingRight() / 2f : 0));
+                    (includePadding ? getPaddingLeft() / 2f - getPaddingRight() / 2f : 0) -
+                    (isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing / 2f : 0));
         }
     }
 
@@ -1765,8 +1774,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private int calculateTabViewBottomMargin(@NonNull final View view) {
         Axis axis = isDraggingHorizontally() ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
-        return Math.round(getSize(axis, view) - (getSize(axis, tabContainer) - tabInset -
-                (isDraggingHorizontally() ? 0 : STACKED_TAB_COUNT * stackedTabSpacing) -
+        return Math.round(getSize(axis, view, true) - (getSize(axis, tabContainer) - tabInset -
+                (STACKED_TAB_COUNT * stackedTabSpacing * (isDraggingHorizontally() ? -1 : 1)) -
                 (isToolbarShown() ? toolbar.getHeight() - tabInset : 0)));
     }
 
@@ -2359,16 +2368,17 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 isToolbarShown() && !isDraggingHorizontally() ? toolbar.getHeight() - tabInset : 0;
         int padding = getPadding(Axis.DRAGGING_AXIS, Gravity.START) +
                 getPadding(Axis.DRAGGING_AXIS, Gravity.END);
+        int offset = isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing : 0;
 
         if (tabView.index < STACKED_TAB_COUNT) {
             float position =
                     size - toolbarHeight - tabInset - (stackedTabSpacing * (tabView.index + 1)) -
-                            padding;
+                            padding + offset;
             return Pair.create(position, State.STACKED_BOTTOM);
         } else {
             float position =
                     size - toolbarHeight - tabInset - (stackedTabSpacing * STACKED_TAB_COUNT) -
-                            padding;
+                            padding + offset;
             return Pair.create(position, State.BOTTOM_MOST_HIDDEN);
         }
     }
