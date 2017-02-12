@@ -379,6 +379,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     tag.closing;
         }
 
+        public void applyTag() {
+            float position = tag.projectedPosition;
+            view.setAlpha(1f);
+            setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
+            setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+            setPosition(Axis.DRAGGING_AXIS, view, position);
+            setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
+            setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
+        }
+
         @Override
         public final String toString() {
             return "TabView [index = " + index + "]";
@@ -1093,7 +1103,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 }
 
                 if (tabView.isVisible()) {
-                    applyTag(tabView);
+                    tabView.applyTag();
                 } else {
                     viewRecycler.remove(tabView);
                 }
@@ -1421,7 +1431,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                applyTag(tabView);
+                tabView.applyTag();
             }
 
         };
@@ -1691,7 +1701,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 View view = tabView.view;
                 ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
                 adaptTabViewSize(tabView);
-                applyTag(tabView);
+                tabView.applyTag();
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
@@ -1967,7 +1977,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                applyTag(tabView);
+                tabView.applyTag();
             }
 
         };
@@ -2070,7 +2080,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             calculateAndClipTopThresholdPosition(tabView, iterator.previous());
 
             if (tabView.isInflated()) {
-                applyTag(tabView);
+                tabView.applyTag();
             }
         }
     }
@@ -2107,7 +2117,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
 
             if (tabView.isInflated()) {
-                applyTag(tabView);
+                tabView.applyTag();
             }
         }
     }
@@ -2130,19 +2140,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             Tag tag = tabView.tag;
             tag.distance = 0;
         }
-    }
-
-    // TODO: Move to TabView inner class
-    private void applyTag(@NonNull final TabView tabView) {
-        Tag tag = tabView.tag;
-        float position = tag.projectedPosition;
-        View view = tabView.view;
-        view.setAlpha(1f);
-        setPivot(Axis.DRAGGING_AXIS, view, getDefaultPivot(Axis.DRAGGING_AXIS, view));
-        setPivot(Axis.ORTHOGONAL_AXIS, view, getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
-        setPosition(Axis.DRAGGING_AXIS, view, position);
-        setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
-        setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
     private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
@@ -2507,7 +2504,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         if (!tabView.isInflated()) {
                             inflateTabView(tabView, null);
                         } else {
-                            applyTag(tabView);
+                            tabView.applyTag();
                         }
                     }
                 }
@@ -2531,7 +2528,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     createInflateTabViewLayoutListener(tabView, layoutListener));
         } else {
             adaptTabViewSize(tabView);
-            applyTag(tabView);
+            tabView.applyTag();
 
             if (layoutListener != null) {
                 layoutListener.onGlobalLayout();
