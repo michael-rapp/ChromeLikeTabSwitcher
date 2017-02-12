@@ -230,7 +230,13 @@ public class ViewRecycler<ItemType, ParamType> {
 
     public final void clearCache() {
         unusedViews.clear();
-        logger.logDebug(getClass(), "Cleared cache");
+        logger.logDebug(getClass(), "Removed all unused views from cache");
+    }
+
+    public final void clearCache(final int viewType) {
+        unusedViews.remove(viewType);
+        logger.logDebug(getClass(),
+                "Cleared all unused views of view type " + viewType + " from cache");
     }
 
     public final boolean isCacheUsed() {
