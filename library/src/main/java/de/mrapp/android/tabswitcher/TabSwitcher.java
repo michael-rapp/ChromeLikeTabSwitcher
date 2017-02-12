@@ -700,9 +700,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private Animation dragAnimation;
 
-    @Deprecated
-    private ViewPropertyAnimator relocateAnimation;
-
     private ViewPropertyAnimator toolbarAnimation;
 
     private int runningAnimations;
@@ -908,17 +905,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
                             break;
                         } else {
-                            TabView peek = iterator.peek();
-                            State peekState = peek != null ? peek.tag.state : null;
-                            boolean reset = !iterator.hasNext() ||
-                                    (peekState != State.STACKED_TOP &&
-                                            peekState != State.STACKED_BOTTOM);
                             tabView.tag.projectedPosition = previousProjectedPosition;
                             long delay =
                                     (top ? (start + 1 - tabView.index) : (tabView.index - start)) *
                                             startDelay;
                             animateRelocate(tabView, previousProjectedPosition, delay,
-                                    createRelocateAnimationListener(tabView, null, reset));
+                                    createRelocateAnimationListener(tabView, null));
                         }
                     }
 
@@ -945,9 +937,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         }
 
                         TabView previous = iterator.previous();
-                        boolean reset = !iterator.hasNext() || firstStackedTabIndex != -1;
                         AnimatorListener listener =
-                                createRelocateAnimationListener(tabView, previous.tag, reset);
+                                createRelocateAnimationListener(tabView, previous.tag);
                         animateRelocate(tabView, previous.tag.projectedPosition,
                                 (start + 1 - tabView.index) * startDelay, tabView.index == start ?
                                         createRelocateAnimationListenerWrapper(closedTabView,
@@ -975,15 +966,14 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                          final float relocatePosition, final long startDelay,
                                          @Nullable final AnimatorListener listener) {
                 View view = tabView.view;
-                relocateAnimation = view.animate();
-                relocateAnimation.setListener(listener);
-                relocateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-                relocateAnimation.setDuration(
+                ViewPropertyAnimator animation = view.animate();
+                animation.setListener(createAnimationListenerWrapper(listener));
+                animation.setInterpolator(new AccelerateDecelerateInterpolator());
+                animation.setDuration(
                         getResources().getInteger(android.R.integer.config_mediumAnimTime));
-                animatePosition(Axis.DRAGGING_AXIS, relocateAnimation, view, relocatePosition,
-                        true);
-                relocateAnimation.setStartDelay(startDelay);
-                relocateAnimation.start();
+                animatePosition(Axis.DRAGGING_AXIS, animation, view, relocatePosition, true);
+                animation.setStartDelay(startDelay);
+                animation.start();
             }
 
             @Override
@@ -1076,15 +1066,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationStart(final Animator animation) {
-                super.onAnimationStart(animation);
-
-                if (listener != null) {
-                    listener.onAnimationStart(animation);
-                }
-            }
-
-            @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 adaptTopMostTabViewWhenClosingAborted(closedTabView, closedTabView.index);
@@ -1098,16 +1079,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private AnimatorListener createRelocateAnimationListener(@NonNull final TabView tabView,
-                                                             @Nullable final Tag tag,
-                                                             final boolean reset) {
+                                                             @Nullable final Tag tag) {
         return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(final Animator animation) {
-                super.onAnimationStart(animation);
-                View view = tabView.view;
-                view.setVisibility(View.VISIBLE);
-            }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
@@ -1123,11 +1096,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     applyTag(tabView);
                 } else {
                     viewRecycler.remove(tabView);
-                }
-
-                if (reset) {
-                    relocateAnimation = null;
-                    executePendingAction();
                 }
             }
 
@@ -2353,7 +2321,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private boolean isAnimationRunning() {
-        return runningAnimations != 0 || relocateAnimation != null;
+        return runningAnimations > 0;
     }
 
     private void handleDown(@NonNull final MotionEvent event) {
