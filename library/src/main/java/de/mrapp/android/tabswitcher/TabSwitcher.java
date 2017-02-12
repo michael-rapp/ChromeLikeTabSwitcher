@@ -219,7 +219,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
         private final PreviewDataBinder dataBinder;
 
-        // TODO: Only add child view, if tab view is the selected one
         private void addChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
             View view = viewHolder.child;
@@ -321,7 +320,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             adaptColor(view, viewHolder, tab);
 
             if (!isSwitcherShown()) {
-                addChildView(tabView);
+                if (tabView.index == selectedTabIndex) {
+                    addChildView(tabView);
+                }
             } else {
                 renderChildView(tabView);
             }
