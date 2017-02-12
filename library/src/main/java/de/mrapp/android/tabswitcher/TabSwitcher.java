@@ -399,10 +399,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             layoutParams.rightMargin = borderMargin;
             layoutParams.bottomMargin = params.length > 0 ? params[0] : borderMargin;
             view.setLayoutParams(layoutParams);
-            view.setTag(R.id.tag_view_holder, viewHolder);
+            view.setTag(viewHolder);
             tabView.view = view;
             tabView.viewHolder = viewHolder;
-            view.setTag(R.id.tag_properties, tabView.tag);
             return view;
         }
 
@@ -410,13 +409,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         public void onShowView(@NonNull final Context context, @NonNull final View view,
                                @NonNull final TabView tabView, @NonNull final Integer... params) {
             if (!tabView.isInflated()) {
-                tabView.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+                tabView.viewHolder = (ViewHolder) view.getTag();
                 tabView.view = view;
-                view.setTag(R.id.tag_properties, tabView.tag);
             }
 
             Tab tab = tabView.tab;
-            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
             adaptTitle(viewHolder, tab);
             adaptIcon(viewHolder, tab);
             adaptCloseButton(viewHolder, tab);
@@ -431,10 +429,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
         @Override
         public void onRemoveView(@NonNull final View view, @NonNull final TabView tabView) {
-            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+            ViewHolder viewHolder = (ViewHolder) view.getTag();
             removeChildView(viewHolder);
             viewHolder.child = null;
-            view.setTag(R.id.tag_properties, null);
         }
 
     }
@@ -460,7 +457,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             this.view = viewRecycler.getView(this);
 
             if (view != null) {
-                this.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
+                this.viewHolder = (ViewHolder) view.getTag();
             } else {
                 this.viewHolder = null;
             }
@@ -1219,8 +1216,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 super.onAnimationEnd(animation);
 
                 if (tag != null) {
-                    View view = tabView.view;
-                    view.setTag(R.id.tag_properties, tag);
+                    tags.put(tabView.tab, tag);
                     tabView.tag = tag;
                 }
 
