@@ -1874,7 +1874,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
         } else {
-            view.setVisibility(View.VISIBLE);
             animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
         }
@@ -2243,14 +2242,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     @SuppressWarnings("WrongConstant")
     private void adaptVisibility(@NonNull final TabView tabView) {
         View view = tabView.view;
-        view.setVisibility(getVisibility(tabView));
-    }
-
-    @Deprecated
-    private int getVisibility(@NonNull final TabView tabView) {
         State state = tabView.tag.state;
-        return (state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN) &&
-                !tabView.tag.closing ? View.INVISIBLE : View.VISIBLE;
+        view.setVisibility((state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN) &&
+                !tabView.tag.closing ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
