@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
                         // TODO: Implement
                         return true;
                     case R.id.clear_tabs_menu_item:
-                        tabSwitcher.clear();
+                        // tabSwitcher.clear();
+                        tabSwitcher.selectTab(tabSwitcher.getTab(5));
                         return true;
                     default:
                         return false;

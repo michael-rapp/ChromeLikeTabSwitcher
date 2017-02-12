@@ -1794,7 +1794,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private OnGlobalLayoutListener createInflateTabViewLayoutListener(
-            @NonNull final TabView tabView) {
+            @NonNull final TabView tabView, @Nullable final OnGlobalLayoutListener layoutListener) {
         return new OnGlobalLayoutListener() {
 
             @Override
@@ -1803,6 +1803,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
                 adaptTabViewSize(tabView);
                 applyTag(tabView);
+
+                if (layoutListener != null) {
+                    layoutListener.onGlobalLayout();
+                }
             }
 
         };
@@ -2041,9 +2045,22 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             while ((tabView = iterator.next()) != null) {
                 if (tabView.isInflated()) {
                     animateHideSwitcher(tabView);
+                } else if (tabView.index == selectedTabIndex) {
+                    inflateTabView(tabView, createTabViewLayoutListener(tabView));
                 }
             }
         }
+    }
+
+    private OnGlobalLayoutListener createTabViewLayoutListener(@NonNull final TabView tabView) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                animateHideSwitcher(tabView);
+            }
+
+        };
     }
 
     public final void toggleSwitcherVisibility() {
@@ -2607,7 +2624,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         viewRecycler.remove(tabView);
                     } else if (tabView.isVisible()) {
                         if (!tabView.isInflated()) {
-                            inflateTabView(tabView);
+                            inflateTabView(tabView, null);
                         } else {
                             applyTag(tabView);
                         }
@@ -2623,16 +2640,21 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         return false;
     }
 
-    private void inflateTabView(@NonNull final TabView tabView) {
+    private void inflateTabView(@NonNull final TabView tabView,
+                                @Nullable final OnGlobalLayoutListener layoutListener) {
         boolean inflated = viewRecycler.inflate(tabView, tabViewBottomMargin);
 
         if (inflated) {
             View view = tabView.view;
-            view.getViewTreeObserver()
-                    .addOnGlobalLayoutListener(createInflateTabViewLayoutListener(tabView));
+            view.getViewTreeObserver().addOnGlobalLayoutListener(
+                    createInflateTabViewLayoutListener(tabView, layoutListener));
         } else {
             adaptTabViewSize(tabView);
             applyTag(tabView);
+
+            if (layoutListener != null) {
+                layoutListener.onGlobalLayout();
+            }
         }
     }
 
@@ -2682,7 +2704,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             if (tabView.tag.state == State.TOP_MOST_HIDDEN) {
                 tabView.tag.state = State.TOP_MOST;
-                inflateTabView(tabView);
+                inflateTabView(tabView, null);
             }
         }
     }
