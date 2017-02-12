@@ -826,9 +826,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         };
     }
 
-    private void animateClose(@NonNull final TabView tabView, final boolean close,
-                              final float flingVelocity, final long startDelay,
-                              @Nullable final AnimatorListener listener) {
+    private void animateOrthogonalDrag(@NonNull final TabView tabView, final boolean close,
+                                       final float flingVelocity, final long startDelay,
+                                       @Nullable final AnimatorListener listener) {
         View view = tabView.view;
         float scale = getScale(view, true);
         float closedTabPosition = calculateClosedTabPosition();
@@ -872,7 +872,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
                     if (previousActualPosition != null) {
                         tabView.tag.actualPosition = previousActualPosition;
-                        applyTag(closedTabView);
                     }
 
                     previousActualPosition = actualPosition;
@@ -1443,7 +1442,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
                 setScale(Axis.ORTHOGONAL_AXIS, view, closedTabScale * scale);
                 setScale(Axis.DRAGGING_AXIS, view, closedTabScale * scale);
-                animateClose(tabView, false, 0, 0, createAddAnimationListener(tabView));
+                animateOrthogonalDrag(tabView, false, 0, 0, createAddAnimationListener(tabView));
             }
 
         };
@@ -1492,16 +1491,35 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 } else {
                     adaptTopMostTabViewWhenClosing(tabView, tabView.index + 1);
                     tabView.tag.closing = true;
-                    View view = tabView.view;
-                    setPivot(Axis.DRAGGING_AXIS, view,
-                            getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
-                    setPivot(Axis.ORTHOGONAL_AXIS, view,
-                            getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-                    animateClose(tabView, true, 0, 0, createCloseAnimationListener(tabView, true));
+
+                    if (tabView.isInflated()) {
+                        animateClose(tabView);
+                    } else {
+                        inflateTabView(tabView, createCloseTabViewLayoutListener(tabView));
+                    }
                 }
             }
 
         });
+    }
+
+    private OnGlobalLayoutListener createCloseTabViewLayoutListener(
+            @NonNull final TabView tabView) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                animateClose(tabView);
+            }
+
+        };
+    }
+
+    private void animateClose(@NonNull final TabView tabView) {
+        View view = tabView.view;
+        setPivot(Axis.DRAGGING_AXIS, view, getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+        setPivot(Axis.ORTHOGONAL_AXIS, view, getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
+        animateOrthogonalDrag(tabView, true, 0, 0, createCloseAnimationListener(tabView, true));
     }
 
     public final void clear() {
@@ -1535,7 +1553,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         }
 
                         if (tabView.isInflated()) {
-                            animateClose(tabView, true, 0, startDelay,
+                            animateOrthogonalDrag(tabView, true, 0, startDelay,
                                     !iterator.hasNext() ? createClearAnimationListener() : null);
                         }
                     }
@@ -1950,13 +1968,14 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 if (tabView.isInflated()) {
                     animateHideSwitcher(tabView);
                 } else if (tabView.index == selectedTabIndex) {
-                    inflateTabView(tabView, createTabViewLayoutListener(tabView));
+                    inflateTabView(tabView, createHideSwitcherLayoutListener(tabView));
                 }
             }
         }
     }
 
-    private OnGlobalLayoutListener createTabViewLayoutListener(@NonNull final TabView tabView) {
+    private OnGlobalLayoutListener createHideSwitcherLayoutListener(
+            @NonNull final TabView tabView) {
         return new OnGlobalLayoutListener() {
 
             @Override
@@ -2674,7 +2693,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             boolean close = flingVelocity >= minCloseFlingVelocity ||
                     Math.abs(getPosition(Axis.ORTHOGONAL_AXIS, view)) >
                             getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
-            animateClose(draggedTabView, close, flingVelocity, 0,
+            animateOrthogonalDrag(draggedTabView, close, flingVelocity, 0,
                     createCloseAnimationListener(draggedTabView, close));
         } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
                 flingDirection == ScrollDirection.DRAGGING_DOWN) {
