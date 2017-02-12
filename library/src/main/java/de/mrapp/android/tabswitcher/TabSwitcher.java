@@ -900,11 +900,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
                             if (top) {
                                 tabView.tag.projectedPosition = previousProjectedPosition;
-                                long delay = (start + 1 - tabView.index) * startDelay;
-                                animateRelocate(tabView, previousProjectedPosition, delay,
-                                        createRelocateAnimationListener(tabView, null, true));
-                            } else {
-                                adaptVisibility(tabView);
+                            }
+
+                            if (tabView.isVisible()) {
+                                inflateTabView(tabView, null);
                             }
 
                             break;
@@ -1123,7 +1122,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 if (tabView.isVisible()) {
                     applyTag(tabView);
                 } else {
-                    // TODO: viewRecycler.remove(tabView);
+                    viewRecycler.remove(tabView);
                 }
 
                 if (reset) {
@@ -2176,15 +2175,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         setPosition(Axis.DRAGGING_AXIS, view, position);
         setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
         setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
-    }
-
-    @Deprecated
-    @SuppressWarnings("WrongConstant")
-    private void adaptVisibility(@NonNull final TabView tabView) {
-        View view = tabView.view;
-        State state = tabView.tag.state;
-        view.setVisibility((state == State.TOP_MOST_HIDDEN || state == State.BOTTOM_MOST_HIDDEN) &&
-                !tabView.tag.closing ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
