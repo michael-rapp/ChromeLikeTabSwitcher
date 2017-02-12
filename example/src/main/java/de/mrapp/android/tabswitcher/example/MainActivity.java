@@ -36,13 +36,14 @@ import android.widget.Toast;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 
 /**
  * The example app's main activity.
  *
  * @author Michael Rapp
  */
-public class MainActivity extends AppCompatActivity implements TabSwitcher.Listener {
+public class MainActivity extends AppCompatActivity implements TabSwitcherListener {
 
     public final class Decorator extends TabSwitcherDecorator {
 

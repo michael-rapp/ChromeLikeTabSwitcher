@@ -97,85 +97,6 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  */
 public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, Tab.Callback {
 
-    /**
-     * Defines the interface, a class, which should be notified about a tab switcher's events, must
-     * implement.
-     */
-    public interface Listener {
-
-        /**
-         * The method, which is invoked, when the tab switcher has been shown.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         */
-        void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher);
-
-        /**
-         * The method, which is invoked, when the tab switcher has been hidden.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         */
-        void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher);
-
-        /**
-         * The method, which is invoked, when the currently selected tab has been changed.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         * @param selectedTabIndex
-         *         The index of the currently selected tab as an {@link Integer} value or -1, if the
-         *         tab switcher does not contain any tabs
-         * @param selectedTab
-         *         The currently selected tab as an instance of the class {@link Tab} or null, if
-         *         the tab switcher does not contain any tabs
-         */
-        void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher, int selectedTabIndex,
-                                @Nullable Tab selectedTab);
-
-        /**
-         * The method, which is invoked, when a tab has been added to the tab switcher.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         * @param index
-         *         The index of the tab, which has been added, as an {@link Integer} value
-         * @param tab
-         *         The tab, which has been added, as an instance of the class {@link Tab}. The tab
-         *         may not be null
-         */
-        void onTabAdded(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
-
-        /**
-         * The method, which is invoked, when a tab has been removed from the tab switcher.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         * @param index
-         *         The index of the tab, which has been removed, as an {@link Integer} value
-         * @param tab
-         *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
-         *         may not be null
-         */
-        void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
-
-        /**
-         * The method, which is invoked, when all tabs have been removed from the tab switcher.
-         *
-         * @param tabSwitcher
-         *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The
-         *         tab switcher may not be null
-         */
-        void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher);
-
-    }
-
     public enum AnimationType {
 
         SWIPE_LEFT,
@@ -696,7 +617,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private ViewGroup tabContainer;
 
-    private Set<Listener> listeners;
+    private Set<TabSwitcherListener> listeners;
 
     private LayoutInflater inflater;
 
@@ -858,38 +779,38 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void notifyOnSwitcherShown() {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onSwitcherShown(this);
         }
     }
 
     private void notifyOnSwitcherHidden() {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onSwitcherHidden(this);
         }
     }
 
     private void notifyOnSelectionChanged(final int selectedTabIndex,
                                           @Nullable final Tab selectedTab) {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onSelectionChanged(this, selectedTabIndex, selectedTab);
         }
     }
 
     private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onTabAdded(this, index, tab);
         }
     }
 
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onTabRemoved(this, index, tab);
         }
     }
 
     private void notifyOnAllTabsRemoved() {
-        for (Listener listener : listeners) {
+        for (TabSwitcherListener listener : listeners) {
             listener.onAllTabsRemoved(this);
         }
     }
@@ -2893,12 +2814,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         return decorator;
     }
 
-    public final void addListener(@NonNull final Listener listener) {
+    public final void addListener(@NonNull final TabSwitcherListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.add(listener);
     }
 
-    public final void removeListener(@NonNull final Listener listener) {
+    public final void removeListener(@NonNull final TabSwitcherListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.remove(listener);
     }

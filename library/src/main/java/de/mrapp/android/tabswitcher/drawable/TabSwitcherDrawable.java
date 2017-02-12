@@ -31,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
 
 /**
@@ -41,7 +42,7 @@ import de.mrapp.android.util.ThemeUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcherDrawable extends Drawable implements TabSwitcher.Listener {
+public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener {
 
     private final int size;
 

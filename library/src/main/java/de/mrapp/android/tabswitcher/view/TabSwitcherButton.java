@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.tabswitcher.drawable.TabSwitcherDrawable;
 import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
@@ -38,7 +39,7 @@ import de.mrapp.android.util.ViewUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcherButton extends ImageButton implements TabSwitcher.Listener {
+public class TabSwitcherButton extends ImageButton implements TabSwitcherListener {
 
     private TabSwitcherDrawable drawable;
 
