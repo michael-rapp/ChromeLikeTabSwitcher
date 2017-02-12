@@ -2048,20 +2048,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         };
     }
 
-    private AnimatorListener createOvershootDownAnimationListener() {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                handleRelease(null);
-                executePendingAction();
-            }
-
-        };
-    }
-
-    private AnimatorListener createOvershootUpAnimationListener() {
+    private AnimatorListener createOvershootAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -2685,7 +2672,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void animateOvershootDown() {
-        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootDownAnimationListener(),
+        animateTilt(new AccelerateDecelerateInterpolator(), createOvershootAnimationListener(),
                 MAX_DOWN_OVERSHOOT_ANGLE);
     }
 
@@ -2717,7 +2704,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
         animation.setDuration(Math.round(animationDuration * Math.abs(
                 (targetPosition - position) / (float) (STACKED_TAB_COUNT * stackedTabSpacing))));
-        animation.addListener(createAnimationListenerWrapper(createOvershootUpAnimationListener()));
+        animation.addListener(createAnimationListenerWrapper(createOvershootAnimationListener()));
         animation.setInterpolator(interpolator);
         animation.setStartDelay(0);
         animation.addUpdateListener(createOvershootUpAnimatorUpdateListener());
@@ -2739,9 +2726,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     result = true;
                     ViewPropertyAnimator animation = view.animate();
                     animation.setListener(createAnimationListenerWrapper(
-                            createOvershootAnimationListenerWrapper(view,
-                                    iterator.hasNext() ? null :
-                                            listener))); // TODO: Iterator.hasNext() will not work
+                            createOvershootAnimationListenerWrapper(view, listener)));
                     animation.setDuration(Math.round(animationDuration *
                             (Math.abs(getRotation(Axis.ORTHOGONAL_AXIS, view)) / maxAngle)));
                     animation.setInterpolator(interpolator);
