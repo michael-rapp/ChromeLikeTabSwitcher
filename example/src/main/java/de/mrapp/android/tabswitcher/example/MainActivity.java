@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 
 /**
  * The example app's main activity.
@@ -43,7 +44,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  */
 public class MainActivity extends AppCompatActivity implements TabSwitcher.Listener {
 
-    public final class Decorator extends TabSwitcher.Decorator {
+    public final class Decorator extends TabSwitcherDecorator {
 
         @NonNull
         @Override
@@ -62,9 +63,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcher.Liste
         public void onShowTab(@NonNull final Context context,
                               @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
                               @NonNull final Tab tab, final int viewType) {
-            TextView textView = (TextView) view.findViewById(android.R.id.title);
+            TextView textView = findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
-            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            Toolbar toolbar = findViewById(R.id.toolbar);
             toolbar.setVisibility(tabSwitcher.isSwitcherShown() ? View.GONE : View.VISIBLE);
         }
 

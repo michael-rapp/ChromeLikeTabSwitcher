@@ -184,34 +184,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     }
 
-    // TODO: Provide a built-in view holder
-    public static abstract class Decorator {
-
-        public int getViewType(@NonNull final Tab tab) {
-            return 0;
-        }
-
-        public int getViewTypeCount() {
-            return 1;
-        }
-
-        @NonNull
-        public abstract View onInflateView(@NonNull final LayoutInflater inflater,
-                                           @NonNull final ViewGroup parent, final int viewType);
-
-        public abstract void onShowTab(@NonNull final Context context,
-                                       @NonNull final TabSwitcher tabSwitcher,
-                                       @NonNull final View view, @NonNull final Tab tab,
-                                       final int viewType);
-
-    }
-
     private class ChildViewRecycler {
 
         private SparseArray<View> views;
 
         @NonNull
-        public View inflateView(@NonNull final ViewGroup parent, final int viewType) {
+        public View inflateView(@NonNull final ViewGroup parent, @NonNull final Tab tab) {
+            int viewType = getDecorator().getViewType(tab);
             View child = null;
 
             if (views == null) {
@@ -221,7 +200,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             }
 
             if (child == null) {
-                child = getDecorator().onInflateView(inflater, parent, viewType);
+                child = getDecorator().inflateView(inflater, parent, tab);
                 views.put(viewType, child);
             }
 
@@ -278,17 +257,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             TabView tabView = params[0];
             ViewHolder viewHolder = tabView.viewHolder;
             child = viewHolder.child;
-            int viewType = tabSwitcher.getDecorator().getViewType(tabView.tab);
+            Tab tab = tabView.tab;
 
             if (child == null) {
-                child = childViewRecycler.inflateView(viewHolder.childContainer, viewType);
+                child = childViewRecycler.inflateView(viewHolder.childContainer, tab);
                 // TODO: Must the view also be added to the parent? This is relevant when calling the showSwitcher-method, while the TabSwitcher is not yet inflated
             } else {
                 viewHolder.child = null;
             }
 
-            tabSwitcher.getDecorator()
-                    .onShowTab(getContext(), tabSwitcher, child, tabView.tab, viewType);
+            tabSwitcher.getDecorator().applyDecorator(getContext(), tabSwitcher, child, tab);
         }
 
         @Nullable
@@ -324,11 +302,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         private void addChildView(@NonNull final TabView tabView) {
             ViewHolder viewHolder = tabView.viewHolder;
             View view = viewHolder.child;
-            int viewType = getDecorator().getViewType(tabView.tab);
+            Tab tab = tabView.tab;
 
             if (view == null) {
                 ViewGroup parent = viewHolder.childContainer;
-                view = childViewRecycler.inflateView(parent, viewType);
+                view = childViewRecycler.inflateView(parent, tab);
                 LayoutParams layoutParams =
                         new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 layoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
@@ -340,7 +318,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             viewHolder.previewImageView.setVisibility(View.GONE);
             viewHolder.previewImageView.setImageBitmap(null);
             viewHolder.borderView.setVisibility(View.GONE);
-            getDecorator().onShowTab(getContext(), TabSwitcher.this, view, tabView.tab, viewType);
+            getDecorator().applyDecorator(getContext(), TabSwitcher.this, view, tab);
         }
 
         private void renderChildView(@NonNull final TabView tabView) {
@@ -728,7 +706,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private RecyclerAdapter recyclerAdapter;
 
-    private Decorator decorator;
+    private TabSwitcherDecorator decorator;
 
     private Queue<Runnable> pendingActions;
 
@@ -2903,14 +2881,14 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
     }
 
-    public final void setDecorator(@NonNull final Decorator decorator) {
+    public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
         this.childViewRecycler.clearCache();
         this.recyclerAdapter.clearCachedBitmaps();
     }
 
-    public final Decorator getDecorator() {
+    public final TabSwitcherDecorator getDecorator() {
         ensureNotNull(decorator, "No decorator has been set", IllegalStateException.class);
         return decorator;
     }
