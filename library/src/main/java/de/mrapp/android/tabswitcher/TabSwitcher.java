@@ -184,6 +184,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     }
 
+    // TODO: Provide a built-in view holder
     public static abstract class Decorator {
 
         public int getViewType(@NonNull final Tab tab) {
