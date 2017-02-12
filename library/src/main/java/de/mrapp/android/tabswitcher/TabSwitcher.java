@@ -1217,11 +1217,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 super.onAnimationEnd(animation);
 
                 if (tag != null) {
+                    tag.closing = false;
                     tags.put(tabView.tab, tag);
                     tabView.tag = tag;
                 }
 
-                applyTag(tabView);
+                if (tabView.isVisible()) {
+                    applyTag(tabView);
+                } else {
+                    // TODO: viewRecycler.remove(tabView);
+                }
 
                 if (reset) {
                     relocateAnimation = null;
