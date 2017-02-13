@@ -887,7 +887,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             }
 
             private void relocateWhenStackedTabViewWasRemoved(final boolean top) {
-                long startDelay = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                long delay = getResources().getInteger(android.R.integer.config_shortAnimTime);
                 int start = closedTabView.index + (top ? -1 : 1);
                 Iterator iterator = new Iterator(top, closedTabView.index);
                 TabView tabView;
@@ -917,11 +917,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             break;
                         } else {
                             tabView.tag.projectedPosition = previousProjectedPosition;
-                            long delay =
+                            long startDelay =
                                     (top ? (start + 1 - tabView.index) : (tabView.index - start)) *
-                                            startDelay;
-                            animateRelocate(tabView, previousProjectedPosition, delay,
-                                    createRelocateAnimationListener(tabView, null));
+                                            delay;
+                            animateRelocate(tabView, previousProjectedPosition, null, startDelay,
+                                    createRelocateAnimationListener(tabView));
                         }
                     }
 
@@ -932,50 +932,82 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             }
 
             private void relocateWhenVisibleTabViewWasRemoved() {
-                int start = closedTabView.index - 1;
-
-                if (start >= 0) {
-                    long startDelay =
-                            getResources().getInteger(android.R.integer.config_shortAnimTime);
-                    Iterator iterator = new Iterator(true, start);
+                if (closedTabView.index > 0) {
+                    long delay = getResources().getInteger(android.R.integer.config_shortAnimTime);
+                    Iterator iterator = new Iterator(true, closedTabView.index);
                     TabView tabView;
                     int firstStackedTabIndex = -1;
+                    Tag firstStackedTag = null;
+                    Tag previousTag = null;
 
                     while ((tabView = iterator.next()) != null && firstStackedTabIndex == -1) {
-                        if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                                tabView.tag.state == State.STACKED_BOTTOM) {
-                            firstStackedTabIndex = tabView.index;
+                        Tag currentTag = tabView.tag.clone();
+
+                        if (previousTag != null) {
+                            if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
+                                    tabView.tag.state == State.STACKED_BOTTOM) {
+                                firstStackedTabIndex = tabView.index;
+                                firstStackedTag = currentTag;
+                            }
+
+                            float relocatePosition = previousTag.projectedPosition;
+                            long startDelay = (closedTabView.index - tabView.index) * delay;
+                            AnimatorListener relocateAnimationListener =
+                                    createRelocateAnimationListener(tabView);
+                            AnimatorListener listener = tabView.index == closedTabView.index - 1 ?
+                                    createRelocateAnimationListenerWrapper(closedTabView,
+                                            relocateAnimationListener) : relocateAnimationListener;
+
+                            if (tabView.isInflated()) {
+                                animateRelocate(tabView, relocatePosition, previousTag, startDelay,
+                                        listener);
+                            } else {
+                                inflateTabView(tabView,
+                                        createRelocateLayoutListener(tabView, relocatePosition,
+                                                previousTag, startDelay, listener));
+                            }
                         }
 
-                        TabView previous = iterator.previous();
-                        AnimatorListener listener =
-                                createRelocateAnimationListener(tabView, previous.tag);
-                        animateRelocate(tabView, previous.tag.projectedPosition,
-                                (start + 1 - tabView.index) * startDelay, tabView.index == start ?
-                                        createRelocateAnimationListenerWrapper(closedTabView,
-                                                listener) : listener);
+                        previousTag = currentTag;
+                        previousTag.closing = false;
                     }
 
                     if (firstStackedTabIndex != -1) {
-                        iterator = new Iterator(true, firstStackedTabIndex);
-                        Float previousActualPosition = null;
+                        iterator = new Iterator(true, firstStackedTabIndex - 1);
+                        float previousActualPosition = firstStackedTag.actualPosition;
 
                         while ((tabView = iterator.next()) != null) {
                             float actualPosition = tabView.tag.actualPosition;
-
-                            if (previousActualPosition != null) {
-                                tabView.tag.actualPosition = previousActualPosition;
-                            }
-
+                            tabView.tag.actualPosition = previousActualPosition;
                             previousActualPosition = actualPosition;
                         }
                     }
                 }
             }
 
+            private OnGlobalLayoutListener createRelocateLayoutListener(
+                    @NonNull final TabView tabView, final float relocatePosition,
+                    @Nullable final Tag tag, final long startDelay,
+                    @Nullable final AnimatorListener listener) {
+                return new OnGlobalLayoutListener() {
+
+                    @Override
+                    public void onGlobalLayout() {
+                        animateRelocate(tabView, relocatePosition, tag, startDelay, listener);
+                    }
+
+                };
+            }
+
             private void animateRelocate(@NonNull final TabView tabView,
-                                         final float relocatePosition, final long startDelay,
+                                         final float relocatePosition, @Nullable final Tag tag,
+                                         final long startDelay,
                                          @Nullable final AnimatorListener listener) {
+                if (tag != null) {
+                    tags.put(tabView.tab, tag);
+                    tabView.tag = tag;
+                }
+
                 View view = tabView.view;
                 ViewPropertyAnimator animation = view.animate();
                 animation.setListener(createAnimationListenerWrapper(listener));
@@ -1089,19 +1121,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         };
     }
 
-    private AnimatorListener createRelocateAnimationListener(@NonNull final TabView tabView,
-                                                             @Nullable final Tag tag) {
+    private AnimatorListener createRelocateAnimationListener(@NonNull final TabView tabView) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-
-                if (tag != null) {
-                    tag.closing = false;
-                    tags.put(tabView.tab, tag);
-                    tabView.tag = tag;
-                }
 
                 if (tabView.isVisible()) {
                     tabView.applyTag();
