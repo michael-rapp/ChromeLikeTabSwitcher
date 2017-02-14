@@ -2159,40 +2159,61 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             tabView.tag.distance = dragDistance;
 
             if (distance != 0) {
-                float currentPosition = tabView.tag.actualPosition;
+                if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
+                    if (previous == null || previous.tag.state != State.VISIBLE) {
+                        float currentPosition = tabView.tag.actualPosition;
 
-                if (currentPosition != -1) {
-                    float newPosition = currentPosition + distance;
-                    clipDraggedTabPosition(newPosition, tabView, previous);
-                } else {
-                    if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
-                        if (previous != null) {
-                            float previousPosition = previous.tag.actualPosition;
-
-                            if (previousPosition != -1) {
-                                float newPosition = previous.tag.actualPosition - maxTabSpacing;
-                                clipDraggedTabPosition(newPosition, tabView, previous);
-                            }
+                        if (currentPosition != -1) {
+                            float newPosition = currentPosition + distance;
+                            clipDraggedTabPosition(newPosition, tabView, null);
                         }
                     } else {
-                        if (next != null) {
-                            float nextPosition = next.tag.actualPosition;
+                        float attachedPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
+                        float previousPosition = previous.tag.projectedPosition;
+                        float ratio = Math.min(1, previousPosition / attachedPosition);
+                        float newPosition = previousPosition - minTabSpacing -
+                                (ratio * (maxTabSpacing - minTabSpacing));
+                        clipDraggedTabPosition(newPosition, tabView, previous);
+                    }
+                } else {
+                    /*
+                    float currentPosition = tabView.tag.actualPosition;
 
-                            if (nextPosition != -1) {
-                                float newPosition = next.tag.actualPosition + maxTabSpacing;
-                                clipDraggedTabPosition(newPosition, tabView, previous);
-                            } else if (tabView.tag.state == State.TOP_MOST) {
-                                clipDraggedTabPosition(currentPosition, tabView, previous);
+                    if (currentPosition != -1) {
+                        float newPosition = currentPosition + distance;
+                        clipDraggedTabPosition(newPosition, tabView, previous);
+                    } else {
+                        if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
+                            if (previous != null) {
+                                float previousPosition = previous.tag.actualPosition;
+
+                                if (previousPosition != -1) {
+                                    float newPosition = previous.tag.actualPosition - minTabSpacing;
+                                    clipDraggedTabPosition(newPosition, tabView, previous);
+                                }
+                            }
+                        } else {
+                            if (next != null) {
+                                float nextPosition = next.tag.actualPosition;
+
+                                if (nextPosition != -1) {
+                                    float newPosition = next.tag.actualPosition + minTabSpacing;
+                                    clipDraggedTabPosition(newPosition, tabView, previous);
+                                } else if (tabView.tag.state == State.TOP_MOST) {
+                                    clipDraggedTabPosition(currentPosition, tabView, previous);
+                                }
                             }
                         }
                     }
-                }
 
-                // TODO: Re-enable non-linear dragging
-                if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
-                    //calculateNonLinearPositionWhenDraggingDown(distance, tabView, previous, currentPosition);
-                } else {
-                    // calculateNonLinearPositionWhenDraggingUp(distance, tabView, previous, currentPosition);
+                    // TODO: Re-enable non-linear dragging
+                    if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
+                        // calculateNonLinearPositionWhenDraggingDown(distance, tabView, previous,
+                        //        currentPosition);
+                    } else {
+                        // calculateNonLinearPositionWhenDraggingUp(distance, tabView, previous, currentPosition);
+                    }
+                    */
                 }
             }
         }
