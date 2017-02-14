@@ -2141,6 +2141,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
     }
 
+    private int firstVisibleIndex = -1;
+
     private boolean calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
                                          @Nullable final TabView previous) {
         if (getCount() - tabView.index > 1) {
@@ -2151,46 +2153,70 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 float attachedPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
 
                 if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
-                    if (previous == null || previous.tag.state != State.VISIBLE) {
-                        float currentPosition = tabView.tag.actualPosition;
+                    boolean abort = calculateTabPositionWhenDraggingDown(distance, attachedPosition,
+                            tabView, previous);
 
-                        if (currentPosition != Float.MIN_VALUE &&
-                                currentPosition != Float.MAX_VALUE) {
-                            float newPosition = currentPosition + distance;
-                            clipDraggedTabPosition(newPosition, tabView, previous);
-                        } else if (tabView.tag.state == State.TOP_MOST ||
-                                tabView.tag.state == State.TOP_MOST_HIDDEN ||
-                                tabView.tag.state == State.STACKED_TOP) {
-                            return true;
-                        }
-                    } else {
-                        float previousPosition = previous.tag.projectedPosition;
-                        float ratio = Math.min(1, previousPosition / attachedPosition);
-                        float newPosition = previousPosition - minTabSpacing -
-                                (ratio * (maxTabSpacing - minTabSpacing));
-                        clipDraggedTabPosition(newPosition, tabView, previous);
+                    if (firstVisibleIndex == -1 && tabView.tag.state == State.VISIBLE) {
+                        firstVisibleIndex = tabView.index;
                     }
+
+                    return abort;
                 } else {
-                    if (previous == null || previous.tag.state != State.VISIBLE ||
-                            previous.tag.projectedPosition > attachedPosition) {
-                        float currentPosition = tabView.tag.actualPosition;
-
-                        if (currentPosition != Float.MIN_VALUE &&
-                                currentPosition != Float.MAX_VALUE) {
-                            float newPosition = currentPosition + distance;
-                            clipDraggedTabPosition(newPosition, tabView, previous);
-                        } else if (tabView.tag.state == State.TOP_MOST) {
-                            clipDraggedTabPosition(currentPosition, tabView, previous);
-                        }
-                    } else {
-                        float previousPosition = previous.tag.projectedPosition;
-                        float ratio = Math.min(1, previousPosition / attachedPosition);
-                        float newPosition = previousPosition - minTabSpacing -
-                                (ratio * (maxTabSpacing - minTabSpacing));
-                        clipDraggedTabPosition(newPosition, tabView, previous);
-                    }
+                    return calculateTabPositionWhenDraggingUp(distance, attachedPosition, tabView,
+                            previous);
                 }
             }
+        }
+
+        return false;
+    }
+
+    private boolean calculateTabPositionWhenDraggingDown(final float dragDistance,
+                                                         final float attachedPosition,
+                                                         @NonNull final TabView tabView,
+                                                         @Nullable final TabView previous) {
+        if (previous == null || previous.tag.state != State.VISIBLE) {
+            float currentPosition = tabView.tag.actualPosition;
+
+            if (currentPosition != Float.MIN_VALUE && currentPosition != Float.MAX_VALUE) {
+                float newPosition = currentPosition + dragDistance;
+                clipDraggedTabPosition(newPosition, tabView, previous);
+            } else if (tabView.tag.state == State.TOP_MOST ||
+                    tabView.tag.state == State.TOP_MOST_HIDDEN ||
+                    tabView.tag.state == State.STACKED_TOP) {
+                return true;
+            }
+        } else {
+            float previousPosition = previous.tag.projectedPosition;
+            float ratio = Math.min(1, previousPosition / attachedPosition);
+            float newPosition = previousPosition - minTabSpacing -
+                    (ratio * (maxTabSpacing - minTabSpacing));
+            clipDraggedTabPosition(newPosition, tabView, previous);
+        }
+
+        return false;
+    }
+
+    private boolean calculateTabPositionWhenDraggingUp(final float dragDistance,
+                                                       final float attachedPosition,
+                                                       @NonNull final TabView tabView,
+                                                       @Nullable final TabView previous) {
+        if (previous == null || previous.tag.state != State.VISIBLE ||
+                previous.tag.projectedPosition > attachedPosition) {
+            float currentPosition = tabView.tag.actualPosition;
+
+            if (currentPosition != Float.MIN_VALUE && currentPosition != Float.MAX_VALUE) {
+                float newPosition = currentPosition + dragDistance;
+                clipDraggedTabPosition(newPosition, tabView, previous);
+            } else if (tabView.tag.state == State.TOP_MOST) {
+                clipDraggedTabPosition(currentPosition, tabView, previous);
+            }
+        } else {
+            float previousPosition = previous.tag.projectedPosition;
+            float ratio = Math.min(1, previousPosition / attachedPosition);
+            float newPosition = previousPosition - minTabSpacing -
+                    (ratio * (maxTabSpacing - minTabSpacing));
+            clipDraggedTabPosition(newPosition, tabView, previous);
         }
 
         return false;
