@@ -616,8 +616,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private static final int STACKED_TAB_COUNT = 3;
 
-    private static final float NON_LINEAR_DRAG_FACTOR = 0.5f;
-
     private static final float MAX_DOWN_OVERSHOOT_ANGLE = 3f;
 
     private static final float MAX_UP_OVERSHOOT_ANGLE = 2f;
@@ -700,8 +698,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private TabView draggedTabView;
 
     private int lastAttachedIndex;
-
-    private float attachedPosition;
 
     private float topDragThreshold = -Float.MIN_VALUE;
 
@@ -1864,7 +1860,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (!isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = true;
             notifyOnSwitcherShown();
-            attachedPosition = calculateAttachedPosition();
             Iterator iterator = new Iterator();
             TabView tabView;
 
@@ -2025,11 +2020,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             }
 
         };
-    }
-
-    private float calculateAttachedPosition() {
-        return ((maxTabSpacing - minTabSpacing) / (1 - NON_LINEAR_DRAG_FACTOR)) *
-                NON_LINEAR_DRAG_FACTOR + calculateFirstTabTopThresholdPosition();
     }
 
     private AnimationListener createDragAnimationListener() {
@@ -2198,55 +2188,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 }
             }
         }
-    }
-
-    private void calculateNonLinearPositionWhenDraggingDown(final float dragDistance,
-                                                            @NonNull final TabView tabView,
-                                                            @Nullable final TabView previous,
-                                                            final float currentPosition) {
-        if (previous != null && previous.tag.state == State.VISIBLE &&
-                tabView.tag.state == State.VISIBLE) {
-            float newPosition = calculateNonLinearPosition(dragDistance, currentPosition, tabView);
-
-            if (previous.tag.projectedPosition - newPosition >= maxTabSpacing) {
-                lastAttachedIndex = tabView.index;
-                newPosition = previous.tag.projectedPosition - maxTabSpacing;
-            }
-
-            clipDraggedTabPosition(newPosition, tabView, previous);
-        }
-    }
-
-    private void calculateNonLinearPositionWhenDraggingUp(final float dragDistance,
-                                                          @NonNull final TabView tabView,
-                                                          @Nullable final TabView previous,
-                                                          final float currentPosition) {
-        if (tabView.tag.state == State.VISIBLE) {
-            boolean attached = tabView.tag.projectedPosition > attachedPosition;
-
-            if (previous == null || attached) {
-                lastAttachedIndex = tabView.index;
-            }
-
-            if (previous != null && !attached) {
-                float newPosition =
-                        calculateNonLinearPosition(dragDistance, currentPosition, tabView);
-
-                if (previous.tag.state != State.STACKED_BOTTOM &&
-                        previous.tag.state != State.BOTTOM_MOST_HIDDEN &&
-                        previous.tag.projectedPosition - newPosition <= minTabSpacing) {
-                    newPosition = previous.tag.projectedPosition - minTabSpacing;
-                }
-
-                clipDraggedTabPosition(newPosition, tabView, previous);
-            }
-        }
-    }
-
-    private float calculateNonLinearPosition(final float dragDistance, final float currentPosition,
-                                             @NonNull final TabView tabView) {
-        return currentPosition + (float) (dragDistance *
-                Math.pow(NON_LINEAR_DRAG_FACTOR, tabView.index - lastAttachedIndex));
     }
 
     private void clipDraggedTabPosition(final float dragPosition, @NonNull final TabView tabView,
