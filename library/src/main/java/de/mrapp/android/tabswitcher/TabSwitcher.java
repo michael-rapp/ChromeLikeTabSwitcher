@@ -2163,8 +2163,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         } else if (tabView.tag.state == State.TOP_MOST ||
                                 tabView.tag.state == State.TOP_MOST_HIDDEN ||
                                 tabView.tag.state == State.STACKED_TOP) {
-                            System.out.println(
-                                    "abort: " + tabView.index + "; state = " + tabView.tag.state);
                             return true;
                         }
                     } else {
