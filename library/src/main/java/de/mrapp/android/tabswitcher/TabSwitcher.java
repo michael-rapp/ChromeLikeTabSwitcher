@@ -2113,13 +2113,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            /*
             calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
 
             if (tabView.isInflated()) {
                 tabView.applyTag();
             }
-            */
         }
     }
 
