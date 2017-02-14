@@ -2123,11 +2123,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
+            /*
             calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
 
             if (tabView.isInflated()) {
                 tabView.applyTag();
             }
+            */
         }
     }
 
@@ -2152,23 +2154,23 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void calculateTabPosition(final float dragDistance, @NonNull final TabView tabView,
-                                      @Nullable final TabView previous,
-                                      @Nullable final TabView next) {
+                                      @Nullable final TabView previous) {
         if (getCount() - tabView.index > 1) {
             float distance = dragDistance - tabView.tag.distance;
             tabView.tag.distance = dragDistance;
 
             if (distance != 0) {
+                float attachedPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
+
                 if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
                     if (previous == null || previous.tag.state != State.VISIBLE) {
                         float currentPosition = tabView.tag.actualPosition;
 
                         if (currentPosition != -1) {
                             float newPosition = currentPosition + distance;
-                            clipDraggedTabPosition(newPosition, tabView, null);
+                            clipDraggedTabPosition(newPosition, tabView, previous);
                         }
                     } else {
-                        float attachedPosition = getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
                         float previousPosition = previous.tag.projectedPosition;
                         float ratio = Math.min(1, previousPosition / attachedPosition);
                         float newPosition = previousPosition - minTabSpacing -
@@ -2176,44 +2178,23 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         clipDraggedTabPosition(newPosition, tabView, previous);
                     }
                 } else {
-                    /*
-                    float currentPosition = tabView.tag.actualPosition;
+                    if (previous == null || previous.tag.state != State.VISIBLE ||
+                            previous.tag.projectedPosition > attachedPosition) {
+                        float currentPosition = tabView.tag.actualPosition;
 
-                    if (currentPosition != -1) {
-                        float newPosition = currentPosition + distance;
-                        clipDraggedTabPosition(newPosition, tabView, previous);
-                    } else {
-                        if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
-                            if (previous != null) {
-                                float previousPosition = previous.tag.actualPosition;
-
-                                if (previousPosition != -1) {
-                                    float newPosition = previous.tag.actualPosition - minTabSpacing;
-                                    clipDraggedTabPosition(newPosition, tabView, previous);
-                                }
-                            }
-                        } else {
-                            if (next != null) {
-                                float nextPosition = next.tag.actualPosition;
-
-                                if (nextPosition != -1) {
-                                    float newPosition = next.tag.actualPosition + minTabSpacing;
-                                    clipDraggedTabPosition(newPosition, tabView, previous);
-                                } else if (tabView.tag.state == State.TOP_MOST) {
-                                    clipDraggedTabPosition(currentPosition, tabView, previous);
-                                }
-                            }
+                        if (currentPosition != -1) {
+                            float newPosition = currentPosition + distance;
+                            clipDraggedTabPosition(newPosition, tabView, previous);
+                        } else if (tabView.tag.state == State.TOP_MOST) {
+                            clipDraggedTabPosition(currentPosition, tabView, previous);
                         }
-                    }
-
-                    // TODO: Re-enable non-linear dragging
-                    if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
-                        // calculateNonLinearPositionWhenDraggingDown(distance, tabView, previous,
-                        //        currentPosition);
                     } else {
-                        // calculateNonLinearPositionWhenDraggingUp(distance, tabView, previous, currentPosition);
+                        float previousPosition = previous.tag.projectedPosition;
+                        float ratio = Math.min(1, previousPosition / attachedPosition);
+                        float newPosition = previousPosition - minTabSpacing -
+                                (ratio * (maxTabSpacing - minTabSpacing));
+                        clipDraggedTabPosition(newPosition, tabView, previous);
                     }
-                    */
                 }
             }
         }
@@ -2284,7 +2265,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             if (dragPosition >= bottomMostPosition) {
                 tabView.tag.projectedPosition = bottomMostPosition;
-                tabView.tag.actualPosition = -1;
+                tabView.tag.actualPosition = tabView.index - 1;
                 tabView.tag.state = bottomMostPair.second;
                 return;
             }
@@ -2550,8 +2531,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 TabView tabView;
 
                 while ((tabView = iterator.next()) != null) {
-                    calculateTabPosition(dragHelper.getDragDistance(), tabView, iterator.previous(),
-                            iterator.peek());
+                    calculateTabPosition(dragHelper.getDragDistance(), tabView,
+                            iterator.previous());
 
                     if (tabView.isInflated() && !tabView.isVisible()) {
                         viewRecycler.remove(tabView);
@@ -2596,13 +2577,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 scrollDirection == ScrollDirection.OVERSHOOT_DOWN)) {
             bottomDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
-            dragToBottomThresholdPosition();
+            // TODO: Do we really need this? dragToBottomThresholdPosition();
             return true;
         } else if (isTopDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_UP ||
                 scrollDirection == ScrollDirection.OVERSHOOT_UP)) {
             topDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
-            dragToTopThresholdPosition();
+            // TODO: Do we really need this? dragToTopThresholdPosition();
             return true;
         }
 
