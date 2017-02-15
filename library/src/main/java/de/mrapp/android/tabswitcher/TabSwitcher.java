@@ -2079,19 +2079,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         };
     }
 
-    private void dragToTopThresholdPosition() {
-        Iterator iterator = new Iterator();
-        TabView tabView;
-
-        while ((tabView = iterator.next()) != null) {
-            calculateAndClipTopThresholdPosition(tabView, iterator.previous());
-
-            if (tabView.isInflated()) {
-                tabView.applyTag();
-            }
-        }
-    }
-
     private void calculateAndClipTopThresholdPosition(@NonNull final TabView tabView,
                                                       @Nullable final TabView previous) {
         float position = calculateTopThresholdPosition(tabView, previous);
@@ -2110,25 +2097,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private float calculateFirstTabTopThresholdPosition() {
         return getCount() > STACKED_TAB_COUNT ? STACKED_TAB_COUNT * stackedTabSpacing :
                 (getCount() - 1) * stackedTabSpacing;
-    }
-
-    private void dragToBottomThresholdPosition() {
-        Iterator iterator = new Iterator();
-        TabView tabView;
-
-        while ((tabView = iterator.next()) != null) {
-            calculateAndClipBottomThresholdPosition(tabView, iterator.previous());
-
-            if (tabView.isInflated()) {
-                tabView.applyTag();
-            }
-        }
-    }
-
-    private void calculateAndClipBottomThresholdPosition(@NonNull final TabView tabView,
-                                                         @Nullable final TabView previous) {
-        float position = calculateBottomThresholdPosition(tabView);
-        clipDraggedTabPosition(position, tabView, previous);
     }
 
     private float calculateBottomThresholdPosition(@NonNull final TabView tabView) {
@@ -2509,7 +2477,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             float currentPosition = tabView.tag.actualPosition;
 
             if (currentPosition != Float.MIN_VALUE && currentPosition != Float.MAX_VALUE) {
-                float newPosition = currentPosition + dragDistance;
+                float thresholdPosition = calculateBottomThresholdPosition(tabView);
+                float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
                 clipDraggedTabPosition(newPosition, tabView, previous);
             } else if (tabView.tag.state == State.TOP_MOST ||
                     tabView.tag.state == State.TOP_MOST_HIDDEN ||
@@ -2517,7 +2486,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 return true;
             }
         } else {
-            float newPosition = calculateNonLinearPosition(previous);
+            float thresholdPosition = calculateBottomThresholdPosition(tabView);
+            float newPosition = Math.min(calculateNonLinearPosition(previous), thresholdPosition);
             clipDraggedTabPosition(newPosition, tabView, previous);
         }
 
@@ -2597,13 +2567,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 scrollDirection == ScrollDirection.OVERSHOOT_DOWN)) {
             bottomDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
-            // TODO: Do we really need this? dragToBottomThresholdPosition();
             return true;
         } else if (isTopDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_UP ||
                 scrollDirection == ScrollDirection.OVERSHOOT_UP)) {
             topDragThreshold = dragPosition;
             scrollDirection = ScrollDirection.OVERSHOOT_UP;
-            // TODO: Do we really need this? dragToTopThresholdPosition();
             return true;
         }
 
