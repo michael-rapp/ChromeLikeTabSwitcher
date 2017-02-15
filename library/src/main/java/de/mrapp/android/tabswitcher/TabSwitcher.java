@@ -2584,7 +2584,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private float calculateAttachedPosition() {
-        return getSize(Axis.DRAGGING_AXIS, tabContainer) / 2f;
+        return (getSize(Axis.DRAGGING_AXIS, tabContainer) -
+                (isDraggingHorizontally() && isToolbarShown() ? toolbar.getHeight() + tabInset :
+                        0)) / 2f;
     }
 
     private boolean checkIfDragThresholdReached(final float dragPosition) {
