@@ -2468,8 +2468,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
             iterator = new Iterator(true, start);
+            abort = false;
 
-            while ((tabView = iterator.next()) != null) {
+            while ((tabView = iterator.next()) != null && !abort) {
                 TabView previous = iterator.previous();
                 float previousPosition = previous.tag.projectedPosition;
                 float newPosition = previousPosition + maxTabSpacing;
@@ -2481,6 +2482,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
                     if (previous.tag.state == State.VISIBLE) {
                         firstVisibleIndex = previous.index;
+                    } else {
+                        abort = true;
                     }
                 }
 
