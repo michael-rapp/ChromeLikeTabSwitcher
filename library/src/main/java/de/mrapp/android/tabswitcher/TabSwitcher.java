@@ -696,6 +696,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private float dragDistance;
 
+    private float attachedPosition;
+
     private int firstVisibleIndex;
 
     private float topDragThreshold = -Float.MIN_VALUE;
@@ -1860,6 +1862,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             switcherShown = true;
             dragDistance = 0;
             firstVisibleIndex = -1;
+            attachedPosition = calculateAttachedPosition();
             notifyOnSwitcherShown();
             Iterator iterator = new Iterator();
             TabView tabView;
@@ -2525,7 +2528,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                                        @NonNull final TabView tabView,
                                                        @Nullable final TabView previous) {
         if (previous == null || previous.tag.state != State.VISIBLE ||
-                previous.tag.projectedPosition > calculateAttachedPosition()) {
+                previous.tag.projectedPosition > attachedPosition) {
             float currentPosition = tabView.tag.actualPosition;
 
             if (currentPosition != Float.MIN_VALUE && currentPosition != Float.MAX_VALUE) {
@@ -2548,7 +2551,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private float calculateNonLinearPosition(@NonNull final TabView previous) {
         float previousPosition = previous.tag.projectedPosition;
-        float ratio = Math.min(1, previousPosition / calculateAttachedPosition());
+        float ratio = Math.min(1, previousPosition / attachedPosition);
         return previousPosition - minTabSpacing -
                 (ratio * (maxTabSpacing - minTabSpacing));
     }
