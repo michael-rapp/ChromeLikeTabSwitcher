@@ -70,11 +70,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
@@ -298,9 +296,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             layoutParams.rightMargin = borderMargin;
             layoutParams.bottomMargin = params.length > 0 ? params[0] : borderMargin;
             view.setLayoutParams(layoutParams);
-            view.setTag(viewHolder);
+            view.setTag(R.id.tag_view_holder, viewHolder);
             tabView.view = view;
             tabView.viewHolder = viewHolder;
+            view.setTag(R.id.tag_properties, tabView.tag);
             return view;
         }
 
@@ -308,12 +307,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         public void onShowView(@NonNull final Context context, @NonNull final View view,
                                @NonNull final TabView tabView, @NonNull final Integer... params) {
             if (!tabView.isInflated()) {
-                tabView.viewHolder = (ViewHolder) view.getTag();
+                tabView.viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
                 tabView.view = view;
+                view.setTag(R.id.tag_properties, tabView.tag);
             }
 
             Tab tab = tabView.tab;
-            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             adaptTitle(viewHolder, tab);
             adaptIcon(viewHolder, tab);
             adaptCloseButton(viewHolder, tab);
@@ -330,9 +330,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
         @Override
         public void onRemoveView(@NonNull final View view, @NonNull final TabView tabView) {
-            ViewHolder viewHolder = (ViewHolder) view.getTag();
+            ViewHolder viewHolder = (ViewHolder) view.getTag(R.id.tag_view_holder);
             removeChildView(viewHolder);
             viewHolder.child = null;
+            view.setTag(R.id.tag_properties, null);
         }
 
     }
@@ -356,19 +357,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             this.index = index;
             this.tab = getTab(index);
             this.view = viewRecycler.getView(this);
-
-            if (view != null) {
-                this.viewHolder = (ViewHolder) view.getTag();
-            } else {
-                this.viewHolder = null;
-            }
-
-            this.tag = tags.get(tab);
-
-            if (tag == null) {
-                tag = new Tag();
-                tags.put(tab, tag);
-            }
+            this.viewHolder = view != null ? (ViewHolder) view.getTag(R.id.tag_view_holder) : null;
+            this.tag = view != null ? (Tag) view.getTag(R.id.tag_properties) : new Tag();
         }
 
         public boolean isInflated() {
@@ -376,8 +366,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
 
         public boolean isVisible() {
-            return (tag.state != State.TOP_MOST_HIDDEN && tag.state != State.BOTTOM_MOST_HIDDEN) ||
-                    tag.closing;
+            return (tag.state != null && tag.state != State.TOP_MOST_HIDDEN &&
+                    tag.state != State.BOTTOM_MOST_HIDDEN) || tag.closing;
         }
 
         public void applyTag() {
@@ -529,11 +519,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private static class Tag implements Cloneable {
 
-        private float position;
+        private float position = Float.MIN_VALUE;
 
-        private State state;
+        private State state = null;
 
-        private boolean closing;
+        private boolean closing = false;
 
         @Override
         public Tag clone() {
@@ -639,9 +629,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
      */
     private List<Tab> tabs;
 
-    // TODO: Only inflated views should be associated with tags. This allows to abandon this map.
-    private Map<Tab, Tag> tags;
-
     private int selectedTabIndex;
 
     private int tabBackgroundColor;
@@ -734,7 +721,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         listeners = new LinkedHashSet<>();
         pendingActions = new LinkedList<>();
         tabs = new ArrayList<>();
-        tags = new HashMap<>();
         selectedTabIndex = -1;
         switcherShown = false;
         Resources resources = getResources();
@@ -967,7 +953,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                          final long startDelay,
                                          @Nullable final AnimatorListener listener) {
                 if (tag != null) {
-                    tags.put(tabView.tab, tag);
+                    tabView.view.setTag(R.id.tag_properties, tag);
                     tabView.tag = tag;
                 }
 
@@ -1006,7 +992,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     viewRecycler.remove(closedTabView);
                     Tab tab = tabs.remove(index);
                     tab.removeCallback(TabSwitcher.this);
-                    tags.remove(tab);
                     notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
@@ -1435,7 +1420,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     viewRecycler.remove(tabView);
                     Tab tab = tabs.remove(index);
                     tab.removeCallback(TabSwitcher.this);
-                    tags.remove(tab);
                     notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
@@ -1771,12 +1755,26 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
     }
 
+    private void printPositions() {
+        /*
+        Iterator iterator = new Iterator(true);
+        TabView tabView;
+
+        System.out.println("------------------------");
+
+        while ((tabView = iterator.next()) != null) {
+            System.out.println(tabView.index + ": " + tabView.tag.position);
+        }
+        */
+    }
+
     private AnimatorListener createAnimationListenerWrapper(
             @Nullable final AnimatorListener listener) {
         return new AnimatorListenerAdapter() {
 
             private void endAnimation() {
                 if (--runningAnimations == 0) {
+                    printPositions();
                     executePendingAction();
                 }
             }
@@ -2349,6 +2347,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             } else {
                 calculateTabPositionsWhenDraggingUp(distance);
             }
+
+            printPositions();
         }
     }
 
@@ -2483,6 +2483,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             if (!tabView.isInflated()) {
                 inflateTabView(tabView, null);
             } else {
+                System.out.println(
+                        tabView.index + ": " + tabView.tag.position + "; " + tabView.tag.state);
                 tabView.applyTag();
             }
         }
