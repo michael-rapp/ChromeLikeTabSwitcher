@@ -518,7 +518,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private static class Tag implements Cloneable {
 
-        private float position = Float.MIN_VALUE;
+        private float position = Float.NaN;
 
         @NonNull
         private State state = State.HIDDEN;
@@ -2568,7 +2568,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                                        final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
             TabView tabView = new TabView(index);
-            tabView.tag.position = Float.MIN_VALUE;
+            tabView.tag.position = Float.NaN;
             tabView.tag.state = State.HIDDEN;
             viewRecycler.remove(tabView);
         }
