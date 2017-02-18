@@ -42,6 +42,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -921,6 +922,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                 animateRelocate(tabView, relocatePosition, previousTag, startDelay,
                                         listener);
                             } else {
+                                Pair<Float, State> pair =
+                                        calculateBottomMostPositionAndState(tabView);
+                                tabView.tag.position = pair.first;
+                                tabView.tag.state = pair.second;
                                 inflateTabView(tabView,
                                         createRelocateLayoutListener(tabView, relocatePosition,
                                                 previousTag, startDelay, listener));
