@@ -682,7 +682,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private int firstVisibleIndex;
 
-    private float topDragThreshold = -Float.MIN_VALUE;
+    private float topDragThreshold = -Float.MAX_VALUE;
 
     private float bottomDragThreshold = Float.MAX_VALUE;
 
