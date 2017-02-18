@@ -2488,8 +2488,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             if (!tabView.isInflated()) {
                 inflateTabView(tabView, null);
             } else {
-                System.out.println(
-                        tabView.index + ": " + tabView.tag.position + "; " + tabView.tag.state);
                 tabView.applyTag();
             }
         }
