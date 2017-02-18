@@ -42,7 +42,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -858,16 +857,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 TabView tabView;
                 Float previousProjectedPosition = null;
 
-                while ((tabView = iterator.next()) != null &&
-                        (tabView.tag.state == State.TOP_MOST_HIDDEN ||
-                                tabView.tag.state == State.STACKED_TOP ||
-                                tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                                tabView.tag.state == State.STACKED_BOTTOM)) {
+                while ((tabView = iterator.next()) != null && (tabView.tag.state == null ||
+                        tabView.tag.state == State.STACKED_TOP ||
+                        tabView.tag.state == State.STACKED_BOTTOM)) {
                     float projectedPosition = tabView.tag.position;
 
                     if (previousProjectedPosition != null) {
-                        if (tabView.tag.state == State.TOP_MOST_HIDDEN ||
-                                tabView.tag.state == State.BOTTOM_MOST_HIDDEN) {
+                        if (tabView.tag.state == null) {
                             TabView previous = iterator.previous();
                             tabView.tag.state = previous.tag.state;
 
@@ -876,6 +872,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             }
 
                             if (tabView.isVisible()) {
+                                Pair<Float, State> pair =
+                                        top ? calculateTopMostPositionAndState(previous, tabView) :
+                                                calculateBottomMostPositionAndState(previous);
+                                tabView.tag.position = pair.first;
+                                tabView.tag.state = pair.second;
                                 inflateTabView(tabView, null);
                             }
 
