@@ -2556,7 +2556,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             TabView tabView = new TabView(index);
 
             if (tabView.tag.state == State.HIDDEN) {
-                tabView.tag.state = State.TOP_MOST;
+                Pair<Float, State> pair = calculateTopMostPositionAndState(closedTabView, tabView);
+                tabView.tag.position = pair.first;
+                tabView.tag.state = pair.second;
                 inflateTabView(tabView, null);
             }
         }
@@ -2566,11 +2568,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                                        final int index) {
         if (closedTabView.tag.state == State.TOP_MOST) {
             TabView tabView = new TabView(index);
-
-            if (tabView.tag.state == State.TOP_MOST) {
-                tabView.tag.state = State.HIDDEN;
-                viewRecycler.remove(tabView);
-            }
+            tabView.tag.position = Float.MIN_VALUE;
+            tabView.tag.state = State.HIDDEN;
+            viewRecycler.remove(tabView);
         }
     }
 
