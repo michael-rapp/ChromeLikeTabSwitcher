@@ -929,6 +929,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                                 inflateTabView(tabView,
                                         createRelocateLayoutListener(tabView, relocatePosition,
                                                 previousTag, startDelay, listener));
+                                tabView.view.setVisibility(View.INVISIBLE);
                             }
                         }
 
@@ -1057,6 +1058,15 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         return new AnimatorListenerAdapter() {
 
             @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (listener != null) {
+                    listener.onAnimationStart(animation);
+                }
+            }
+
+            @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 adaptTopMostTabViewWhenClosingAborted(closedTabView, closedTabView.index);
@@ -1071,6 +1081,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private AnimatorListener createRelocateAnimationListener(@NonNull final TabView tabView) {
         return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+                tabView.view.setVisibility(View.VISIBLE);
+            }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
