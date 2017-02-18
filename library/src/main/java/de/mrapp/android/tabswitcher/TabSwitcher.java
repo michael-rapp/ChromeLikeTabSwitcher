@@ -905,8 +905,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                         Tag currentTag = tabView.tag.clone();
 
                         if (previousTag != null) {
-                            if (tabView.tag.state == State.BOTTOM_MOST_HIDDEN ||
-                                    tabView.tag.state == State.STACKED_BOTTOM) {
+                            if (tabView.tag.state != State.VISIBLE) {
                                 abort = true;
                             }
 
@@ -1755,26 +1754,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
     }
 
-    private void printPositions() {
-        /*
-        Iterator iterator = new Iterator(true);
-        TabView tabView;
-
-        System.out.println("------------------------");
-
-        while ((tabView = iterator.next()) != null) {
-            System.out.println(tabView.index + ": " + tabView.tag.position);
-        }
-        */
-    }
-
     private AnimatorListener createAnimationListenerWrapper(
             @Nullable final AnimatorListener listener) {
         return new AnimatorListenerAdapter() {
 
             private void endAnimation() {
                 if (--runningAnimations == 0) {
-                    printPositions();
                     executePendingAction();
                 }
             }
@@ -2347,8 +2332,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             } else {
                 calculateTabPositionsWhenDraggingUp(distance);
             }
-
-            printPositions();
         }
     }
 
