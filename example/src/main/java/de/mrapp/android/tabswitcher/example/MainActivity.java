@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Michael Rapp
+ * Copyright 2016 - 2017 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         @NonNull
         @Override
         public View onInflateView(@NonNull final LayoutInflater inflater,
-                                  @NonNull final ViewGroup parent, final int viewType) {
+                                  @Nullable final ViewGroup parent, final int viewType) {
             View view = inflater.inflate(R.layout.tab, parent, false);
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.tab);

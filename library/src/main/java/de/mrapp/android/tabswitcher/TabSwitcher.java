@@ -42,7 +42,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -82,6 +81,7 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ThemeUtil;
@@ -98,38 +98,6 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, Tab.Callback {
-
-    private class ChildViewRecycler {
-
-        private SparseArray<View> views;
-
-        @NonNull
-        public View inflateView(@NonNull final ViewGroup parent, @NonNull final Tab tab) {
-            int viewType = getDecorator().getViewType(tab);
-            View child = null;
-
-            if (views == null) {
-                views = new SparseArray<>(getDecorator().getViewTypeCount());
-            } else {
-                child = views.get(viewType);
-            }
-
-            if (child == null) {
-                child = getDecorator().inflateView(inflater, parent, tab);
-                views.put(viewType, child);
-            }
-
-            return child;
-        }
-
-        public void clearCache() {
-            if (views != null) {
-                views.clear();
-                views = null;
-            }
-        }
-
-    }
 
     private static class PreviewDataBinder
             extends AbstractDataBinder<Bitmap, Tab, ImageView, TabView> {
@@ -175,7 +143,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             Tab tab = tabView.tab;
 
             if (child == null) {
-                child = childViewRecycler.inflateView(viewHolder.childContainer, tab);
+                child = childViewRecycler.inflate(tab, viewHolder.childContainer);
                 // TODO: Must the view also be added to the parent? This is relevant when calling the showSwitcher-method, while the TabSwitcher is not yet inflated
             } else {
                 viewHolder.child = null;
@@ -220,7 +188,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             if (view == null) {
                 ViewGroup parent = viewHolder.childContainer;
-                view = childViewRecycler.inflateView(parent, tab);
+                view = childViewRecycler.inflate(tab, parent);
                 LayoutParams layoutParams =
                         new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 layoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
@@ -729,7 +697,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         tabViewBottomMargin = -1;
         scrollDirection = ScrollDirection.NONE;
         inflateLayout();
-        childViewRecycler = new ChildViewRecycler();
+        childViewRecycler = new ChildViewRecycler(inflater);
         recyclerAdapter = new RecyclerAdapter();
         viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(new TabViewComparator()));
@@ -2070,13 +2038,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if ((getCount() - tabView.index) <= STACKED_TAB_COUNT) {
             float position = stackedTabSpacing * (getCount() - (tabView.index + 1));
             return Pair.create(position,
-                    (previous == null || previous.tag.state == State.FLOATING) ? State.STACKED_START_ATOP :
-                            State.STACKED_START);
+                    (previous == null || previous.tag.state == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.STACKED_START);
         } else {
             float position = stackedTabSpacing * STACKED_TAB_COUNT;
             return Pair.create(position,
-                    (previous == null || previous.tag.state == State.FLOATING) ? State.STACKED_START_ATOP :
-                            State.HIDDEN);
+                    (previous == null || previous.tag.state == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.HIDDEN);
         }
     }
 
@@ -2566,7 +2534,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         TabView tabView;
 
         while ((tabView = iterator.next()) != null) {
-            if (tabView.tag.state == State.FLOATING || tabView.tag.state == State.STACKED_START_ATOP) {
+            if (tabView.tag.state == State.FLOATING ||
+                    tabView.tag.state == State.STACKED_START_ATOP) {
                 View view = tabView.view;
                 float toolbarHeight = isToolbarShown() && !isDraggingHorizontally() ?
                         toolbar.getHeight() - tabInset : 0;
@@ -2731,7 +2700,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.childViewRecycler.clearCache();
+        this.childViewRecycler.setDecorator(decorator);
         this.recyclerAdapter.clearCachedBitmaps();
     }
 

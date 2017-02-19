@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Michael Rapp
+ * Copyright 2016 - 2017 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
 
     @NonNull
     public final View inflateView(@NonNull final LayoutInflater inflater,
-                                  @NonNull final ViewGroup parent, @NonNull final Tab tab) {
+                                  @Nullable final ViewGroup parent, @NonNull final Tab tab) {
         int viewType = getViewType(tab);
         return onInflateView(inflater, parent, viewType);
     }
@@ -48,7 +49,7 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
 
     @NonNull
     public abstract View onInflateView(@NonNull final LayoutInflater inflater,
-                                       @NonNull final ViewGroup parent, final int viewType);
+                                       @Nullable final ViewGroup parent, final int viewType);
 
     public abstract void onShowTab(@NonNull final Context context,
                                    @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
