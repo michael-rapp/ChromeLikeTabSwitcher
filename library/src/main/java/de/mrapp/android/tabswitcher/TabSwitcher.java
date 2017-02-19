@@ -77,6 +77,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.model.AnimationType;
+import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
@@ -492,14 +493,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         OVERSHOOT_UP,
 
         OVERSHOOT_DOWN;
-
-    }
-
-    private enum Axis {
-
-        DRAGGING_AXIS,
-
-        ORTHOGONAL_AXIS
 
     }
 
