@@ -62,6 +62,11 @@ public class Arithmetics {
     private final float stackedTabSpacing;
 
     /**
+     * The maximum space between two neighboring tabs.
+     */
+    private final float maxTabSpacing;
+
+    /**
      * Modifies a specific axis depending on the orientation of the tab switcher.
      *
      * @param axis
@@ -95,6 +100,7 @@ public class Arithmetics {
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        this.maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
     }
 
     /**
@@ -347,6 +353,86 @@ public class Arithmetics {
             return view.getHeight() * getScale(view, includePadding);
         } else {
             return view.getWidth() * getScale(view, includePadding);
+        }
+    }
+
+    /**
+     * Returns the default pivot of a view on a specific axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    public final float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureNotNull(view, "The view may not be null");
+
+        if (axis == Axis.DRAGGING_AXIS) {
+            return tabSwitcher.isDraggingHorizontally() ? getSize(axis, view) / 2f : 0;
+        } else {
+            return tabSwitcher.isDraggingHorizontally() ? 0 : getSize(axis, view) / 2f;
+        }
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when it is closed.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotWhenClosing(@NonNull final Axis axis, @NonNull final View view) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureNotNull(view, "The view may not be null");
+
+        if (axis == Axis.DRAGGING_AXIS) {
+            return maxTabSpacing;
+        } else {
+            return getDefaultPivot(axis, view);
+        }
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when overshooting at the start.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotOnOvershootStart(@NonNull final Axis axis, @NonNull final View view) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureNotNull(view, "The view may not be null");
+
+        return getSize(axis, view) / 2f;
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when overshooting at the end.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotOnOvershootEnd(@NonNull final Axis axis, @NonNull final View view) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureNotNull(view, "The view may not be null");
+
+        if (axis == Axis.DRAGGING_AXIS) {
+            return maxTabSpacing;
+        } else {
+            return getSize(axis, view) / 2f;
         }
     }
 
