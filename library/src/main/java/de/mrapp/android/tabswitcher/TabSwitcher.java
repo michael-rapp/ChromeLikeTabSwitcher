@@ -77,7 +77,9 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
-import de.mrapp.android.tabswitcher.gesture.DragHelper;
+import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
+import de.mrapp.android.tabswitcher.util.DragHelper;
+import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ThemeUtil;

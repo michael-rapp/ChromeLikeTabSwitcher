@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.gesture;
+package de.mrapp.android.tabswitcher.util;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 

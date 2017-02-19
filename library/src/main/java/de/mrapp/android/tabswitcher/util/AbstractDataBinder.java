@@ -1,4 +1,4 @@
-package de.mrapp.android.tabswitcher;
+package de.mrapp.android.tabswitcher.util;
 
 import android.content.Context;
 import android.os.Handler;
