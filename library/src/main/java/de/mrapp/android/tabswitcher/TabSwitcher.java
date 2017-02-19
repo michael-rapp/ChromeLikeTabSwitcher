@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Michael Rapp
+ * Copyright 2016 - 2017 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -77,6 +77,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
@@ -96,14 +97,6 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, Tab.Callback {
-
-    public enum AnimationType {
-
-        SWIPE_LEFT,
-
-        SWIPE_RIGHT
-
-    }
 
     private class ChildViewRecycler {
 
