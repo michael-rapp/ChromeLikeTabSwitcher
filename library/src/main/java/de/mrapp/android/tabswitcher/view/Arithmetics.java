@@ -387,7 +387,7 @@ public class Arithmetics {
      *         The view may not be null
      * @return The pivot of the given view on the given axis as a {@link Float} value
      */
-    private float getPivotWhenClosing(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getPivotWhenClosing(@NonNull final Axis axis, @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -408,7 +408,8 @@ public class Arithmetics {
      *         The view may not be null
      * @return The pivot of the given view on the given axis as a {@link Float} value
      */
-    private float getPivotOnOvershootStart(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getPivotOnOvershootStart(@NonNull final Axis axis,
+                                                @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -425,7 +426,7 @@ public class Arithmetics {
      *         The view may not be null
      * @return The pivot of the given view on the given axis as a {@link Float} value
      */
-    private float getPivotOnOvershootEnd(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getPivotOnOvershootEnd(@NonNull final Axis axis, @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
