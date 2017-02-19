@@ -203,8 +203,8 @@ public class ViewRecycler<ItemType, ParamType> {
     private final Map<ItemType, View> activeViews;
 
     /**
-     * A map, which manages the views, which are currently unused. The views are associated with the
-     * view type the correspond to.
+     * A sparse array, which manages the views, which are currently unused. The views are associated
+     * with the view type the correspond to.
      */
     private final SparseArray<Queue<View>> unusedViews;
 
@@ -309,12 +309,46 @@ public class ViewRecycler<ItemType, ParamType> {
         this(parent, adapter, LayoutInflater.from(parent.getContext()), comparator);
     }
 
+    /**
+     * Creates a new recycler, which allows to cache views in order to be able to reuse them later
+     * instead of inflating new instances. By default, views are added to the parent in the order of
+     * their inflation.
+     *
+     * @param parent
+     *         The parent, the recycler should be bound to, as an instance of the class {@link
+     *         ViewGroup}. The parent may not be null
+     * @param adapter
+     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
+     *         instance of the class {@link Adapter}. The adapter may not be null
+     * @param inflater
+     *         The layout inflater, which should be used to inflate views, as an instance of the
+     *         class {@link LayoutInflater}. The layout inflater may not be null
+     */
     public ViewRecycler(@NonNull final ViewGroup parent,
                         @NonNull final Adapter<ItemType, ParamType> adapter,
                         @NonNull final LayoutInflater inflater) {
         this(parent, adapter, inflater, null);
     }
 
+    /**
+     * Creates a new recycler, which allows to cache views in order to be able to reuse them later
+     * instead of inflating new instances. This constructor allows to specify a comparator, which
+     * allows to determine the order, which should be used to add views to the parent.
+     *
+     * @param parent
+     *         The parent, the recycler should be bound to, as an instance of the class {@link
+     *         ViewGroup}. The parent may not be null
+     * @param adapter
+     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
+     *         instance of the class {@link Adapter}. The adapter may not be null
+     * @param inflater
+     *         The layout inflater, which should be used to inflate views, as an instance of the
+     *         class {@link LayoutInflater}. The layout inflater may not be null
+     * @param comparator
+     *         The comparator, which allows to determine the order, which should be used to add
+     *         views to the parent, as an instance of the type {@link Comparator} or null, if the
+     *         views should be added in the order of their inflation
+     */
     public ViewRecycler(@NonNull final ViewGroup parent,
                         @NonNull final Adapter<ItemType, ParamType> adapter,
                         @NonNull final LayoutInflater inflater,
