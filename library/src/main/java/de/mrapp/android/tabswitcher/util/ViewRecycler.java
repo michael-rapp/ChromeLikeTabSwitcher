@@ -371,6 +371,7 @@ public class ViewRecycler<ItemType, ParamType> {
      */
     @SafeVarargs
     public final boolean inflate(@NonNull final ItemType item, @NonNull final ParamType... params) {
+        ensureNotNull(params, "The array may not be null");
         View view = getView(item);
         boolean inflated = false;
 
