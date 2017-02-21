@@ -78,6 +78,7 @@ import java.util.Set;
 
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
+import de.mrapp.android.tabswitcher.model.DragState;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
@@ -485,20 +486,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     }
 
-    private enum ScrollDirection {
-
-        NONE,
-
-        DRAGGING_UP,
-
-        DRAGGING_DOWN,
-
-        OVERSHOOT_UP,
-
-        OVERSHOOT_DOWN;
-
-    }
-
     private class FlingAnimation extends Animation {
 
         private final float flingDistance;
@@ -595,7 +582,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private int tabViewBottomMargin;
 
-    private ScrollDirection scrollDirection;
+    private DragState dragState;
 
     private TabView draggedTabView;
 
@@ -668,7 +655,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         tabViewBottomMargin = -1;
-        scrollDirection = ScrollDirection.NONE;
+        dragState = DragState.NONE;
         inflateLayout();
         childViewRecycler = new ChildViewRecycler(inflater);
         recyclerAdapter = new RecyclerAdapter();
@@ -2028,7 +2015,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 dragHelper.reset(0);
             }
 
-            scrollDirection = ScrollDirection.OVERSHOOT_UP;
+            dragState = DragState.OVERSHOOT_START;
             overshootDragHelper.update(dragPosition);
             float overshootDistance = Math.abs(overshootDragHelper.getDragDistance());
 
@@ -2065,7 +2052,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 dragHelper.reset(0);
             }
 
-            scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
+            dragState = DragState.OVERSHOOT_END;
             overshootDragHelper.update(dragPosition);
             float overshootDistance = overshootDragHelper.getDragDistance();
             float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
@@ -2076,7 +2063,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             dragHelper.update(dragPosition);
             closeDragHelper.update(orthogonalPosition);
 
-            if (scrollDirection == ScrollDirection.NONE && draggedTabView == null &&
+            if (dragState == DragState.NONE && draggedTabView == null &&
                     closeDragHelper.hasThresholdBeenReached()) {
                 TabView tabView = getFocusedTabView(dragHelper.getDragStartPosition());
 
@@ -2086,19 +2073,19 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             }
 
             if (draggedTabView == null && dragHelper.hasThresholdBeenReached()) {
-                if (scrollDirection == ScrollDirection.OVERSHOOT_UP) {
-                    scrollDirection = ScrollDirection.DRAGGING_DOWN;
-                } else if (scrollDirection == ScrollDirection.OVERSHOOT_DOWN) {
-                    scrollDirection = ScrollDirection.DRAGGING_UP;
+                if (dragState == DragState.OVERSHOOT_START) {
+                    dragState = DragState.DRAG_TO_END;
+                } else if (dragState == DragState.OVERSHOOT_END) {
+                    dragState = DragState.DRAG_TO_START;
                 } else {
-                    scrollDirection = previousDistance - dragHelper.getDragDistance() <= 0 ?
-                            ScrollDirection.DRAGGING_DOWN : ScrollDirection.DRAGGING_UP;
+                    dragState = previousDistance - dragHelper.getDragDistance() <= 0 ?
+                            DragState.DRAG_TO_END : DragState.DRAG_TO_START;
                 }
             }
 
             if (draggedTabView != null) {
                 handleDragToClose();
-            } else if (scrollDirection != ScrollDirection.NONE) {
+            } else if (dragState != DragState.NONE) {
                 calculateTabPositions();
                 checkIfDragThresholdReached(dragPosition);
             }
@@ -2115,7 +2102,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         dragDistance = currentDragDistance;
 
         if (distance != 0) {
-            if (scrollDirection == ScrollDirection.DRAGGING_DOWN) {
+            if (dragState == DragState.DRAG_TO_END) {
                 calculateTabPositionsWhenDraggingDown(distance);
             } else {
                 calculateTabPositionsWhenDraggingUp(distance);
@@ -2282,15 +2269,15 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private boolean checkIfDragThresholdReached(final float dragPosition) {
-        if (isBottomDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_DOWN ||
-                scrollDirection == ScrollDirection.OVERSHOOT_DOWN)) {
+        if (isBottomDragThresholdReached() &&
+                (dragState == DragState.DRAG_TO_END || dragState == DragState.OVERSHOOT_END)) {
             bottomDragThreshold = dragPosition;
-            scrollDirection = ScrollDirection.OVERSHOOT_DOWN;
+            dragState = DragState.OVERSHOOT_END;
             return true;
-        } else if (isTopDragThresholdReached() && (scrollDirection == ScrollDirection.DRAGGING_UP ||
-                scrollDirection == ScrollDirection.OVERSHOOT_UP)) {
+        } else if (isTopDragThresholdReached() &&
+                (dragState == DragState.DRAG_TO_START || dragState == DragState.OVERSHOOT_START)) {
             topDragThreshold = dragPosition;
-            scrollDirection = ScrollDirection.OVERSHOOT_UP;
+            dragState = DragState.OVERSHOOT_START;
             return true;
         }
 
@@ -2374,13 +2361,13 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private void handleRelease(@Nullable final MotionEvent event) {
         boolean thresholdReached = dragHelper.hasThresholdBeenReached();
-        ScrollDirection flingDirection = this.scrollDirection;
+        DragState flingDirection = this.dragState;
         this.dragHelper.reset(dragThreshold);
         this.overshootDragHelper.reset();
         this.closeDragHelper.reset();
         this.topDragThreshold = -Float.MAX_VALUE;
         this.bottomDragThreshold = Float.MAX_VALUE;
-        this.scrollDirection = ScrollDirection.NONE;
+        this.dragState = DragState.NONE;
         this.dragDistance = 0;
 
         if (draggedTabView != null) {
@@ -2398,15 +2385,15 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
             animateOrthogonalDrag(draggedTabView, close, flingVelocity, 0,
                     createCloseAnimationListener(draggedTabView, close));
-        } else if (flingDirection == ScrollDirection.DRAGGING_UP ||
-                flingDirection == ScrollDirection.DRAGGING_DOWN) {
+        } else if (flingDirection == DragState.DRAG_TO_START ||
+                flingDirection == DragState.DRAG_TO_END) {
 
             if (event != null && velocityTracker != null && thresholdReached) {
                 animateFling(event, flingDirection);
             }
-        } else if (flingDirection == ScrollDirection.OVERSHOOT_DOWN) {
+        } else if (flingDirection == DragState.OVERSHOOT_END) {
             animateOvershootDown();
-        } else if (flingDirection == ScrollDirection.OVERSHOOT_UP) {
+        } else if (flingDirection == DragState.OVERSHOOT_START) {
             animateOvershootUp();
         } else if (event != null && !dragHelper.hasThresholdBeenReached() &&
                 !closeDragHelper.hasThresholdBeenReached()) {
@@ -2500,7 +2487,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void animateFling(@NonNull final MotionEvent event,
-                              @NonNull final ScrollDirection flingDirection) {
+                              @NonNull final DragState dragState) {
         int pointerId = event.getPointerId(0);
         velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
         float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
@@ -2508,7 +2495,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (flingVelocity > minFlingVelocity) {
             float flingDistance = 0.25f * flingVelocity;
 
-            if (flingDirection == ScrollDirection.DRAGGING_UP) {
+            if (dragState == DragState.DRAG_TO_START) {
                 flingDistance = -1 * flingDistance;
             }
 
