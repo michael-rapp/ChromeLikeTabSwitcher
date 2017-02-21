@@ -22,7 +22,7 @@ import android.widget.TextView;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
 /**
- * A view holder, which allows to keep references to the views a tab of a {@link TabSwitcher}
+ * A view holder, which allows to store references to the views a tab of a {@link TabSwitcher}
  * consists of.
  *
  * @author Michael Rapp
