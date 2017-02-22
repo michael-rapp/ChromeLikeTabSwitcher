@@ -68,7 +68,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +80,6 @@ import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.DragHelper;
@@ -89,6 +87,7 @@ import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.tabswitcher.view.Arithmetics;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
+import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
@@ -303,16 +302,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             removeChildView(viewHolder);
             viewHolder.child = null;
             view.setTag(R.id.tag_properties, null);
-        }
-
-    }
-
-    // TODO: Move to class TabSwitcher
-    private class TabViewComparator implements Comparator<TabItem> {
-
-        @Override
-        public int compare(TabItem o1, TabItem o2) {
-            return ((Integer) o1.getIndex()).compareTo(o2.getIndex());
         }
 
     }
@@ -606,7 +595,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         childViewRecycler = new ChildViewRecycler(inflater);
         recyclerAdapter = new RecyclerAdapter();
         viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
-                Collections.reverseOrder(new TabViewComparator()));
+                Collections.reverseOrder(TabItem.COMPARATOR));
         arithmetics = new Arithmetics(this);
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
