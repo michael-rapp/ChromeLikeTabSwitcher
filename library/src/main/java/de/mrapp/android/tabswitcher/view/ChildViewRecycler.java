@@ -92,7 +92,7 @@ public class ChildViewRecycler {
      * may not be null
      */
     @NonNull
-    public View inflate(@NonNull final Tab tab, @Nullable final ViewGroup parent) {
+    public final View inflate(@NonNull final Tab tab, @Nullable final ViewGroup parent) {
         ensureNotNull(tab, "The tab may not be null");
         ensureNotNull(decorator, "No decorator has been set", IllegalStateException.class);
         int viewType = decorator.getViewType(tab);
@@ -115,7 +115,7 @@ public class ChildViewRecycler {
     /**
      * Removes all views from the cache.
      */
-    public void clearCache() {
+    public final void clearCache() {
         if (views != null) {
             views.clear();
             views = null;

@@ -74,7 +74,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     }
 
     @Override
-    protected void onPreExecute(@NonNull final ImageView view, @NonNull final TabItem... params) {
+    protected final void onPreExecute(@NonNull final ImageView view,
+                                      @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
         TabViewHolder viewHolder = tabItem.getViewHolder();
         child = viewHolder.child;
@@ -92,7 +93,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
 
     @Nullable
     @Override
-    protected Bitmap doInBackground(@NonNull final Tab key, @NonNull final TabItem... params) {
+    protected final Bitmap doInBackground(@NonNull final Tab key,
+                                          @NonNull final TabItem... params) {
         Bitmap bitmap =
                 Bitmap.createBitmap(child.getWidth(), child.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -107,8 +109,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     }
 
     @Override
-    protected void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
-                                 @NonNull final TabItem... params) {
+    protected final void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
+                                       @NonNull final TabItem... params) {
         view.setImageBitmap(data);
         view.setVisibility(data != null ? View.VISIBLE : View.GONE);
     }
