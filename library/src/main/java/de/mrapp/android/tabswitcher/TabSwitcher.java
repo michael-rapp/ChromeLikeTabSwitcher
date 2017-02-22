@@ -76,7 +76,7 @@ import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
-import de.mrapp.android.tabswitcher.view.Arithmetics;
+import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
