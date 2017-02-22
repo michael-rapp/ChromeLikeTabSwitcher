@@ -22,7 +22,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
@@ -58,9 +57,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,6 +70,7 @@ import java.util.Set;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
+import de.mrapp.android.tabswitcher.model.Iterator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
@@ -81,7 +78,7 @@ import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.tabswitcher.view.Arithmetics;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
-import de.mrapp.android.tabswitcher.view.PreviewDataBinder;
+import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -97,220 +94,7 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, Tab.Callback {
-
-    private class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer> {
-
-        private final PreviewDataBinder dataBinder;
-
-        private void addChildView(@NonNull final TabItem tabItem) {
-            TabViewHolder viewHolder = tabItem.getViewHolder();
-            View view = viewHolder.child;
-            Tab tab = tabItem.getTab();
-
-            if (view == null) {
-                ViewGroup parent = viewHolder.childContainer;
-                view = childViewRecycler.inflate(tab, parent);
-                LayoutParams layoutParams =
-                        new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                layoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                        getPaddingBottom());
-                parent.addView(view, 0, layoutParams);
-                viewHolder.child = view;
-            }
-
-            viewHolder.previewImageView.setVisibility(View.GONE);
-            viewHolder.previewImageView.setImageBitmap(null);
-            viewHolder.borderView.setVisibility(View.GONE);
-            getDecorator().applyDecorator(getContext(), TabSwitcher.this, view, tab);
-        }
-
-        private void renderChildView(@NonNull final TabItem tabItem) {
-            TabViewHolder viewHolder = tabItem.getViewHolder();
-            viewHolder.borderView.setVisibility(View.VISIBLE);
-            boolean async = viewHolder.child == null;
-            dataBinder.load(tabItem.getTab(), viewHolder.previewImageView, async, tabItem);
-
-            if (!async) {
-                removeChildView(viewHolder);
-            }
-        }
-
-        private void removeChildView(@NonNull final TabViewHolder viewHolder) {
-            if (viewHolder.childContainer.getChildCount() > 2) {
-                viewHolder.childContainer.removeViewAt(0);
-            }
-        }
-
-        public RecyclerAdapter() {
-            this.dataBinder = new PreviewDataBinder(TabSwitcher.this, childViewRecycler);
-        }
-
-        public void clearCachedBitmaps() {
-            dataBinder.clearCache();
-        }
-
-        @NonNull
-        @Override
-        public View onInflateView(@NonNull final LayoutInflater inflater,
-                                  @Nullable final ViewGroup parent, @NonNull final TabItem tabItem,
-                                  final int viewType, @NonNull final Integer... params) {
-            TabViewHolder viewHolder = new TabViewHolder();
-            View view = inflater.inflate(
-                    isDraggingHorizontally() ? R.layout.tab_view_horizontally : R.layout.tab_view,
-                    tabContainer, false);
-            Drawable backgroundDrawable =
-                    ContextCompat.getDrawable(getContext(), R.drawable.tab_background);
-            ViewUtil.setBackground(view, backgroundDrawable);
-            int padding = tabInset + tabBorderWidth;
-            view.setPadding(padding, tabInset, padding, padding);
-            viewHolder.titleContainer = (ViewGroup) view.findViewById(R.id.tab_title_container);
-            viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
-            viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
-            viewHolder.childContainer = (ViewGroup) view.findViewById(R.id.child_container);
-            viewHolder.previewImageView = (ImageView) view.findViewById(R.id.preview_image_view);
-            adaptChildAndPreviewMargins(viewHolder);
-            viewHolder.borderView = view.findViewById(R.id.border_view);
-            Drawable borderDrawable =
-                    ContextCompat.getDrawable(getContext(), R.drawable.tab_border);
-            ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
-            LayoutParams layoutParams =
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            int borderMargin = -(tabInset + tabBorderWidth);
-            layoutParams.leftMargin = borderMargin;
-            layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
-            layoutParams.rightMargin = borderMargin;
-            layoutParams.bottomMargin = params.length > 0 ? params[0] : borderMargin;
-            view.setLayoutParams(layoutParams);
-            view.setTag(R.id.tag_view_holder, viewHolder);
-            tabItem.setView(view);
-            tabItem.setViewHolder(viewHolder);
-            view.setTag(R.id.tag_properties, tabItem.getTag());
-            return view;
-        }
-
-        @Override
-        public void onShowView(@NonNull final Context context, @NonNull final View view,
-                               @NonNull final TabItem tabItem, @NonNull final Integer... params) {
-            if (!tabItem.isInflated()) {
-                tabItem.setView(view);
-                tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));
-                view.setTag(R.id.tag_properties, tabItem.getTag());
-            }
-
-            Tab tab = tabItem.getTab();
-            TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
-            adaptTitle(viewHolder, tab);
-            adaptIcon(viewHolder, tab);
-            adaptCloseButton(viewHolder, tab);
-            adaptColor(view, viewHolder, tab);
-
-            if (!isSwitcherShown()) {
-                if (tabItem.getIndex() == selectedTabIndex) {
-                    addChildView(tabItem);
-                }
-            } else {
-                renderChildView(tabItem);
-            }
-        }
-
-        @Override
-        public void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
-            TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
-            removeChildView(viewHolder);
-            viewHolder.child = null;
-            view.setTag(R.id.tag_properties, null);
-        }
-
-    }
-
-    private class Iterator implements java.util.Iterator<TabItem> {
-
-        private boolean reverse;
-
-        private int index;
-
-        private int end;
-
-        private TabItem current;
-
-        private TabItem previous;
-
-        private TabItem first;
-
-        public Iterator() {
-            this(false);
-        }
-
-        public Iterator(final boolean reverse) {
-            this(reverse, -1);
-        }
-
-        public Iterator(final boolean reverse, final int start) {
-            this(reverse, start, -1);
-        }
-
-        public Iterator(final boolean reverse, final int start, final int end) {
-            this.reverse = reverse;
-            this.end = end != -1 ? (reverse ? end - 1 : end + 1) : -1;
-            this.previous = null;
-            this.index = start != -1 ? start : (reverse ? getCount() - 1 : 0);
-            int previousIndex = reverse ? this.index + 1 : this.index - 1;
-
-            if (previousIndex >= 0 && previousIndex < getCount()) {
-                this.current = createTabView(previousIndex);
-            } else {
-                this.current = null;
-            }
-        }
-
-        public TabItem first() {
-            return first;
-        }
-
-        public TabItem previous() {
-            return previous;
-        }
-
-        public TabItem peek() {
-            if (hasNext()) {
-                return createTabView(index);
-            }
-
-            return null;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (index == end) {
-                return false;
-            } else {
-                if (reverse) {
-                    return index >= 0;
-                } else {
-                    return getCount() - index >= 1;
-                }
-            }
-        }
-
-        @Override
-        public TabItem next() {
-            if (hasNext()) {
-                previous = current;
-
-                if (first == null) {
-                    first = current;
-                }
-
-                current = createTabView(index);
-                index += reverse ? -1 : 1;
-                return current;
-            }
-
-            return null;
-        }
-
-    }
+public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
     private class FlingAnimation extends Animation {
 
@@ -430,20 +214,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private int runningAnimations;
 
-    private TabItem createTabView(final int index) {
-        Tab tab = getTab(index);
-        TabItem tabItem = new TabItem(index, tab);
-        View view = viewRecycler.getView(tabItem);
-
-        if (view != null) {
-            tabItem.setView(view);
-            tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));
-            tabItem.setTag((Tag) view.getTag(R.id.tag_properties));
-        }
-
-        return tabItem;
-    }
-
     private void applyTag(@NonNull final TabItem tabItem) {
         float position = tabItem.getTag().getPosition();
         View view = tabItem.getView();
@@ -511,9 +281,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         dragState = DragState.NONE;
         inflateLayout();
         childViewRecycler = new ChildViewRecycler(inflater);
-        recyclerAdapter = new RecyclerAdapter();
+        recyclerAdapter = new RecyclerAdapter(this, childViewRecycler);
         viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(TabItem.COMPARATOR));
+        recyclerAdapter.setViewRecycler(viewRecycler);
         arithmetics = new Arithmetics(this);
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
@@ -565,17 +336,6 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         }
     }
 
-    private OnClickListener createCloseButtonClickListener(@NonNull final Tab tab) {
-        return new OnClickListener() {
-
-            @Override
-            public void onClick(final View v) {
-                removeTab(tab);
-            }
-
-        };
-    }
-
     private void animateOrthogonalDrag(@NonNull final TabItem tabItem, final boolean close,
                                        final float flingVelocity, final long startDelay,
                                        @Nullable final AnimatorListener listener) {
@@ -617,7 +377,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             private void relocateWhenStackedTabViewWasRemoved(final boolean top) {
                 long delay = getResources().getInteger(android.R.integer.config_shortAnimTime);
                 int start = closedTabItem.getIndex() + (top ? -1 : 1);
-                Iterator iterator = new Iterator(top, closedTabItem.getIndex());
+                Iterator iterator =
+                        new Iterator.Builder(TabSwitcher.this, viewRecycler).reverse(top)
+                                .start(closedTabItem.getIndex()).create();
                 TabItem tabItem;
                 Float previousProjectedPosition = null;
 
@@ -662,7 +424,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             private void relocateWhenVisibleTabViewWasRemoved() {
                 if (closedTabItem.getIndex() > 0) {
                     long delay = getResources().getInteger(android.R.integer.config_shortAnimTime);
-                    Iterator iterator = new Iterator(true, closedTabItem.getIndex());
+                    Iterator iterator =
+                            new Iterator.Builder(TabSwitcher.this, viewRecycler).reverse(true)
+                                    .start(closedTabItem.getIndex()).create();
                     TabItem tabItem;
                     Tag previousTag = null;
                     boolean abort = false;
@@ -765,7 +529,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     int index = closedTabItem.getIndex();
                     viewRecycler.remove(closedTabItem);
                     Tab tab = tabs.remove(index);
-                    tab.removeCallback(TabSwitcher.this);
+                    tab.removeCallback(recyclerAdapter);
                     notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
@@ -953,7 +717,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             @Override
             public void run() {
                 tabs.add(index, tab);
-                tab.addCallback(TabSwitcher.this);
+                tab.addCallback(recyclerAdapter);
                 notifyOnTabAdded(index, tab);
 
                 if (getCount() == 1) {
@@ -965,10 +729,10 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     toolbar.setAlpha(0);
 
                     if (selectedTabIndex == index && ViewCompat.isLaidOut(TabSwitcher.this)) {
-                        viewRecycler.inflate(createTabView(index));
+                        viewRecycler.inflate(TabItem.create(TabSwitcher.this, viewRecycler, index));
                     }
                 } else {
-                    TabItem tabItem = createTabView(index);
+                    TabItem tabItem = TabItem.create(TabSwitcher.this, viewRecycler, index);
                     tabItem.getView().getViewTreeObserver().addOnGlobalLayoutListener(
                             createAddTabViewLayoutListener(tabItem, animationType));
                 }
@@ -1032,12 +796,12 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             @Override
             public void run() {
                 int index = indexOfOrThrowException(tab);
-                TabItem tabItem = createTabView(index);
+                TabItem tabItem = TabItem.create(TabSwitcher.this, viewRecycler, index);
 
                 if (!isSwitcherShown()) {
                     viewRecycler.remove(tabItem);
                     Tab tab = tabs.remove(index);
-                    tab.removeCallback(TabSwitcher.this);
+                    tab.removeCallback(recyclerAdapter);
                     notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
@@ -1049,7 +813,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                             selectedTabIndex--;
                         }
 
-                        viewRecycler.inflate(createTabView(selectedTabIndex));
+                        viewRecycler.inflate(
+                                TabItem.create(TabSwitcher.this, viewRecycler, selectedTabIndex));
                         notifyOnSelectionChanged(selectedTabIndex, getTab(selectedTabIndex));
                     }
                 } else {
@@ -1096,7 +861,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 if (!isSwitcherShown()) {
                     for (int i = tabs.size() - 1; i >= 0; i--) {
                         Tab tab = tabs.remove(i);
-                        tab.removeCallback(TabSwitcher.this);
+                        tab.removeCallback(recyclerAdapter);
                     }
 
                     selectedTabIndex = -1;
@@ -1105,7 +870,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                     notifyOnAllTabsRemoved();
                     toolbar.setAlpha(isToolbarShown() ? 1 : 0);
                 } else {
-                    Iterator iterator = new Iterator(true);
+                    Iterator iterator =
+                            new Iterator.Builder(TabSwitcher.this, viewRecycler).reverse(true)
+                                    .create();
                     TabItem tabItem;
                     int startDelay = 0;
 
@@ -1156,7 +923,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
                 for (int i = tabs.size() - 1; i >= 0; i--) {
                     Tab tab = tabs.remove(i);
-                    tab.removeCallback(TabSwitcher.this);
+                    tab.removeCallback(recyclerAdapter);
                 }
 
                 selectedTabIndex = -1;
@@ -1177,8 +944,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
                 int index = indexOfOrThrowException(tab);
 
                 if (!isSwitcherShown()) {
-                    viewRecycler.remove(createTabView(selectedTabIndex));
-                    viewRecycler.inflate(createTabView(index));
+                    viewRecycler.remove(TabItem
+                            .create(TabSwitcher.this, viewRecycler, selectedTabIndex));
+                    viewRecycler.inflate(TabItem.create(TabSwitcher.this, viewRecycler, index));
                     selectedTabIndex = index;
                     notifyOnSelectionChanged(index, tab);
                 } else {
@@ -1437,7 +1205,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             firstVisibleIndex = -1;
             attachedPosition = calculateAttachedPosition();
             notifyOnSwitcherShown();
-            Iterator iterator = new Iterator();
+            Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -1493,7 +1261,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             @Override
             public void onAnimationUpdate(final ValueAnimator animation) {
-                Iterator iterator = new Iterator();
+                Iterator iterator = new Iterator.Builder(TabSwitcher.this, viewRecycler).create();
                 TabItem tabItem;
 
                 while ((tabItem = iterator.next()) != null) {
@@ -1526,8 +1294,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
             switcherShown = false;
             notifyOnSwitcherHidden();
             tabViewBottomMargin = -1;
-            recyclerAdapter.clearCachedBitmaps();
-            Iterator iterator = new Iterator();
+            recyclerAdapter.clearCachedPreviews();
+            Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -1790,7 +1558,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (getCount() <= 1) {
             return true;
         } else {
-            TabItem tabItem = createTabView(0);
+            TabItem tabItem = TabItem.create(this, viewRecycler, 0);
             return tabItem.getTag().getState() == State.STACKED_START_ATOP;
         }
     }
@@ -1799,7 +1567,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         if (getCount() <= 1) {
             return true;
         } else {
-            TabItem tabItem = createTabView(getCount() - 2);
+            TabItem tabItem = TabItem.create(this, viewRecycler, getCount() - 2);
             return tabItem.getTag().getPosition() >= maxTabSpacing;
         }
     }
@@ -1808,7 +1576,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         float maxCameraDistance = getMaxCameraDistance();
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
-        Iterator iterator = new Iterator();
+        Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1840,7 +1608,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void tiltOnOvershootUp(final float angle) {
-        Iterator iterator = new Iterator();
+        Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1877,7 +1645,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
             if (overshootDistance <= maxOvershootDistance) {
                 float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-                Iterator iterator = new Iterator();
+                Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
                 TabItem tabItem;
 
                 while ((tabItem = iterator.next()) != null) {
@@ -1968,7 +1736,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     private void calculateTabPositionsWhenDraggingDown(final float dragDistance) {
         firstVisibleIndex = -1;
-        Iterator iterator = new Iterator(false, Math.max(0, firstVisibleIndex));
+        Iterator iterator =
+                new Iterator.Builder(this, viewRecycler).start(Math.max(0, firstVisibleIndex))
+                        .create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -1987,7 +1757,9 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void calculateTabPositionsWhenDraggingUp(final float dragDistance) {
-        Iterator iterator = new Iterator(false, Math.max(0, firstVisibleIndex));
+        Iterator iterator =
+                new Iterator.Builder(this, viewRecycler).start(Math.max(0, firstVisibleIndex))
+                        .create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -2002,7 +1774,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator = new Iterator(true, start);
+            iterator = new Iterator.Builder(this, viewRecycler).start(start).create();
             abort = false;
 
             while ((tabItem = iterator.next()) != null && !abort) {
@@ -2166,7 +1938,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private void adaptTopMostTabViewWhenClosing(@NonNull final TabItem closedTabItem,
                                                 final int index) {
         if (closedTabItem.getTag().getState() == State.STACKED_START_ATOP) {
-            TabItem tabItem = createTabView(index);
+            TabItem tabItem = TabItem.create(this, viewRecycler, index);
 
             if (tabItem.getTag().getState() == State.HIDDEN) {
                 Pair<Float, State> pair = calculateTopMostPositionAndState(closedTabItem, tabItem);
@@ -2180,7 +1952,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private void adaptTopMostTabViewWhenClosingAborted(@NonNull final TabItem closedTabItem,
                                                        final int index) {
         if (closedTabItem.getTag().getState() == State.STACKED_START_ATOP) {
-            TabItem tabItem = createTabView(index);
+            TabItem tabItem = TabItem.create(this, viewRecycler, index);
             tabItem.getTag().setPosition(Float.NaN);
             tabItem.getTag().setState(State.HIDDEN);
             viewRecycler.remove(tabItem);
@@ -2193,7 +1965,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
 
     @Nullable
     private TabItem getFocusedTabView(final float position) {
-        Iterator iterator = new Iterator();
+        Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -2293,7 +2065,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     }
 
     private void animateOvershootUp(@NonNull final Interpolator interpolator) {
-        TabItem tabItem = createTabView(0);
+        TabItem tabItem = TabItem.create(this, viewRecycler, 0);
         View view = tabItem.getView();
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
@@ -2315,7 +2087,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     private boolean animateTilt(@NonNull final Interpolator interpolator,
                                 @Nullable final AnimatorListener listener, final float maxAngle) {
         long animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        Iterator iterator = new Iterator(true);
+        Iterator iterator = new Iterator.Builder(this, viewRecycler).reverse(true).create();
         TabItem tabItem;
         boolean result = false;
 
@@ -2368,7 +2140,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
         this.childViewRecycler.setDecorator(decorator);
-        this.recyclerAdapter.clearCachedBitmaps();
+        this.recyclerAdapter.clearCachedPreviews();
     }
 
     public final TabSwitcherDecorator getDecorator() {
@@ -2384,6 +2156,11 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
     public final void removeListener(@NonNull final TabSwitcherListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.remove(listener);
+    }
+
+    @NonNull
+    public final ViewGroup getTabContainer() {
+        return tabContainer;
     }
 
     @NonNull
@@ -2453,112 +2230,16 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         padding = new int[]{left, top, right, bottom};
         LayoutParams toolbarLayoutParams = (LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setMargins(left, top, right, 0);
-        Iterator iterator = new Iterator();
+        Iterator iterator = new Iterator.Builder(this, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
             TabViewHolder viewHolder = tabItem.getViewHolder();
 
             if (viewHolder != null) {
-                adaptChildAndPreviewMargins(viewHolder);
+                recyclerAdapter.adaptPadding(viewHolder);
             }
         }
-    }
-
-    private void adaptChildAndPreviewMargins(@NonNull final TabViewHolder viewHolder) {
-        if (viewHolder.child != null) {
-            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-            childLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                    getPaddingBottom());
-        }
-
-        LayoutParams previewLayoutParams =
-                (LayoutParams) viewHolder.previewImageView.getLayoutParams();
-        previewLayoutParams.setMargins(getPaddingLeft(), getPaddingTop(), getPaddingRight(),
-                getPaddingBottom());
-    }
-
-    @Override
-    public final void onTitleChanged(@NonNull final Tab tab) {
-        int index = indexOf(tab);
-
-        if (index != -1) {
-            TabItem tabItem = createTabView(index);
-
-            if (tabItem.isInflated()) {
-                TabViewHolder viewHolder = tabItem.getViewHolder();
-                adaptTitle(viewHolder, tab);
-            }
-        }
-    }
-
-    private void adaptTitle(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
-        viewHolder.titleTextView.setText(tab.getTitle());
-    }
-
-    @Override
-    public final void onIconChanged(@NonNull final Tab tab) {
-        int index = indexOf(tab);
-
-        if (index != -1) {
-            TabItem tabItem = createTabView(index);
-
-            if (tabItem.isInflated()) {
-                TabViewHolder viewHolder = tabItem.getViewHolder();
-                adaptIcon(viewHolder, tab);
-            }
-        }
-    }
-
-    private void adaptIcon(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
-        viewHolder.titleTextView
-                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(getContext()), null, null,
-                        null);
-    }
-
-    @Override
-    public final void onCloseableChanged(@NonNull final Tab tab) {
-        int index = indexOf(tab);
-
-        if (index != -1) {
-            TabItem tabItem = createTabView(index);
-
-            if (tabItem.isInflated()) {
-                TabViewHolder viewHolder = tabItem.getViewHolder();
-                adaptCloseButton(viewHolder, tab);
-            }
-        }
-    }
-
-    private void adaptCloseButton(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
-        viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
-        viewHolder.closeButton
-                .setOnClickListener(tab.isCloseable() ? createCloseButtonClickListener(tab) : null);
-    }
-
-    @Override
-    public final void onColorChanged(@NonNull final Tab tab) {
-        int index = indexOf(tab);
-
-        if (index != -1) {
-            TabItem tabItem = createTabView(index);
-
-            if (tabItem.isInflated()) {
-                View view = tabItem.getView();
-                TabViewHolder viewHolder = tabItem.getViewHolder();
-                adaptColor(view, viewHolder, tab);
-            }
-        }
-    }
-
-    private void adaptColor(@NonNull final View view, @NonNull final TabViewHolder viewHolder,
-                            @NonNull final Tab tab) {
-        int color = tab.getColor();
-        Drawable background = view.getBackground();
-        background
-                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
-        Drawable border = viewHolder.borderView.getBackground();
-        border.setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
     }
 
     @Override
@@ -2606,7 +2287,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, 
         ViewUtil.removeOnGlobalLayoutListener(getViewTreeObserver(), this);
 
         if (selectedTabIndex != -1) {
-            TabItem tabItem = createTabView(selectedTabIndex);
+            TabItem tabItem = TabItem.create(this, viewRecycler, selectedTabIndex);
             viewRecycler.inflate(tabItem);
         }
     }
