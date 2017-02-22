@@ -22,10 +22,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -81,11 +77,11 @@ import de.mrapp.android.tabswitcher.model.DragState;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.tabswitcher.view.Arithmetics;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
+import de.mrapp.android.tabswitcher.view.PreviewDataBinder;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -102,84 +98,6 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener, Tab.Callback {
-
-    private static class PreviewDataBinder
-            extends AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> {
-
-        /**
-         * The tab switcher, the data binder belongs to.
-         */
-        private final TabSwitcher tabSwitcher;
-
-        /**
-         * The view recycler, which is used to inflate child views.
-         */
-        private final ChildViewRecycler childViewRecycler;
-
-        /**
-         * The view, which is rendered as a preview image.
-         */
-        private View child;
-
-        /**
-         * Creates a new data binder, which allows to render preview images of tabs.
-         *
-         * @param tabSwitcher
-         *         The tab switcher, the data binder belong to, as an instance of the class {@link
-         *         TabSwitcher}. The tab switcher may not be null
-         * @param childViewRecycler
-         *         The view recycler, which should be used to inflate child views, as an instance of
-         *         the class {@link ChildViewRecycler}. The view recycler may not be null
-         */
-        public PreviewDataBinder(@NonNull final TabSwitcher tabSwitcher,
-                                 @NonNull final ChildViewRecycler childViewRecycler) {
-            super(tabSwitcher.getContext());
-            this.tabSwitcher = tabSwitcher;
-            this.childViewRecycler = childViewRecycler;
-        }
-
-        @Override
-        protected void onPreExecute(@NonNull final ImageView view,
-                                    @NonNull final TabItem... params) {
-            TabItem tabItem = params[0];
-            TabViewHolder viewHolder = tabItem.getViewHolder();
-            child = viewHolder.child;
-            Tab tab = tabItem.getTab();
-
-            if (child == null) {
-                child = childViewRecycler.inflate(tab, viewHolder.childContainer);
-                // TODO: Must the view also be added to the parent? This is relevant when calling the showSwitcher-method, while the TabSwitcher is not yet inflated
-            } else {
-                viewHolder.child = null;
-            }
-
-            tabSwitcher.getDecorator().applyDecorator(getContext(), tabSwitcher, child, tab);
-        }
-
-        @Nullable
-        @Override
-        protected Bitmap doInBackground(@NonNull final Tab key, @NonNull final TabItem... params) {
-            Bitmap bitmap = Bitmap.createBitmap(child.getWidth(), child.getHeight(),
-                    Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            child.draw(canvas);
-
-            // TODO: This is only for debugging purposes
-            Paint paint = new Paint();
-            paint.setColor(Color.RED);
-            canvas.drawCircle(100, 100, 40, paint);
-
-            return bitmap;
-        }
-
-        @Override
-        protected void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
-                                     @NonNull final TabItem... params) {
-            view.setImageBitmap(data);
-            view.setVisibility(data != null ? View.VISIBLE : View.GONE);
-        }
-
-    }
 
     private class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer> {
 
