@@ -94,7 +94,7 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
+public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlobalLayoutListener {
 
     private class FlingAnimation extends Animation {
 
@@ -699,15 +699,18 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         initialize(attributeSet, defaultStyle, defaultStyleResource);
     }
 
+    @Override
     public final void addTab(@NonNull final Tab tab) {
         addTab(tab, getCount());
     }
 
+    @Override
     public final void addTab(@NonNull final Tab tab, final int index) {
         addTab(tab, index, AnimationType.SWIPE_RIGHT);
     }
 
     // TODO: Add support for adding tab, while switcher is shown
+    @Override
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final AnimationType animationType) {
         ensureNotNull(tab, "The tab may not be null");
@@ -789,6 +792,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         };
     }
 
+    @Override
     public final void removeTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         enqueuePendingAction(new Runnable() {
@@ -853,6 +857,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         animateOrthogonalDrag(tabItem, true, 0, 0, createCloseAnimationListener(tabItem, true));
     }
 
+    @Override
     public final void clear() {
         enqueuePendingAction(new Runnable() {
 
@@ -935,6 +940,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         };
     }
 
+    @Override
     public final void selectTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         enqueuePendingAction(new Runnable() {
@@ -987,26 +993,33 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
     }
 
     @Nullable
+    @Override
     public final Tab getSelectedTab() {
         return selectedTabIndex != -1 ? getTab(selectedTabIndex) : null;
     }
 
+    @Override
     public final int getSelectedTabIndex() {
         return selectedTabIndex;
     }
 
+    @Override
     public final boolean isEmpty() {
         return getCount() == 0;
     }
 
+    @Override
     public final int getCount() {
         return tabs.size();
     }
 
+    @NonNull
+    @Override
     public final Tab getTab(final int index) {
         return tabs.get(index);
     }
 
+    @Override
     public final int indexOf(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         return tabs.indexOf(tab);
@@ -1022,6 +1035,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         return index;
     }
 
+    @Override
     public final boolean isSwitcherShown() {
         return switcherShown;
     }
@@ -1197,7 +1211,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
     // TODO: Calling this method should also work when the view is not yet inflated
     // TODO: Should this be executed as a pending action?
-    @SuppressWarnings("WrongConstant")
+    @Override
     public final void showSwitcher() {
         if (!isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = true;
@@ -1289,6 +1303,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
     // TODO: Calling this method should also work when the view is not yet inflated
     // TODO: Should this be executed as a pending action?
+    @Override
     public final void hideSwitcher() {
         if (isSwitcherShown() && !isAnimationRunning()) {
             switcherShown = false;
@@ -1320,6 +1335,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         };
     }
 
+    @Override
     public final void toggleSwitcherVisibility() {
         if (switcherShown) {
             hideSwitcher();
@@ -2136,6 +2152,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         }
     }
 
+    @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
@@ -2143,54 +2160,65 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         this.recyclerAdapter.clearCachedPreviews();
     }
 
+    @Override
     public final TabSwitcherDecorator getDecorator() {
         ensureNotNull(decorator, "No decorator has been set", IllegalStateException.class);
         return decorator;
     }
 
+    @Override
     public final void addListener(@NonNull final TabSwitcherListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.add(listener);
     }
 
+    @Override
     public final void removeListener(@NonNull final TabSwitcherListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         this.listeners.remove(listener);
     }
 
     @NonNull
+    @Override
     public final ViewGroup getTabContainer() {
         return tabContainer;
     }
 
     @NonNull
+    @Override
     public final Toolbar getToolbar() {
         return toolbar;
     }
 
+    @Override
     public final void showToolbar(final boolean show) {
         toolbar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
+    @Override
     public final boolean isToolbarShown() {
         return toolbar.getVisibility() == View.VISIBLE;
     }
 
+    @Override
     public final void setToolbarTitle(@Nullable final CharSequence title) {
         toolbar.setTitle(title);
     }
 
+    @Override
     public final void setToolbarTitle(@StringRes final int resourceId) {
         setToolbarTitle(getContext().getText(resourceId));
     }
 
+    @Override
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
         toolbar.inflateMenu(resourceId);
         toolbar.setOnMenuItemClickListener(listener);
-
     }
 
+    @NonNull
+    @Override
     public final Menu getToolbarMenu() {
         return toolbar.getMenu();
     }
@@ -2214,12 +2242,14 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
         }
     }
 
+    @Override
     public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
                                                @Nullable final OnClickListener listener) {
         toolbar.setNavigationIcon(icon);
         toolbar.setNavigationOnClickListener(listener);
     }
 
+    @Override
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
         setToolbarNavigationIcon(ContextCompat.getDrawable(getContext(), resourceId), listener);
