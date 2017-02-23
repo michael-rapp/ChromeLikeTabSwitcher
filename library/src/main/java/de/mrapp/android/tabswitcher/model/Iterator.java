@@ -198,7 +198,6 @@ public class Iterator implements java.util.Iterator<TabItem> {
      * @return The tab item, which corresponds to the first tab, as an instance of the class {@link
      * TabItem}. The tab item may not be null
      */
-    @NonNull
     public final TabItem first() {
         return first;
     }
@@ -209,7 +208,6 @@ public class Iterator implements java.util.Iterator<TabItem> {
      * @return The tab item, which corresponds to the previous tab, as an instance of the class
      * {@link TabItem}. The tab item may not be null
      */
-    @Nullable
     public final TabItem previous() {
         return previous;
     }
