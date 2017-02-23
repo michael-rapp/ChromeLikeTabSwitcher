@@ -1561,7 +1561,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
         return super.onTouchEvent(event);
     }
 
-    private boolean isAnimationRunning() {
+    public final boolean isAnimationRunning() {
         return runningAnimations > 0;
     }
 

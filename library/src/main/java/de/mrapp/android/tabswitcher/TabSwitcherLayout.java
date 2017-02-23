@@ -86,6 +86,13 @@ public interface TabSwitcherLayout {
     Layout getLayout();
 
     /**
+     * Returns, whether an animation is currently running, or not.
+     *
+     * @return True, if an animation is currently running, false otherwise
+     */
+    boolean isAnimationRunning();
+
+    /**
      * Returns, whether the tab switcher is empty, or not.
      *
      * @return True, if the tab switcher is empty, false otherwise
