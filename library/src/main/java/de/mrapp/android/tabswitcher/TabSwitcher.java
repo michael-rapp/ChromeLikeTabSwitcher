@@ -67,6 +67,7 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
@@ -76,7 +77,6 @@ import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
-import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
@@ -610,7 +610,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
     }
 
     /**
-     * Obtains all attributes froma specific attribute set.
+     * Obtains all attributes from a specific attribute set.
      *
      * @param attributeSet
      *         The attribute set, the attributes should be obtained from, as an instance of the type
@@ -669,8 +669,8 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
      */
     private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
         int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
-        tabBackgroundColor =
-                typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue);
+        recyclerAdapter.setTabBackgroundColor(
+                typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
     }
 
     public final boolean isDraggingHorizontally() {

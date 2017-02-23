@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -80,7 +81,7 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
     /**
      * The default background color of a tab.
      */
-    private final int tabBackgroundColor;
+    private int tabBackgroundColor;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -282,6 +283,16 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
         this.tabBackgroundColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
         this.viewRecycler = null;
+    }
+
+    /**
+     * Sets the default background color of a tab.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    public final void setTabBackgroundColor(@ColorInt final int color) {
+        this.tabBackgroundColor = color;
     }
 
     /**
