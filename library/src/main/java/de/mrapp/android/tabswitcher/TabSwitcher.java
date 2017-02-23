@@ -72,6 +72,7 @@ import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
 import de.mrapp.android.tabswitcher.model.Iterator;
+import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
@@ -673,10 +674,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
     }
 
-    public final boolean isDraggingHorizontally() {
-        return getOrientation(getContext()) == Orientation.LANDSCAPE;
-    }
-
     public TabSwitcher(@NonNull final Context context) {
         this(context, null);
     }
@@ -697,6 +694,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
                        @AttrRes final int defaultStyle, @StyleRes final int defaultStyleResource) {
         super(context, attributeSet, defaultStyle, defaultStyleResource);
         initialize(attributeSet, defaultStyle, defaultStyleResource);
+    }
+
+    @NonNull
+    @Override
+    public final Layout getLayout() {
+        return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
+                Layout.PHONE_PORTRAIT;
     }
 
     @Override
@@ -1041,11 +1045,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
     }
 
     private int calculateTabViewBottomMargin(@NonNull final View view) {
-        Axis axis = isDraggingHorizontally() ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
+        Axis axis =
+                getLayout() == Layout.PHONE_LANDSCAPE ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         float tabHeight = (view.getHeight() - 2 * tabInset) * arithmetics.getScale(view, true);
         float totalHeight = arithmetics.getSize(axis, tabContainer);
         int toolbarHeight = isToolbarShown() ? toolbar.getHeight() - tabInset : 0;
-        int stackHeight = isDraggingHorizontally() ? 0 : STACKED_TAB_COUNT * stackedTabSpacing;
+        int stackHeight =
+                getLayout() == Layout.PHONE_LANDSCAPE ? 0 : STACKED_TAB_COUNT * stackedTabSpacing;
         return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
                 (totalHeight - getPaddingTop() - getPaddingBottom()));
     }
@@ -1108,7 +1114,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
         } else if (tabItem.getIndex() > selectedTabIndex) {
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
-                    isDraggingHorizontally() ? 0 : layoutParams.topMargin);
+                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin);
         }
 
         if (tabViewBottomMargin == -1) {
@@ -1146,17 +1152,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
         arithmetics.animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
-                isDraggingHorizontally() ? layoutParams.topMargin : 0, false);
+                getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0, false);
 
         if (tabItem.getIndex() < selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     arithmetics.getSize(Axis.DRAGGING_AXIS, this), false);
         } else if (tabItem.getIndex() > selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
+                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin, false);
         } else {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    isDraggingHorizontally() ? 0 : layoutParams.topMargin, false);
+                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin, false);
         }
 
         animation.setStartDelay(0);
@@ -1494,11 +1500,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
 
     private Pair<Float, State> calculateBottomMostPositionAndState(@NonNull final TabItem tabItem) {
         float size = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer);
-        int toolbarHeight =
-                isToolbarShown() && !isDraggingHorizontally() ? toolbar.getHeight() - tabInset : 0;
+        int toolbarHeight = isToolbarShown() && getLayout() != Layout.PHONE_LANDSCAPE ?
+                toolbar.getHeight() - tabInset : 0;
         int padding = arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.START, this) +
                 arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.END, this);
-        int offset = isDraggingHorizontally() ? STACKED_TAB_COUNT * stackedTabSpacing : 0;
+        int offset =
+                getLayout() == Layout.PHONE_LANDSCAPE ? STACKED_TAB_COUNT * stackedTabSpacing : 0;
 
         if (tabItem.getIndex() < STACKED_TAB_COUNT) {
             float position = size - toolbarHeight - tabInset -
@@ -1908,8 +1915,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
 
     private float calculateAttachedPosition() {
         return (arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (isDraggingHorizontally() && isToolbarShown() ? toolbar.getHeight() + tabInset :
-                        0)) / 2f;
+                (getLayout() == Layout.PHONE_LANDSCAPE && isToolbarShown() ?
+                        toolbar.getHeight() + tabInset : 0)) / 2f;
     }
 
     private boolean checkIfDragThresholdReached(final float dragPosition) {
@@ -1988,7 +1995,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
             if (tabItem.getTag().getState() == State.FLOATING ||
                     tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 View view = tabItem.getView();
-                float toolbarHeight = isToolbarShown() && !isDraggingHorizontally() ?
+                float toolbarHeight = isToolbarShown() && getLayout() != Layout.PHONE_LANDSCAPE ?
                         toolbar.getHeight() - tabInset : 0;
                 float viewPosition =
                         arithmetics.getPosition(Axis.DRAGGING_AXIS, view) + toolbarHeight +

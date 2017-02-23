@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Axis;
+import de.mrapp.android.tabswitcher.model.Layout;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
@@ -76,7 +77,7 @@ public class Arithmetics {
      */
     @NonNull
     private Axis getOrientationInvariantAxis(@NonNull final Axis axis) {
-        if (tabSwitcher.isDraggingHorizontally()) {
+        if (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE) {
             return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         }
 
@@ -148,7 +149,7 @@ public class Arithmetics {
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin - tabSwitcher.getPaddingLeft() / 2f +
                     tabSwitcher.getPaddingRight() / 2f +
-                    (tabSwitcher.isDraggingHorizontally() ?
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
                             stackedTabCount * stackedTabSpacing / 2f : 0);
         }
     }
@@ -178,7 +179,7 @@ public class Arithmetics {
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin + tabSwitcher.getPaddingLeft() / 2f -
                     tabSwitcher.getPaddingRight() / 2f -
-                    (tabSwitcher.isDraggingHorizontally() ?
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
                             stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
@@ -217,7 +218,7 @@ public class Arithmetics {
             animator.x(position + layoutParams.leftMargin +
                     (includePadding ?
                             tabSwitcher.getPaddingLeft() / 2f - tabSwitcher.getPaddingRight() / 2f :
-                            0) - (tabSwitcher.isDraggingHorizontally() ?
+                            0) - (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
                     stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
@@ -266,7 +267,8 @@ public class Arithmetics {
         float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin -
                 (includePadding ? tabSwitcher.getPaddingLeft() + tabSwitcher.getPaddingRight() :
                         0) -
-                (tabSwitcher.isDraggingHorizontally() ? stackedTabCount * stackedTabSpacing : 0);
+                (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                        stackedTabCount * stackedTabSpacing : 0);
         return targetWidth / width;
     }
 
@@ -371,9 +373,9 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return tabSwitcher.isDraggingHorizontally() ? getSize(axis, view) / 2f : 0;
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getSize(axis, view) / 2f : 0;
         } else {
-            return tabSwitcher.isDraggingHorizontally() ? 0 : getSize(axis, view) / 2f;
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getSize(axis, view) / 2f;
         }
     }
 
@@ -505,9 +507,11 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setRotationY(tabSwitcher.isDraggingHorizontally() ? -1 * angle : angle);
+            view.setRotationY(
+                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         } else {
-            view.setRotationX(tabSwitcher.isDraggingHorizontally() ? -1 * angle : angle);
+            view.setRotationX(
+                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         }
     }
 
@@ -529,9 +533,11 @@ public class Arithmetics {
         ensureNotNull(animator, "The animator may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            animator.rotationY(tabSwitcher.isDraggingHorizontally() ? -1 * angle : angle);
+            animator.rotationY(
+                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         } else {
-            animator.rotationX(tabSwitcher.isDraggingHorizontally() ? -1 * angle : angle);
+            animator.rotationX(
+                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         }
     }
 

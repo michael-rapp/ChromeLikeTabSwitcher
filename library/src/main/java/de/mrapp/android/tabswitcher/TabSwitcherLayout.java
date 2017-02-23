@@ -13,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import de.mrapp.android.tabswitcher.model.AnimationType;
+import de.mrapp.android.tabswitcher.model.Layout;
 
 /**
  * @author Michael Rapp
@@ -26,6 +27,9 @@ public interface TabSwitcherLayout {
     void addListener(@NonNull TabSwitcherListener listener);
 
     void removeListener(@NonNull TabSwitcherListener listener);
+
+    @NonNull
+    Layout getLayout();
 
     boolean isEmpty();
 

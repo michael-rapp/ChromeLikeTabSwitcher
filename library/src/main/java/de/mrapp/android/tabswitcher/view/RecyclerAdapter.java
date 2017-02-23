@@ -32,6 +32,7 @@ import android.widget.TextView;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.util.ViewUtil;
@@ -342,7 +343,7 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
                                     @NonNull final Integer... params) {
         TabViewHolder viewHolder = new TabViewHolder();
         View view = inflater.inflate(
-                tabSwitcher.isDraggingHorizontally() ? R.layout.tab_view_horizontally :
+                tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.tab_view_horizontally :
                         R.layout.tab_view, tabSwitcher.getTabContainer(), false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(tabSwitcher.getContext(), R.drawable.tab_background);
