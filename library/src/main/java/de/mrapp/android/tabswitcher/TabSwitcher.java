@@ -1774,7 +1774,7 @@ public class TabSwitcher extends FrameLayout implements OnGlobalLayoutListener {
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator = new Iterator.Builder(this, viewRecycler).start(start).create();
+            iterator = new Iterator.Builder(this, viewRecycler).reverse(true).start(start).create();
             abort = false;
 
             while ((tabItem = iterator.next()) != null && !abort) {
