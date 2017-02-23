@@ -89,7 +89,7 @@ public class TabItem {
         this.tab = tab;
         this.view = null;
         this.viewHolder = null;
-        this.tag = null;
+        this.tag = new Tag();
     }
 
     /**
@@ -119,7 +119,11 @@ public class TabItem {
         if (view != null) {
             tabItem.setView(view);
             tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));
-            tabItem.setTag((Tag) view.getTag(R.id.tag_properties));
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+
+            if (tag != null) {
+                tabItem.setTag(tag);
+            }
         }
 
         return tabItem;
