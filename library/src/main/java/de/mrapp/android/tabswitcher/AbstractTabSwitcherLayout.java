@@ -26,12 +26,10 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
@@ -55,7 +53,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
+public abstract class AbstractTabSwitcherLayout
+        implements TabSwitcherLayout, OnGlobalLayoutListener {
 
     /**
      * A animation listener, which increases the number of running animations, when the observed
@@ -449,16 +448,8 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
 
     /**
      * Inflates the layout.
-     *
-     * @param inflater
-     *         The layout inflater, which should be used to inflate the layout, as an instance of
-     *         the class {@link LayoutInflater}. The layout inflater may not be null
-     * @param parent
-     *         The parent, the layout should be added to, as an instance of the class {@link
-     *         ViewGroup}. The parent may not be null
      */
-    public abstract void inflateLayout(@NonNull final LayoutInflater inflater,
-                                       @NonNull final ViewGroup parent);
+    public abstract void inflateLayout();
 
     /**
      * Handles a touch event.

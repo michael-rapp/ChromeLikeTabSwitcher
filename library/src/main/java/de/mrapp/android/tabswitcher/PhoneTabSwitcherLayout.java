@@ -2265,12 +2265,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     @Override
-    public final void inflateLayout(@NonNull final LayoutInflater inflater,
-                                    @NonNull final ViewGroup parent) {
-        toolbar = (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, parent, false);
-        parent.addView(toolbar);
+    public final void inflateLayout() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        toolbar =
+                (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, getTabSwitcher(), false);
+        getTabSwitcher().addView(toolbar);
         tabContainer = new FrameLayout(getContext());
-        parent.addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
+        getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ChildViewRecycler(inflater);
         recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
@@ -2534,6 +2535,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     @Override
     public final Toolbar getToolbar() {
         return toolbar;
+    }
+
+    @Override
+    public final void onGlobalLayout() {
+        ViewUtil.removeOnGlobalLayoutListener(getTabSwitcher().getViewTreeObserver(), this);
+
+        if (getSelectedTabIndex() != -1) {
+            TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex());
+            viewRecycler.inflate(tabItem);
+        }
     }
 
 }
