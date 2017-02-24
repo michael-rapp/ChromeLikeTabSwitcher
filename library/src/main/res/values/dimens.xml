@@ -24,13 +24,13 @@ License.
     <dimen name="max_tab_spacing">128dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>
     <dimen name="max_overshoot_distance">48dp</dimen>
-    <dimen name="min_close_fling_velocity">1024dp</dimen>
+    <dimen name="min_swipe_velocity">1024dp</dimen>
     <dimen name="drag_threshold">8dp</dimen>
-    <dimen name="close_drag_threshold">24dp</dimen>
+    <dimen name="swipe_threshold">24dp</dimen>
     <dimen name="tab_switcher_drawable_size">32dp</dimen>
     <dimen name="tab_switcher_drawable_font_size_normal">10sp</dimen>
     <dimen name="tab_switcher_drawable_font_size_small">7sp</dimen>
-    <item name="closed_tab_scale" format="float" type="dimen">0.5</item>
-    <item name="closed_tab_alpha" format="float" type="dimen">0</item>
+    <item name="swiped_tab_scale" format="float" type="dimen">0.5</item>
+    <item name="swiped_tab_alpha" format="float" type="dimen">0</item>
 
 </resources>

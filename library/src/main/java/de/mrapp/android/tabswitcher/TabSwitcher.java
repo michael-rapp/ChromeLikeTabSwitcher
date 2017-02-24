@@ -260,7 +260,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
         dragHelper = new DragHelper(dragThreshold);
         overshootDragHelper = new DragHelper(0);
         closeDragHelper =
-                new DragHelper(resources.getDimensionPixelSize(R.dimen.close_drag_threshold));
+                new DragHelper(resources.getDimensionPixelSize(R.dimen.swipe_threshold));
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         minTabSpacing = resources.getDimensionPixelSize(R.dimen.min_tab_spacing);
         maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
@@ -268,11 +268,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, OnGlo
         ViewConfiguration configuration = ViewConfiguration.get(getContext());
         minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
-        minCloseFlingVelocity = resources.getDimensionPixelSize(R.dimen.min_close_fling_velocity);
+        minCloseFlingVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
         TypedValue typedValue = new TypedValue();
-        resources.getValue(R.dimen.closed_tab_scale, typedValue, true);
+        resources.getValue(R.dimen.swiped_tab_scale, typedValue, true);
         closedTabScale = typedValue.getFloat();
-        resources.getValue(R.dimen.closed_tab_alpha, typedValue, true);
+        resources.getValue(R.dimen.swiped_tab_alpha, typedValue, true);
         closedTabAlpha = typedValue.getFloat();
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);

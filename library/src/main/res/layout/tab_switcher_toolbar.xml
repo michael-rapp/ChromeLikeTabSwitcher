@@ -20,4 +20,5 @@ License.
     android:layout_height="?attr/actionBarSize"
     android:background="@android:color/transparent"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    android:visibility="invisible"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>

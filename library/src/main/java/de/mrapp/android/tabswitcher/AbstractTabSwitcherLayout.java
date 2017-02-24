@@ -31,15 +31,18 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.model.AnimationType;
+import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -124,6 +127,52 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
     }
 
     /**
+     * A layout listener, which unregisters itself from the observed view, when invoked. The
+     * listener allows to encapsulate another listener, which is notified, when the listener is
+     * invoked.
+     */
+    protected class LayoutListenerWrapper implements OnGlobalLayoutListener {
+
+        /**
+         * The observed view.
+         */
+        private final View view;
+
+        /**
+         * The encapsulated listener.
+         */
+        private final OnGlobalLayoutListener listener;
+
+        /**
+         * Creates a new layout listener, which unregisters itself from the observed view, when
+         * invoked.
+         *
+         * @param view
+         *         The observed view as an instance of the class {@link View}. The view may not be
+         *         null
+         * @param listener
+         *         The listener, which should be encapsulated, as an instance of the type {@link
+         *         OnGlobalLayoutListener} or null, if no listener should be encapsulated
+         */
+        public LayoutListenerWrapper(@NonNull final View view,
+                                     @Nullable final OnGlobalLayoutListener listener) {
+            ensureNotNull(view, "The view may not be null");
+            this.view = view;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
+
+            if (listener != null) {
+                listener.onGlobalLayout();
+            }
+        }
+
+    }
+
+    /**
      * The tab switcher, the layout belongs to.
      */
     private final TabSwitcher tabSwitcher;
@@ -171,24 +220,14 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
     private int[] padding;
 
     /**
-     * Executes the next pending action.
+     * Returns the tab switcher, the layout belongs to.
+     *
+     * @return The tab switcher, the layout belongs to, as an instance of the class {@link
+     * TabSwitcher}. The tab switcher may not be null
      */
-    private void executePendingAction() {
-        if (!isAnimationRunning()) {
-            final Runnable action = pendingActions.poll();
-
-            if (action != null) {
-                new Runnable() {
-
-                    @Override
-                    public void run() {
-                        action.run();
-                        executePendingAction();
-                    }
-
-                }.run();
-            }
-        }
+    @NonNull
+    protected final TabSwitcher getTabSwitcher() {
+        return tabSwitcher;
     }
 
     /**
@@ -200,6 +239,36 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
     @NonNull
     protected final Context getContext() {
         return tabSwitcher.getContext();
+    }
+
+    /**
+     * Returns the list, which contains the tabs, which are contained by the tab switcher.
+     *
+     * @return The list, which contains the tabs, which are contained by the tab switcher, as an
+     * instance of the type {@link List}. The list may not be null
+     */
+    @NonNull
+    protected final List<Tab> getTabs() {
+        return tabs;
+    }
+
+    /**
+     * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the tab
+     * switcher does not contain the given tab.
+     *
+     * @param tab
+     *         The tab, whose index should be returned, as an instance of the class {@link Tab}. The
+     *         tab may not be null
+     * @return The index of the given tab as an {@link Integer} value
+     */
+    protected final int indexOfOrThrowException(@NonNull final Tab tab) {
+        int index = indexOf(tab);
+
+        if (index == -1) {
+            throw new NoSuchElementException("No such tab: " + tab);
+        }
+
+        return index;
     }
 
     /**
@@ -235,6 +304,27 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
         ensureNotNull(action, "The action may not be null");
         pendingActions.add(action);
         executePendingAction();
+    }
+
+    /**
+     * Executes the next pending action.
+     */
+    protected final void executePendingAction() {
+        if (!isAnimationRunning()) {
+            final Runnable action = pendingActions.poll();
+
+            if (action != null) {
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+                        action.run();
+                        executePendingAction();
+                    }
+
+                }.run();
+            }
+        }
     }
 
     /**
