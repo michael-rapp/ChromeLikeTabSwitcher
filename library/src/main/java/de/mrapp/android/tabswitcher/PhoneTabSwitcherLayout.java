@@ -398,7 +398,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                     (getCount() - 1) * stackedTabSpacing;
 
         } else {
-            return Float.NaN;
+            return -1;
         }
     }
 
@@ -435,7 +435,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
         if (position <= startPosition) {
             tabItem.getTag().setPosition(startPosition);
             tabItem.getTag().setState(startPair.second);
-            return;
         } else {
             Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
             float endPosition = endPair.first;
@@ -443,12 +442,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             if (position >= endPosition) {
                 tabItem.getTag().setPosition(endPosition);
                 tabItem.getTag().setState(endPair.second);
-                return;
+            } else {
+                tabItem.getTag().setPosition(position);
+                tabItem.getTag().setState(State.FLOATING);
             }
         }
 
-        tabItem.getTag().setPosition(position);
-        tabItem.getTag().setState(State.FLOATING);
     }
 
     /**
