@@ -1616,6 +1616,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     /**
+     * Handles, when a drag gesture has been started.
+     *
+     * @param event
+     *         The motion event, which started the drag gesture, as an instance of the class {@link
+     *         MotionEvent}. The motion event may not be null
+     */
+    private void handleDown(@NonNull final MotionEvent event) {
+        pointerId = event.getPointerId(0);
+
+        if (velocityTracker == null) {
+            velocityTracker = VelocityTracker.obtain();
+        } else {
+            velocityTracker.clear();
+        }
+
+        velocityTracker.addMovement(event);
+    }
+
+    /**
      * Handles drag gestures.
      *
      * @param dragPosition
@@ -2258,6 +2277,47 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
         viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(TabItem.COMPARATOR));
         recyclerAdapter.setViewRecycler(viewRecycler);
+    }
+
+    @Override
+    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
+        if (isSwitcherShown() && !isEmpty()) {
+            if (flingAnimation != null) {
+                flingAnimation.cancel();
+                flingAnimation = null;
+            }
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    handleDown(event);
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    if (!isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                        if (velocityTracker == null) {
+                            velocityTracker = VelocityTracker.obtain();
+                        }
+
+                        velocityTracker.addMovement(event);
+                        handleDrag(arithmetics.getPosition(Axis.DRAGGING_AXIS, event),
+                                arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event));
+                    } else {
+                        handleRelease(null);
+                        handleDown(event);
+                    }
+
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (!isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                        handleRelease(event);
+                    }
+
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        return false;
     }
 
     @NonNull

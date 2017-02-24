@@ -28,6 +28,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -458,6 +459,16 @@ public abstract class AbstractTabSwitcherLayout implements TabSwitcherLayout {
      */
     public abstract void inflateLayout(@NonNull final LayoutInflater inflater,
                                        @NonNull final ViewGroup parent);
+
+    /**
+     * Handles a touch event.
+     *
+     * @param event
+     *         The touch event as an instance of the class {@link MotionEvent}. The touch event may
+     *         not be null
+     * @return True, if the event has been handled, false otherwise
+     */
+    public abstract boolean handleTouchEvent(@NonNull final MotionEvent event);
 
     @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
