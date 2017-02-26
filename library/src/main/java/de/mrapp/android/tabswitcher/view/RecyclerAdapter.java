@@ -29,6 +29,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -63,6 +67,12 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
      * The data binder, which allows to render previews of tabs.
      */
     private final PreviewDataBinder dataBinder;
+
+    /**
+     * A set, which contains the listeners, which should be notified, when a tab is about to be
+     * closed by clicking its close button.
+     */
+    private final Set<TabCloseListener> tabCloseListeners;
 
     /**
      * The inset of tabs in pixels.
@@ -211,10 +221,30 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
 
             @Override
             public void onClick(final View v) {
-                tabSwitcher.removeTab(tab);
+                if (notifyOnCloseTab(tab)) {
+                    tabSwitcher.removeTab(tab);
+                }
             }
 
         };
+    }
+
+    /**
+     * Notifies all listeners, that a tab is about to be closed by clicking its close button.
+     *
+     * @param tab
+     *         The tab, which is about to be closed, as an instance of the class {@link Tab}. The
+     *         tab may not be null
+     * @return True, if the tab should be closed, false otherwise
+     */
+    private boolean notifyOnCloseTab(@NonNull final Tab tab) {
+        boolean result = true;
+
+        for (TabCloseListener listener : tabCloseListeners) {
+            result &= listener.onCloseTab(tabSwitcher, tab);
+        }
+
+        return result;
     }
 
     /**
@@ -276,6 +306,7 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
         this.tabSwitcher = tabSwitcher;
         this.childViewRecycler = childViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, childViewRecycler);
+        this.tabCloseListeners = new LinkedHashSet<>();
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
@@ -284,6 +315,32 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
         this.tabBackgroundColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
         this.viewRecycler = null;
+    }
+
+    /**
+     * Adds a new listener, which should be notified, when a tab is about to be closed by clicking
+     * its close button.
+     *
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link
+     *         TabCloseListener}. The listener may not be null
+     */
+    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabCloseListeners.add(listener);
+    }
+
+    /**
+     * Removes a specific listener, which should not be notified, when a tab is about to be closed
+     * by clicking its close button, anymore.
+     *
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link
+     *         TabCloseListener}. The listener may not be null
+     */
+    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabCloseListeners.remove(listener);
     }
 
     /**

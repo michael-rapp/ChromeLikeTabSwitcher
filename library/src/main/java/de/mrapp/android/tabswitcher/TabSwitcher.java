@@ -313,6 +313,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         layout.removeListener(listener);
     }
 
+    @Override
+    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
+        layout.addCloseTabListener(listener);
+    }
+
+    @Override
+    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
+        layout.removeCloseTabListener(listener);
+    }
+
     @NonNull
     @Override
     public final ViewGroup getTabContainer() {

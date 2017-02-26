@@ -68,7 +68,7 @@ public interface TabSwitcherLayout {
     void addListener(@NonNull TabSwitcherListener listener);
 
     /**
-     * Removes a specific listener, which should not be notified about the tab switcher's events
+     * Removes a specific listener, which should not be notified about the tab switcher's events,
      * anymore.
      *
      * @param listener
@@ -76,6 +76,26 @@ public interface TabSwitcherLayout {
      *         TabSwitcherListener}. The listener may not be null
      */
     void removeListener(@NonNull TabSwitcherListener listener);
+
+    /**
+     * Adds a new listener, which should be notified, when a tab is about to be closed by clicking
+     * its close button.
+     *
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link
+     *         TabCloseListener}. The listener may not be null
+     */
+    void addCloseTabListener(@NonNull TabCloseListener listener);
+
+    /**
+     * Removes a specific listener, which should not be notified, when a tab is about to be closed
+     * by clicking its close button, anymore.
+     *
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link
+     *         TabCloseListener}. The listener may not be null
+     */
+    void removeCloseTabListener(@NonNull TabCloseListener listener);
 
     /**
      * Returns the layout of the tab switcher.

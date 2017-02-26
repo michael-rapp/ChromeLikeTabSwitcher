@@ -2329,6 +2329,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
         return false;
     }
 
+    @Override
+    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
+        recyclerAdapter.addCloseTabListener(listener);
+    }
+
+    @Override
+    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
+        recyclerAdapter.removeCloseTabListener(listener);
+    }
+
     @NonNull
     @Override
     public final Layout getLayout() {
