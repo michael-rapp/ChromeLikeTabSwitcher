@@ -33,6 +33,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -242,14 +243,46 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Returns the list, which contains the tabs, which are contained by the tab switcher.
+     * Adds a tab to the list, which contains the tabs, which are contained by the tab switcher.
      *
-     * @return The list, which contains the tabs, which are contained by the tab switcher, as an
-     * instance of the type {@link List}. The list may not be null
+     * @param index
+     *         The index, the tab should be added at, as an {@link Integer} value
+     * @param tab
+     *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
+     *         not be null
      */
-    @NonNull
-    protected final List<Tab> getTabs() {
-        return tabs;
+    protected final void addTabInternal(final int index, @NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
+        tabs.add(index, tab);
+        notifyOnTabAdded(index, tab);
+    }
+
+    /**
+     * Removes a tab from the list, which contains the tabs, which are contained by the tab
+     * switcher.
+     *
+     * @param index
+     *         The index of the tab, which should be removed, as an {@link Integer} value
+     * @return The tab, which has been removed, as an instance of the class {@link Tab}
+     */
+    protected final Tab removeTabInternal(final int index) {
+        Tab tab = tabs.remove(index);
+        notifyOnTabRemoved(index, tab);
+        return tab;
+    }
+
+    /**
+     * Removes all tabs from the list, which contains the tabs,w hich are contained by the tab
+     * switcher.
+     *
+     * @return A collection, which contains the tabs, which have been removed, as an instance of the
+     * type {@link Collection} or an empty collection, if no tabs have been removed
+     */
+    protected final Collection<Tab> clearTabsInternal() {
+        Collection<Tab> result = new ArrayList<>(tabs);
+        tabs.clear();
+        notifyOnAllTabsRemoved();
+        return result;
     }
 
     /**
@@ -279,6 +312,12 @@ public abstract class AbstractTabSwitcherLayout
      */
     protected final void setSwitcherShown(final boolean shown) {
         this.switcherShown = shown;
+
+        if (shown) {
+            notifyOnSwitcherShown();
+        } else {
+            notifyOnSwitcherHidden();
+        }
     }
 
     /**
@@ -291,6 +330,7 @@ public abstract class AbstractTabSwitcherLayout
     protected final void setSelectedTabIndex(final int index) {
         ensureAtLeast(index, -1, "The index must be at least -1");
         this.selectedTabIndex = index;
+        notifyOnSelectionChanged(index, index != -1 ? getTab(index) : null);
     }
 
     /**
@@ -330,7 +370,7 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * Notifies all listeners, that the tab switcher has been shown.
      */
-    protected final void notifyOnSwitcherShown() {
+    private void notifyOnSwitcherShown() {
         for (TabSwitcherListener listener : listeners) {
             listener.onSwitcherShown(tabSwitcher);
         }
@@ -339,7 +379,7 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * Notifies all listeners, that the tab switcher has been hidden.
      */
-    protected final void notifyOnSwitcherHidden() {
+    private void notifyOnSwitcherHidden() {
         for (TabSwitcherListener listener : listeners) {
             listener.onSwitcherHidden(tabSwitcher);
         }
@@ -355,8 +395,8 @@ public abstract class AbstractTabSwitcherLayout
      *         The currently selected tab as an instance of the class {@link Tab} or null,  if no
      *         tab is currently selected
      */
-    protected final void notifyOnSelectionChanged(final int selectedTabIndex,
-                                                  @Nullable final Tab selectedTab) {
+    private void notifyOnSelectionChanged(final int selectedTabIndex,
+                                          @Nullable final Tab selectedTab) {
         for (TabSwitcherListener listener : listeners) {
             listener.onSelectionChanged(tabSwitcher, selectedTabIndex, selectedTab);
         }
@@ -371,7 +411,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
      *         not be null
      */
-    protected final void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
+    private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
         for (TabSwitcherListener listener : listeners) {
             listener.onTabAdded(tabSwitcher, index, tab);
         }
@@ -386,7 +426,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
      *         not be null
      */
-    protected final void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
         for (TabSwitcherListener listener : listeners) {
             listener.onTabRemoved(tabSwitcher, index, tab);
         }
@@ -395,7 +435,7 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * Notifies all listeners, that all tabs have been removed from the tab switcher.
      */
-    protected final void notifyOnAllTabsRemoved() {
+    private void notifyOnAllTabsRemoved() {
         for (TabSwitcherListener listener : listeners) {
             listener.onAllTabsRemoved(tabSwitcher);
         }

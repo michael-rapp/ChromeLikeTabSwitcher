@@ -1124,15 +1124,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
 
-                for (int i = getTabs().size() - 1; i >= 0; i--) {
-                    Tab tab = getTabs().remove(i);
+                for (Tab tab : clearTabsInternal()) {
                     tab.removeCallback(recyclerAdapter);
                 }
 
-                setSelectedTabIndex(-1);
                 viewRecycler.removeAll();
-                notifyOnAllTabsRemoved();
-                notifyOnSelectionChanged(-1, null);
+                setSelectedTabIndex(-1);
                 animateToolbarVisibility(isToolbarShown(), 0);
             }
 
@@ -1179,21 +1176,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 if (remove) {
                     int index = removedTabItem.getIndex();
                     viewRecycler.remove(removedTabItem);
-                    Tab tab = getTabs().remove(index);
+                    Tab tab = removeTabInternal(index);
                     tab.removeCallback(recyclerAdapter);
-                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         setSelectedTabIndex(-1);
-                        notifyOnSelectionChanged(-1, null);
                         animateToolbarVisibility(isToolbarShown(), 0);
                     } else if (getSelectedTabIndex() == removedTabItem.getIndex()) {
                         if (getSelectedTabIndex() > 0) {
                             setSelectedTabIndex(getSelectedTabIndex() - 1);
+                        } else {
+                            setSelectedTabIndex(getSelectedTabIndex());
                         }
-
-                        notifyOnSelectionChanged(getSelectedTabIndex(),
-                                getTab(getSelectedTabIndex()));
                     }
                 } else {
                     View view = removedTabItem.getView();
@@ -2336,13 +2330,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
             @Override
             public void run() {
-                getTabs().add(index, tab);
                 tab.addCallback(recyclerAdapter);
-                notifyOnTabAdded(index, tab);
+                addTabInternal(index, tab);
 
                 if (getCount() == 1) {
                     setSelectedTabIndex(0);
-                    notifyOnSelectionChanged(0, tab);
                 }
 
                 if (!isSwitcherShown()) {
@@ -2371,23 +2363,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
                 if (!isSwitcherShown()) {
                     viewRecycler.remove(tabItem);
-                    Tab tab = getTabs().remove(index);
+                    Tab tab = removeTabInternal(index);
                     tab.removeCallback(recyclerAdapter);
-                    notifyOnTabRemoved(index, tab);
 
                     if (isEmpty()) {
                         setSelectedTabIndex(-1);
-                        notifyOnSelectionChanged(-1, null);
                         toolbar.setAlpha(isToolbarShown() ? 1 : 0);
                     } else if (getSelectedTabIndex() == index) {
                         if (getSelectedTabIndex() > 0) {
                             setSelectedTabIndex(getSelectedTabIndex() - 1);
+                        } else {
+                            setSelectedTabIndex(getSelectedTabIndex());
                         }
 
                         viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler,
                                 getSelectedTabIndex()));
-                        notifyOnSelectionChanged(getSelectedTabIndex(),
-                                getTab(getSelectedTabIndex()));
                     }
                 } else {
                     adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
@@ -2411,15 +2401,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             @Override
             public void run() {
                 if (!isSwitcherShown()) {
-                    for (int i = getTabs().size() - 1; i >= 0; i--) {
-                        Tab tab = getTabs().remove(i);
+                    for (Tab tab : clearTabsInternal()) {
                         tab.removeCallback(recyclerAdapter);
                     }
 
-                    setSelectedTabIndex(-1);
                     viewRecycler.removeAll();
-                    notifyOnSelectionChanged(-1, null);
-                    notifyOnAllTabsRemoved();
+                    setSelectedTabIndex(-1);
                     toolbar.setAlpha(isToolbarShown() ? 1 : 0);
                 } else {
                     Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).
@@ -2455,7 +2442,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             dragDistance = 0;
             firstVisibleIndex = -1;
             attachedPosition = calculateAttachedPosition();
-            notifyOnSwitcherShown();
             Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
             TabItem tabItem;
 
@@ -2484,7 +2470,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     public final void hideSwitcher() {
         if (isSwitcherShown() && !isAnimationRunning()) {
             setSwitcherShown(false);
-            notifyOnSwitcherHidden();
             tabViewBottomMargin = -1;
             recyclerAdapter.clearCachedPreviews();
             Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
@@ -2508,15 +2493,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             @Override
             public void run() {
                 int index = indexOfOrThrowException(tab);
+                setSelectedTabIndex(index);
 
                 if (!isSwitcherShown()) {
                     viewRecycler.remove(TabItem
                             .create(getTabSwitcher(), viewRecycler, getSelectedTabIndex()));
                     viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
-                    setSelectedTabIndex(index);
-                    notifyOnSelectionChanged(index, tab);
                 } else {
-                    setSelectedTabIndex(index);
                     hideSwitcher();
                 }
             }
