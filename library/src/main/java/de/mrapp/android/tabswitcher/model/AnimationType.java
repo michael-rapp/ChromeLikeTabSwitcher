@@ -25,12 +25,14 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 public enum AnimationType {
 
     /**
-     * When the tab should be swiped in/out from/to the left.
+     * When the tab should be swiped in/out from/to the left, respectively to the top, when dragging
+     * horizontally.
      */
     SWIPE_LEFT,
 
     /**
-     * When the tab should be swiped in/out from/to the right.
+     * When the tab should be swiped in/out from/to the right, respectively to the bottom, when
+     * dragging horizontally.
      */
     SWIPE_RIGHT
 
