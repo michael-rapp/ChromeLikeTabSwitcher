@@ -216,6 +216,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     }
 
     @Override
+    public final void clear(@NonNull final AnimationType animationType) {
+        layout.clear(animationType);
+    }
+
+    @Override
     public final void selectTab(@NonNull final Tab tab) {
         layout.selectTab(tab);
     }

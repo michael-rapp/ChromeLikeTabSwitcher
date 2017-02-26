@@ -564,6 +564,11 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void clear() {
+        clear(AnimationType.SWIPE_RIGHT);
+    }
+
+    @Override
     public final boolean isSwitcherShown() {
         return switcherShown;
     }

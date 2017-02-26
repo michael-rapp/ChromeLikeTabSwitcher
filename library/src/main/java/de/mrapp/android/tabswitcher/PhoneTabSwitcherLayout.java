@@ -671,6 +671,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param delay
      *         The delay after which the animation should be started in milliseconds as a {@link
      *         Long} value
+     * @param animationType
+     *         The animation type, which should be used, as a value of the enum {@link
+     *         AnimationType} or null, if no specific animation type should be used
      * @param listener
      *         The listener, which should be notified about the progress of the animation, as an
      *         instance of the type {@link AnimatorListener} or null, if no listener should be
@@ -678,13 +681,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      */
     private void animateSwipe(@NonNull final TabItem tabItem, final boolean remove,
                               final float velocity, final long delay,
+                              @Nullable AnimationType animationType,
                               @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
         float currentScale = arithmetics.getScale(view, true);
         float swipePosition = calculateSwipePosition();
         float currentPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view);
-        float targetPosition =
-                remove ? (currentPosition < 0 ? -1 * swipePosition : swipePosition) : 0;
+        AnimationType direction = animationType != null ? animationType :
+                currentPosition < 0 ? AnimationType.SWIPE_LEFT : AnimationType.SWIPE_RIGHT;
+        float targetPosition = remove ?
+                (direction == AnimationType.SWIPE_LEFT ? -1 * swipePosition : swipePosition) : 0;
         float distance = Math.abs(targetPosition - currentPosition);
         long animationDuration;
 
@@ -721,7 +727,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-        animateSwipe(tabItem, true, 0, 0, createRemoveAnimationListener(tabItem, true));
+        animateSwipe(tabItem, true, 0, 0, null, createRemoveAnimationListener(tabItem, true));
     }
 
     /**
@@ -1972,7 +1978,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             boolean remove = flingVelocity >= minSwipeVelocity ||
                     Math.abs(arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view)) >
                             arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
-            animateSwipe(swipedTabItem, remove, flingVelocity, 0,
+            animateSwipe(swipedTabItem, remove, flingVelocity, 0, null,
                     createRemoveAnimationListener(swipedTabItem, remove));
         } else if (flingDirection == DragState.DRAG_TO_START ||
                 flingDirection == DragState.DRAG_TO_END) {
@@ -2395,7 +2401,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     @Override
-    public final void clear() {
+    public final void clear(@NonNull final AnimationType animationType) {
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -2423,7 +2429,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                         }
 
                         if (tabItem.isInflated()) {
-                            animateSwipe(tabItem, true, 0, startDelay,
+                            animateSwipe(tabItem, true, 0, startDelay, animationType,
                                     !iterator.hasNext() ? createClearAnimationListener() : null);
                         }
                     }

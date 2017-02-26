@@ -192,10 +192,22 @@ public interface TabSwitcherLayout {
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
      * removed by using an animation. By default, the animation type <code>AnimationType.SWIPE_RIGHT</code>
-     * is used.
+     * is used. If an animation is currently running, the tabs will be removed once all previously
+     * started animations have been finished.
      */
     // TODO: Add method with animation type parameter
     void clear();
+
+    /**
+     * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
+     * removed by using an animation of a specific type. If an animation is currently running, the
+     * tabs will be removed once all previously started animations have been finished.
+     *
+     * @param animationType
+     *         The type of the animation, which should be used to remove the tabs, as a value of the
+     *         enum {@link AnimationType}. The animation type may not be null
+     */
+    void clear(@NonNull AnimationType animationType);
 
     /**
      * Returns, whether the tab switcher is currently shown.
