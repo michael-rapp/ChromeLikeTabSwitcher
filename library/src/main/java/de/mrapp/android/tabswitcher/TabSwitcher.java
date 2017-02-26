@@ -19,13 +19,13 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
+import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
@@ -41,7 +41,6 @@ import java.util.Iterator;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
-import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -76,6 +75,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         layout = new PhoneTabSwitcherLayout(this);
         layout.inflateLayout();
         getViewTreeObserver().addOnGlobalLayoutListener(layout);
+        setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
+                super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
     }
 
@@ -102,46 +103,10 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                         defaultStyleResource);
 
         try {
-            obtainBackground(typedArray);
-            obtainTabBackgroundColor(typedArray);
+            layout.obtainStyledAttributes(typedArray);
         } finally {
             typedArray.recycle();
         }
-    }
-
-    /**
-     * Obtains the view's background from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the background should be obtained from, as an instance of the class
-     *         {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainBackground(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
-
-        if (resourceId != 0) {
-            ViewUtil.setBackground(this, ContextCompat.getDrawable(getContext(), resourceId));
-        } else {
-            int defaultValue =
-                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
-            int color =
-                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
-            setBackgroundColor(color);
-        }
-    }
-
-    /**
-     * Obtains the background color of tabs from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the background color should be obtained from, as an instance of the
-     *         class {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
-        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
-        // TODO: Call setTabBackgroundColor method once created
-        // recyclerAdapter.setTabBackgroundColor(
-        //        typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
     }
 
     public TabSwitcher(@NonNull final Context context) {
@@ -419,6 +384,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     @Override
     public final int getPaddingEnd() {
         return layout.getPaddingEnd();
+    }
+
+    @ColorInt
+    @Override
+    public final int getTabBackgroundColor() {
+        return layout.getTabBackgroundColor();
+    }
+
+    @Override
+    public final void setTabBackgroundColor(@ColorInt final int color) {
+        layout.setTabBackgroundColor(color);
     }
 
 }

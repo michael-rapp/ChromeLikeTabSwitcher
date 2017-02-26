@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -32,9 +31,9 @@ import android.widget.TextView;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -88,11 +87,6 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
      * The height of the view group, which contains a tab's title and close button, in pixels.
      */
     private final int tabTitleContainerHeight;
-
-    /**
-     * The default background color of a tab.
-     */
-    private int tabBackgroundColor;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -264,10 +258,11 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
                             @NonNull final Tab tab) {
         int color = tab.getColor();
         Drawable background = view.getBackground();
-        background
-                .setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        background.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
+                PorterDuff.Mode.MULTIPLY);
         Drawable border = viewHolder.borderView.getBackground();
-        border.setColorFilter(color != -1 ? color : tabBackgroundColor, PorterDuff.Mode.MULTIPLY);
+        border.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
+                PorterDuff.Mode.MULTIPLY);
     }
 
     /**
@@ -312,8 +307,6 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        this.tabBackgroundColor =
-                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
         this.viewRecycler = null;
     }
 
@@ -341,16 +334,6 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
     public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         tabCloseListeners.remove(listener);
-    }
-
-    /**
-     * Sets the default background color of a tab.
-     *
-     * @param color
-     *         The color, which should be set, as an {@link Integer} value
-     */
-    public final void setTabBackgroundColor(@ColorInt final int color) {
-        this.tabBackgroundColor = color;
     }
 
     /**

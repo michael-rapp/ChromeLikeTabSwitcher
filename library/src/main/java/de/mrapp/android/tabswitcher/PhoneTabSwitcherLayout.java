@@ -18,8 +18,11 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -2188,6 +2191,41 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     /**
+     * Obtains the view's background from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainBackground(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
+
+        if (resourceId != 0) {
+            ViewUtil.setBackground(getTabSwitcher(),
+                    ContextCompat.getDrawable(getContext(), resourceId));
+        } else {
+            int defaultValue =
+                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
+            int color =
+                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
+            getTabSwitcher().setBackgroundColor(color);
+        }
+    }
+
+    /**
+     * Obtains the background color of tabs from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background color should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
+        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
+        setTabBackgroundColor(
+                typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
+    }
+
+    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on
      * smartphones.
      *
@@ -2270,6 +2308,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 recyclerAdapter.adaptPadding(viewHolder);
             }
         }
+    }
+
+    @Override
+    protected final void onTabBackgroundColorChanged(@ColorInt final int color) {
+        for (Tab tab : this) {
+            recyclerAdapter.onColorChanged(tab);
+        }
+    }
+
+    @Override
+    public final void obtainStyledAttributes(@NonNull final TypedArray typedArray) {
+        super.obtainStyledAttributes(typedArray);
+        obtainBackground(typedArray);
+        obtainTabBackgroundColor(typedArray);
     }
 
     @Override

@@ -17,8 +17,11 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.CallSuper;
+import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
@@ -26,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -220,6 +224,11 @@ public abstract class AbstractTabSwitcherLayout
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
      */
     private int[] padding;
+
+    /**
+     * The background color of tabs;
+     */
+    private int tabBackgroundColor;
 
     /**
      * Returns the tab switcher, the layout belongs to.
@@ -443,6 +452,54 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Obtains the title of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the title should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarTitle(@NonNull final TypedArray typedArray) {
+        CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
+
+        if (!TextUtils.isEmpty(title)) {
+            setToolbarTitle(title);
+        }
+    }
+
+    /**
+     * Obtains the menu of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the menu should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarMenu(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, -1);
+
+        if (resourceId != -1) {
+            inflateToolbarMenu(resourceId, null);
+        }
+    }
+
+    /**
+     * Obtains the navigation icon of the toolbar, which is shown, when the tab switcher is shown,
+     * from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the navigation icon should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
+        Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
+
+        if (icon != null) {
+            setToolbarNavigationIcon(icon, null);
+        }
+    }
+
+    /**
      * The method, which is invoked on implementing subclasses, when the decorator has been
      * changed.
      *
@@ -466,6 +523,15 @@ public abstract class AbstractTabSwitcherLayout
      */
     protected abstract void onPaddingChanged(final int left, final int top, final int right,
                                              final int bottom);
+
+    /**
+     * The method, which is invoked on implementing subclasses, when the background colors of tabs
+     * has been changed.
+     *
+     * @param color
+     *         The color, which has been set, as an {@link Integer} value
+     */
+    protected abstract void onTabBackgroundColorChanged(@ColorInt final int color);
 
     /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher}.
@@ -501,6 +567,20 @@ public abstract class AbstractTabSwitcherLayout
      * @return True, if the event has been handled, false otherwise
      */
     public abstract boolean handleTouchEvent(@NonNull final MotionEvent event);
+
+    /**
+     * Obtains all of the layout's attributes from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the attributes should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    @CallSuper
+    public void obtainStyledAttributes(@NonNull final TypedArray typedArray) {
+        obtainToolbarTitle(typedArray);
+        obtainToolbarMenu(typedArray);
+        obtainToolbarNavigationIcon(typedArray);
+    }
 
     @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
@@ -694,6 +774,18 @@ public abstract class AbstractTabSwitcherLayout
         }
 
         return getPaddingRight();
+    }
+
+    @ColorInt
+    @Override
+    public final int getTabBackgroundColor() {
+        return tabBackgroundColor;
+    }
+
+    @Override
+    public final void setTabBackgroundColor(@ColorInt final int color) {
+        this.tabBackgroundColor = color;
+        onTabBackgroundColorChanged(color);
     }
 
 }

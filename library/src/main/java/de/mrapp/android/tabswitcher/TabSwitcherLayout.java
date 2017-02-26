@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
@@ -448,5 +449,21 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
      * @return The end padding of the tab switcher as an {@link Integer} value
      */
     int getPaddingEnd();
+
+    /**
+     * Returns the background color of tabs.
+     *
+     * @return The background color of tabs as an {@link Integer} value
+     */
+    @ColorInt
+    int getTabBackgroundColor();
+
+    /**
+     * Sets the background color of tabs.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    void setTabBackgroundColor(@ColorInt int color);
 
 }
