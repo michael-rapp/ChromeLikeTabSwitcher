@@ -36,6 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import java.util.Iterator;
+
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
@@ -240,6 +242,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     @Override
     public final int getSelectedTabIndex() {
         return layout.getSelectedTabIndex();
+    }
+
+    @Override
+    public final Iterator<Tab> iterator() {
+        return layout.iterator();
     }
 
     @Override

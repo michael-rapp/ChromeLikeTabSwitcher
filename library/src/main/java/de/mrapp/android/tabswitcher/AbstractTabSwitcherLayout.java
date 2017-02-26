@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -529,6 +530,11 @@ public abstract class AbstractTabSwitcherLayout
     @Override
     public final boolean isAnimationRunning() {
         return runningAnimations > 0;
+    }
+
+    @Override
+    public final Iterator<Tab> iterator() {
+        return tabs.iterator();
     }
 
     @Override

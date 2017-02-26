@@ -37,7 +37,7 @@ import de.mrapp.android.tabswitcher.model.Layout;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public interface TabSwitcherLayout {
+public interface TabSwitcherLayout extends Iterable<Tab> {
 
     /**
      * Sets the decorator, which allows to inflate the views, which correspond to the tabs of the
