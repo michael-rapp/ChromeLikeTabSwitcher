@@ -2534,7 +2534,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                     TabItem tabItem;
 
                     while ((tabItem = iterator.next()) != null) {
-                        calculateAndClipStartPosition(tabItem, iterator.previous());
+                        TabItem predecessor = iterator.previous();
+                        float position;
+
+                        if (tabItem.getIndex() > getSelectedTabIndex()) {
+                            position = calculateNonLinearPosition(predecessor);
+                        } else if (tabItem.getIndex() < getSelectedTabIndex()) {
+                            position = attachedPosition +
+                                    (getSelectedTabIndex() - tabItem.getIndex()) * maxTabSpacing;
+                        } else {
+                            position = attachedPosition;
+                        }
+
+                        clipTabPosition(position, tabItem, predecessor);
 
                         if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
                             viewRecycler.inflate(tabItem);
