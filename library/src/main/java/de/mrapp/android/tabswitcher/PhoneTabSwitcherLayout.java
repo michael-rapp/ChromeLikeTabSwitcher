@@ -2524,55 +2524,69 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     // TODO: Calling this method should also work when the view is not yet inflated
-    // TODO: Should this be executed as a pending action?
     @Override
     public final void showSwitcher() {
-        if (!isSwitcherShown() && !isAnimationRunning()) {
-            setSwitcherShown(true);
-            dragDistance = 0;
-            firstVisibleIndex = -1;
-            attachedPosition = calculateAttachedPosition();
-            Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
-            TabItem tabItem;
+        enqueuePendingAction(new Runnable() {
 
-            while ((tabItem = iterator.next()) != null) {
-                calculateAndClipStartPosition(tabItem, iterator.previous());
+            @Override
+            public void run() {
+                if (!isSwitcherShown()) {
+                    setSwitcherShown(true);
+                    dragDistance = 0;
+                    firstVisibleIndex = -1;
+                    attachedPosition = calculateAttachedPosition();
+                    Iterator iterator =
+                            new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+                    TabItem tabItem;
 
-                if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
-                    viewRecycler.inflate(tabItem);
-                    View view = tabItem.getView();
+                    while ((tabItem = iterator.next()) != null) {
+                        calculateAndClipStartPosition(tabItem, iterator.previous());
 
-                    if (!ViewCompat.isLaidOut(view)) {
-                        view.getViewTreeObserver().addOnGlobalLayoutListener(
-                                new LayoutListenerWrapper(view,
-                                        createShowSwitcherLayoutListener(tabItem)));
-                    } else {
-                        animateShowSwitcher(tabItem);
+                        if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
+                            viewRecycler.inflate(tabItem);
+                            View view = tabItem.getView();
+
+                            if (!ViewCompat.isLaidOut(view)) {
+                                view.getViewTreeObserver().addOnGlobalLayoutListener(
+                                        new LayoutListenerWrapper(view,
+                                                createShowSwitcherLayoutListener(tabItem)));
+                            } else {
+                                animateShowSwitcher(tabItem);
+                            }
+                        }
                     }
                 }
             }
-        }
+
+        });
     }
 
     // TODO: Calling this method should also work when the view is not yet inflated
-    // TODO: Should this be executed as a pending action?
     @Override
     public final void hideSwitcher() {
-        if (isSwitcherShown() && !isAnimationRunning()) {
-            setSwitcherShown(false);
-            tabViewBottomMargin = -1;
-            recyclerAdapter.clearCachedPreviews();
-            Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
-            TabItem tabItem;
+        enqueuePendingAction(new Runnable() {
 
-            while ((tabItem = iterator.next()) != null) {
-                if (tabItem.isInflated()) {
-                    animateHideSwitcher(tabItem);
-                } else if (tabItem.getIndex() == getSelectedTabIndex()) {
-                    inflateView(tabItem, createHideSwitcherLayoutListener(tabItem));
+            @Override
+            public void run() {
+                if (isSwitcherShown()) {
+                    setSwitcherShown(false);
+                    tabViewBottomMargin = -1;
+                    recyclerAdapter.clearCachedPreviews();
+                    Iterator iterator =
+                            new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+                    TabItem tabItem;
+
+                    while ((tabItem = iterator.next()) != null) {
+                        if (tabItem.isInflated()) {
+                            animateHideSwitcher(tabItem);
+                        } else if (tabItem.getIndex() == getSelectedTabIndex()) {
+                            inflateView(tabItem, createHideSwitcherLayoutListener(tabItem));
+                        }
+                    }
                 }
             }
-        }
+
+        });
     }
 
     @Override
