@@ -564,6 +564,11 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void removeTab(@NonNull final Tab tab) {
+        removeTab(tab, AnimationType.SWIPE_RIGHT);
+    }
+
+    @Override
     public final void clear() {
         clear(AnimationType.SWIPE_RIGHT);
     }

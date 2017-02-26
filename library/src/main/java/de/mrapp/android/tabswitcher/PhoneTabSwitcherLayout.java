@@ -720,14 +720,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param tabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
+     * @param animationType
+     *         The animation type, which should be used, as a value of the enum {@link
+     *         AnimationType} or null, if no specific animation type should be used
      */
-    private void animateRemove(@NonNull final TabItem tabItem) {
+    private void animateRemove(@NonNull final TabItem tabItem,
+                               @Nullable final AnimationType animationType) {
         View view = tabItem.getView();
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-        animateSwipe(tabItem, true, 0, 0, null, createRemoveAnimationListener(tabItem, true));
+        animateSwipe(tabItem, true, 0, 0, animationType,
+                createRemoveAnimationListener(tabItem, true));
     }
 
     /**
@@ -975,16 +980,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param tabItem
      *         The tab item, which corresponds to the tab, which should be removed, as an instance
      *         of the class {@link TabItem}. The tab item may not be null
+     * @param animationType
+     *         The animation type, which should be used, as a value of the enum {@link
+     *         AnimationType} or null, if no specific animation type should be used
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createRemoveLayoutListener(@NonNull final TabItem tabItem) {
+    private OnGlobalLayoutListener createRemoveLayoutListener(@NonNull final TabItem tabItem,
+                                                              @Nullable final AnimationType animationType) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateRemove(tabItem);
+                animateRemove(tabItem, animationType);
             }
 
         };
@@ -2358,7 +2367,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     @Override
-    public final void removeTab(@NonNull final Tab tab) {
+    public final void removeTab(@NonNull final Tab tab,
+                                @NonNull final AnimationType animationType) {
         ensureNotNull(tab, "The tab may not be null");
         enqueuePendingAction(new Runnable() {
 
@@ -2390,9 +2400,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                     tabItem.getTag().setClosing(true);
 
                     if (tabItem.isInflated()) {
-                        animateRemove(tabItem);
+                        animateRemove(tabItem, animationType);
                     } else {
-                        inflateView(tabItem, createRemoveLayoutListener(tabItem));
+                        inflateView(tabItem, createRemoveLayoutListener(tabItem, animationType));
                     }
                 }
             }
