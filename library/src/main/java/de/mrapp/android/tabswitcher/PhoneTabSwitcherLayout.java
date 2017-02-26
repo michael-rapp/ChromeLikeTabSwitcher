@@ -1663,10 +1663,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param orthogonalPosition
      *         The position of the pointer of the orthogonal axis in pixels as a {@link Float}
      *         value
-     * @return True, if any tabs have been moved, false otherwise
      */
-    // TODO: Is return value required?
-    private boolean handleDrag(final float dragPosition, final float orthogonalPosition) {
+    private void handleDrag(final float dragPosition, final float orthogonalPosition) {
         if (dragPosition <= startOvershootThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
@@ -1746,11 +1744,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 calculateTabPositions();
                 checkIfOvershooting(dragPosition);
             }
-
-            return true;
         }
-
-        return false;
     }
 
     /**
