@@ -734,8 +734,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-        animateSwipe(tabItem, true, 0, 0, animationType,
-                createRemoveAnimationListener(tabItem, true));
+        animateSwipe(tabItem, true, 0, 0, animationType, createRemoveAnimationListener(tabItem));
     }
 
     /**
@@ -1155,35 +1154,58 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     }
 
     /**
-     * Creates and returns a listener, which allows to relocate all previous tabs, when a tab has
-     * been removed.
+     * Creates and returns a listener, which allows to handle, when a tab has been swiped, but was
+     * not removed.
      *
-     * @param removedTabItem
-     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which has been swiped, as an instance of
      *         the class {@link TabItem}. The tab item may not be null
-     * @param remove
-     *         True, if the tab has been removed, false otherwise
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
-    // TODO: Create distinct listeners for swiping tabs. One for removing the tab and one for reverting the swipe gesture
     @NonNull
-    private AnimatorListener createRemoveAnimationListener(@NonNull final TabItem removedTabItem,
-                                                           final boolean remove) {
+    private AnimatorListener createSwipeAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                View view = tabItem.getView();
+                adaptStackOnSwipeAborted(tabItem, tabItem.getIndex() + 1);
+                tabItem.getTag().setClosing(false);
+                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                handleRelease(null);
+                animateToolbarVisibility(true, 0);
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a listener, which allows to relocate all previous tabs, when a tab has
+     * been removed.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createRemoveAnimationListener(@NonNull final TabItem tabItem) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
 
-                if (remove) {
-                    if (removedTabItem.getTag().getState() == State.STACKED_END) {
-                        relocateWhenRemovingStackedTab(removedTabItem, false);
-                    } else if (removedTabItem.getTag().getState() == State.STACKED_START) {
-                        relocateWhenRemovingStackedTab(removedTabItem, true);
-                    } else {
-                        relocateWhenRemovingFloatingTab(removedTabItem);
-                    }
+                if (tabItem.getTag().getState() == State.STACKED_END) {
+                    relocateWhenRemovingStackedTab(tabItem, false);
+                } else if (tabItem.getTag().getState() == State.STACKED_START) {
+                    relocateWhenRemovingStackedTab(tabItem, true);
+                } else {
+                    relocateWhenRemovingFloatingTab(tabItem);
                 }
             }
 
@@ -1191,33 +1213,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
 
-                if (remove) {
-                    int index = removedTabItem.getIndex();
-                    viewRecycler.remove(removedTabItem);
-                    Tab tab = removeTabInternal(index);
-                    tab.removeCallback(recyclerAdapter);
+                int index = tabItem.getIndex();
+                viewRecycler.remove(tabItem);
+                Tab tab = removeTabInternal(index);
+                tab.removeCallback(recyclerAdapter);
 
-                    if (isEmpty()) {
-                        setSelectedTabIndex(-1);
-                        animateToolbarVisibility(isToolbarShown(), 0);
-                    } else if (getSelectedTabIndex() == removedTabItem.getIndex()) {
-                        if (getSelectedTabIndex() > 0) {
-                            setSelectedTabIndex(getSelectedTabIndex() - 1);
-                        } else {
-                            setSelectedTabIndex(getSelectedTabIndex());
-                        }
+                if (isEmpty()) {
+                    setSelectedTabIndex(-1);
+                    animateToolbarVisibility(isToolbarShown(), 0);
+                } else if (getSelectedTabIndex() == tabItem.getIndex()) {
+                    if (getSelectedTabIndex() > 0) {
+                        setSelectedTabIndex(getSelectedTabIndex() - 1);
+                    } else {
+                        setSelectedTabIndex(getSelectedTabIndex());
                     }
-                } else {
-                    View view = removedTabItem.getView();
-                    adaptStackOnSwipeAborted(removedTabItem, removedTabItem.getIndex() + 1);
-                    removedTabItem.getTag().setClosing(false);
-                    arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                            arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
-                    handleRelease(null);
-                    animateToolbarVisibility(true, 0);
                 }
-
-                swipedTabItem = null;
             }
 
         };
@@ -1991,7 +2001,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                     Math.abs(arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view)) >
                             arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
             animateSwipe(swipedTabItem, remove, flingVelocity, 0, null,
-                    createRemoveAnimationListener(swipedTabItem, remove));
+                    remove ? createRemoveAnimationListener(swipedTabItem) :
+                            createSwipeAnimationListener(swipedTabItem));
+            swipedTabItem = null;
         } else if (flingDirection == DragState.DRAG_TO_START ||
                 flingDirection == DragState.DRAG_TO_END) {
 
