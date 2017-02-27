@@ -40,6 +40,8 @@ public class DragHandler {
 
         void onRevertEndOvershoot(float maxAngle);
 
+        void onStartOvershoot(float position);
+
         void onTiltOnStartOvershoot(float angle);
 
         void onTiltOnEndOvershoot(float angle);
@@ -79,6 +81,12 @@ public class DragHandler {
     private void notifyOnRevertEndOvershoot() {
         if (callback != null) {
             callback.onRevertEndOvershoot(maxEndOvershootAngle);
+        }
+    }
+
+    private void notifyOnStartOvershoot(final float position) {
+        if (callback != null) {
+            callback.onStartOvershoot(position);
         }
     }
 
@@ -827,27 +835,10 @@ public class DragHandler {
 
             if (overshootDistance <= maxOvershootDistance) {
                 float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-                Iterator iterator = new Iterator.Builder(tabSwitcher, viewRecycler).create();
-                TabItem tabItem;
-
-                while ((tabItem = iterator.next()) != null) {
-                    if (tabItem.getIndex() == 0) {
-                        View view = tabItem.getView();
-                        float currentPosition = tabItem.getTag().getPosition();
-                        arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                                arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
-                        arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
-                                arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
-                        arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
-                                currentPosition - (currentPosition * ratio));
-                    } else if (tabItem.isInflated()) {
-                        View firstView = iterator.first().getView();
-                        View view = tabItem.getView();
-                        view.setVisibility(arithmetics.getPosition(Axis.DRAGGING_AXIS, firstView) <=
-                                arithmetics.getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
-                                View.VISIBLE);
-                    }
-                }
+                TabItem tabItem = TabItem.create(tabSwitcher, viewRecycler, 0);
+                float currentPosition = tabItem.getTag().getPosition();
+                float position = currentPosition - (currentPosition * ratio);
+                notifyOnStartOvershoot(position);
             } else {
                 float ratio = Math.max(0, Math.min(1,
                         (overshootDistance - maxOvershootDistance) / maxOvershootDistance));

@@ -1440,6 +1440,34 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Moves the first tab to overlap the other tabs, when overshooting at the start.
+     *
+     * @param position
+     *         The position of the first tab in pixels as a {@link Float} value
+     */
+    private void startOvershoot(final float position) {
+        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.getIndex() == 0) {
+                View view = tabItem.getView();
+                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, position);
+            } else if (tabItem.isInflated()) {
+                View firstView = iterator.first().getView();
+                View view = tabItem.getView();
+                view.setVisibility(arithmetics.getPosition(Axis.DRAGGING_AXIS, firstView) <=
+                        arithmetics.getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
+                        View.VISIBLE);
+            }
+        }
+    }
+
+    /**
      * Tilts the tabs, when overshooting at the start.
      *
      * @param angle
@@ -1932,6 +1960,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onRevertEndOvershoot(final float maxAngle) {
         animateRevertEndOvershoot(maxAngle);
+    }
+
+    public final void onStartOvershoot(final float position) {
+        startOvershoot(position);
     }
 
     @Override
