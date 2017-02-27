@@ -300,6 +300,33 @@ public class DragHandler {
     }
 
     /**
+     * Handles a fling gesture.
+     *
+     * @param event
+     *         The motion event, which triggered the fling gesture, as an instance of the class
+     *         {@link MotionEvent}. The motion event may not be null
+     * @param dragState
+     *         The current drag state, which determines the fling direction, as a value of the enum
+     *         {@link DragState}. The drag state may not be null
+     */
+    private void handleFling(@NonNull final MotionEvent event, @NonNull final DragState dragState) {
+        int pointerId = event.getPointerId(0);
+        velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
+        float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
+
+        if (flingVelocity > minFlingVelocity) {
+            float flingDistance = 0.25f * flingVelocity;
+
+            if (dragState == DragState.DRAG_TO_START) {
+                flingDistance = -1 * flingDistance;
+            }
+
+            long duration = Math.round(Math.abs(flingDistance) / flingVelocity * 1000);
+            notifyOnFling(flingDistance, duration);
+        }
+    }
+
+    /**
      * Clips the position of a specific tab item.
      *
      * @param position
@@ -909,23 +936,6 @@ public class DragHandler {
         }
 
         resetDragging();
-    }
-
-    private void handleFling(@NonNull final MotionEvent event, @NonNull final DragState dragState) {
-        int pointerId = event.getPointerId(0);
-        velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-        float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
-
-        if (flingVelocity > minFlingVelocity) {
-            float flingDistance = 0.25f * flingVelocity;
-
-            if (dragState == DragState.DRAG_TO_START) {
-                flingDistance = -1 * flingDistance;
-            }
-
-            long duration = Math.round(Math.abs(flingDistance) / flingVelocity * 1000);
-            notifyOnFling(flingDistance, duration);
-        }
     }
 
     /**
