@@ -221,12 +221,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private int tabViewBottomMargin;
 
     /**
-     * The position on the dragging axis, where the distance between a tab and its predecessor
-     * should have reached the maximum, in pixels.
-     */
-    private float attachedPosition;
-
-    /**
      * The animation, which is used to show or hide the toolbar.
      */
     private ViewPropertyAnimator toolbarAnimation;
@@ -562,7 +556,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The maximum angle, the tabs can be rotated by, in degrees as a {@link Float} value
      */
     private void animateRevertStartOvershoot(final float maxAngle) {
-        boolean tilted = animateTilt(new AccelerateInterpolator(), null, maxAngle);
+        boolean tilted = animateTilt(new AccelerateInterpolator(), maxAngle);
 
         if (tilted) {
             enqueuePendingAction(new Runnable() {
@@ -598,8 +592,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
         animation.setDuration(Math.round(revertOvershootAnimationDuration * Math.abs(
                 (targetPosition - position) / (float) (stackedTabCount * stackedTabSpacing))));
-        animation.addListener(
-                new AnimationListenerWrapper(createRevertOvershootAnimationListener()));
+        animation.addListener(new AnimationListenerWrapper(null));
         animation.setInterpolator(interpolator);
         animation.setStartDelay(0);
         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -636,8 +629,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The maximum angle, the tabs can be rotated by, in degrees as a {@link Float} value
      */
     private void animateRevertEndOvershoot(final float maxAngle) {
-        animateTilt(new AccelerateDecelerateInterpolator(),
-                createRevertOvershootAnimationListener(), maxAngle);
+        animateTilt(new AccelerateDecelerateInterpolator(), maxAngle);
     }
 
     /**
@@ -646,16 +638,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param interpolator
      *         The interpolator, which should be used by the animation, as an instance of the type
      *         {@link Interpolator}. The interpolator may not be null
-     * @param listener
-     *         The listener, which should be notified about the progress of the animation, as an
-     *         instance of the type {@link AnimatorListener}. The listener may not be null
      * @param maxAngle
      *         The angle, the tabs may be rotated by at maximum, in degrees as a {@link Float}
      *         value
      * @return True, if at least one tab was animated, false otherwise
      */
-    private boolean animateTilt(@NonNull final Interpolator interpolator,
-                                @Nullable final AnimatorListener listener, final float maxAngle) {
+    private boolean animateTilt(@NonNull final Interpolator interpolator, final float maxAngle) {
         Iterator iterator =
                 new Iterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
         TabItem tabItem;
@@ -669,7 +657,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     result = true;
                     ViewPropertyAnimator animation = view.animate();
                     animation.setListener(new AnimationListenerWrapper(
-                            createRevertOvershootAnimationListenerWrapper(view, listener)));
+                            createRevertOvershootAnimationListener(view)));
                     animation.setDuration(Math.round(revertOvershootAnimationDuration *
                             (Math.abs(arithmetics.getRotation(Axis.ORTHOGONAL_AXIS, view)) /
                                     maxAngle)));
@@ -947,7 +935,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tabItem.getTag().setClosing(false);
                 arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                         arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
-                dragHandler.handleRelease(null);
                 animateToolbarVisibility(true, 0);
             }
 
@@ -1088,16 +1075,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param view
      *         The view, whose pivot should be adapted, as an instance of the class {@link View}.
      *         The view may not be null
-     * @param listener
-     *         The listener, which should be notified, when the created listener is invoked, as an
-     *         instance of the type {@link AnimatorListener} or null, if no listener should be
-     *         notified
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRevertOvershootAnimationListenerWrapper(@NonNull final View view,
-                                                                           @Nullable final AnimatorListener listener) {
+    private AnimatorListener createRevertOvershootAnimationListener(@NonNull final View view) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1107,30 +1089,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                         arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
-
-                if (listener != null) {
-                    listener.onAnimationEnd(animation);
-                }
-            }
-
-        };
-    }
-
-    /**
-     * Creates and returns an animation listener, which allows to handle, when an animation, which
-     * reverted an overshoot, has been ended.
-     *
-     * @return The listener, which has been created, as an instance of the type {@link
-     * AnimatorListener}. The listener may not be null
-     */
-    @NonNull
-    private AnimatorListener createRevertOvershootAnimationListener() {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                dragHandler.handleRelease(null);
             }
 
         };
@@ -1701,6 +1659,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    public final boolean isAnimationRunning() {
+        return super.isAnimationRunning() || flingAnimation != null;
+    }
+
+    @Override
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final AnimationType animationType) {
         ensureNotNull(tab, "The tab may not be null");
@@ -1828,19 +1791,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     TabItem tabItem;
 
                     while ((tabItem = iterator.next()) != null) {
-                        TabItem predecessor = iterator.previous();
-                        float position;
-
-                        if (tabItem.getIndex() > getSelectedTabIndex()) {
-                            position = dragHandler.calculateNonLinearPosition(predecessor);
-                        } else if (tabItem.getIndex() < getSelectedTabIndex()) {
-                            position = attachedPosition +
-                                    (getSelectedTabIndex() - tabItem.getIndex()) * maxTabSpacing;
-                        } else {
-                            position = attachedPosition;
-                        }
-
-                        dragHandler.clipTabPosition(position, tabItem, predecessor);
+                        calculateAndClipStartPosition(tabItem, iterator.previous());
 
                         if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
                             viewRecycler.inflate(tabItem);

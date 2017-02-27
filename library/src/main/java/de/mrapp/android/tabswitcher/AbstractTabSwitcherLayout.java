@@ -607,8 +607,9 @@ public abstract class AbstractTabSwitcherLayout
         this.listeners.remove(listener);
     }
 
+    @CallSuper
     @Override
-    public final boolean isAnimationRunning() {
+    public boolean isAnimationRunning() {
         return runningAnimations > 0;
     }
 
