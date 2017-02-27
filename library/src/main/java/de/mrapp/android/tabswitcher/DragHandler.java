@@ -246,6 +246,26 @@ public class DragHandler {
     private Callback callback;
 
     /**
+     * Resets the drag handler to its previous state, when a drag gesture has ended.
+     */
+    private void resetDragging() {
+        if (velocityTracker != null) {
+            velocityTracker.recycle();
+            velocityTracker = null;
+        }
+
+        pointerId = -1;
+        dragState = DragState.NONE;
+        swipedTabItem = null;
+        dragDistance = 0;
+        startOvershootThreshold = -Float.MAX_VALUE;
+        endOvershootThreshold = Float.MAX_VALUE;
+        dragHelper.reset(dragThreshold);
+        overshootDragHelper.reset();
+        swipeDragHelper.reset();
+    }
+
+    /**
      * Handles, when a drag gesture has been started.
      *
      * @param event
@@ -392,23 +412,8 @@ public class DragHandler {
                 calculatePositionsWhenDraggingToEnd(distance);
             } else {
                 calculatePositionsWhenDraggingToStart(distance);
-                printPositions();
             }
         }
-    }
-
-    private void printPositions() {
-        /*
-        System.out.println("------------------------------");
-
-        Iterator iterator = new Iterator.Builder(tabSwitcher, viewRecycler).reverse(true).create();
-        TabItem tabItem;
-
-        while ((tabItem = iterator.next()) != null) {
-            System.out.println(tabItem.getIndex() + ": " + tabItem.getTag().getPosition() + ", " +
-                    tabItem.getTag().getState());
-        }
-        */
     }
 
     /**
@@ -923,23 +928,9 @@ public class DragHandler {
         }
     }
 
-    private void resetDragging() {
-        if (velocityTracker != null) {
-            velocityTracker.recycle();
-            velocityTracker = null;
-        }
-
-        pointerId = -1;
-        dragState = DragState.NONE;
-        swipedTabItem = null;
-        dragDistance = 0;
-        startOvershootThreshold = -Float.MAX_VALUE;
-        endOvershootThreshold = Float.MAX_VALUE;
-        dragHelper.reset(dragThreshold);
-        overshootDragHelper.reset();
-        swipeDragHelper.reset();
-    }
-
+    /**
+     * Resets the drag handler to its initial state.
+     */
     public final void reset() {
         resetDragging();
         firstVisibleIndex = -1;
