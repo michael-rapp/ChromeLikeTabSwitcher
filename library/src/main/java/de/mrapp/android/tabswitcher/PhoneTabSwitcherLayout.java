@@ -1777,7 +1777,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getCount() - tabItem.getIndex() > 1) {
-                abort = calculatePositionWhenDraggingDown(dragDistance, tabItem,
+                abort = calculatePositionWhenDraggingToEnd(dragDistance, tabItem,
                         iterator.previous());
 
                 if (firstVisibleIndex == -1 && tabItem.getTag().getState() == State.FLOATING) {
@@ -1805,7 +1805,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getCount() - tabItem.getIndex() > 1) {
-                abort = calculatePositionWhenDraggingUp(dragDistance, tabItem, iterator.previous());
+                abort = calculatePositionWhenDraggingToStart(dragDistance, tabItem,
+                        iterator.previous());
             } else {
                 clipTabPosition(tabItem.getTag().getPosition(), tabItem, iterator.previous());
             }
@@ -1862,9 +1863,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      *         null, if the tab item does not have a predecessor
      * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
      */
-    private boolean calculatePositionWhenDraggingUp(final float dragDistance,
-                                                    @NonNull final TabItem tabItem,
-                                                    @Nullable final TabItem predecessor) {
+    private boolean calculatePositionWhenDraggingToStart(final float dragDistance,
+                                                         @NonNull final TabItem tabItem,
+                                                         @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() > attachedPosition) {
             if (tabItem.getTag().getState() == State.FLOATING) {
@@ -1900,9 +1901,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      *         null, if the tab item does not have a predecessor
      * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
      */
-    private boolean calculatePositionWhenDraggingDown(final float dragDistance,
-                                                      @NonNull final TabItem tabItem,
-                                                      @Nullable final TabItem predecessor) {
+    private boolean calculatePositionWhenDraggingToEnd(final float dragDistance,
+                                                       @NonNull final TabItem tabItem,
+                                                       @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
             if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
