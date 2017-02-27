@@ -450,7 +450,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 tabItem.getTag().setState(State.FLOATING);
             }
         }
-
     }
 
     /**
@@ -1756,9 +1755,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
         if (distance != 0) {
             if (dragState == DragState.DRAG_TO_END) {
-                calculatePositionsWhenDraggingDown(distance);
+                calculatePositionsWhenDraggingToEnd(distance);
             } else {
-                calculatePositionsWhenDraggingUp(distance);
+                calculatePositionsWhenDraggingToStart(distance);
             }
         }
     }
@@ -1769,7 +1768,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculatePositionsWhenDraggingDown(final float dragDistance) {
+    private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
         Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
@@ -1784,6 +1783,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
                 if (firstVisibleIndex == -1 && tabItem.getTag().getState() == State.FLOATING) {
                     firstVisibleIndex = tabItem.getIndex();
                 }
+            } else {
+                clipTabPosition(tabItem.getTag().getPosition(), tabItem, iterator.previous());
             }
 
             inflateOrRemoveView(tabItem);
@@ -1796,7 +1797,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculatePositionsWhenDraggingUp(final float dragDistance) {
+    private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
         Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
@@ -1805,6 +1806,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getCount() - tabItem.getIndex() > 1) {
                 abort = calculatePositionWhenDraggingUp(dragDistance, tabItem, iterator.previous());
+            } else {
+                clipTabPosition(tabItem.getTag().getPosition(), tabItem, iterator.previous());
             }
 
             inflateOrRemoveView(tabItem);
