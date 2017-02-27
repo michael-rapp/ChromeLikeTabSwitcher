@@ -350,7 +350,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      *         {@link View}. The view may not be null
      * @return The bottom margin, which has been calculated, in pixels as an {@link Integer} value
      */
-    private int calculateTabViewBottomMargin(@NonNull final View view) {
+    private int calculateBottomMargin(@NonNull final View view) {
         Axis axis =
                 getLayout() == Layout.PHONE_LANDSCAPE ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         float tabHeight = (view.getHeight() - 2 * tabInset) * arithmetics.getScale(view, true);
@@ -602,11 +602,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
         }
 
         if (tabViewBottomMargin == -1) {
-            tabViewBottomMargin = calculateTabViewBottomMargin(view);
+            tabViewBottomMargin = calculateBottomMargin(view);
         }
 
-        animateBottomMargin(view, calculateTabViewBottomMargin(view),
-                showSwitcherAnimationDuration);
+        animateBottomMargin(view, calculateBottomMargin(view), showSwitcherAnimationDuration);
         ViewPropertyAnimator animation = view.animate();
         animation.setDuration(showSwitcherAnimationDuration);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -1741,7 +1740,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
             if (swipedTabItem != null) {
                 handleSwipe();
             } else if (dragState != DragState.NONE) {
-                calculateTabPositions();
+                calculatePositions();
                 checkIfOvershooting(dragPosition);
             }
         }
@@ -1750,16 +1749,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
     /**
      * Calculates the positions of all tabs, depending on the current drag distance.
      */
-    private void calculateTabPositions() {
+    private void calculatePositions() {
         float currentDragDistance = dragHelper.getDragDistance();
         float distance = currentDragDistance - dragDistance;
         dragDistance = currentDragDistance;
 
         if (distance != 0) {
             if (dragState == DragState.DRAG_TO_END) {
-                calculateTabPositionsWhenDraggingDown(distance);
+                calculatePositionsWhenDraggingDown(distance);
             } else {
-                calculateTabPositionsWhenDraggingUp(distance);
+                calculatePositionsWhenDraggingUp(distance);
             }
         }
     }
@@ -1770,7 +1769,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculateTabPositionsWhenDraggingDown(final float dragDistance) {
+    private void calculatePositionsWhenDraggingDown(final float dragDistance) {
         firstVisibleIndex = -1;
         Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
@@ -1779,7 +1778,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getCount() - tabItem.getIndex() > 1) {
-                abort = calculateTabPositionWhenDraggingDown(dragDistance, tabItem,
+                abort = calculatePositionWhenDraggingDown(dragDistance, tabItem,
                         iterator.previous());
 
                 if (firstVisibleIndex == -1 && tabItem.getTag().getState() == State.FLOATING) {
@@ -1797,7 +1796,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculateTabPositionsWhenDraggingUp(final float dragDistance) {
+    private void calculatePositionsWhenDraggingUp(final float dragDistance) {
         Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
@@ -1805,8 +1804,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
 
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getCount() - tabItem.getIndex() > 1) {
-                abort = calculateTabPositionWhenDraggingUp(dragDistance, tabItem,
-                        iterator.previous());
+                abort = calculatePositionWhenDraggingUp(dragDistance, tabItem, iterator.previous());
             }
 
             inflateOrRemoveView(tabItem);
@@ -1861,9 +1859,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      *         null, if the tab item does not have a predecessor
      * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
      */
-    private boolean calculateTabPositionWhenDraggingUp(final float dragDistance,
-                                                       @NonNull final TabItem tabItem,
-                                                       @Nullable final TabItem predecessor) {
+    private boolean calculatePositionWhenDraggingUp(final float dragDistance,
+                                                    @NonNull final TabItem tabItem,
+                                                    @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() > attachedPosition) {
             if (tabItem.getTag().getState() == State.FLOATING) {
@@ -1899,9 +1897,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout {
      *         null, if the tab item does not have a predecessor
      * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
      */
-    private boolean calculateTabPositionWhenDraggingDown(final float dragDistance,
-                                                         @NonNull final TabItem tabItem,
-                                                         @Nullable final TabItem predecessor) {
+    private boolean calculatePositionWhenDraggingDown(final float dragDistance,
+                                                      @NonNull final TabItem tabItem,
+                                                      @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
             if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
