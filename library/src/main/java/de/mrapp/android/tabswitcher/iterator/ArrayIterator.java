@@ -15,85 +15,83 @@ package de.mrapp.android.tabswitcher.iterator;
 
 import android.support.annotation.NonNull;
 
-import java.util.List;
-
 import de.mrapp.android.tabswitcher.model.TabItem;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An iterator, which allows to iterate the tab items, which are contained by a {@link List}.
+ * An iterator, which allows to iterate the tab items, which are contained by an array.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class ListIterator extends AbstractIterator {
+public class ArrayIterator extends AbstractIterator {
 
     /**
-     * A builder, which allows to configure and create instances of the class {@link ListIterator}.
+     * A builder, which allows to configure and create instances of the class {@link
+     * ArrayIterator}.
      */
-    public static class Builder extends AbstractBuilder<Builder, ListIterator> {
+    public static class Builder extends AbstractBuilder<Builder, ArrayIterator> {
 
         /**
-         * The list, whose items should be iterated by the iterator.
+         * The array, whose items should be iterated by the iterator.
          */
-        private final List<TabItem> list;
+        private final TabItem[] array;
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * ListIterator}.
+         * ArrayIterator}.
          *
-         * @param list
-         *         The tab switcher, whose items should be iterated by the iterator, as an instance
-         *         of the type {@link List}. The list may not be null
+         * @param array
+         *         The array, whose items should be iterated by the iterator, as an array of the
+         *         type {@link TabItem}. The array may not be null
          */
-        public Builder(@NonNull final List<TabItem> list) {
-            ensureNotNull(list, "The list may not be null");
-            this.list = list;
+        public Builder(@NonNull final TabItem[] array) {
+            ensureNotNull(array, "The array may not be null");
+            this.array = array;
         }
 
         @NonNull
         @Override
-        public ListIterator create() {
-            return new ListIterator(list, reverse, start);
+        public ArrayIterator create() {
+            return new ArrayIterator(array, reverse, start);
         }
 
     }
 
     /**
-     * The list, whose items are iterated.
+     * The array, whose items are iterated.
      */
-    private final List<TabItem> list;
+    private final TabItem[] array;
 
     /**
-     * Creates a new iterator, which allows to iterate the tab items, which are contained by a
-     * {@link List}.
+     * Creates a new iterator, which allows to iterate the tab items, which are contained by an
+     * array.
      *
-     * @param list
-     *         The list, whose items should be iterated, as an instance of the type {@link List}.
-     *         The list may not be null
+     * @param array
+     *         The array, whose items should be iterated, as an array of the type {@link TabItem}.
+     *         The array may not be null
      * @param reverse
      *         True, if the tabs should be iterated in reverse order, false otherwise
      * @param start
      *         The index of the first tab, which should be iterated, as an {@link Integer} value or
      *         -1, if all tabs should be iterated
      */
-    private ListIterator(@NonNull final List<TabItem> list, final boolean reverse,
-                         final int start) {
-        ensureNotNull(list, "The list may not be null");
-        this.list = list;
+    private ArrayIterator(@NonNull final TabItem[] array, final boolean reverse, final int start) {
+        ensureNotNull(array, "The array may not be null");
+        this.array = array;
         initialize(reverse, start);
     }
 
     @Override
     protected final int getCount() {
-        return list.size();
+        return array.length;
     }
 
     @NonNull
     @Override
     protected final TabItem getItem(final int index) {
-        return list.get(index);
+        return array[index];
     }
 
 }
