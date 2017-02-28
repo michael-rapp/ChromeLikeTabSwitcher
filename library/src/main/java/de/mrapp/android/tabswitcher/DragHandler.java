@@ -620,7 +620,7 @@ public class DragHandler {
      *         be null
      * @return The position, which has been calculated, as a {@link Float} value
      */
-    public final float calculateNonLinearPosition(@NonNull final TabItem predecessor) {
+    private float calculateNonLinearPosition(@NonNull final TabItem predecessor) {
         float previousPosition = predecessor.getTag().getPosition();
         float ratio = Math.min(1, previousPosition / calculateAttachedPosition());
         return previousPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
