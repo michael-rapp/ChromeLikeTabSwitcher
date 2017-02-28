@@ -45,9 +45,9 @@ import android.widget.FrameLayout;
 import java.util.Collections;
 
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
+import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -599,7 +599,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onAnimationUpdate(final ValueAnimator animation) {
-                TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
+                TabIterator iterator =
+                        new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                 TabItem tabItem;
 
                 while ((tabItem = iterator.next()) != null) {
@@ -1265,8 +1266,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem) {
         if (removedTabItem.getIndex() > 0) {
-            TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
-                    .start(removedTabItem.getIndex()).create();
+            TabIterator iterator =
+                    new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
+                            .start(removedTabItem.getIndex()).create();
             TabItem tabItem;
             Tag previousTag = null;
             boolean abort = false;
@@ -1323,8 +1325,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void relocateWhenRemovingStackedTab(@NonNull final TabItem removedTabItem,
                                                 final boolean start) {
         int startIndex = removedTabItem.getIndex() + (start ? -1 : 1);
-        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(start)
-                .start(removedTabItem.getIndex()).create();
+        TabIterator iterator =
+                new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(start)
+                        .start(removedTabItem.getIndex()).create();
         TabItem tabItem;
         Float previousProjectedPosition = null;
 
@@ -1632,7 +1635,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         recyclerAdapter.setViewRecycler(viewRecycler);
         int dragThreshold =
                 getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
-        dragHandler = new DragHandler(getTabSwitcher(), viewRecycler, arithmetics, dragThreshold);
+        dragHandler = new DragHandler(getTabSwitcher(), viewRecycler,
+                new TabIterator.Factory(getTabSwitcher(), viewRecycler), arithmetics,
+                dragThreshold);
         dragHandler.setCallback(this);
     }
 

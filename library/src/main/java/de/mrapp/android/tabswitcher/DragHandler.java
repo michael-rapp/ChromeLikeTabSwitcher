@@ -11,9 +11,9 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
+import de.mrapp.android.tabswitcher.iterator.AbstractIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
-import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -120,6 +120,8 @@ public class DragHandler {
             callback.onViewStateChanged(tabItem);
         }
     }
+
+    private final AbstractIterator.Factory factory;
 
     private final TabSwitcher tabSwitcher;
 
@@ -459,8 +461,8 @@ public class DragHandler {
      */
     private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
-        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler)
-                .start(Math.max(0, firstVisibleIndex)).create();
+        AbstractIterator.AbstractBuilder builder = factory.create();
+        AbstractIterator iterator = builder.start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -487,8 +489,8 @@ public class DragHandler {
      *         The current drag distance in pixels as a {@link Float} value
      */
     private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
-        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler)
-                .start(Math.max(0, firstVisibleIndex)).create();
+        AbstractIterator.AbstractBuilder builder = factory.create();
+        AbstractIterator iterator = builder.start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -505,8 +507,7 @@ public class DragHandler {
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator = new TabIterator.Builder(tabSwitcher, viewRecycler).reverse(true).start(start)
-                    .create();
+            iterator = builder.reverse(true).start(start).create();
             abort = false;
 
             while ((tabItem = iterator.next()) != null && !abort) {
@@ -718,7 +719,8 @@ public class DragHandler {
      */
     @Nullable
     private TabItem getFocusedTabView(final float position) {
-        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler).create();
+        AbstractIterator.AbstractBuilder<?, ?> builder = factory.create();
+        AbstractIterator iterator = builder.create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -744,13 +746,16 @@ public class DragHandler {
 
     public DragHandler(@NonNull final TabSwitcher tabSwitcher,
                        @NonNull final ViewRecycler<TabItem, Integer> viewRecycler,
+                       @NonNull final AbstractIterator.Factory factory,
                        @NonNull final Arithmetics arithmetics, final int dragThreshold) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
+        ensureNotNull(factory, "The factory may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
         ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.tabSwitcher = tabSwitcher;
         this.viewRecycler = viewRecycler;
+        this.factory = factory;
         this.arithmetics = arithmetics;
         this.dragThreshold = dragThreshold;
         this.dragHelper = new DragHelper(dragThreshold);
@@ -824,6 +829,8 @@ public class DragHandler {
      *         value
      */
     public final void handleDrag(final float dragPosition, final float orthogonalPosition) {
+        ensureNotNull(factory, "The factory may not be null");
+
         if (dragPosition <= startOvershootThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);

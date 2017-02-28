@@ -60,6 +60,36 @@ public class ArrayIterator extends AbstractIterator {
     }
 
     /**
+     * A factory, which allows to create instances of the class {@link Builder}.
+     */
+    public static class Factory implements AbstractIterator.Factory {
+
+        /**
+         * The array, which is used by the builders, which are created by the factory.
+         */
+        private final TabItem[] array;
+
+        /**
+         * Creates a new factory, which allows to create instances of the class {@link Builder}.
+         *
+         * @param array
+         *         The array, which should be used by the builders, which are created by the
+         *         factory, as an array of the type {@link TabItem}. The array may not be null
+         */
+        public Factory(@NonNull final TabItem[] array) {
+            ensureNotNull(array, "The array may not be null");
+            this.array = array;
+        }
+
+        @NonNull
+        @Override
+        public AbstractBuilder<?, ?> create() {
+            return new Builder(array);
+        }
+
+    }
+
+    /**
      * The array, whose items are iterated.
      */
     private final TabItem[] array;

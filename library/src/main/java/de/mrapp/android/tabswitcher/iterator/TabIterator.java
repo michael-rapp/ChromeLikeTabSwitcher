@@ -75,6 +75,51 @@ public class TabIterator extends AbstractIterator {
     }
 
     /**
+     * A factory, which allows to create instances of the class {@link Builder}.
+     */
+    public static class Factory implements AbstractIterator.Factory {
+
+        /**
+         * The tab switcher, which is used by the builders, which are created by the factory.
+         */
+        private final TabSwitcher tabSwitcher;
+
+        /**
+         * The view recycler, which is used by the builders, which are created by the factory.
+         */
+        private final ViewRecycler<TabItem, ?> viewRecycler;
+
+        /**
+         * Creates a new factory, which allows to create instances of the class {@link Builder}.
+         *
+         * @param tabSwitcher
+         *         The tab switcher, which should be used by the builders, which are created by the
+         *         factory, as an instance of the class {@link TabSwitcher}. The tab switcher may
+         *         not be null
+         * @param viewRecycler
+         *         The view recycler, which should be used by the builders, which are created by the
+         *         factory, as an instance of the class {@link ViewRecycler}. The view recycler may
+         *         not be null
+         */
+        public Factory(@NonNull final TabSwitcher tabSwitcher,
+                       @NonNull final ViewRecycler<TabItem, ?> viewRecycler) {
+            ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+            ensureNotNull(viewRecycler, "The view recycler may not be null");
+            this.tabSwitcher = tabSwitcher;
+            this.viewRecycler = viewRecycler;
+        }
+
+        @NonNull
+        @Override
+        public Builder create() {
+            return new Builder(tabSwitcher, viewRecycler);
+        }
+
+    }
+
+    ;
+
+    /**
      * The tab switcher, whose tabs are iterated.
      */
     private final TabSwitcher tabSwitcher;

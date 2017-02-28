@@ -32,7 +32,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
      * An abstract base class of all builders, which allows to configure and create instances of the
      * class {@link AbstractIterator}.
      */
-    protected static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractIterator> {
+    public static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractIterator> {
 
         /**
          * True, if the tabs should be iterated in reverse order, false otherwise.
@@ -102,6 +102,23 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
             this.start = start;
             return self();
         }
+
+    }
+
+    /**
+     * Defines the interface, a factory, which allows to create instances of the class {@link
+     * AbstractBuilder}, must implement.
+     */
+    public interface Factory {
+
+        /**
+         * Creates and returns the builder, which is created by the factory.
+         *
+         * @return The builder, which is created by the factory, as an instance of the class {@link
+         * AbstractBuilder}. The builder may not be null
+         */
+        @NonNull
+        AbstractBuilder<?, ?> create();
 
     }
 
