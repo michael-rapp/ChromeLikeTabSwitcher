@@ -11,9 +11,11 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.model;
+package de.mrapp.android.tabswitcher.iterator;
 
 import android.support.annotation.NonNull;
+
+import de.mrapp.android.tabswitcher.model.TabItem;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 
