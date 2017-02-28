@@ -101,8 +101,9 @@ public class Iterator extends AbstractIterator {
      *         The index of the first tab, which should be iterated, as an {@link Integer} value or
      *         -1, if all tabs should be iterated
      */
-    private Iterator(final TabSwitcher tabSwitcher, final ViewRecycler<TabItem, ?> viewRecycler,
-                     final boolean reverse, final int start) {
+    private Iterator(@NonNull final TabSwitcher tabSwitcher,
+                     @NonNull final ViewRecycler<TabItem, ?> viewRecycler, final boolean reverse,
+                     final int start) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
