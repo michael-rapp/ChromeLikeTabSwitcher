@@ -47,7 +47,7 @@ import java.util.Collections;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.iterator.Iterator;
+import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -599,7 +599,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onAnimationUpdate(final ValueAnimator animation) {
-                Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+                TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                 TabItem tabItem;
 
                 while ((tabItem = iterator.next()) != null) {
@@ -644,8 +644,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return True, if at least one tab was animated, false otherwise
      */
     private boolean animateTilt(@NonNull final Interpolator interpolator, final float maxAngle) {
-        Iterator iterator =
-                new Iterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
+        TabIterator iterator =
+                new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
         TabItem tabItem;
         boolean result = false;
 
@@ -1265,7 +1265,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem) {
         if (removedTabItem.getIndex() > 0) {
-            Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
+            TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
                     .start(removedTabItem.getIndex()).create();
             TabItem tabItem;
             Tag previousTag = null;
@@ -1323,7 +1323,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void relocateWhenRemovingStackedTab(@NonNull final TabItem removedTabItem,
                                                 final boolean start) {
         int startIndex = removedTabItem.getIndex() + (start ? -1 : 1);
-        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).reverse(start)
+        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).reverse(start)
                 .start(removedTabItem.getIndex()).create();
         TabItem tabItem;
         Float previousProjectedPosition = null;
@@ -1404,7 +1404,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The position of the first tab in pixels as a {@link Float} value
      */
     private void startOvershoot(final float position) {
-        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1432,7 +1432,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The angle, the tabs should be rotated by, in degrees as a {@link Float} value
      */
     private void tiltOnStartOvershoot(final float angle) {
-        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1461,7 +1461,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float maxCameraDistance = getMaxCameraDistance();
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
-        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1590,7 +1590,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         FrameLayout.LayoutParams toolbarLayoutParams =
                 (FrameLayout.LayoutParams) toolbar.getLayoutParams();
         toolbarLayoutParams.setMargins(left, top, right, 0);
-        Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -1752,7 +1752,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     setSelectedTabIndex(-1);
                     toolbar.setAlpha(isToolbarShown() ? 1 : 0);
                 } else {
-                    Iterator iterator = new Iterator.Builder(getTabSwitcher(), viewRecycler).
+                    TabIterator iterator = new TabIterator.Builder(getTabSwitcher(), viewRecycler).
                             reverse(true).create();
                     TabItem tabItem;
                     int startDelay = 0;
@@ -1786,8 +1786,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (!isSwitcherShown()) {
                     setSwitcherShown(true);
                     dragHandler.reset();
-                    Iterator iterator =
-                            new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+                    TabIterator iterator =
+                            new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                     TabItem tabItem;
 
                     while ((tabItem = iterator.next()) != null) {
@@ -1823,8 +1823,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     setSwitcherShown(false);
                     tabViewBottomMargin = -1;
                     recyclerAdapter.clearCachedPreviews();
-                    Iterator iterator =
-                            new Iterator.Builder(getTabSwitcher(), viewRecycler).create();
+                    TabIterator iterator =
+                            new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                     TabItem tabItem;
 
                     while ((tabItem = iterator.next()) != null) {

@@ -13,7 +13,7 @@ import android.view.ViewConfiguration;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
-import de.mrapp.android.tabswitcher.iterator.Iterator;
+import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -459,7 +459,7 @@ public class DragHandler {
      */
     private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
-        Iterator iterator = new Iterator.Builder(tabSwitcher, viewRecycler)
+        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
@@ -487,7 +487,7 @@ public class DragHandler {
      *         The current drag distance in pixels as a {@link Float} value
      */
     private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
-        Iterator iterator = new Iterator.Builder(tabSwitcher, viewRecycler)
+        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler)
                 .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
@@ -505,7 +505,7 @@ public class DragHandler {
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator = new Iterator.Builder(tabSwitcher, viewRecycler).reverse(true).start(start)
+            iterator = new TabIterator.Builder(tabSwitcher, viewRecycler).reverse(true).start(start)
                     .create();
             abort = false;
 
@@ -718,7 +718,7 @@ public class DragHandler {
      */
     @Nullable
     private TabItem getFocusedTabView(final float position) {
-        Iterator iterator = new Iterator.Builder(tabSwitcher, viewRecycler).create();
+        TabIterator iterator = new TabIterator.Builder(tabSwitcher, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {

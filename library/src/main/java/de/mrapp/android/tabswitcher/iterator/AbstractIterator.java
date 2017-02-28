@@ -68,7 +68,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
          * Creates the iterator, which has been configured by using the builder.
          *
          * @return The iterator, which has been created, as an instance of the class {@link
-         * Iterator}. The iterator may not be null
+         * TabIterator}. The iterator may not be null
          */
         @NonNull
         public abstract ProductType create();

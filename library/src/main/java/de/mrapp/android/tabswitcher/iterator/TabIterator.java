@@ -28,12 +28,12 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class Iterator extends AbstractIterator {
+public class TabIterator extends AbstractIterator {
 
     /**
-     * A builder, which allows to configure and create instances of the class {@link Iterator}.
+     * A builder, which allows to configure and create instances of the class {@link TabIterator}.
      */
-    public static class Builder extends AbstractBuilder<Builder, Iterator> {
+    public static class Builder extends AbstractBuilder<Builder, TabIterator> {
 
         /**
          * The tab switcher, whose tabs should be iterated by the iterator.
@@ -48,7 +48,7 @@ public class Iterator extends AbstractIterator {
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * Iterator}.
+         * TabIterator}.
          *
          * @param tabSwitcher
          *         The tab switcher, whose tabs should be iterated by the iterator, as an instance
@@ -68,8 +68,8 @@ public class Iterator extends AbstractIterator {
 
         @NonNull
         @Override
-        public Iterator create() {
-            return new Iterator(tabSwitcher, viewRecycler, reverse, start);
+        public TabIterator create() {
+            return new TabIterator(tabSwitcher, viewRecycler, reverse, start);
         }
 
     }
@@ -102,9 +102,9 @@ public class Iterator extends AbstractIterator {
      *         The index of the first tab, which should be iterated, as an {@link Integer} value or
      *         -1, if all tabs should be iterated
      */
-    private Iterator(@NonNull final TabSwitcher tabSwitcher,
-                     @NonNull final ViewRecycler<TabItem, ?> viewRecycler, final boolean reverse,
-                     final int start) {
+    private TabIterator(@NonNull final TabSwitcher tabSwitcher,
+                        @NonNull final ViewRecycler<TabItem, ?> viewRecycler, final boolean reverse,
+                        final int start) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
