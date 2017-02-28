@@ -1141,7 +1141,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             if (tabItem.getTag().getState() == State.HIDDEN) {
                 Pair<Float, State> pair = dragHandler
-                        .calculatePositionAndStateWhenStackedAtStart(swipedTabItem, tabItem);
+                        .calculatePositionAndStateWhenStackedAtStart(swipedTabItem, null);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateView(tabItem, null);
