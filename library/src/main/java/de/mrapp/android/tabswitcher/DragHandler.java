@@ -122,8 +122,6 @@ public class DragHandler {
 
     private final TabSwitcher tabSwitcher;
 
-    private final ViewRecycler<TabItem, Integer> viewRecycler;
-
     /**
      * The arithmetics, which are used to calculate the positions, size and rotation of tabs.
      */
@@ -790,13 +788,10 @@ public class DragHandler {
     }
 
     public DragHandler(@NonNull final TabSwitcher tabSwitcher,
-                       @NonNull final ViewRecycler<TabItem, Integer> viewRecycler,
                        @NonNull final Arithmetics arithmetics) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
         this.tabSwitcher = tabSwitcher;
-        this.viewRecycler = viewRecycler;
         this.arithmetics = arithmetics;
         this.dragHelper = new DragHelper(0);
         this.overshootDragHelper = new DragHelper(0);
