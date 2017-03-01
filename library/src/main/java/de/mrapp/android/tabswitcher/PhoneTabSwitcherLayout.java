@@ -885,6 +885,37 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Creates and returns a layout listener, which allows to adapt the bottom margin of a tab, once
+     * its view has been inflated.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be adapted, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @return The layout listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The layout listener may not be null
+     */
+    private OnGlobalLayoutListener createBottomMarginLayoutListener(
+            @NonNull final TabItem tabItem) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = tabItem.getView();
+
+                if (tabViewBottomMargin == -1) {
+                    tabViewBottomMargin = calculateBottomMargin(view);
+                }
+
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
+                layoutParams.bottomMargin = tabViewBottomMargin;
+                view.setLayoutParams(layoutParams);
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to adapt the size and position of a tab,
      * once its view has been inflated.
      *
@@ -1952,7 +1983,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             while ((tabItem = iterator.next()) != null) {
                 if (tabItem.isVisible()) {
-                    inflateAndUpdateView(tabItem, null);
+                    inflateAndUpdateView(tabItem, createBottomMarginLayoutListener(tabItem));
                 }
             }
 

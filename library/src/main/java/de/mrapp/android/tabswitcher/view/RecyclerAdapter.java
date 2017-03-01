@@ -403,10 +403,11 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         int borderMargin = -(tabInset + tabBorderWidth);
+        int bottomMargin = params.length > 0 && params[0] != -1 ? params[0] : borderMargin;
         layoutParams.leftMargin = borderMargin;
         layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
         layoutParams.rightMargin = borderMargin;
-        layoutParams.bottomMargin = params.length > 0 ? params[0] : borderMargin;
+        layoutParams.bottomMargin = bottomMargin;
         view.setLayoutParams(layoutParams);
         view.setTag(R.id.tag_view_holder, viewHolder);
         tabItem.setView(view);
