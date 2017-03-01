@@ -1675,6 +1675,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return super.isAnimationRunning() || flingAnimation != null;
     }
 
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final AnimationType animationType) {
@@ -1705,6 +1706,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         });
     }
 
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void removeTab(@NonNull final Tab tab,
                                 @NonNull final AnimationType animationType) {
@@ -1749,6 +1751,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         });
     }
 
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void clear(@NonNull final AnimationType animationType) {
         enqueuePendingAction(new Runnable() {
@@ -1788,17 +1791,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         });
     }
 
-    private void print(@NonNull final TabItem[] items) {
-        System.out.println("-------------------");
-
-        for (TabItem item : items) {
-            System.out.println(
-                    item.getIndex() + ": pos = " + item.getTag().getPosition() + ", state = " +
-                            item.getTag().getState());
-        }
-    }
-
     // TODO: Calling this method should also work when the view is not yet inflated
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void showSwitcher() {
         enqueuePendingAction(new Runnable() {
@@ -1818,8 +1812,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         tabItems[tabItem.getIndex()] = tabItem;
                     }
 
-                    print(tabItems);
-
                     AbstractIterator.Factory factory = new ArrayIterator.Factory(tabItems);
                     int dragDistance = 0;
                     boolean abort = false;
@@ -1832,8 +1824,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     dragHandler.handleRelease(factory, null, dragThreshold);
                     dragHandler.setCallback(PhoneTabSwitcherLayout.this);
                     iterator = new ArrayIterator.Builder(tabItems).create();
-
-                    print(tabItems);
 
                     while ((tabItem = iterator.next()) != null) {
                         if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
@@ -1856,6 +1846,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     // TODO: Calling this method should also work when the view is not yet inflated
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void hideSwitcher() {
         enqueuePendingAction(new Runnable() {
@@ -1884,6 +1875,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         });
     }
 
+    // TODO: Only modify views if tab switcher is already laid out
     @Override
     public final void selectTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
