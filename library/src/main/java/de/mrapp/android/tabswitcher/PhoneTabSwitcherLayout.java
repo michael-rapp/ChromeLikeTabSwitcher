@@ -96,7 +96,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (flingAnimation != null) {
-                dragHandler.handleDrag(distance * interpolatedTime, 0);
+                dragHandler.handleDrag(new TabIterator.Factory(getTabSwitcher(), viewRecycler),
+                        distance * interpolatedTime, 0);
             }
         }
 
@@ -106,6 +107,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The arithmetics, which are used to calculate the positions, size and rotation of tabs.
      */
     private final Arithmetics arithmetics;
+
+    /**
+     * The threshold, which must be reached until tabs are dragged, in pixels.
+     */
+    private final int dragThreshold;
 
     /**
      * The inset of tabs in pixels.
@@ -1115,7 +1121,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onAnimationEnd(final Animation animation) {
-                dragHandler.handleRelease(null);
+                dragHandler.handleRelease(new TabIterator.Factory(getTabSwitcher(), viewRecycler),
+                        null, dragThreshold);
                 flingAnimation = null;
                 executePendingAction();
             }
@@ -1554,6 +1561,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         super(tabSwitcher);
         arithmetics = new Arithmetics(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
+        dragThreshold =
+                getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
@@ -1635,17 +1644,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(TabItem.COMPARATOR));
         recyclerAdapter.setViewRecycler(viewRecycler);
-        int dragThreshold =
-                getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
-        dragHandler = new DragHandler(getTabSwitcher(), viewRecycler,
-                new TabIterator.Factory(getTabSwitcher(), viewRecycler), arithmetics,
-                dragThreshold);
-        dragHandler.setCallback(this);
+        dragHandler = new DragHandler(getTabSwitcher(), viewRecycler, arithmetics);
     }
 
     @Override
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        return dragHandler.handleTouchEvent(event);
+        return dragHandler
+                .handleTouchEvent(new TabIterator.Factory(getTabSwitcher(), viewRecycler), event);
     }
 
     @Override
@@ -1783,6 +1788,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         });
     }
 
+    private void print(@NonNull final TabItem[] items) {
+        System.out.println("-------------------");
+
+        for (TabItem item : items) {
+            System.out.println(
+                    item.getIndex() + ": pos = " + item.getTag().getPosition() + ", state = " +
+                            item.getTag().getState());
+        }
+    }
+
     // TODO: Calling this method should also work when the view is not yet inflated
     @Override
     public final void showSwitcher() {
@@ -1792,7 +1807,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void run() {
                 if (!isSwitcherShown()) {
                     setSwitcherShown(true);
-                    dragHandler.reset();
+                    dragHandler.reset(0);
                     TabItem[] tabItems = new TabItem[getCount()];
                     AbstractIterator iterator =
                             new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
@@ -1803,20 +1818,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         tabItems[tabItem.getIndex()] = tabItem;
                     }
 
+                    print(tabItems);
+
                     AbstractIterator.Factory factory = new ArrayIterator.Factory(tabItems);
-                    DragHandler dragHandler2 =
-                            new DragHandler(getTabSwitcher(), viewRecycler, factory, arithmetics,
-                                    0);
                     int dragDistance = 0;
                     boolean abort = false;
 
                     while (tabItems[getSelectedTabIndex()].getTag().getPosition() <
                             dragHandler.calculateAttachedPosition() && !abort) {
-                        abort = !dragHandler2.handleDrag(++dragDistance, 0);
+                        abort = !dragHandler.handleDrag(factory, ++dragDistance, 0);
                     }
 
-                    dragHandler2.handleRelease(null);
+                    dragHandler.handleRelease(factory, null, dragThreshold);
+                    dragHandler.setCallback(PhoneTabSwitcherLayout.this);
                     iterator = new ArrayIterator.Builder(tabItems).create();
+
+                    print(tabItems);
 
                     while ((tabItem = iterator.next()) != null) {
                         if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
@@ -1849,6 +1866,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     setSwitcherShown(false);
                     tabViewBottomMargin = -1;
                     recyclerAdapter.clearCachedPreviews();
+                    dragHandler.setCallback(null);
                     TabIterator iterator =
                             new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                     TabItem tabItem;
@@ -1920,7 +1938,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (flingAnimation != null) {
             flingAnimation.cancel();
             flingAnimation = null;
-            dragHandler.handleRelease(null);
+            dragHandler.handleRelease(new TabIterator.Factory(getTabSwitcher(), viewRecycler), null,
+                    dragThreshold);
         }
     }
 
