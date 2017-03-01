@@ -45,6 +45,8 @@ import android.widget.FrameLayout;
 import java.util.Collections;
 
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
+import de.mrapp.android.tabswitcher.iterator.AbstractIterator;
+import de.mrapp.android.tabswitcher.iterator.ArrayIterator;
 import de.mrapp.android.tabswitcher.iterator.TabIterator;
 import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
@@ -1791,13 +1793,32 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (!isSwitcherShown()) {
                     setSwitcherShown(true);
                     dragHandler.reset();
-                    TabIterator iterator =
+                    TabItem[] tabItems = new TabItem[getCount()];
+                    AbstractIterator iterator =
                             new TabIterator.Builder(getTabSwitcher(), viewRecycler).create();
                     TabItem tabItem;
 
                     while ((tabItem = iterator.next()) != null) {
                         calculateAndClipStartPosition(tabItem, iterator.previous());
+                        tabItems[tabItem.getIndex()] = tabItem;
+                    }
 
+                    AbstractIterator.Factory factory = new ArrayIterator.Factory(tabItems);
+                    DragHandler dragHandler2 =
+                            new DragHandler(getTabSwitcher(), viewRecycler, factory, arithmetics,
+                                    0);
+                    int dragDistance = 0;
+                    boolean abort = false;
+
+                    while (tabItems[getSelectedTabIndex()].getTag().getPosition() <
+                            dragHandler.calculateAttachedPosition() && !abort) {
+                        abort = !dragHandler2.handleDrag(++dragDistance, 0);
+                    }
+
+                    dragHandler2.handleRelease(null);
+                    iterator = new ArrayIterator.Builder(tabItems).create();
+
+                    while ((tabItem = iterator.next()) != null) {
                         if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
                             viewRecycler.inflate(tabItem);
                             View view = tabItem.getView();

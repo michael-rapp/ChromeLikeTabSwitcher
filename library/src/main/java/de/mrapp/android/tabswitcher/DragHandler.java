@@ -645,7 +645,7 @@ public class DragHandler {
      *
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
-    private float calculateAttachedPosition() {
+    public final float calculateAttachedPosition() {
         if (attachedPosition == -1) {
             attachedPosition =
                     (arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
@@ -689,7 +689,9 @@ public class DragHandler {
         if (tabSwitcher.getCount() <= 1) {
             return true;
         } else {
-            TabItem tabItem = TabItem.create(tabSwitcher, viewRecycler, 0);
+            AbstractIterator.AbstractBuilder builder = factory.create();
+            AbstractIterator iterator = builder.create();
+            TabItem tabItem = iterator.getItem(0);
             return tabItem.getTag().getState() == State.STACKED_START_ATOP;
         }
     }
@@ -703,7 +705,9 @@ public class DragHandler {
         if (tabSwitcher.getCount() <= 1) {
             return true;
         } else {
-            TabItem tabItem = TabItem.create(tabSwitcher, viewRecycler, tabSwitcher.getCount() - 2);
+            AbstractIterator.AbstractBuilder builder = factory.create();
+            AbstractIterator iterator = builder.create();
+            TabItem tabItem = iterator.getItem(tabSwitcher.getCount() - 2);
             return tabItem.getTag().getPosition() >= maxTabSpacing;
         }
     }
@@ -827,8 +831,9 @@ public class DragHandler {
      * @param orthogonalPosition
      *         The position of the pointer of the orthogonal axis in pixels as a {@link Float}
      *         value
+     * @return True, if any tabs have been moved, false otherwise
      */
-    public final void handleDrag(final float dragPosition, final float orthogonalPosition) {
+    public final boolean handleDrag(final float dragPosition, final float orthogonalPosition) {
         ensureNotNull(factory, "The factory may not be null");
 
         if (dragPosition <= startOvershootThreshold) {
@@ -842,7 +847,9 @@ public class DragHandler {
 
             if (overshootDistance <= maxOvershootDistance) {
                 float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-                TabItem tabItem = TabItem.create(tabSwitcher, viewRecycler, 0);
+                AbstractIterator.AbstractBuilder builder = factory.create();
+                AbstractIterator iterator = builder.create();
+                TabItem tabItem = iterator.getItem(0);
                 float currentPosition = tabItem.getTag().getPosition();
                 float position = currentPosition - (currentPosition * ratio);
                 notifyOnStartOvershoot(position);
@@ -892,8 +899,11 @@ public class DragHandler {
             } else if (dragState != DragState.NONE) {
                 calculatePositions();
                 checkIfOvershooting(dragPosition);
+                return true;
             }
         }
+
+        return false;
     }
 
     /**

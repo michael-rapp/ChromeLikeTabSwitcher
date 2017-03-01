@@ -153,7 +153,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
      *
      * @return The total number of available items as an {@link Integer} value
      */
-    protected abstract int getCount();
+    public abstract int getCount();
 
     /**
      * The method, which is invoked on subclasses in order to retrieve the item, which corresponds
@@ -165,7 +165,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
      * TabItem}. The tab item may not be null
      */
     @NonNull
-    protected abstract TabItem getItem(final int index);
+    public abstract TabItem getItem(final int index);
 
     /**
      * Initializes the iterator.

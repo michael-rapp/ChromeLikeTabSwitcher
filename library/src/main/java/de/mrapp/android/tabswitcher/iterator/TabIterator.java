@@ -158,13 +158,13 @@ public class TabIterator extends AbstractIterator {
     }
 
     @Override
-    protected final int getCount() {
+    public final int getCount() {
         return tabSwitcher.getCount();
     }
 
     @NonNull
     @Override
-    protected final TabItem getItem(final int index) {
+    public final TabItem getItem(final int index) {
         return TabItem.create(tabSwitcher, viewRecycler, index);
     }
 
