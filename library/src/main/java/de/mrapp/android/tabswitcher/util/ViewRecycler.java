@@ -177,7 +177,7 @@ public class ViewRecycler<ItemType, ParamType> {
     private final Context context;
 
     /**
-     * The adapter, which is used to inflate and adapt the appearance views.
+     * The adapter, which is used to inflate and adapt the appearance of views.
      */
     private final Adapter<ItemType, ParamType> adapter;
 
