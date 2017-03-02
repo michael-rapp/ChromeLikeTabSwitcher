@@ -17,7 +17,7 @@ import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -44,7 +44,7 @@ public class TabIterator extends AbstractIterator {
          * The view recycler, which allows to inflated the views, which are used to visualize the
          * iterated tabs.
          */
-        private final ViewRecycler<TabItem, ?> viewRecycler;
+        private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
@@ -55,11 +55,11 @@ public class TabIterator extends AbstractIterator {
          *         of the class {@link TabSwitcher}. The tab switcher may not be null
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
-         *         the iterated tabs, as an instance of the class {@link ViewRecycler}. The view
+         *         the iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view
          *         recycler may not be null
          */
         public Builder(@NonNull final TabSwitcher tabSwitcher,
-                       @NonNull final ViewRecycler<TabItem, ?> viewRecycler) {
+                       @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
             ensureNotNull(tabSwitcher, "The tab switcher may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             this.tabSwitcher = tabSwitcher;
@@ -87,7 +87,7 @@ public class TabIterator extends AbstractIterator {
         /**
          * The view recycler, which is used by the builders, which are created by the factory.
          */
-        private final ViewRecycler<TabItem, ?> viewRecycler;
+        private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
         /**
          * Creates a new factory, which allows to create instances of the class {@link Builder}.
@@ -98,11 +98,11 @@ public class TabIterator extends AbstractIterator {
          *         not be null
          * @param viewRecycler
          *         The view recycler, which should be used by the builders, which are created by the
-         *         factory, as an instance of the class {@link ViewRecycler}. The view recycler may
+         *         factory, as an instance of the class {@link AttachedViewRecycler}. The view recycler may
          *         not be null
          */
         public Factory(@NonNull final TabSwitcher tabSwitcher,
-                       @NonNull final ViewRecycler<TabItem, ?> viewRecycler) {
+                       @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
             ensureNotNull(tabSwitcher, "The tab switcher may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             this.tabSwitcher = tabSwitcher;
@@ -128,7 +128,7 @@ public class TabIterator extends AbstractIterator {
      * The view recycler, which allows to inflated the views, which are used to visualize the
      * iterated tabs.
      */
-    private final ViewRecycler<TabItem, ?> viewRecycler;
+    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
     /**
      * Creates a new iterator, which allows to iterate the tab items, which correspond to the tabs
@@ -139,7 +139,7 @@ public class TabIterator extends AbstractIterator {
      *         TabSwitcher}. The tab switcher may not be null
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
-     *         iterated tabs, as an instance of the class {@link ViewRecycler}. The view recycler
+     *         iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler
      *         may not be null
      * @param reverse
      *         True, if the tabs should be iterated in reverse order, false otherwise
@@ -148,7 +148,7 @@ public class TabIterator extends AbstractIterator {
      *         -1, if all tabs should be iterated
      */
     private TabIterator(@NonNull final TabSwitcher tabSwitcher,
-                        @NonNull final ViewRecycler<TabItem, ?> viewRecycler, final boolean reverse,
+                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler, final boolean reverse,
                         final int start) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");

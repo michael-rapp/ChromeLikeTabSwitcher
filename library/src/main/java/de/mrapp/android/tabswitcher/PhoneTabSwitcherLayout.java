@@ -54,7 +54,7 @@ import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
@@ -206,7 +206,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
      */
-    private ViewRecycler<TabItem, Integer> viewRecycler;
+    private AttachedViewRecycler<TabItem, Integer> viewRecycler;
 
     /**
      * The drag hander, which is used to calculate the positions of tabs.
@@ -1749,7 +1749,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ChildViewRecycler(inflater);
         recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
-        viewRecycler = new ViewRecycler<>(tabContainer, recyclerAdapter, inflater,
+        viewRecycler = new AttachedViewRecycler<>(tabContainer, recyclerAdapter, inflater,
                 Collections.reverseOrder(TabItem.COMPARATOR));
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new DragHandler(getTabSwitcher(), arithmetics);

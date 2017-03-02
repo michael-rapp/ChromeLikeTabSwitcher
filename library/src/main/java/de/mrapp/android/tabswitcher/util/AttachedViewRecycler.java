@@ -59,11 +59,11 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.14.0
  */
-public class ViewRecycler<ItemType, ParamType> {
+public class AttachedViewRecycler<ItemType, ParamType> {
 
     /**
      * An abstract base class for all adapters, which are responsible for inflating views, which
-     * should be used to visualize the items of a {@link ViewRecycler}.
+     * should be used to visualize the items of a {@link AttachedViewRecycler}.
      *
      * @param <ItemType>
      *         The type of the items, which should be visualized by the adapter
@@ -282,8 +282,8 @@ public class ViewRecycler<ItemType, ParamType> {
      *         The adapter, which should be used to inflate and adapt the appearance of views, as an
      *         instance of the class {@link Adapter}. The adapter may not be null
      */
-    public ViewRecycler(@NonNull final ViewGroup parent,
-                        @NonNull final Adapter<ItemType, ParamType> adapter) {
+    public AttachedViewRecycler(@NonNull final ViewGroup parent,
+                                @NonNull final Adapter<ItemType, ParamType> adapter) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()));
     }
 
@@ -303,9 +303,9 @@ public class ViewRecycler<ItemType, ParamType> {
      *         views to the parent, as an instance of the type {@link Comparator} or null, if the
      *         views should be added in the order of their inflation
      */
-    public ViewRecycler(@NonNull final ViewGroup parent,
-                        @NonNull final Adapter<ItemType, ParamType> adapter,
-                        @Nullable final Comparator<ItemType> comparator) {
+    public AttachedViewRecycler(@NonNull final ViewGroup parent,
+                                @NonNull final Adapter<ItemType, ParamType> adapter,
+                                @Nullable final Comparator<ItemType> comparator) {
         this(parent, adapter, LayoutInflater.from(parent.getContext()), comparator);
     }
 
@@ -324,9 +324,9 @@ public class ViewRecycler<ItemType, ParamType> {
      *         The layout inflater, which should be used to inflate views, as an instance of the
      *         class {@link LayoutInflater}. The layout inflater may not be null
      */
-    public ViewRecycler(@NonNull final ViewGroup parent,
-                        @NonNull final Adapter<ItemType, ParamType> adapter,
-                        @NonNull final LayoutInflater inflater) {
+    public AttachedViewRecycler(@NonNull final ViewGroup parent,
+                                @NonNull final Adapter<ItemType, ParamType> adapter,
+                                @NonNull final LayoutInflater inflater) {
         this(parent, adapter, inflater, null);
     }
 
@@ -349,10 +349,10 @@ public class ViewRecycler<ItemType, ParamType> {
      *         views to the parent, as an instance of the type {@link Comparator} or null, if the
      *         views should be added in the order of their inflation
      */
-    public ViewRecycler(@NonNull final ViewGroup parent,
-                        @NonNull final Adapter<ItemType, ParamType> adapter,
-                        @NonNull final LayoutInflater inflater,
-                        @Nullable final Comparator<ItemType> comparator) {
+    public AttachedViewRecycler(@NonNull final ViewGroup parent,
+                                @NonNull final Adapter<ItemType, ParamType> adapter,
+                                @NonNull final LayoutInflater inflater,
+                                @Nullable final Comparator<ItemType> comparator) {
         ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(adapter, "The adapter may not be null");
         ensureNotNull(inflater, "The layout inflater may not be null");

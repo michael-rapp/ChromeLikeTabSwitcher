@@ -37,7 +37,7 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -49,7 +49,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
+public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integer>
         implements Tab.Callback {
 
     /**
@@ -91,7 +91,7 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
     /**
      * The view recycler, the adapter is bound to.
      */
-    private ViewRecycler<TabItem, Integer> viewRecycler;
+    private AttachedViewRecycler<TabItem, Integer> viewRecycler;
 
     /**
      * Inflates the child view of a tab and adds it to the view hierarchy.
@@ -341,9 +341,9 @@ public class RecyclerAdapter extends ViewRecycler.Adapter<TabItem, Integer>
      *
      * @param viewRecycler
      *         The view recycler, which should be set, as an instance of the class {@link
-     *         ViewRecycler}. The view recycler may not be null
+     *         AttachedViewRecycler}. The view recycler may not be null
      */
-    public final void setViewRecycler(@NonNull final ViewRecycler<TabItem, Integer> viewRecycler) {
+    public final void setViewRecycler(@NonNull final AttachedViewRecycler<TabItem, Integer> viewRecycler) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
     }

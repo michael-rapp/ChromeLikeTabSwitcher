@@ -18,7 +18,6 @@ import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.DragHelper;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 

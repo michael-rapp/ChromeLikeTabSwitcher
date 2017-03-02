@@ -22,7 +22,7 @@ import java.util.Comparator;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
@@ -101,7 +101,7 @@ public class TabItem {
      *         TabSwitcher}. The tab switcher may not be null
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
-     *         tabs, as an instance of the class {@link ViewRecycler}. The view recycler may not be
+     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may not be
      *         null
      * @param index
      *         The index of the tab as an {@link Integer} value. The index must be at least 0
@@ -110,7 +110,7 @@ public class TabItem {
      */
     @NonNull
     public static TabItem create(@NonNull final TabSwitcher tabSwitcher,
-                                 @NonNull final ViewRecycler<TabItem, ?> viewRecycler,
+                                 @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
                                  final int index) {
         Tab tab = tabSwitcher.getTab(index);
         TabItem tabItem = new TabItem(index, tab);
