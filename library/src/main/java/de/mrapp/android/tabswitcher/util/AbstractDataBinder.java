@@ -145,6 +145,16 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     private final ExecutorService threadPool;
 
     /**
+     * The object, which is used to acquire locks, when cancelling to load data.
+     */
+    private final Object cancelLock;
+
+    /**
+     * True, if loading the data has been canceled, false otherwise
+     */
+    private boolean canceled;
+
+    /**
      * True, if data should be cached, false otherwise.
      */
     private boolean useCache;
@@ -202,10 +212,12 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
 
             @Override
             public void run() {
-                task.result = loadData(task);
-                Message message = Message.obtain();
-                message.obj = task;
-                sendMessage(message);
+                if (!isCanceled()) {
+                    task.result = loadData(task);
+                    Message message = Message.obtain();
+                    message.obj = task;
+                    sendMessage(message);
+                }
             }
 
         });
@@ -231,6 +243,18 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
             logger.logError(getClass(), "An error occurred while loading data with key " + task.key,
                     e);
             return null;
+        }
+    }
+
+    /**
+     * Sets, whether loading the data has been canceled, or not.
+     *
+     * @param canceled
+     *         True, if loading the data has been canceled, false otherwise
+     */
+    private void setCanceled(final boolean canceled) {
+        synchronized (cancelLock) {
+            this.canceled = canceled;
         }
     }
 
@@ -323,6 +347,8 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
         this.cache = Collections.synchronizedMap(new HashMap<KeyType, SoftReference<DataType>>());
         this.views = Collections.synchronizedMap(new WeakHashMap<ViewType, KeyType>());
         this.threadPool = threadPool;
+        this.cancelLock = new Object();
+        this.canceled = false;
         this.useCache = true;
     }
 
@@ -402,22 +428,44 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
         ensureNotNull(key, "The key may not be null");
         ensureNotNull(view, "The view may not be null");
         ensureNotNull(params, "The array may not be null");
+        setCanceled(false);
         views.put(view, key);
         DataType data = getCachedData(key);
 
-        if (data != null) {
-            onPostExecute(view, data, params);
-            logger.logInfo(getClass(), "Loaded data with key " + key + " from cache");
-        } else {
-            onPreExecute(view, params);
-            Task<DataType, KeyType, ViewType, ParamType> task = new Task<>(view, key, params);
-
-            if (async) {
-                loadDataAsynchronously(task);
-            } else {
-                data = loadData(task);
+        if (!isCanceled()) {
+            if (data != null) {
                 onPostExecute(view, data, params);
+                logger.logInfo(getClass(), "Loaded data with key " + key + " from cache");
+            } else {
+                onPreExecute(view, params);
+                Task<DataType, KeyType, ViewType, ParamType> task = new Task<>(view, key, params);
+
+                if (async) {
+                    loadDataAsynchronously(task);
+                } else {
+                    data = loadData(task);
+                    onPostExecute(view, data, params);
+                }
             }
+        }
+    }
+
+    /**
+     * Cancels loading the data.
+     */
+    public final void cancel() {
+        setCanceled(true);
+        logger.logInfo(getClass(), "Canceled to load data");
+    }
+
+    /**
+     * Returns, whether loading the data has been canceled, or not.
+     *
+     * @return True, if loading the data has been canceled, false otherwise
+     */
+    public final boolean isCanceled() {
+        synchronized (cancelLock) {
+            return canceled;
         }
     }
 
@@ -463,13 +511,19 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     @Override
     public final void handleMessage(final Message msg) {
         Task<DataType, KeyType, ViewType, ParamType> task = (Task) msg.obj;
-        KeyType key = views.get(task.view);
 
-        if (key != null && key.equals(task.key)) {
-            onPostExecute(task.view, task.result, task.params);
+        if (!isCanceled()) {
+            KeyType key = views.get(task.view);
+
+            if (key != null && key.equals(task.key)) {
+                onPostExecute(task.view, task.result, task.params);
+            } else {
+                logger.logVerbose(getClass(),
+                        "Data with key " + task.key + " not displayed. View has been recycled");
+            }
         } else {
             logger.logVerbose(getClass(),
-                    "Data with key " + task.key + " not displayed. View has been recycled");
+                    "Data with key " + task.key + " not displayed. Loading data has been canceled");
         }
     }
 
