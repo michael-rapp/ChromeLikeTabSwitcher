@@ -135,6 +135,7 @@ public class DragHelper {
      * <code>reset():void</code> for further information.
      *
      * @return True, if the instance has been marked to be reset, false otherwise
+     * @deprecated Use <code>isReset</code>-method instead
      */
     @Deprecated
     public final boolean isReseted() {
@@ -194,6 +195,7 @@ public class DragHelper {
      *
      * @return The distance, which has been passed while dragging, as an {@link Integer} value or 0,
      * if the threshold has not been reached yet
+     * @deprecated Use <code>getDragDistance</code>-method instead
      */
     @Deprecated
     public final int getDistance() {
@@ -215,6 +217,7 @@ public class DragHelper {
      *
      * @return The position, where the gesture has been started at, as an {@link Integer} value or
      * -1, if no gesture has been started yet
+     * @deprecated Use <code>getDragStartPosition</code>-method instead
      */
     @Deprecated
     public final int getStartPosition() {
