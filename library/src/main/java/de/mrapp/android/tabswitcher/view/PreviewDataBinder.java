@@ -17,11 +17,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import de.mrapp.android.tabswitcher.Tab;
@@ -51,11 +51,6 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     private final ChildViewRecycler childViewRecycler;
 
     /**
-     * The view, which is currently rendered as a preview image.
-     */
-    private View child;
-
-    /**
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
      * display them afterwards.
      *
@@ -80,22 +75,25 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
                                       @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
         TabViewHolder viewHolder = tabItem.getViewHolder();
-        child = viewHolder.child;
+        View child = viewHolder.child;
         Tab tab = tabItem.getTab();
 
         if (child == null) {
             child = childViewRecycler.inflate(tab, viewHolder.childContainer);
-        } else {
-            viewHolder.child = null;
         }
 
         tabSwitcher.getDecorator().applyDecorator(getContext(), tabSwitcher, child, tab);
+        viewHolder.child = child;
     }
 
     @Nullable
     @Override
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {
+        TabItem tabItem = params[0];
+        TabViewHolder viewHolder = tabItem.getViewHolder();
+        View child = viewHolder.child;
+        viewHolder.child = null;
         int width = tabSwitcher.getWidth();
         int height = tabSwitcher.getHeight();
         child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -107,8 +105,11 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
 
         // TODO: This is only for debugging purposes
         Paint paint = new Paint();
+        paint.setTextSize(48);
+        paint.setTypeface(Typeface.DEFAULT_BOLD);
         paint.setColor(Color.RED);
-        canvas.drawCircle(100, 100, 40, paint);
+        canvas.drawText(Integer.toString(params[0].getIndex()), 50, 50, paint);
+
         return bitmap;
     }
 

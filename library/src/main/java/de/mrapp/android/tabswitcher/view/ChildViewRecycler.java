@@ -101,7 +101,8 @@ public class ChildViewRecycler {
         if (views == null) {
             views = new SparseArray<>(decorator.getViewTypeCount());
         } else {
-            child = views.get(viewType);
+            // TODO: Views are now forced to be always inflated because of concurrency issues. A more sophisticated view recycling mechanism is needed.
+            // child = views.get(viewType);
         }
 
         if (child == null) {

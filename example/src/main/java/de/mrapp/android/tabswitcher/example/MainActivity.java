@@ -212,8 +212,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             tab.setIcon(R.drawable.ic_file_outline_18dp);
             tabSwitcher.addTab(tab);
         }
-
-        //tabSwitcher.showSwitcher();
     }
 
 }
