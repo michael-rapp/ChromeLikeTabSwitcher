@@ -55,7 +55,8 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
-import de.mrapp.android.tabswitcher.view.ChildViewRecycler;
+import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.tabswitcher.view.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -196,7 +197,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The view recycler, which allows to recycler the child views of tabs.
      */
-    private ChildViewRecycler childViewRecycler;
+    private ViewRecycler<Tab, Void> childViewRecycler;
 
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
@@ -1320,7 +1321,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void inflateAndUpdateView(@NonNull final TabItem tabItem,
                                       @Nullable final OnGlobalLayoutListener listener) {
-        boolean inflated = viewRecycler.inflate(tabItem, tabViewBottomMargin);
+        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem, tabViewBottomMargin);
+        boolean inflated = pair.second;
 
         if (inflated) {
             View view = tabItem.getView();
@@ -1702,7 +1704,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     protected final void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
-        childViewRecycler.setDecorator(decorator);
+        childViewRecycler.setAdapter(new ChildRecyclerAdapter(getTabSwitcher(), decorator));
         recyclerAdapter.clearCachedPreviews();
     }
 
@@ -1747,7 +1749,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         tabContainer = new FrameLayout(getContext());
         getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
-        childViewRecycler = new ChildViewRecycler(inflater);
+        childViewRecycler = new ViewRecycler<Tab, Void>(inflater);
         recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(TabItem.COMPARATOR));

@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,9 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
+import de.mrapp.android.tabswitcher.util.AbstractViewRecycler;
 import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
+import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -49,7 +52,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integer>
+public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integer>
         implements Tab.Callback {
 
     /**
@@ -60,7 +63,7 @@ public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integ
     /**
      * The view recycler, which allows to inflate the child views of tabs.
      */
-    private final ChildViewRecycler childViewRecycler;
+    private final ViewRecycler<Tab, Void> childViewRecycler;
 
     /**
      * The data binder, which allows to render previews of tabs.
@@ -107,7 +110,8 @@ public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integ
 
         if (view == null) {
             ViewGroup parent = viewHolder.childContainer;
-            view = childViewRecycler.inflate(tab, parent);
+            Pair<View, ?> pair = childViewRecycler.inflate(tab, parent);
+            view = pair.first;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
@@ -295,7 +299,7 @@ public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integ
      * tabs of a {@link TabSwitcher}.
      */
     public RecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                           @NonNull final ChildViewRecycler childViewRecycler) {
+                           @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
@@ -343,7 +347,8 @@ public class RecyclerAdapter extends AttachedViewRecycler.Adapter<TabItem, Integ
      *         The view recycler, which should be set, as an instance of the class {@link
      *         AttachedViewRecycler}. The view recycler may not be null
      */
-    public final void setViewRecycler(@NonNull final AttachedViewRecycler<TabItem, Integer> viewRecycler) {
+    public final void setViewRecycler(
+            @NonNull final AttachedViewRecycler<TabItem, Integer> viewRecycler) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
     }

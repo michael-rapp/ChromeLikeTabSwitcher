@@ -20,6 +20,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
+import de.mrapp.android.tabswitcher.util.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -48,7 +50,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     /**
      * The view recycler, which is used to inflate child views.
      */
-    private final ChildViewRecycler childViewRecycler;
+    private final ViewRecycler<Tab, Void> childViewRecycler;
 
     /**
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
@@ -59,10 +61,10 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      *         TabSwitcher}. The tab switcher may not be null
      * @param childViewRecycler
      *         The view recycler, which should be used to inflate child views, as an instance of the
-     *         class {@link ChildViewRecycler}. The view recycler may not be null
+     *         class {@link ViewRecycler}. The view recycler may not be null
      */
     public PreviewDataBinder(@NonNull final TabSwitcher tabSwitcher,
-                             @NonNull final ChildViewRecycler childViewRecycler) {
+                             @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
         super(tabSwitcher.getContext());
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
@@ -79,7 +81,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         Tab tab = tabItem.getTab();
 
         if (child == null) {
-            child = childViewRecycler.inflate(tab, viewHolder.childContainer);
+            Pair<View, ?> pair = childViewRecycler.inflate(tab, viewHolder.childContainer);
+            child = pair.first;
         }
 
         tabSwitcher.getDecorator().applyDecorator(getContext(), tabSwitcher, child, tab);
@@ -118,6 +121,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
                                        @NonNull final TabItem... params) {
         view.setImageBitmap(data);
         view.setVisibility(data != null ? View.VISIBLE : View.GONE);
+        TabItem tabItem = params[0];
+        childViewRecycler.remove(tabItem.getTab());
     }
 
 }
