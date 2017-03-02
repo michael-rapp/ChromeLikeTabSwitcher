@@ -177,11 +177,6 @@ public class AttachedViewRecycler<ItemType, ParamType> {
     private final Context context;
 
     /**
-     * The adapter, which is used to inflate and adapt the appearance of views.
-     */
-    private final Adapter<ItemType, ParamType> adapter;
-
-    /**
      * The layout inflater, which is used to inflate views.
      */
     private final LayoutInflater inflater;
@@ -203,12 +198,6 @@ public class AttachedViewRecycler<ItemType, ParamType> {
     private final Map<ItemType, View> activeViews;
 
     /**
-     * A sparse array, which manages the views, which are currently unused. The views are associated
-     * with the view type the correspond to.
-     */
-    private final SparseArray<Queue<View>> unusedViews;
-
-    /**
      * A list, which contains the items, which are currently visualized by the active views. The
      * order of the items corresponds to the hierarchical order of the corresponding views in their
      * parent.
@@ -219,6 +208,17 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * The logger, which is used by the recycler.
      */
     private final Logger logger;
+
+    /**
+     * The adapter, which is used to inflate and adapt the appearance of views.
+     */
+    private Adapter<ItemType, ParamType> adapter;
+
+    /**
+     * A sparse array, which manages the views, which are currently unused. The views are associated
+     * with the view type the correspond to.
+     */
+    private SparseArray<Queue<View>> unusedViews;
 
     /**
      * True, if unused views are cached, false otherwise.
@@ -236,6 +236,10 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      */
     private void addUnusedView(@NonNull final View view, final int viewType) {
         if (useCache) {
+            if (unusedViews == null) {
+                unusedViews = new SparseArray<>(adapter.getViewTypeCount());
+            }
+
             Queue<View> queue = unusedViews.get(viewType);
 
             if (queue == null) {
@@ -259,7 +263,7 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      */
     @Nullable
     private View pollUnusedView(final int viewType) {
-        if (useCache) {
+        if (useCache && unusedViews != null) {
             Queue<View> queue = unusedViews.get(viewType);
 
             if (queue != null) {
@@ -278,13 +282,9 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * @param parent
      *         The parent, the recycler should be bound to, as an instance of the class {@link
      *         ViewGroup}. The parent may not be null
-     * @param adapter
-     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
-     *         instance of the class {@link Adapter}. The adapter may not be null
      */
-    public AttachedViewRecycler(@NonNull final ViewGroup parent,
-                                @NonNull final Adapter<ItemType, ParamType> adapter) {
-        this(parent, adapter, LayoutInflater.from(parent.getContext()));
+    public AttachedViewRecycler(@NonNull final ViewGroup parent) {
+        this(parent, LayoutInflater.from(parent.getContext()));
     }
 
     /**
@@ -295,18 +295,14 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * @param parent
      *         The parent, the recycler should be bound to, as an instance of the class {@link
      *         ViewGroup}. The parent may not be null
-     * @param adapter
-     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
-     *         instance of the class {@link Adapter}. The adapter may not be null
      * @param comparator
      *         The comparator, which allows to determine the order, which should be used to add
      *         views to the parent, as an instance of the type {@link Comparator} or null, if the
      *         views should be added in the order of their inflation
      */
     public AttachedViewRecycler(@NonNull final ViewGroup parent,
-                                @NonNull final Adapter<ItemType, ParamType> adapter,
                                 @Nullable final Comparator<ItemType> comparator) {
-        this(parent, adapter, LayoutInflater.from(parent.getContext()), comparator);
+        this(parent, LayoutInflater.from(parent.getContext()), comparator);
     }
 
     /**
@@ -317,17 +313,13 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * @param parent
      *         The parent, the recycler should be bound to, as an instance of the class {@link
      *         ViewGroup}. The parent may not be null
-     * @param adapter
-     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
-     *         instance of the class {@link Adapter}. The adapter may not be null
      * @param inflater
      *         The layout inflater, which should be used to inflate views, as an instance of the
      *         class {@link LayoutInflater}. The layout inflater may not be null
      */
     public AttachedViewRecycler(@NonNull final ViewGroup parent,
-                                @NonNull final Adapter<ItemType, ParamType> adapter,
                                 @NonNull final LayoutInflater inflater) {
-        this(parent, adapter, inflater, null);
+        this(parent, inflater, null);
     }
 
     /**
@@ -338,9 +330,6 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * @param parent
      *         The parent, the recycler should be bound to, as an instance of the class {@link
      *         ViewGroup}. The parent may not be null
-     * @param adapter
-     *         The adapter, which should be used to inflate and adapt the appearance of views, as an
-     *         instance of the class {@link Adapter}. The adapter may not be null
      * @param inflater
      *         The layout inflater, which should be used to inflate views, as an instance of the
      *         class {@link LayoutInflater}. The layout inflater may not be null
@@ -350,22 +339,44 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      *         views should be added in the order of their inflation
      */
     public AttachedViewRecycler(@NonNull final ViewGroup parent,
-                                @NonNull final Adapter<ItemType, ParamType> adapter,
                                 @NonNull final LayoutInflater inflater,
                                 @Nullable final Comparator<ItemType> comparator) {
         ensureNotNull(parent, "The parent may not be null");
-        ensureNotNull(adapter, "The adapter may not be null");
         ensureNotNull(inflater, "The layout inflater may not be null");
         this.context = inflater.getContext();
         this.inflater = inflater;
         this.parent = parent;
-        this.adapter = adapter;
         this.comparator = comparator;
         this.activeViews = new HashMap<>();
-        this.unusedViews = new SparseArray<>(adapter.getViewTypeCount());
         this.items = new ArrayList<>();
         this.logger = new Logger(LogLevel.INFO);
+        this.adapter = null;
+        this.unusedViews = null;
         this.useCache = true;
+    }
+
+    /**
+     * Returns the adapter, which is used to inflate and adapt the appearance of views.
+     *
+     * @return The adapter, which is used to inflate and adapt the appearance of views, as an
+     * instance of the class {@link Adapter} or null, if no adapter is set
+     */
+    @Nullable
+    public final Adapter<ItemType, ParamType> getAdapter() {
+        return adapter;
+    }
+
+    /**
+     * Sets the adapter, which should be used to inflate and adapt the appearance of views. Calling
+     * this method causes the cache to be cleared.
+     *
+     * @param adapter
+     *         The adapter, which should be set, as an instance of the class {@link Adapter} or
+     *         null, if no adapter should be set
+     */
+    public final void setAdapter(@Nullable final Adapter<ItemType, ParamType> adapter) {
+        this.adapter = adapter;
+        clearCache();
     }
 
     /**
@@ -406,6 +417,8 @@ public class AttachedViewRecycler<ItemType, ParamType> {
     @SafeVarargs
     public final boolean inflate(@NonNull final ItemType item, @NonNull final ParamType... params) {
         ensureNotNull(params, "The array may not be null");
+        ensureNotNull(adapter, "No adapter has been set", IllegalStateException.class);
+
         View view = getView(item);
         boolean inflated = false;
 
@@ -457,6 +470,7 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      */
     public final void remove(@NonNull final ItemType item) {
         ensureNotNull(item, "The item may not be null");
+        ensureNotNull(adapter, "No adapter has been set", IllegalStateException.class);
         int index = items.indexOf(item);
 
         if (index != -1) {
@@ -478,6 +492,8 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * added to a cache in order to be able to reuse them later.
      */
     public final void removeAll() {
+        ensureNotNull(adapter, "No adapter has been set", IllegalStateException.class);
+
         for (int i = items.size() - 1; i >= 0; i--) {
             ItemType item = items.remove(i);
             View view = activeViews.remove(item);
@@ -521,7 +537,11 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      * Removes all unused views from the cache.
      */
     public final void clearCache() {
-        unusedViews.clear();
+        if (unusedViews != null) {
+            unusedViews.clear();
+            unusedViews = null;
+        }
+
         logger.logDebug(getClass(), "Removed all unused views from cache");
     }
 
@@ -533,7 +553,10 @@ public class AttachedViewRecycler<ItemType, ParamType> {
      *         {@link Integer} value
      */
     public final void clearCache(final int viewType) {
-        unusedViews.remove(viewType);
+        if (unusedViews != null) {
+            unusedViews.remove(viewType);
+        }
+
         logger.logDebug(getClass(),
                 "Cleared all unused views of view type " + viewType + " from cache");
     }
