@@ -882,20 +882,31 @@ public class DragHandler {
 
             dragState = DragState.OVERSHOOT_START;
             overshootDragHelper.update(dragPosition);
-            float overshootDistance = Math.abs(overshootDragHelper.getDragDistance());
+            float overshootDistance = overshootDragHelper.getDragDistance();
 
-            if (overshootDistance <= maxOvershootDistance) {
-                float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-                AbstractIterator.AbstractBuilder builder = factory.create();
-                AbstractIterator iterator = builder.create();
-                TabItem tabItem = iterator.getItem(0);
-                float currentPosition = tabItem.getTag().getPosition();
-                float position = currentPosition - (currentPosition * ratio);
-                notifyOnStartOvershoot(position);
-            } else {
-                float ratio = Math.max(0, Math.min(1,
-                        (overshootDistance - maxOvershootDistance) / maxOvershootDistance));
-                notifyOnTiltOnStartOvershoot(ratio * maxStartOvershootAngle);
+            if (overshootDistance < 0) {
+                float absOvershootDistance = Math.abs(overshootDistance);
+
+                if (absOvershootDistance <= maxOvershootDistance) {
+                    float ratio =
+                            Math.max(0, Math.min(1, absOvershootDistance / maxOvershootDistance));
+                    AbstractIterator.AbstractBuilder builder = factory.create();
+                    AbstractIterator iterator = builder.create();
+                    TabItem tabItem = iterator.getItem(0);
+                    float currentPosition = tabItem.getTag().getPosition();
+                    float position = currentPosition - (currentPosition * ratio);
+                    notifyOnStartOvershoot(position);
+                } else {
+                    float ratio =
+                            (absOvershootDistance - maxOvershootDistance) / maxOvershootDistance;
+
+                    if (ratio >= 1) {
+                        overshootDragHelper.setMinDragDistance(overshootDistance);
+                    }
+
+                    notifyOnTiltOnStartOvershoot(
+                            Math.max(0, Math.min(1, (ratio) * maxStartOvershootAngle)));
+                }
             }
         } else if (dragPosition >= endOvershootThreshold) {
             if (!dragHelper.isReset()) {
@@ -906,8 +917,13 @@ public class DragHandler {
             dragState = DragState.OVERSHOOT_END;
             overshootDragHelper.update(dragPosition);
             float overshootDistance = overshootDragHelper.getDragDistance();
-            float ratio = Math.max(0, Math.min(1, overshootDistance / maxOvershootDistance));
-            notifyOnTiltOnEndOvershoot(ratio * -maxEndOvershootAngle);
+            float ratio = overshootDistance / maxOvershootDistance;
+
+            if (ratio >= 1) {
+                overshootDragHelper.setMaxDragDistance(overshootDistance);
+            }
+
+            notifyOnTiltOnEndOvershoot(Math.max(0, Math.min(1, ratio)) * -maxEndOvershootAngle);
         } else {
             overshootDragHelper.reset();
             float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
