@@ -877,6 +877,7 @@ public class DragHandler {
         if (dragPosition <= startOvershootThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
+                dragDistance = 0;
             }
 
             dragState = DragState.OVERSHOOT_START;
@@ -899,6 +900,7 @@ public class DragHandler {
         } else if (dragPosition >= endOvershootThreshold) {
             if (!dragHelper.isReset()) {
                 dragHelper.reset(0);
+                dragDistance = 0;
             }
 
             dragState = DragState.OVERSHOOT_END;
