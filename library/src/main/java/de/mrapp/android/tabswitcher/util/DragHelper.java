@@ -14,6 +14,8 @@
 package de.mrapp.android.tabswitcher.util;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
+import static de.mrapp.android.util.Condition.ensureGreater;
+import static de.mrapp.android.util.Condition.ensureSmaller;
 
 /**
  * A helper class, which may be used to recognize drag gestures.
@@ -63,6 +65,16 @@ public class DragHelper {
     private boolean reachedThreshold;
 
     /**
+     * The maximum drag distance in pixels or 0, if no maximum drag distance is set.
+     */
+    private float maxDragDistance;
+
+    /**
+     * The minimum drag distance in pixels or 0, if no minimum drag distance is set.
+     */
+    private float minDragDistance;
+
+    /**
      * Returns, whether the threshold is reached by a specific distance.
      *
      * @param distance
@@ -88,6 +100,8 @@ public class DragHelper {
         this.dragStartPosition = -1;
         this.dragStartTime = -1;
         this.reachedThreshold = false;
+        this.minDragDistance = 0;
+        this.maxDragDistance = 0;
         reset();
     }
 
@@ -168,6 +182,8 @@ public class DragHelper {
             dragStartTime = -1;
             dragStartPosition = position;
             reachedThreshold = false;
+            minDragDistance = 0;
+            maxDragDistance = 0;
         }
 
         if (!reachedThreshold) {
@@ -177,8 +193,72 @@ public class DragHelper {
                 thresholdReachedPosition = position;
             }
         } else {
-            distance = position - thresholdReachedPosition;
+            float newDistance = position - thresholdReachedPosition;
+
+            if (minDragDistance != 0 && minDragDistance > newDistance) {
+                newDistance = minDragDistance;
+                thresholdReachedPosition = position - minDragDistance;
+            }
+
+            if (maxDragDistance != 0 && maxDragDistance < newDistance) {
+                newDistance = maxDragDistance;
+                thresholdReachedPosition = position - maxDragDistance;
+            }
+
+            distance = newDistance;
         }
+    }
+
+    /**
+     * Returns the maximum drag distance.
+     *
+     * @return The maximum drag distance in pixels as a {@link Float} value or 0, if no maximum drag
+     * distance is set
+     */
+    public final float getMaxDragDistance() {
+        return maxDragDistance;
+    }
+
+    /**
+     * Sets the maximum drag distance.
+     *
+     * @param maxDragDistance
+     *         The maximum drag distance, which should be set, in pixels as a {@link Float} value or
+     *         0, if no maximum drag distance should be set
+     */
+    public final void setMaxDragDistance(final float maxDragDistance) {
+        if (maxDragDistance != 0) {
+            ensureGreater(maxDragDistance, threshold,
+                    "The maximum drag distance must be greater than " + threshold);
+        }
+
+        this.maxDragDistance = maxDragDistance;
+    }
+
+    /**
+     * Returns the minimum drag distance.
+     *
+     * @return The minimum drag distance in pixels as a {@link Float} value or 0, if no minimum drag
+     * distance is set
+     */
+    public final float getMinDragDistance() {
+        return minDragDistance;
+    }
+
+    /**
+     * Sets the minimum drag distance.
+     *
+     * @param minDragDistance
+     *         The minimum drag distance, which should be set, in pixels as a {@link Float} value or
+     *         0, if no minimum drag distance should be set
+     */
+    public final void setMinDragDistance(final float minDragDistance) {
+        if (minDragDistance != 0) {
+            ensureSmaller(minDragDistance, -threshold,
+                    "The minimum drag distance must be smaller than " + -threshold);
+        }
+
+        this.minDragDistance = minDragDistance;
     }
 
     /**
