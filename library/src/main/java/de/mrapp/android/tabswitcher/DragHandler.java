@@ -430,8 +430,7 @@ public class DragHandler {
 
         if (tabItem.getIndex() < stackedTabCount) {
             float position = size - toolbarHeight - tabInset -
-                    (stackedTabSpacing * (tabItem.getIndex() + 1)) -
-                    padding + offset;
+                    (stackedTabSpacing * (tabItem.getIndex() + 1)) - padding + offset;
             return Pair.create(position, State.STACKED_END);
         } else {
             float position =
@@ -902,6 +901,7 @@ public class DragHandler {
 
                     if (ratio >= 1) {
                         overshootDragHelper.setMinDragDistance(overshootDistance);
+                        startOvershootThreshold = dragPosition + (maxOvershootDistance * 2);
                     }
 
                     notifyOnTiltOnStartOvershoot(
@@ -921,6 +921,7 @@ public class DragHandler {
 
             if (ratio >= 1) {
                 overshootDragHelper.setMaxDragDistance(overshootDistance);
+                endOvershootThreshold = dragPosition - maxOvershootDistance;
             }
 
             notifyOnTiltOnEndOvershoot(Math.max(0, Math.min(1, ratio)) * -maxEndOvershootAngle);
