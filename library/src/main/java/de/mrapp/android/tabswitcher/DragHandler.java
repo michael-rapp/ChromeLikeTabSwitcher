@@ -381,105 +381,6 @@ public class DragHandler {
     }
 
     /**
-     * Clips the position of a specific tab item.
-     *
-     * @param position
-     *         The position, which should be clipped, in pixels as a {@link Float} value
-     * @param tabItem
-     *         The tab item, whose position should be clipped, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
-     */
-    public final void clipTabPosition(final float position, @NonNull final TabItem tabItem,
-                                      @Nullable final TabItem predecessor) {
-        Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor);
-        float startPosition = startPair.first;
-
-        if (position <= startPosition) {
-            tabItem.getTag().setPosition(startPosition);
-            tabItem.getTag().setState(startPair.second);
-        } else {
-            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
-            float endPosition = endPair.first;
-
-            if (position >= endPosition) {
-                tabItem.getTag().setPosition(endPosition);
-                tabItem.getTag().setState(endPair.second);
-            } else {
-                tabItem.getTag().setPosition(position);
-                tabItem.getTag().setState(State.FLOATING);
-            }
-        }
-    }
-
-    /**
-     * Calculates and returns the position and state of a specific tab item, when stacked at the
-     * start.
-     *
-     * @param tabItem
-     *         The tab item, whose position and state should be returned, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the start, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
-            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor) {
-        if ((tabSwitcher.getCount() - tabItem.getIndex()) <= stackedTabCount) {
-            float position =
-                    stackedTabSpacing * (tabSwitcher.getCount() - (tabItem.getIndex() + 1));
-            return Pair.create(position,
-                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.STACKED_START);
-        } else {
-            float position = stackedTabSpacing * stackedTabCount;
-            return Pair.create(position,
-                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.HIDDEN);
-        }
-    }
-
-    /**
-     * Calculates and returns the position and state of a specific tab item, when stacked at the
-     * end.
-     *
-     * @param tabItem
-     *         The tab item, whose position and state should be returned, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the end, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(
-            @NonNull final TabItem tabItem) {
-        float size = arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer());
-        int toolbarHeight =
-                tabSwitcher.isToolbarShown() && tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
-                        tabSwitcher.getToolbar().getHeight() - tabInset : 0;
-        int padding = arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.START, tabSwitcher) +
-                arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.END, tabSwitcher);
-        int offset = tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
-                stackedTabCount * stackedTabSpacing : 0;
-
-        if (tabItem.getIndex() < stackedTabCount) {
-            float position = size - toolbarHeight - tabInset -
-                    (stackedTabSpacing * (tabItem.getIndex() + 1)) - padding + offset;
-            return Pair.create(position, State.STACKED_END);
-        } else {
-            float position =
-                    size - toolbarHeight - tabInset - (stackedTabSpacing * stackedTabCount) -
-                            padding + offset;
-            return Pair.create(position, State.HIDDEN);
-        }
-    }
-
-    /**
      * Calculates the positions of all tabs, depending on the current drag distance.
      *
      * @param factory
@@ -995,6 +896,105 @@ public class DragHandler {
         }
 
         return attachedPosition;
+    }
+
+    /**
+     * Clips the position of a specific tab item.
+     *
+     * @param position
+     *         The position, which should be clipped, in pixels as a {@link Float} value
+     * @param tabItem
+     *         The tab item, whose position should be clipped, as an instance of the class {@link
+     *         TabItem}. The tab item may not be null
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     */
+    public final void clipTabPosition(final float position, @NonNull final TabItem tabItem,
+                                      @Nullable final TabItem predecessor) {
+        Pair<Float, State> startPair =
+                calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor);
+        float startPosition = startPair.first;
+
+        if (position <= startPosition) {
+            tabItem.getTag().setPosition(startPosition);
+            tabItem.getTag().setState(startPair.second);
+        } else {
+            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
+            float endPosition = endPair.first;
+
+            if (position >= endPosition) {
+                tabItem.getTag().setPosition(endPosition);
+                tabItem.getTag().setState(endPair.second);
+            } else {
+                tabItem.getTag().setPosition(position);
+                tabItem.getTag().setState(State.FLOATING);
+            }
+        }
+    }
+
+    /**
+     * Calculates and returns the position and state of a specific tab item, when stacked at the
+     * start.
+     *
+     * @param tabItem
+     *         The tab item, whose position and state should be returned, as an instance of the
+     *         class {@link TabItem}. The tab item may not be null
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the start, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
+            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor) {
+        if ((tabSwitcher.getCount() - tabItem.getIndex()) <= stackedTabCount) {
+            float position =
+                    stackedTabSpacing * (tabSwitcher.getCount() - (tabItem.getIndex() + 1));
+            return Pair.create(position,
+                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.STACKED_START);
+        } else {
+            float position = stackedTabSpacing * stackedTabCount;
+            return Pair.create(position,
+                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.HIDDEN);
+        }
+    }
+
+    /**
+     * Calculates and returns the position and state of a specific tab item, when stacked at the
+     * end.
+     *
+     * @param tabItem
+     *         The tab item, whose position and state should be returned, as an instance of the
+     *         class {@link TabItem}. The tab item may not be null
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the end, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(
+            @NonNull final TabItem tabItem) {
+        float size = arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer());
+        int toolbarHeight =
+                tabSwitcher.isToolbarShown() && tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
+                        tabSwitcher.getToolbar().getHeight() - tabInset : 0;
+        int padding = arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.START, tabSwitcher) +
+                arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.END, tabSwitcher);
+        int offset = tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                stackedTabCount * stackedTabSpacing : 0;
+
+        if (tabItem.getIndex() < stackedTabCount) {
+            float position = size - toolbarHeight - tabInset -
+                    (stackedTabSpacing * (tabItem.getIndex() + 1)) - padding + offset;
+            return Pair.create(position, State.STACKED_END);
+        } else {
+            float position =
+                    size - toolbarHeight - tabInset - (stackedTabSpacing * stackedTabCount) -
+                            padding + offset;
+            return Pair.create(position, State.HIDDEN);
+        }
     }
 
     /**
