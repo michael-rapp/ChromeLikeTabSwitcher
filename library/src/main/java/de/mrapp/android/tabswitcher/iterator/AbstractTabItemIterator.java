@@ -26,13 +26,13 @@ import static de.mrapp.android.util.Condition.ensureAtLeast;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
+public abstract class AbstractTabItemIterator implements java.util.Iterator<TabItem> {
 
     /**
      * An abstract base class of all builders, which allows to configure and create instances of the
-     * class {@link AbstractIterator}.
+     * class {@link AbstractTabItemIterator}.
      */
-    public static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractIterator> {
+    public static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractTabItemIterator> {
 
         /**
          * True, if the tabs should be iterated in reverse order, false otherwise.
@@ -57,7 +57,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * AbstractIterator}.
+         * AbstractTabItemIterator}.
          */
         protected AbstractBuilder() {
             reverse(false);
@@ -68,7 +68,7 @@ public abstract class AbstractIterator implements java.util.Iterator<TabItem> {
          * Creates the iterator, which has been configured by using the builder.
          *
          * @return The iterator, which has been created, as an instance of the class {@link
-         * TabIterator}. The iterator may not be null
+         * TabItemIterator}. The iterator may not be null
          */
         @NonNull
         public abstract ProductType create();
