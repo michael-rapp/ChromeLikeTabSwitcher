@@ -32,6 +32,8 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.DragHelper;
 
+import static de.mrapp.android.util.Condition.ensureGreater;
+import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -193,16 +195,6 @@ public class DragHandler {
     private final float maxEndOvershootAngle;
 
     /**
-     * The minimum space between neighboring tabs in pixels.
-     */
-    private final int minTabSpacing;
-
-    /**
-     * The maximum space between neighboring tabs in pixels.
-     */
-    private final int maxTabSpacing;
-
-    /**
      * The number of tabs, which are contained by a stack.
      */
     private final int stackedTabCount;
@@ -282,6 +274,11 @@ public class DragHandler {
      * should have reached the maximum, in pixels.
      */
     private float attachedPosition;
+
+    /**
+     * The maximum space between neighboring tabs in pixels.
+     */
+    private float maxTabSpacing;
 
     /**
      * The callback, which is notified about the drag handler's events.
@@ -472,7 +469,7 @@ public class DragHandler {
             while ((tabItem = iterator.next()) != null && !abort) {
                 TabItem previous = iterator.previous();
                 float previousPosition = previous.getTag().getPosition();
-                float newPosition = previousPosition + maxTabSpacing;
+                float newPosition = previousPosition + getMaxTabSpacing();
                 tabItem.getTag().setPosition(newPosition);
 
                 if (tabItem.getIndex() < start) {
@@ -583,7 +580,8 @@ public class DragHandler {
     private float calculateNonLinearPosition(@NonNull final TabItem predecessor) {
         float previousPosition = predecessor.getTag().getPosition();
         float ratio = Math.min(1, previousPosition / getAttachedPosition());
-        return previousPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
+        float minTabSpacing = getMinTabSpacing();
+        return previousPosition - minTabSpacing - (ratio * (getMaxTabSpacing() - minTabSpacing));
     }
 
     /**
@@ -595,7 +593,7 @@ public class DragHandler {
      * @return The position, which has been calculated, as a {@link Float} value
      */
     private float calculateEndPosition(@NonNull final TabItem tabItem) {
-        return (tabSwitcher.getCount() - (tabItem.getIndex() + 1)) * maxTabSpacing;
+        return (tabSwitcher.getCount() - (tabItem.getIndex() + 1)) * getMaxTabSpacing();
     }
 
     /**
@@ -662,7 +660,7 @@ public class DragHandler {
             AbstractTabItemIterator.AbstractBuilder builder = factory.create();
             AbstractTabItemIterator iterator = builder.create();
             TabItem tabItem = iterator.getItem(tabSwitcher.getCount() - 2);
-            return tabItem.getTag().getPosition() >= maxTabSpacing;
+            return tabItem.getTag().getPosition() >= getMaxTabSpacing();
         }
     }
 
@@ -705,6 +703,26 @@ public class DragHandler {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the maximum space between two neighboring tabs.
+     *
+     * @return The maximum space between two neighboring tabs in pixels as a {@link Float} value
+     */
+    private float getMaxTabSpacing() {
+        ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
+                IllegalStateException.class);
+        return maxTabSpacing;
+    }
+
+    /**
+     * Returns the minimum space between two neighboring tabs.
+     *
+     * @return The minimum space between two neighboring tabs in pixels as a {@link Float} value
+     */
+    private float getMinTabSpacing() {
+        return getMaxTabSpacing() * 0.375f;
     }
 
     /**
@@ -857,8 +875,6 @@ public class DragHandler {
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-        this.minTabSpacing = resources.getDimensionPixelSize(R.dimen.min_tab_spacing);
-        this.maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
         this.maxOvershootDistance = resources.getDimensionPixelSize(R.dimen.max_overshoot_distance);
         this.maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         this.maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
@@ -866,6 +882,7 @@ public class DragHandler {
         this.minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         this.minSwipeVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
+        this.maxTabSpacing = -1;
         reset(dragThreshold);
     }
 
@@ -878,6 +895,17 @@ public class DragHandler {
      */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
+    }
+
+    /**
+     * Sets the maximum space between two neighboring tabs.
+     *
+     * @param maxTabSpacing
+     *         The maximum space, which should be set, in pixels as a {@link Float} value
+     */
+    public final void setMaxTabSpacing(final float maxTabSpacing) {
+        ensureGreater(maxTabSpacing, 0, "The maximum tab spacing must be greater than 0");
+        this.maxTabSpacing = maxTabSpacing;
     }
 
     /**

@@ -359,6 +359,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @NonNull
     private TabItem[] calculateInitialTabItems() {
         dragHandler.reset(0);
+        dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
         TabItem[] tabItems = new TabItem[getCount()];
         AbstractTabItemIterator.Factory factory =
                 new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, dragHandler,
@@ -376,6 +377,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         dragHandler.handleRelease(factory, null, dragThreshold);
         dragHandler.setCallback(PhoneTabSwitcherLayout.this);
         return tabItems;
+    }
+
+    /**
+     * Calculates and returns the maximum space between two neighboring tabs, depending on the
+     * number of tabs, which are contained by the tab switcher.
+     *
+     * @return The maximum space, which has been calculated, in pixels as a {@link Float} value
+     */
+    private float calculateMaxTabSpacing() {
+        float totalSpace = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
+                (getLayout() == Layout.PHONE_PORTRAIT && isToolbarShown() ?
+                        toolbar.getHeight() + tabInset : 0);
+        return totalSpace / 4f;
     }
 
     /**
