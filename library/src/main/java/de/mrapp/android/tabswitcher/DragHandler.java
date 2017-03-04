@@ -298,8 +298,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param event
      *         The motion event, which triggered the click, as an instance of the class {@link
      *         MotionEvent}. The motion event may not be null
@@ -445,8 +445,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      */
     private void calculatePositions(@NonNull final AbstractTabItemIterator.Factory factory) {
         float currentDragDistance = dragHelper.getDragDistance();
@@ -467,8 +467,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
@@ -501,8 +501,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
@@ -575,7 +575,7 @@ public class DragHandler {
                                                          @NonNull final TabItem tabItem,
                                                          @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
-                predecessor.getTag().getPosition() > calculateAttachedPosition()) {
+                predecessor.getTag().getPosition() > getAttachedPosition()) {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -642,7 +642,7 @@ public class DragHandler {
      */
     private float calculateNonLinearPosition(@NonNull final TabItem predecessor) {
         float previousPosition = predecessor.getTag().getPosition();
-        float ratio = Math.min(1, previousPosition / calculateAttachedPosition());
+        float ratio = Math.min(1, previousPosition / getAttachedPosition());
         return previousPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
 
@@ -659,30 +659,12 @@ public class DragHandler {
     }
 
     /**
-     * Calculates and returns the position on the dragging axis, where the distance between a tab
-     * and its predecessor should have reached the maximum.
-     *
-     * @return The position, which has been calculated, in pixels as an {@link Float} value
-     */
-    public final float calculateAttachedPosition() {
-        if (attachedPosition == -1) {
-            attachedPosition =
-                    (arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
-                            (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
-                                    tabSwitcher.isToolbarShown() ?
-                                    tabSwitcher.getToolbar().getHeight() + tabInset : 0)) / 2f;
-        }
-
-        return attachedPosition;
-    }
-
-    /**
      * Checks if a drag gesture resulted in overshooting.
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @return True, if the drag gesture resulted in overshooting, false otherwise
@@ -709,8 +691,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @return True, if the tabs are overshooting at the start, false otherwise
      */
     private boolean isOvershootingAtStart(@NonNull final AbstractTabItemIterator.Factory factory) {
@@ -729,8 +711,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @return True, if the tabs are overshooting at the end, false otherwise
      */
     private boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator.Factory factory) {
@@ -750,8 +732,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param position
      *         The position in pixels as a {@link Float} value
      * @return The tab item, which corresponds to the focused tab, as an instance of the class
@@ -815,6 +797,24 @@ public class DragHandler {
         this.callback = callback;
     }
 
+    /**
+     * Calculates and returns the position on the dragging axis, where the distance between a tab
+     * and its predecessor should have reached the maximum.
+     *
+     * @return The position, which has been calculated, in pixels as an {@link Float} value
+     */
+    public final float getAttachedPosition() {
+        if (attachedPosition == -1) {
+            attachedPosition =
+                    (arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
+                            (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
+                                    tabSwitcher.isToolbarShown() ?
+                                    tabSwitcher.getToolbar().getHeight() + tabInset : 0)) / 2f;
+        }
+
+        return attachedPosition;
+    }
+
     public final boolean handleTouchEvent(@NonNull final AbstractTabItemIterator.Factory factory,
                                           @NonNull final MotionEvent event) {
         ensureNotNull(factory, "The factory may not be null");
@@ -860,8 +860,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @param orthogonalPosition
@@ -968,8 +968,8 @@ public class DragHandler {
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
+     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+     *         The factory may not be null
      * @param event
      *         The motion event, which ended the drag gesture, as an instance of the class {@link
      *         MotionEvent} or null, if no fling animation should be triggered

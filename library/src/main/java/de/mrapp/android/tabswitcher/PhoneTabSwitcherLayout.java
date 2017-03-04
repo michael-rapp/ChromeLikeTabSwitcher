@@ -369,7 +369,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         while ((tabItems[getSelectedTabIndex()] == null ||
                 tabItems[getSelectedTabIndex()].getTag().getPosition() <
-                        dragHandler.calculateAttachedPosition()) && !abort) {
+                        dragHandler.getAttachedPosition()) && !abort) {
             abort = !dragHandler.handleDrag(factory, ++dragDistance, 0);
         }
 
