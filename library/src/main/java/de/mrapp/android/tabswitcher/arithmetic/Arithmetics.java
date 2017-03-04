@@ -63,9 +63,9 @@ public class Arithmetics {
     private final float stackedTabSpacing;
 
     /**
-     * The maximum space between two neighboring tabs.
+     * The pivot when overshooting at the end.
      */
-    private final float maxTabSpacing;
+    private final float endOvershootPivot;
 
     /**
      * Modifies a specific axis depending on the orientation of the tab switcher.
@@ -101,7 +101,7 @@ public class Arithmetics {
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-        this.maxTabSpacing = resources.getDimensionPixelSize(R.dimen.max_tab_spacing);
+        this.endOvershootPivot = resources.getDimensionPixelSize(R.dimen.end_overshoot_pivot);
     }
 
     /**
@@ -140,9 +140,8 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getY() -
-                    (tabSwitcher.isToolbarShown() && tabSwitcher.isSwitcherShown() ?
-                            tabSwitcher.getToolbar().getHeight() - tabInset : 0) -
+            return view.getY() - (tabSwitcher.isToolbarShown() && tabSwitcher.isSwitcherShown() ?
+                    tabSwitcher.getToolbar().getHeight() - tabInset : 0) -
                     getPadding(axis, Gravity.START, tabSwitcher);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -215,11 +214,10 @@ public class Arithmetics {
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
-            animator.x(position + layoutParams.leftMargin +
-                    (includePadding ?
-                            tabSwitcher.getPaddingLeft() / 2f - tabSwitcher.getPaddingRight() / 2f :
-                            0) - (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
-                    stackedTabCount * stackedTabSpacing / 2f : 0));
+            animator.x(position + layoutParams.leftMargin + (includePadding ?
+                    tabSwitcher.getPaddingLeft() / 2f - tabSwitcher.getPaddingRight() / 2f : 0) -
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                            stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
 
@@ -266,9 +264,8 @@ public class Arithmetics {
         float width = view.getWidth();
         float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin -
                 (includePadding ? tabSwitcher.getPaddingLeft() + tabSwitcher.getPaddingRight() :
-                        0) -
-                (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
-                        stackedTabCount * stackedTabSpacing : 0);
+                        0) - (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                stackedTabCount * stackedTabSpacing : 0);
         return targetWidth / width;
     }
 
@@ -394,7 +391,7 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return maxTabSpacing;
+            return endOvershootPivot;
         } else {
             return getDefaultPivot(axis, view);
         }
@@ -433,7 +430,7 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return maxTabSpacing;
+            return endOvershootPivot;
         } else {
             return getSize(axis, view) / 2f;
         }
