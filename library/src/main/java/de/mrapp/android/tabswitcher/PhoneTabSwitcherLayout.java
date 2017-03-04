@@ -1367,6 +1367,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float position = tabItem.getTag().getPosition();
         View view = tabItem.getView();
         view.setAlpha(1f);
+        view.setVisibility(View.VISIBLE);
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
