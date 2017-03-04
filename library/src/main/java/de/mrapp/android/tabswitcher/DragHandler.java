@@ -1,3 +1,16 @@
+/*
+ * Copyright 2016 - 2017 Michael Rapp
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package de.mrapp.android.tabswitcher;
 
 import android.content.res.Resources;
@@ -22,103 +35,126 @@ import de.mrapp.android.tabswitcher.util.DragHelper;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
+ * A drag handler, which allows to calculate the position and state of tabs on touch events.
+ *
  * @author Michael Rapp
+ * @since 1.0.0
  */
 public class DragHandler {
 
+    /**
+     * Defines the interface, a class, which should be notified about the events of a drag handler,
+     * must implement.
+     */
     public interface Callback {
 
+        /**
+         * The method, which is invoked, when a tab has been clicked.
+         *
+         * @param tabItem
+         *         The tab item, which corresponds to the tab, which has been clicked, as an
+         *         instance of the class {@link TabItem}. The tab item may not be null
+         */
         void onClick(@NonNull TabItem tabItem);
 
-        void onCancelFling();
-
+        /**
+         * The method, which is invoked, when a fling has been triggered.
+         *
+         * @param distance
+         *         The distance of the fling in pixels as a {@link Float} value
+         * @param duration
+         *         The duration of the fling in milliseconds as a {@link Long} value
+         */
         void onFling(float distance, long duration);
 
+        /**
+         * The method, which is invoked, when a fling has been cancelled.
+         */
+        void onCancelFling();
+
+        /**
+         * The method, which is invoked, when an overshoot at the start should be reverted.
+         *
+         * @param maxAngle
+         *         The angle, the tabs may be tilted by at maximum, in degrees as a {@link Float}
+         *         value
+         */
         void onRevertStartOvershoot(float maxAngle);
 
+        /**
+         * The method, which is invoked, when an overshoot at the end should be reverted.
+         *
+         * @param maxAngle
+         *         The angle, the tabs may be tilted by at maximum, in degrees as a {@link Float}
+         *         value
+         */
         void onRevertEndOvershoot(float maxAngle);
 
+        /**
+         * The method, which is invoked, when tabs are overshooting at the start.
+         *
+         * @param position
+         *         The position of the first tab in pixels as a {@link Float} value
+         */
         void onStartOvershoot(float position);
 
+        /**
+         * The method, which is invoked, when the tabs should be tilted when overshooting at the
+         * start.
+         *
+         * @param angle
+         *         The angle, the tabs should be tilted by, in degrees as a {@link Float} value
+         */
         void onTiltOnStartOvershoot(float angle);
 
+        /**
+         * The method, which is invoked, when the tabs should be tilted when overshooting at the
+         * end.
+         *
+         * @param angle
+         *         The angle, the tabs should be tilted by, in degrees as a {@link Float} value
+         */
         void onTiltOnEndOvershoot(float angle);
 
+        /**
+         * The method, which is invoked, when a tab is swiped.
+         *
+         * @param tabItem
+         *         The tab item, which corresponds to the swiped tab, as an instance of the class
+         *         {@link TabItem}. The tab item may not be null
+         * @param distance
+         *         The distance, the tab is swiped by, in pixels as a {@link Float} value
+         */
         void onSwipe(@NonNull TabItem tabItem, float distance);
 
+        /**
+         * The method, which is invoked, when swiping a tab ended.
+         *
+         * @param tabItem
+         *         The tab item, which corresponds to the swiped tab, as an instance of the class
+         *         {@link TabItem}. The tab item may not be null
+         * @param remove
+         *         True, if the tab should be removed, false otherwise
+         * @param velocity
+         *         The velocity of the swipe gesture as a {@link Float} value
+         */
         void onSwipeEnded(@NonNull TabItem tabItem, boolean remove, float velocity);
 
+        /**
+         * The method, which is invoked, when the position or state of a tab has been changed.
+         *
+         * @param tabItem
+         *         The tab item, which corresponds to the tab, whose position or state has been
+         *         changed, as an instance of the class {@link TabItem}. The tab item may not be
+         *         null
+         */
         void onViewStateChanged(@NonNull TabItem tabItem);
 
     }
 
-    private void notifyOnClick(@NonNull final TabItem tabItem) {
-        if (callback != null) {
-            callback.onClick(tabItem);
-        }
-    }
-
-    private void notifyOnCancelFling() {
-        if (callback != null) {
-            callback.onCancelFling();
-        }
-    }
-
-    private void notifyOnFling(final float distance, final long duration) {
-        if (callback != null) {
-            callback.onFling(distance, duration);
-        }
-    }
-
-    private void notifyOnRevertStartOvershoot() {
-        if (callback != null) {
-            callback.onRevertStartOvershoot(maxStartOvershootAngle);
-        }
-    }
-
-    private void notifyOnRevertEndOvershoot() {
-        if (callback != null) {
-            callback.onRevertEndOvershoot(maxEndOvershootAngle);
-        }
-    }
-
-    private void notifyOnStartOvershoot(final float position) {
-        if (callback != null) {
-            callback.onStartOvershoot(position);
-        }
-    }
-
-    private void notifyOnTiltOnStartOvershoot(final float angle) {
-        if (callback != null) {
-            callback.onTiltOnStartOvershoot(angle);
-        }
-    }
-
-    private void notifyOnTiltOnEndOvershoot(final float angle) {
-        if (callback != null) {
-            callback.onTiltOnEndOvershoot(angle);
-        }
-    }
-
-    private void notifyOnSwipe(@NonNull final TabItem tabItem, final float distance) {
-        if (callback != null) {
-            callback.onSwipe(tabItem, distance);
-        }
-    }
-
-    private void notifyOnSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
-                                    final float velocity) {
-        if (callback != null) {
-            callback.onSwipeEnded(tabItem, remove, velocity);
-        }
-    }
-
-    private void notifyOnViewStateChanged(@NonNull final TabItem tabItem) {
-        if (callback != null) {
-            callback.onViewStateChanged(tabItem);
-        }
-    }
-
+    /**
+     * The tab switcher, whose tabs' positions and states are calculated by the drag handler.
+     */
     private final TabSwitcher tabSwitcher;
 
     /**
@@ -247,6 +283,9 @@ public class DragHandler {
      */
     private float attachedPosition;
 
+    /**
+     * The callback, which is notified about the drag handler's events.
+     */
     private Callback callback;
 
     /**
@@ -767,6 +806,142 @@ public class DragHandler {
         return null;
     }
 
+    /**
+     * Notifies the callback, that a tab has been clicked.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which has been clicked, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     */
+    private void notifyOnClick(@NonNull final TabItem tabItem) {
+        if (callback != null) {
+            callback.onClick(tabItem);
+        }
+    }
+
+    /**
+     * Notifies the callback, that a fling has been triggered.
+     *
+     * @param distance
+     *         The distance of the fling in pixels as a {@link Float} value
+     * @param duration
+     *         The duration of the fling in milliseconds as a {@link Long} value
+     */
+    private void notifyOnFling(final float distance, final long duration) {
+        if (callback != null) {
+            callback.onFling(distance, duration);
+        }
+    }
+
+    /**
+     * Notifies the callback, that a fling has been cancelled.
+     */
+    private void notifyOnCancelFling() {
+        if (callback != null) {
+            callback.onCancelFling();
+        }
+    }
+
+    /**
+     * Notifies the callback, that an overshoot at the start should be reverted.
+     */
+    private void notifyOnRevertStartOvershoot() {
+        if (callback != null) {
+            callback.onRevertStartOvershoot(maxStartOvershootAngle);
+        }
+    }
+
+    /**
+     * Notifies the callback, that an overshoot at the end should be reverted.
+     */
+    private void notifyOnRevertEndOvershoot() {
+        if (callback != null) {
+            callback.onRevertEndOvershoot(maxEndOvershootAngle);
+        }
+    }
+
+    /**
+     * Notifies the callback, that tabs are overshooting at the start.
+     *
+     * @param position
+     *         The position of the first tab in pixels as a {@link Float} value
+     */
+    private void notifyOnStartOvershoot(final float position) {
+        if (callback != null) {
+            callback.onStartOvershoot(position);
+        }
+    }
+
+    /**
+     * Notifies the callback, that the tabs should be tilted when overshooting at the start.
+     *
+     * @param angle
+     *         The angle, the tabs should be tilted by, in degrees as a {@link Float} value
+     */
+    private void notifyOnTiltOnStartOvershoot(final float angle) {
+        if (callback != null) {
+            callback.onTiltOnStartOvershoot(angle);
+        }
+    }
+
+    /**
+     * Notifies the callback, that the tabs should be titled when overshooting at the end.
+     *
+     * @param angle
+     *         The angle, the tabs should be tilted by, in degrees as a {@link Float} value
+     */
+    private void notifyOnTiltOnEndOvershoot(final float angle) {
+        if (callback != null) {
+            callback.onTiltOnEndOvershoot(angle);
+        }
+    }
+
+    /**
+     * Notifies the callback, that a tab is swiped.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
+     *         TabItem}. The tab item may not be null
+     * @param distance
+     *         The distance, the tab is swiped by, in pixels as a {@link Float} value
+     */
+    private void notifyOnSwipe(@NonNull final TabItem tabItem, final float distance) {
+        if (callback != null) {
+            callback.onSwipe(tabItem, distance);
+        }
+    }
+
+    /**
+     * Notifies the callback, that swiping a tab ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
+     *         TabItem}. The tab item may not be null
+     * @param remove
+     *         True, if the tab should be removed, false otherwise
+     * @param velocity
+     *         The velocity of the swipe gesture as a {@link Float} value
+     */
+    private void notifyOnSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
+                                    final float velocity) {
+        if (callback != null) {
+            callback.onSwipeEnded(tabItem, remove, velocity);
+        }
+    }
+
+    /**
+     * Notifies, that the position or state of a tab has been changed.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose position or state has been changed,
+     *         as an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    private void notifyOnViewStateChanged(@NonNull final TabItem tabItem) {
+        if (callback != null) {
+            callback.onViewStateChanged(tabItem);
+        }
+    }
+
     public DragHandler(@NonNull final TabSwitcher tabSwitcher,
                        @NonNull final Arithmetics arithmetics) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
@@ -793,6 +968,13 @@ public class DragHandler {
         reset(dragThreshold);
     }
 
+    /**
+     * Sets the callback, which should be notified, about the drag handler's events.
+     *
+     * @param callback
+     *         The callback, which should be set, as an instance of the type {@link Callback} or
+     *         null, if no callback should be notified
+     */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
     }
@@ -815,9 +997,23 @@ public class DragHandler {
         return attachedPosition;
     }
 
+    /**
+     * Handles a touch event.
+     *
+     * @param factory
+     *         The factory, which should be used to create builders, which allow to configure and
+     *         create the iterators for iterating the tabs, whose positions and states should be
+     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
+     *         factory may not be null
+     * @param event
+     *         The event, which should be handled, as an instance of the class {@link MotionEvent}.
+     *         The event may be not null
+     * @return True, if the event has been handled, false otherwise
+     */
     public final boolean handleTouchEvent(@NonNull final AbstractTabItemIterator.Factory factory,
                                           @NonNull final MotionEvent event) {
         ensureNotNull(factory, "The factory may not be null");
+        ensureNotNull(event, "The motion event may not be null");
 
         if (tabSwitcher.isSwitcherShown() && !tabSwitcher.isEmpty()) {
             notifyOnCancelFling();
@@ -859,9 +1055,10 @@ public class DragHandler {
      * Handles drag gestures.
      *
      * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
+     *         The factory, which should be used to create builders, which allow to configure and
+     *         create the iterators for iterating the tabs, whose positions and states should be
+     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
+     *         factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @param orthogonalPosition
@@ -967,9 +1164,10 @@ public class DragHandler {
      * Handles, when a drag gesture has been ended.
      *
      * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
+     *         The factory, which should be used to create builders, which allow to configure and
+     *         create the iterators for iterating the tabs, whose positions and states should be
+     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
+     *         factory may not be null
      * @param event
      *         The motion event, which ended the drag gesture, as an instance of the class {@link
      *         MotionEvent} or null, if no fling animation should be triggered
