@@ -140,7 +140,7 @@ public class AttachedViewRecycler<ItemType, ParamType>
     @SafeVarargs
     @NonNull
     @Override
-    public final Pair<View, Boolean> inflate(@NonNull final ItemType item,
+    public final Pair<View, Boolean> inflate(@NonNull final ItemType item, final boolean useCache,
                                              @NonNull final ParamType... params) {
         ensureNotNull(params, "The array may not be null");
         ensureNotNull(getAdapter(), "No adapter has been set", IllegalStateException.class);

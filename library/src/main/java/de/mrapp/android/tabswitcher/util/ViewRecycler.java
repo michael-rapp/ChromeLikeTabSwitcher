@@ -85,6 +85,35 @@ public class ViewRecycler<ItemType, ParamType> extends AbstractViewRecycler<Item
     public final Pair<View, Boolean> inflate(@NonNull final ItemType item,
                                              @Nullable final ViewGroup parent,
                                              @NonNull final ParamType... params) {
+        return inflate(item, parent, true, params);
+    }
+
+    /**
+     * Inflates the view, which is used to visualize a specific item.
+     *
+     * @param item
+     *         The item, which should be visualized by the inflated view, as an instance of the
+     *         generic type ItemType. The item may not be null
+     * @param parent
+     *         The parent of the inflated view as an instance of the class {@link ViewGroup} or
+     *         null, if no parent is available
+     * @param useCache
+     *         True, if an unused view should retrieved from the cache, if possible, false, if a new
+     *         instance should be inflated instead
+     * @param params
+     *         An array, which may contain optional parameters, as an array of the generic type
+     *         ParamType or an empty array, if no optional parameters are available
+     * @return A pair, which contains the view, which is used to visualize the given item, as well
+     * as a boolean value, which indicates, whether a new view has been inflated, or if an unused
+     * view has been reused from the cache, as an instance of the class {@link Pair}. The pair may
+     * not be null
+     */
+    @SafeVarargs
+    @NonNull
+    public final Pair<View, Boolean> inflate(@NonNull final ItemType item,
+                                             @Nullable final ViewGroup parent,
+                                             final boolean useCache,
+                                             @NonNull final ParamType... params) {
         ensureNotNull(params, "The array may not be null");
         ensureNotNull(getAdapter(), "No adapter has been set", IllegalStateException.class);
 
@@ -93,7 +122,10 @@ public class ViewRecycler<ItemType, ParamType> extends AbstractViewRecycler<Item
 
         if (view == null) {
             int viewType = getAdapter().getViewType(item);
-            view = pollUnusedView(viewType);
+
+            if (useCache) {
+                view = pollUnusedView(viewType);
+            }
 
             if (view == null) {
                 view = getAdapter()
@@ -117,9 +149,9 @@ public class ViewRecycler<ItemType, ParamType> extends AbstractViewRecycler<Item
     @SafeVarargs
     @NonNull
     @Override
-    public final Pair<View, Boolean> inflate(@NonNull final ItemType item,
+    public final Pair<View, Boolean> inflate(@NonNull final ItemType item, final boolean useCache,
                                              @NonNull final ParamType... params) {
-        return inflate(item, null, params);
+        return inflate(item, null, useCache, params);
     }
 
     @Override

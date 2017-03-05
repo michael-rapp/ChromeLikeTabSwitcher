@@ -303,12 +303,14 @@ public abstract class AbstractViewRecycler<ItemType, ParamType> {
     }
 
     /**
-     * Inflates the view, which is used to visualize a specific item. If possible, an unused view
-     * will be retrieved from the cache, instead of inflating a new instance.
+     * Inflates the view, which is used to visualize a specific item.
      *
      * @param item
      *         The item, which should be visualized by the inflated view, as an instance of the
      *         generic type ItemType. The item may not be null
+     * @param useCache
+     *         True, if an unused view should retrieved from the cache, if possible, false, if a new
+     *         instance should be inflated instead
      * @param params
      *         An array, which may contain optional parameters, as an array of the generic type
      *         ParamType or an empty array, if no optional parameters are available
@@ -320,6 +322,7 @@ public abstract class AbstractViewRecycler<ItemType, ParamType> {
     @SuppressWarnings("unchecked")
     @NonNull
     public abstract Pair<View, Boolean> inflate(@NonNull final ItemType item,
+                                                final boolean useCache,
                                                 @NonNull final ParamType... params);
 
     /**
@@ -337,6 +340,28 @@ public abstract class AbstractViewRecycler<ItemType, ParamType> {
      * added to a cache in order to be able to reuse them later.
      */
     public abstract void removeAll();
+
+    /**
+     * Inflates the view, which is used to visualize a specific item. If possible, an unused view
+     * will be retrieved from the cache, instead of inflating a new instance.
+     *
+     * @param item
+     *         The item, which should be visualized by the inflated view, as an instance of the
+     *         generic type ItemType. The item may not be null
+     * @param params
+     *         An array, which may contain optional parameters, as an array of the generic type
+     *         ParamType or an empty array, if no optional parameters are available
+     * @return A pair, which contains the view, which is used to visualize the given item, as well
+     * as a boolean value, which indicates, whether a new view has been inflated, or if an unused
+     * view has been reused from the cache, as an instance of the class {@link Pair}. The pair may
+     * not be null
+     */
+    @SuppressWarnings("unchecked")
+    @NonNull
+    public final Pair<View, Boolean> inflate(@NonNull final ItemType item,
+                                             @NonNull final ParamType... params) {
+        return inflate(item, true, params);
+    }
 
     /**
      * Returns the context, which is used by the view recycler.
