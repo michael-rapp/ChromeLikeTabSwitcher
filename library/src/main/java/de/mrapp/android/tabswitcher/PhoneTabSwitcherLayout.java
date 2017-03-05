@@ -364,7 +364,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         AbstractTabItemIterator.Factory factory =
                 new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, dragHandler,
                         tabItems);
-
         int dragDistance = 0;
         boolean abort = false;
 
