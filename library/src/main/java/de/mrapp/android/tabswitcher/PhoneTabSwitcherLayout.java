@@ -361,19 +361,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         dragHandler.reset(0);
         dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
         TabItem[] tabItems = new TabItem[getCount()];
-        AbstractTabItemIterator.Factory factory =
-                new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, dragHandler,
-                        tabItems);
-        int dragDistance = 0;
-        boolean abort = false;
 
-        while ((tabItems[getSelectedTabIndex()] == null ||
-                tabItems[getSelectedTabIndex()].getTag().getPosition() <
-                        dragHandler.getAttachedPosition()) && !abort) {
-            abort = !dragHandler.handleDrag(factory, ++dragDistance, 0);
+        if (!isEmpty()) {
+            AbstractTabItemIterator.Factory factory =
+                    new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, dragHandler,
+                            tabItems);
+            int dragDistance = 0;
+            boolean abort = false;
+
+            while ((tabItems[getSelectedTabIndex()] == null ||
+                    tabItems[getSelectedTabIndex()].getTag().getPosition() <
+                            dragHandler.getAttachedPosition()) && !abort) {
+                abort = !dragHandler.handleDrag(factory, ++dragDistance, 0);
+            }
+
+            dragHandler.handleRelease(factory, null, dragThreshold);
         }
 
-        dragHandler.handleRelease(factory, null, dragThreshold);
         dragHandler.setCallback(PhoneTabSwitcherLayout.this);
         return tabItems;
     }
