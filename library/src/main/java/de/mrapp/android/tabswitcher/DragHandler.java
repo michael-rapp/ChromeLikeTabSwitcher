@@ -952,7 +952,7 @@ public class DragHandler {
         if (attachedPosition == -1) {
             attachedPosition =
                     (arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
-                            (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
+                            (tabSwitcher.getLayout() == Layout.PHONE_PORTRAIT &&
                                     tabSwitcher.isToolbarShown() ?
                                     tabSwitcher.getToolbar().getHeight() + tabInset : 0)) / 2f;
         }
