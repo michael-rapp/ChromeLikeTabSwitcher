@@ -452,6 +452,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
         removeChildView(viewHolder);
         viewHolder.child = null;
+        viewHolder.previewImageView.setImageBitmap(null);
         view.setTag(R.id.tag_properties, null);
     }
 
