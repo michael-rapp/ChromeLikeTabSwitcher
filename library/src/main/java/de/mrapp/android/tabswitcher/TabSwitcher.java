@@ -38,7 +38,6 @@ import android.widget.FrameLayout;
 
 import java.util.Iterator;
 
-import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 
@@ -168,8 +167,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index,
-                             @NonNull final AnimationType animationType) {
-        layout.addTab(tab, index, animationType);
+                             @NonNull final Animation animation) {
+        layout.addTab(tab, index, animation);
     }
 
     @Override
@@ -178,9 +177,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     }
 
     @Override
-    public final void removeTab(@NonNull final Tab tab,
-                                @NonNull final AnimationType animationType) {
-        layout.removeTab(tab, animationType);
+    public final void removeTab(@NonNull final Tab tab, @NonNull final Animation animation) {
+        layout.removeTab(tab, animation);
     }
 
     @Override
@@ -189,7 +187,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     }
 
     @Override
-    public final void clear(@NonNull final AnimationType animationType) {
+    public final void clear(@NonNull final Animation animationType) {
         layout.clear(animationType);
     }
 

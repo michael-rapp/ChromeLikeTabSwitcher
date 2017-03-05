@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 
 import java.util.NoSuchElementException;
 
-import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Layout;
 
 /**
@@ -192,11 +191,11 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
      *         The index, the tab should be added at, as an {@link Integer} value. The index must be
      *         at least 0 and at maximum <code>getCount()</code>, otherwise an {@link
      *         IndexOutOfBoundsException} will be thrown
-     * @param animationType
-     *         The type of the animation, which should be used to add the tab, as a value of the
-     *         enum {@link AnimationType}. The animation type may not be null
+     * @param animation
+     *         The animation, which should be used to add the tab, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    void addTab(@NonNull Tab tab, int index, @NonNull AnimationType animationType);
+    void addTab(@NonNull Tab tab, int index, @NonNull Animation animation);
 
     /**
      * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
@@ -218,11 +217,11 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
      * @param tab
      *         The tab, which should be removed, as an instance of the class {@link Tab}. The tab
      *         may not be null
-     * @param animationType
-     *         The type of the animation, which should be used to remove the tabs, as a value of the
-     *         enum {@link AnimationType}. The animation type may not be null
+     * @param animation
+     *         The animation, which should be used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    void removeTab(@NonNull Tab tab, @NonNull AnimationType animationType);
+    void removeTab(@NonNull Tab tab, @NonNull Animation animation);
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
@@ -237,11 +236,11 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
      * removed by using an animation of a specific type. If an animation is currently running, the
      * tabs will be removed once all previously started animations have been finished.
      *
-     * @param animationType
-     *         The type of the animation, which should be used to remove the tabs, as a value of the
-     *         enum {@link AnimationType}. The animation type may not be null
+     * @param animation
+     *         The animation, which should be used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    void clear(@NonNull AnimationType animationType);
+    void clear(@NonNull Animation animation);
 
     /**
      * Returns, whether the tab switcher is currently shown.

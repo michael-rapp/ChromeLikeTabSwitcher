@@ -46,7 +46,6 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
-import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
@@ -647,17 +646,17 @@ public abstract class AbstractTabSwitcherLayout
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index) {
-        addTab(tab, index, AnimationType.SWIPE_RIGHT);
+        addTab(tab, index, Animation.createSwipeAnimation());
     }
 
     @Override
     public final void removeTab(@NonNull final Tab tab) {
-        removeTab(tab, AnimationType.SWIPE_RIGHT);
+        removeTab(tab, Animation.createSwipeAnimation());
     }
 
     @Override
     public final void clear() {
-        clear(AnimationType.SWIPE_RIGHT);
+        clear(Animation.createSwipeAnimation());
     }
 
     @Override

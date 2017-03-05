@@ -35,7 +35,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -44,11 +43,12 @@ import android.widget.FrameLayout;
 
 import java.util.Collections;
 
+import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
+import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.InitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
-import de.mrapp.android.tabswitcher.model.AnimationType;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
@@ -63,6 +63,7 @@ import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
+import static de.mrapp.android.util.Condition.ensureTrue;
 import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
@@ -77,7 +78,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * An animation, which allows to fling the tabs.
      */
-    private class FlingAnimation extends Animation {
+    private class FlingAnimation extends android.view.animation.Animation {
 
         /**
          * The distance, the tabs should be moved.
@@ -232,7 +233,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The animation, which is used to fling the tabs.
      */
-    private Animation flingAnimation;
+    private android.view.animation.Animation flingAnimation;
 
     /**
      * Calculates and returns the bottom margin of a view, which visualizes a tab.
@@ -521,9 +522,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param delay
      *         The delay after which the animation should be started in milliseconds as a {@link
      *         Long} value
-     * @param animationType
-     *         The animation type, which should be used, as a value of the enum {@link
-     *         AnimationType} or null, if no specific animation type should be used
+     * @param swipeAnimation
+     *         The animation, which should be used, as an instance of the class {@link
+     *         SwipeAnimation} or null, if no specific animation should be used
      * @param listener
      *         The listener, which should be notified about the progress of the animation, as an
      *         instance of the type {@link AnimatorListener} or null, if no listener should be
@@ -531,16 +532,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void animateSwipe(@NonNull final TabItem tabItem, final boolean remove,
                               final float velocity, final long delay,
-                              @Nullable AnimationType animationType,
+                              @Nullable final SwipeAnimation swipeAnimation,
                               @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
         float currentScale = arithmetics.getScale(view, true);
         float swipePosition = calculateSwipePosition();
         float currentPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view);
-        AnimationType direction = animationType != null ? animationType :
-                currentPosition < 0 ? AnimationType.SWIPE_LEFT : AnimationType.SWIPE_RIGHT;
-        float targetPosition = remove ?
-                (direction == AnimationType.SWIPE_LEFT ? -1 * swipePosition : swipePosition) : 0;
+        SwipeDirection direction = swipeAnimation != null ? swipeAnimation.getDirection() :
+                currentPosition < 0 ? SwipeDirection.LEFT : SwipeDirection.RIGHT;
+        float targetPosition =
+                remove ? (direction == SwipeDirection.LEFT ? -1 * swipePosition : swipePosition) :
+                        0;
         float distance = Math.abs(targetPosition - currentPosition);
         long animationDuration;
 
@@ -570,18 +572,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
-     * @param animationType
-     *         The animation type, which should be used, as a value of the enum {@link
-     *         AnimationType} or null, if no specific animation type should be used
+     * @param swipeAnimation
+     *         The animation, which should be used, as an instance of the class {@link
+     *         SwipeAnimation} or null, if no specific animation should be used
      */
     private void animateRemove(@NonNull final TabItem tabItem,
-                               @Nullable final AnimationType animationType) {
+                               @Nullable final SwipeAnimation swipeAnimation) {
         View view = tabItem.getView();
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-        animateSwipe(tabItem, true, 0, 0, animationType, createRemoveAnimationListener(tabItem));
+        animateSwipe(tabItem, true, 0, 0, swipeAnimation, createRemoveAnimationListener(tabItem));
     }
 
     /**
@@ -814,20 +816,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tabItem
      *         The tab item, which corresponds to the tab, which should be removed, as an instance
      *         of the class {@link TabItem}. The tab item may not be null
-     * @param animationType
-     *         The animation type, which should be used, as a value of the enum {@link
-     *         AnimationType} or null, if no specific animation type should be used
+     * @param swipeAnimation
+     *         The animation, which should be used, as an instance of the class {@link
+     *         SwipeAnimation} or null, if no specific animation should be used
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
     private OnGlobalLayoutListener createRemoveLayoutListener(@NonNull final TabItem tabItem,
-                                                              @Nullable final AnimationType animationType) {
+                                                              @Nullable final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateRemove(tabItem, animationType);
+                animateRemove(tabItem, swipeAnimation);
             }
 
         };
@@ -1209,12 +1211,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return new AnimationListener() {
 
             @Override
-            public void onAnimationStart(final Animation animation) {
+            public void onAnimationStart(final android.view.animation.Animation animation) {
 
             }
 
             @Override
-            public void onAnimationEnd(final Animation animation) {
+            public void onAnimationEnd(final android.view.animation.Animation animation) {
                 dragHandler
                         .handleRelease(new TabItemIterator.Factory(getTabSwitcher(), viewRecycler),
                                 null, dragThreshold);
@@ -1223,7 +1225,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             @Override
-            public void onAnimationRepeat(final Animation animation) {
+            public void onAnimationRepeat(final android.view.animation.Animation animation) {
 
             }
 
@@ -1779,9 +1781,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index,
-                             @NonNull final AnimationType animationType) {
+                             @NonNull final Animation animation) {
         ensureNotNull(tab, "The tab may not be null");
-        ensureNotNull(animationType, "The animation type may not be null");
+        ensureNotNull(animation, "The animation may not be null");
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -1809,9 +1811,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void removeTab(@NonNull final Tab tab,
-                                @NonNull final AnimationType animationType) {
+    public final void removeTab(@NonNull final Tab tab, @NonNull final Animation animation) {
         ensureNotNull(tab, "The tab may not be null");
+        ensureNotNull(animation, "The animation may not be null");
+        ensureTrue(animation instanceof SwipeAnimation,
+                animation.getClass().getSimpleName() + " not supported when using layout " +
+                        getLayout());
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -1842,12 +1847,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else {
                     adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
                     tabItem.getTag().setClosing(true);
+                    SwipeAnimation swipeAnimation =
+                            animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
 
                     if (tabItem.isInflated()) {
-                        animateRemove(tabItem, animationType);
+                        animateRemove(tabItem, swipeAnimation);
                     } else {
                         inflateAndUpdateView(tabItem,
-                                createRemoveLayoutListener(tabItem, animationType));
+                                createRemoveLayoutListener(tabItem, swipeAnimation));
                     }
                 }
             }
@@ -1856,7 +1863,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void clear(@NonNull final AnimationType animationType) {
+    public final void clear(@NonNull final Animation animation) {
+        ensureNotNull(animation, "The animation may not be null");
+        ensureTrue(animation instanceof SwipeAnimation,
+                animation.getClass().getSimpleName() + " not supported when using layout " +
+                        getLayout());
         enqueuePendingAction(new Runnable() {
 
             @Override
@@ -1885,7 +1896,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         }
 
                         if (tabItem.isInflated()) {
-                            animateSwipe(tabItem, true, 0, startDelay, animationType,
+                            SwipeAnimation swipeAnimation = animation instanceof SwipeAnimation ?
+                                    (SwipeAnimation) animation : null;
+                            animateSwipe(tabItem, true, 0, startDelay, swipeAnimation,
                                     !iterator.hasNext() ? createClearAnimationListener() : null);
                         }
                     }
