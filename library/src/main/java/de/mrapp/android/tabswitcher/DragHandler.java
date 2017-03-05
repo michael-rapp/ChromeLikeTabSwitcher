@@ -760,7 +760,7 @@ public class DragHandler {
     private float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
         ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
                 IllegalStateException.class);
-        return tabSwitcher.getCount() > 3 && tabItem != null &&
+        return tabSwitcher.getCount() > 4 && tabItem != null &&
                 tabItem.getIndex() == tabSwitcher.getSelectedTabIndex() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
     }
@@ -973,6 +973,8 @@ public class DragHandler {
 
             if (tabSwitcher.getCount() == 3) {
                 attachedPosition = totalSpace * 0.66f;
+            } else if (tabSwitcher.getCount() == 4) {
+                attachedPosition = totalSpace * 0.75f;
             } else {
                 attachedPosition = totalSpace * 0.5f;
             }
