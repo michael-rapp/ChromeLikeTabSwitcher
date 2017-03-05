@@ -411,7 +411,6 @@ public class Arithmetics {
                                                 @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
-
         return getSize(axis, view) / 2f;
     }
 
@@ -430,7 +429,7 @@ public class Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return endOvershootPivot;
+            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getSize(axis, view) / 2f;
         } else {
             return getSize(axis, view) / 2f;
         }

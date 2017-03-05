@@ -1188,7 +1188,8 @@ public class DragHandler {
                 endOvershootThreshold = dragPosition - maxOvershootDistance;
             }
 
-            notifyOnTiltOnEndOvershoot(Math.max(0, Math.min(1, ratio)) * -maxEndOvershootAngle);
+            notifyOnTiltOnEndOvershoot(Math.max(0, Math.min(1, ratio)) *
+                    -(tabSwitcher.getCount() > 1 ? maxEndOvershootAngle : maxStartOvershootAngle));
         } else {
             overshootDragHelper.reset();
             float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
