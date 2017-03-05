@@ -99,11 +99,11 @@ public class Animation {
          * Creates a new reveal animation.
          *
          * @param x
-         *         The horizontal position, the animation should start at, in pixels as an {@link
-         *         Integer} value
+         *         The horizontal position, the animation should start at, in pixels as a {@link
+         *         Float} value
          * @param y
-         *         The vertical position, the animation should start at, in pixels as an {@link
-         *         Integer} value
+         *         The vertical position, the animation should start at, in pixels as a {@link
+         *         Float} value
          */
         public RevealAnimation(final float x, final float y) {
             this.x = x;
@@ -113,7 +113,7 @@ public class Animation {
         /**
          * Returns the horizontal position, the animation starts at.
          *
-         * @return The horizontal position, the animation starts at, in pixels as an {@link Integer}
+         * @return The horizontal position, the animation starts at, in pixels as a {@link Float}
          * value
          */
         public final float getX() {
@@ -123,7 +123,7 @@ public class Animation {
         /**
          * Returns the vertical position, the animation starts at.
          *
-         * @return The vertical position, the animation starts at, in pixels as an {@link Integer}
+         * @return The vertical position, the animation starts at, in pixels as a {@link Float}
          * value
          */
         public final float getY() {
@@ -165,10 +165,10 @@ public class Animation {
      * specific position.
      *
      * @param x
-     *         The horizontal position, the animation should start at, in pixels as an {@link
-     *         Integer} value
+     *         The horizontal position, the animation should start at, in pixels as a {@link Float}
+     *         value
      * @param y
-     *         The vertical position, the animation should start at, in pixels as an {@link Integer}
+     *         The vertical position, the animation should start at, in pixels as a {@link Float}
      *         value
      * @return The animation, which has been created, as an instance of the class {@link Animation}.
      * The animation may not be null
