@@ -395,9 +395,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (getCount() <= 2) {
             return totalSpace * 0.66f;
+        } else if (getCount() == 3) {
+            return totalSpace * 0.4f;
+        } else {
+            return totalSpace * 0.25f;
         }
-
-        return totalSpace * 0.25f;
     }
 
     /**

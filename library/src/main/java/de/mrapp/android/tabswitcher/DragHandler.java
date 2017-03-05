@@ -760,7 +760,7 @@ public class DragHandler {
     private float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
         ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
                 IllegalStateException.class);
-        return tabSwitcher.getCount() > 2 && tabItem != null &&
+        return tabSwitcher.getCount() > 3 && tabItem != null &&
                 tabItem.getIndex() == tabSwitcher.getSelectedTabIndex() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
     }
@@ -965,11 +965,17 @@ public class DragHandler {
      */
     public final float getAttachedPosition() {
         if (attachedPosition == -1) {
-            attachedPosition =
-                    (arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
+            float totalSpace =
+                    arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
                             (tabSwitcher.getLayout() == Layout.PHONE_PORTRAIT &&
                                     tabSwitcher.isToolbarShown() ?
-                                    tabSwitcher.getToolbar().getHeight() + tabInset : 0)) / 2f;
+                                    tabSwitcher.getToolbar().getHeight() + tabInset : 0);
+
+            if (tabSwitcher.getCount() == 3) {
+                attachedPosition = totalSpace * 0.66f;
+            } else {
+                attachedPosition = totalSpace * 0.5f;
+            }
         }
 
         return attachedPosition;
