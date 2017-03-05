@@ -392,7 +392,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float totalSpace = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
                 (getLayout() == Layout.PHONE_PORTRAIT && isToolbarShown() ?
                         toolbar.getHeight() + tabInset : 0);
-        return totalSpace / 4f;
+
+        if (getCount() <= 2) {
+            return totalSpace * 0.66f;
+        }
+
+        return totalSpace * 0.25f;
     }
 
     /**
