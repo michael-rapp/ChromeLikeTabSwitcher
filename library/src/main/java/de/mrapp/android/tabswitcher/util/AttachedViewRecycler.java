@@ -150,7 +150,10 @@ public class AttachedViewRecycler<ItemType, ParamType>
 
         if (view == null) {
             int viewType = getAdapter().getViewType(item);
-            view = pollUnusedView(viewType);
+
+            if (useCache) {
+                view = pollUnusedView(viewType);
+            }
 
             if (view == null) {
                 view = getAdapter()
