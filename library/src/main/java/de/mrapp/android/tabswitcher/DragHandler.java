@@ -1169,7 +1169,7 @@ public class DragHandler {
                     }
 
                     notifyOnTiltOnStartOvershoot(
-                            Math.max(0, Math.min(1, (ratio) * maxStartOvershootAngle)));
+                            Math.max(0, Math.min(1, ratio)) * maxStartOvershootAngle);
                 }
             }
         } else if (dragPosition >= endOvershootThreshold) {
