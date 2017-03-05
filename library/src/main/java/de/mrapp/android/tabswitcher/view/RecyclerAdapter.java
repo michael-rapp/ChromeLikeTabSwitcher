@@ -15,7 +15,9 @@ package de.mrapp.android.tabswitcher.view;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -452,7 +454,19 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
         removeChildView(viewHolder);
         viewHolder.child = null;
-        viewHolder.previewImageView.setImageBitmap(null);
+
+        if (dataBinder.isCached(tabItem.getTab())) {
+            Drawable drawable = viewHolder.previewImageView.getDrawable();
+            viewHolder.previewImageView.setImageBitmap(null);
+
+            if (drawable instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                bitmap.recycle();
+            }
+        } else {
+            viewHolder.previewImageView.setImageBitmap(null);
+        }
+
         view.setTag(R.id.tag_properties, null);
     }
 

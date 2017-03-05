@@ -19,11 +19,10 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.v4.util.LruCache;
 import android.view.View;
 
-import java.lang.ref.SoftReference;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
@@ -119,6 +118,11 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
+     * The number of items, which are stored by a cached, by default.
+     */
+    public static final int CACHE_SIZE = 10;
+
+    /**
      * The context, which is used by the data binder.
      */
     private final Context context;
@@ -129,9 +133,9 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     private final Logger logger;
 
     /**
-     * A map, which is used to cache already loaded data.
+     * A LRU cache, which is used to cache already loaded data.
      */
-    private final Map<KeyType, SoftReference<DataType>> cache;
+    private final LruCache<KeyType, DataType> cache;
 
     /**
      * A map, which is used to manage the views, which have already been used to display data.
@@ -171,13 +175,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     @Nullable
     private DataType getCachedData(@NonNull final KeyType key) {
         synchronized (cache) {
-            SoftReference<DataType> reference = cache.get(key);
-
-            if (reference != null) {
-                return reference.get();
-            }
-
-            return null;
+            return cache.get(key);
         }
     }
 
@@ -189,12 +187,12 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         generic type KeyType. The key may not be null
      * @param data
      *         The data, which should be added to the cache, as an instance of the generic type
-     *         DataType
+     *         DataType. The data may not be null
      */
-    private void cacheData(@NonNull final KeyType key, @Nullable final DataType data) {
+    private void cacheData(@NonNull final KeyType key, @NonNull final DataType data) {
         synchronized (cache) {
             if (useCache) {
-                cache.put(key, new SoftReference<>(data));
+                cache.put(key, data);
             }
         }
     }
@@ -236,7 +234,11 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     private DataType loadData(@NonNull final Task<DataType, KeyType, ViewType, ParamType> task) {
         try {
             DataType data = doInBackground(task.key, task.params);
-            cacheData(task.key, task.result);
+
+            if (data != null) {
+                cacheData(task.key, data);
+            }
+
             logger.logInfo(getClass(), "Loaded data with key " + task.key);
             return data;
         } catch (Exception e) {
@@ -315,8 +317,9 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
                                           @NonNull final ParamType... params);
 
     /**
-     * Creates a new data binder. Caching is enabled by default. The executor service, which is used
-     * to manage asynchronous tasks, is created by using the static method
+     * Creates a new data binder. Caching is enabled by default. The cache, which is used to store
+     * already loaded data, caches up to <code>CACHE_SIZE</code> items. The executor service, which
+     * is used to manage asynchronous tasks, is created by using the static method
      * <code>Executors.newCachedThreadPool</code>. Such executor services are meant to be used when
      * many short-living tasks are executed and reuse previously created threads.
      *
@@ -329,7 +332,9 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
-     * Creates a new data binder. Caching is enabled by default.
+     * Creates a new data binder, which uses a specific executor service. Caching is enabled by
+     * default. The cache, which is used to store already loaded data, caches up to
+     * <code>CACHE_SIZE</code> items.
      *
      * @param context
      *         The context, which should be used by the data binder, as an instance of the class
@@ -340,11 +345,50 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      */
     public AbstractDataBinder(@NonNull final Context context,
                               @NonNull final ExecutorService threadPool) {
+        this(context, threadPool, new LruCache<KeyType, DataType>(CACHE_SIZE));
+    }
+
+    /**
+     * Creates a new data binder, which uses a specific cache. Caching is enabled by default. The
+     * executor service, which is used to manage asynchronous tasks, is created by using the static
+     * method <code>Executors.newCachedThreadPool</code>. Such executor services are meant to be
+     * used when many short-living tasks are executed and reuse previously created threads.
+     *
+     * @param context
+     *         The context, which should be used by the data binder, as an instance of the class
+     *         {@link Context}. The context may not be null
+     * @param cache
+     *         The LRU cache, which should be used to cache already loaded data, as an instance of
+     *         the class {@link LruCache}. The cache may not be null
+     */
+    public AbstractDataBinder(@NonNull final Context context,
+                              @NonNull final LruCache<KeyType, DataType> cache) {
+        this(context, Executors.newCachedThreadPool(), cache);
+    }
+
+    /**
+     * Creates a new data binder, which uses a specifc executor service and cache. Caching is
+     * enabled by default.
+     *
+     * @param context
+     *         The context, which should be used by the data binder, as an instance of the class
+     *         {@link Context}. The context may not be null
+     * @param threadPool
+     *         The executor service, which should be used to manage asynchronous tasks, as an
+     *         instance of the type {@link ExecutorService}. The executor service may not be null
+     * @param cache
+     *         The LRU cache, which should be used to cache already loaded data, as an instance of
+     *         the class {@link LruCache}. The cache may not be null
+     */
+    public AbstractDataBinder(@NonNull final Context context,
+                              @NonNull final ExecutorService threadPool,
+                              @NonNull final LruCache<KeyType, DataType> cache) {
         ensureNotNull(context, "The context may not be null");
         ensureNotNull(threadPool, "The executor service may not be null");
+        ensureNotNull(cache, "The cache may not be null");
         this.context = context;
         this.logger = new Logger(LogLevel.INFO);
-        this.cache = Collections.synchronizedMap(new HashMap<KeyType, SoftReference<DataType>>());
+        this.cache = cache;
         this.views = Collections.synchronizedMap(new WeakHashMap<ViewType, KeyType>());
         this.threadPool = threadPool;
         this.cancelLock = new Object();
@@ -470,6 +514,23 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
     }
 
     /**
+     * Returns, whether the data, which corresponds to a specific key, is currently cached, or not.
+     *
+     * @param key
+     *         The key, which corresponds to the data, which should be checked, as an instance of
+     *         the generic type KeyType. The key may not be null
+     * @return True, if the data, which corresponds to the given key, is currently cached, false
+     * otherwise
+     */
+    public final boolean isCached(@NonNull final KeyType key) {
+        ensureNotNull(key, "The key may not be null");
+
+        synchronized (cache) {
+            return cache.get(key) != null;
+        }
+    }
+
+    /**
      * Returns, whether data is cached, or not.
      *
      * @return True, if data is cached, false otherwise
@@ -502,7 +563,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      */
     public final void clearCache() {
         synchronized (cache) {
-            cache.clear();
+            cache.evictAll();
             logger.logDebug(getClass(), "Cleared cache");
         }
     }

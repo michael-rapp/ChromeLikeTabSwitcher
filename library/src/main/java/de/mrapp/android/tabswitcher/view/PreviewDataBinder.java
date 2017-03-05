@@ -20,6 +20,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.LruCache;
 import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -65,7 +66,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      */
     public PreviewDataBinder(@NonNull final TabSwitcher tabSwitcher,
                              @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
-        super(tabSwitcher.getContext());
+        super(tabSwitcher.getContext(), new LruCache<Tab, Bitmap>(5));
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
