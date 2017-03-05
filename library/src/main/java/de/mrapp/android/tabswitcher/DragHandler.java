@@ -1144,10 +1144,14 @@ public class DragHandler {
 
             if (overshootDistance < 0) {
                 float absOvershootDistance = Math.abs(overshootDistance);
+                float startOvershootDistance =
+                        tabSwitcher.getCount() >= stackedTabCount ? maxOvershootDistance :
+                                (tabSwitcher.getCount() > 1 ? (float) maxOvershootDistance /
+                                        (float) tabSwitcher.getCount() : 0);
 
-                if (absOvershootDistance <= maxOvershootDistance) {
+                if (absOvershootDistance <= startOvershootDistance) {
                     float ratio =
-                            Math.max(0, Math.min(1, absOvershootDistance / maxOvershootDistance));
+                            Math.max(0, Math.min(1, absOvershootDistance / startOvershootDistance));
                     AbstractTabItemIterator.AbstractBuilder builder = factory.create();
                     AbstractTabItemIterator iterator = builder.create();
                     TabItem tabItem = iterator.getItem(0);
@@ -1156,11 +1160,12 @@ public class DragHandler {
                     notifyOnStartOvershoot(position);
                 } else {
                     float ratio =
-                            (absOvershootDistance - maxOvershootDistance) / maxOvershootDistance;
+                            (absOvershootDistance - startOvershootDistance) / maxOvershootDistance;
 
                     if (ratio >= 1) {
                         overshootDragHelper.setMinDragDistance(overshootDistance);
-                        startOvershootThreshold = dragPosition + (maxOvershootDistance * 2);
+                        startOvershootThreshold =
+                                dragPosition + maxOvershootDistance + startOvershootDistance;
                     }
 
                     notifyOnTiltOnStartOvershoot(
