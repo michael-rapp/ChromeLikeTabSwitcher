@@ -109,7 +109,7 @@ public class ViewRecycler<ItemType, ParamType> extends AbstractViewRecycler<Item
             getActiveViews().put(item, view);
         }
 
-        getAdapter().onShowView(getContext(), view, item, params);
+        getAdapter().onShowView(getContext(), view, item, inflated, params);
         getLogger().logDebug(getClass(), "Updated view of item " + item);
         return Pair.create(view, inflated);
     }

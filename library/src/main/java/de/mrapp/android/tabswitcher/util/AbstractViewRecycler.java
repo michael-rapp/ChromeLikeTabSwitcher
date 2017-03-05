@@ -110,13 +110,15 @@ public abstract class AbstractViewRecycler<ItemType, ParamType> {
          * @param item
          *         The item, which should be visualized, as an instance of the generic type
          *         ItemType. The item may not be null
+         * @param inflated
+         *         True, if the view has been inflated, false, if it has been reused
          * @param params
          *         An array, which may contain optional parameters, as an array of the generic type
          *         ParamType or an empty array, if no optional parameters are available
          */
         @SuppressWarnings("unchecked")
         public abstract void onShowView(@NonNull final Context context, @NonNull final View view,
-                                        @NonNull final ItemType item,
+                                        @NonNull final ItemType item, final boolean inflated,
                                         @NonNull final ParamType... params);
 
         /**

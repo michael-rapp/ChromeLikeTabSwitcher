@@ -25,7 +25,6 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -78,12 +77,11 @@ public class TabItem {
      * default, the item is neither associated with a view, nor with a view holder.
      *
      * @param index
-     *         The index of the tab as an {@link Integer} value. The index must be at least 0
+     *         The index of the tab as an {@link Integer} value
      * @param tab
      *         The tab as an instance of the class {@link Tab}. The tab may not be null
      */
-    private TabItem(final int index, @NonNull final Tab tab) {
-        ensureAtLeast(index, 0, "The index must be at least 0");
+    public TabItem(final int index, @NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         this.index = index;
         this.tab = tab;
@@ -101,8 +99,8 @@ public class TabItem {
      *         TabSwitcher}. The tab switcher may not be null
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
-     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may not be
-     *         null
+     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may
+     *         not be null
      * @param index
      *         The index of the tab as an {@link Integer} value. The index must be at least 0
      * @return The item, which has been created, as an instance of the class {@link TabItem}. The

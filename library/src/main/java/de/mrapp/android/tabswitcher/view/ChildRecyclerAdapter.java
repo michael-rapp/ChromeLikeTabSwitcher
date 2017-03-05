@@ -41,7 +41,8 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
 
     @Override
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
-                                 @NonNull final Tab item, @NonNull final Void... params) {
+                                 @NonNull final Tab item, final boolean inflated,
+                                 @NonNull final Void... params) {
         decorator.applyDecorator(context, tabSwitcher, view, item);
     }
 

@@ -181,7 +181,7 @@ public class AttachedViewRecycler<ItemType, ParamType>
             getLogger().logDebug(getClass(), "Added view of item " + item + " at index " + index);
         }
 
-        getAdapter().onShowView(getContext(), view, item, params);
+        getAdapter().onShowView(getContext(), view, item, inflated, params);
         getLogger().logDebug(getClass(), "Updated view of item " + item);
         return Pair.create(view, inflated);
     }

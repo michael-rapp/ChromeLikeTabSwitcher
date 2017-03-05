@@ -43,6 +43,7 @@ import android.widget.FrameLayout;
 
 import java.util.Collections;
 
+import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
@@ -189,6 +190,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The duration of the animation, which is used to revert overshoots.
      */
     private final long revertOvershootAnimationDuration;
+
+    /**
+     * The duration of a reveal animation.
+     */
+    private final long revealAnimationDuration;
 
     /**
      * The view recycler, which allows to recycler the child views of tabs.
@@ -764,6 +770,29 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Starts a reveal animation to add a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param index
+     *         The index, the tab should be added at, as an {@link Integer} value
+     */
+    private void animateReveal(@NonNull final TabItem tabItem, final int index) {
+        View view = tabItem.getView();
+        ViewPropertyAnimator animation = view.animate();
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setListener(new AnimationListenerWrapper(
+                createRevealAnimationListener(tabItem.getTab(), index)));
+        animation.setStartDelay(0);
+        animation.setDuration(revealAnimationDuration);
+        animation.scaleY(1);
+        animation.scaleX(1);
+        animation.start();
+        animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to animate the position and size of a tab
      * in order to show the tab switcher, once its view has been inflated.
      *
@@ -873,6 +902,42 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Creates and returns a layout listener, which allows to start a reveal animation to add a tab,
+     * once its view has been inflated.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param index
+     *         The index, the tab should be added at, as an {@link Integer} value
+     * @param revealAnimation
+     *         The reveal animation, which should be started, as an instance of the class {@link
+     *         RevealAnimation}. The reveal animation may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createRevealLayoutListener(@NonNull final TabItem tabItem,
+                                                              final int index,
+                                                              @NonNull final RevealAnimation revealAnimation) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = tabItem.getView();
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
+                view.setPivotX(revealAnimation.getX() - layoutParams.leftMargin);
+                view.setPivotY(revealAnimation.getY() - layoutParams.topMargin);
+                view.setScaleX(0);
+                view.setScaleY(0);
+                animateReveal(tabItem, index);
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to adapt the bottom margin of a tab, once
      * its view has been inflated.
      *
@@ -924,8 +989,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
-                View view = tabItem.getView();
-                ViewUtil.removeOnGlobalLayoutListener(view.getViewTreeObserver(), this);
                 adaptViewSize(tabItem);
                 updateView(tabItem);
 
@@ -953,7 +1016,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 updateView(tabItem);
             }
@@ -977,13 +1040,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
 
                 if (tabItem.getIndex() == getSelectedTabIndex()) {
                     viewRecycler.inflate(tabItem);
                 } else {
                     viewRecycler.remove(tabItem);
+                }
+
+                if (tabItem.getIndex() == getCount() - 1) {
                     viewRecycler.clearCache();
                 }
             }
@@ -1092,6 +1158,37 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         setSelectedTabIndex(getSelectedTabIndex());
                     }
                 }
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a listener, which allows to handle, when a tab has been added by using a
+     * reveal animation.
+     *
+     * @param tab
+     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
+     *         not be null
+     * @param index
+     *         The index, the tab has been added at, as an {@link Integer} value
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createRevealAnimationListener(@NonNull final Tab tab,
+                                                           final int index) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                addTabInternal(index, tab);
+                setSelectedTabIndex(index);
+                setSwitcherShown(false);
+                viewRecycler.removeAll();
+                viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
+                viewRecycler.clearCache();
             }
 
         };
@@ -1309,18 +1406,38 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void inflateAndUpdateView(@NonNull final TabItem tabItem,
                                       @Nullable final OnGlobalLayoutListener listener) {
-        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem, tabViewBottomMargin);
-        boolean inflated = pair.second;
+        inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener),
+                tabViewBottomMargin);
+    }
 
-        if (inflated) {
-            View view = tabItem.getView();
-            view.getViewTreeObserver().addOnGlobalLayoutListener(new LayoutListenerWrapper(view,
-                    createInflateViewLayoutListener(tabItem, listener)));
-        } else {
-            adaptViewSize(tabItem);
-            updateView(tabItem);
+    /**
+     * Inflates the view, which is used to visualize a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param listener
+     *         The layout listener, which should be notified, when the view has been inflated, as an
+     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
+     *         notified
+     * @param params
+     *         An array, which contains optional parameters, which should be passed to the view
+     *         recycler, which is used to inflate the view, as an array of the type {@link Integer}.
+     *         The array may not be null
+     */
+    private void inflateView(@NonNull final TabItem tabItem,
+                             @Nullable final OnGlobalLayoutListener listener,
+                             @NonNull final Integer... params) {
+        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem, params);
 
-            if (listener != null) {
+        if (listener != null) {
+            boolean inflated = pair.second;
+
+            if (inflated) {
+                View view = pair.first;
+                view.getViewTreeObserver()
+                        .addOnGlobalLayoutListener(new LayoutListenerWrapper(view, listener));
+            } else {
                 listener.onGlobalLayout();
             }
         }
@@ -1688,6 +1805,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         relocateAnimationDelay = resources.getInteger(R.integer.relocate_animation_delay);
         revertOvershootAnimationDuration =
                 resources.getInteger(R.integer.revert_overshoot_animation_duration);
+        revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
         tabViewBottomMargin = -1;
         toolbarAnimation = null;
         flingAnimation = null;
@@ -1788,8 +1906,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void run() {
+                tab.addCallback(recyclerAdapter);
+
                 if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
-                    tab.addCallback(recyclerAdapter);
                     addTabInternal(index, tab);
 
                     if (getCount() == 1) {
@@ -1802,6 +1921,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
                     }
                 } else {
+                    if (animation instanceof RevealAnimation) {
+                        RevealAnimation revealAnimation = (RevealAnimation) animation;
+                        TabItem tabItem = new TabItem(-1, tab);
+                        inflateView(tabItem,
+                                createRevealLayoutListener(tabItem, index, revealAnimation));
+                    }
+
                     // TODO: Add support for adding tab, while switcher is shown
                     // TODO: Only modify views if tab switcher is already laid out
                 }

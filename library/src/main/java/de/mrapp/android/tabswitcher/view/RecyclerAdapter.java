@@ -423,7 +423,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
-                                 @NonNull final TabItem tabItem, @NonNull final Integer... params) {
+                                 @NonNull final TabItem tabItem, final boolean inflated,
+                                 @NonNull final Integer... params) {
         if (!tabItem.isInflated()) {
             tabItem.setView(view);
             tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));

@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
@@ -101,8 +102,12 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         return new OnClickListener() {
 
             @Override
-            public void onClick(View view) {
-
+            public void onClick(final View view) {
+                int index = tabSwitcher.getCount();
+                float x = view.getX() + (view.getWidth());
+                float y = view.getY() + (view.getHeight());
+                Animation animation = Animation.createRevealAnimation(x, y);
+                tabSwitcher.addTab(createTab(index), index, animation);
             }
 
         };
@@ -148,6 +153,13 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             }
 
         };
+    }
+
+    private Tab createTab(final int index) {
+        CharSequence title = getString(R.string.tab_title, index + 1);
+        Tab tab = new Tab(title);
+        tab.setIcon(R.drawable.ic_file_outline_18dp);
+        return tab;
     }
 
     @Override
@@ -206,11 +218,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         Menu menu = tabSwitcher.getToolbarMenu();
         TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
 
-        for (int i = 1; i <= TAB_COUNT; i++) {
-            CharSequence title = getString(R.string.tab_title, i);
-            Tab tab = new Tab(title);
-            tab.setIcon(R.drawable.ic_file_outline_18dp);
-            tabSwitcher.addTab(tab);
+        for (int i = 0; i < TAB_COUNT; i++) {
+            tabSwitcher.addTab(createTab(i));
         }
     }
 
