@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 float x = view.getX() + (view.getWidth());
                 float y = view.getY() + (view.getHeight());
                 Animation animation = Animation.createRevealAnimation(x, y);
-                tabSwitcher.addTab(createTab(index), index, animation);
+                tabSwitcher.addTab(createTab(index), 0, animation);
             }
 
         };
