@@ -455,13 +455,16 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         removeChildView(viewHolder);
         viewHolder.child = null;
 
-        if (dataBinder.isCached(tabItem.getTab())) {
+        if (!dataBinder.isCached(tabItem.getTab())) {
             Drawable drawable = viewHolder.previewImageView.getDrawable();
             viewHolder.previewImageView.setImageBitmap(null);
 
             if (drawable instanceof BitmapDrawable) {
                 Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                bitmap.recycle();
+
+                if (!bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
             }
         } else {
             viewHolder.previewImageView.setImageBitmap(null);
