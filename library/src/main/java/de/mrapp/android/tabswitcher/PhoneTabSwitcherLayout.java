@@ -423,6 +423,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void animateShowSwitcher(@NonNull final TabItem tabItem) {
         View view = tabItem.getView();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
+        view.setX(layoutParams.leftMargin);
+        view.setY(layoutParams.topMargin);
+        arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
+        arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
@@ -433,8 +438,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer));
         } else if (tabItem.getIndex() > getSelectedTabIndex()) {
-            FrameLayout.LayoutParams layoutParams =
-                    (FrameLayout.LayoutParams) view.getLayoutParams();
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
                     getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin);
         }
