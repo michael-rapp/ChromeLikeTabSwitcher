@@ -31,6 +31,16 @@ public enum Axis {
     /**
      * The axis on which a tab is moved, when it is added to or removed from the switcher.
      */
-    ORTHOGONAL_AXIS
+    ORTHOGONAL_AXIS,
+
+    /**
+     * The horizontal axis.
+     */
+    X_AXIS,
+
+    /**
+     * The vertical axis.
+     */
+    Y_AXIS
 
 }

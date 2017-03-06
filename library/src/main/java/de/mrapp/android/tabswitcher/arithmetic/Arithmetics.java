@@ -77,11 +77,15 @@ public class Arithmetics {
      */
     @NonNull
     private Axis getOrientationInvariantAxis(@NonNull final Axis axis) {
-        if (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE) {
+        if (axis == Axis.Y_AXIS) {
+            return Axis.DRAGGING_AXIS;
+        } else if (axis == Axis.X_AXIS) {
+            return Axis.ORTHOGONAL_AXIS;
+        } else if (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE) {
             return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
+        } else {
+            return axis;
         }
-
-        return axis;
     }
 
     /**
@@ -369,7 +373,7 @@ public class Arithmetics {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getSize(axis, view) / 2f : 0;
         } else {
             return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getSize(axis, view) / 2f;
@@ -390,7 +394,7 @@ public class Arithmetics {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return endOvershootPivot;
         } else {
             return getDefaultPivot(axis, view);
@@ -428,7 +432,7 @@ public class Arithmetics {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
-        if (axis == Axis.DRAGGING_AXIS) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return tabSwitcher.getCount() > 1 ? endOvershootPivot : getSize(axis, view) / 2f;
         } else {
             return getSize(axis, view) / 2f;

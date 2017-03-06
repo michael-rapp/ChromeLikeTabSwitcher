@@ -127,6 +127,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final int tabBorderWidth;
 
     /**
+     * The height of a tab's title container in pixels.
+     */
+    private final int tabTitleContainerHeight;
+
+    /**
      * The number of tabs, which are contained by a stack.
      */
     private final int stackedTabCount;
@@ -925,12 +930,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 View view = tabItem.getView();
-                FrameLayout.LayoutParams layoutParams =
-                        (FrameLayout.LayoutParams) view.getLayoutParams();
-                arithmetics.setPivot(getLayout() == Layout.PHONE_LANDSCAPE ? Axis.DRAGGING_AXIS :
-                        Axis.ORTHOGONAL_AXIS, view, revealAnimation.getX());
-                arithmetics.setPivot(getLayout() == Layout.PHONE_LANDSCAPE ? Axis.ORTHOGONAL_AXIS :
-                        Axis.DRAGGING_AXIS, view, revealAnimation.getY());
+                float x = revealAnimation.getX();
+                float y = revealAnimation.getY() + tabTitleContainerHeight;
+                arithmetics.setPivot(Axis.X_AXIS, view, x);
+                arithmetics.setPivot(Axis.Y_AXIS, view, y);
                 arithmetics.setScale(Axis.DRAGGING_AXIS, view, 0);
                 arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 0);
                 animateReveal(tabItem, index);
@@ -1786,6 +1789,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
+        tabTitleContainerHeight =
+                resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         TypedValue typedValue = new TypedValue();

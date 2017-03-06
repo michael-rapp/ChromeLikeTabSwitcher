@@ -104,8 +104,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public void onClick(final View view) {
                 int index = tabSwitcher.getCount();
-                float x = view.getX() + (view.getWidth());
-                float y = view.getY() + (view.getHeight());
+                int[] location = new int[2];
+                view.getLocationInWindow(location);
+                float x = location[0] + (view.getWidth() / 2f);
+                float y = location[1] + (view.getHeight() / 2f);
                 Animation animation = Animation.createRevealAnimation(x, y);
                 tabSwitcher.addTab(createTab(index), 0, animation);
             }
