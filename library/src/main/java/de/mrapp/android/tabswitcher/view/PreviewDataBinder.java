@@ -14,7 +14,6 @@
 package de.mrapp.android.tabswitcher.view;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -27,14 +26,11 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.widget.ImageView;
 
-import java.io.ByteArrayOutputStream;
-
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
-import de.mrapp.android.util.StreamUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -70,7 +66,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      */
     public PreviewDataBinder(@NonNull final TabSwitcher tabSwitcher,
                              @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
-        super(tabSwitcher.getContext(), new LruCache<Tab, Bitmap>(5));
+        super(tabSwitcher.getContext(), new LruCache<Tab, Bitmap>(7));
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
@@ -98,43 +94,27 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     @Override
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {
-        ByteArrayOutputStream outputStream = null;
-        Bitmap bitmap = null;
+        TabItem tabItem = params[0];
+        TabViewHolder viewHolder = tabItem.getViewHolder();
+        View child = viewHolder.child;
+        viewHolder.child = null;
+        int width = tabSwitcher.getWidth();
+        int height = tabSwitcher.getHeight();
+        child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        child.draw(canvas);
 
-        try {
-            TabItem tabItem = params[0];
-            TabViewHolder viewHolder = tabItem.getViewHolder();
-            View child = viewHolder.child;
-            viewHolder.child = null;
-            int width = tabSwitcher.getWidth();
-            int height = tabSwitcher.getHeight();
-            child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            child.draw(canvas);
+        // TODO: This is only for debugging purposes
+        Paint paint = new Paint();
+        paint.setTextSize(48);
+        paint.setTypeface(Typeface.DEFAULT_BOLD);
+        paint.setColor(Color.RED);
+        canvas.drawText(Integer.toString(params[0].getIndex()), 50, 50, paint);
 
-            // TODO: This is only for debugging purposes
-            Paint paint = new Paint();
-            paint.setTextSize(48);
-            paint.setTypeface(Typeface.DEFAULT_BOLD);
-            paint.setColor(Color.RED);
-            canvas.drawText(Integer.toString(params[0].getIndex()), 50, 50, paint);
-
-            outputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
-            byte[] array = outputStream.toByteArray();
-            return BitmapFactory.decodeByteArray(array, 0, array.length);
-        } finally {
-            StreamUtil.close(outputStream);
-
-            if (bitmap != null) {
-                bitmap.recycle();
-                bitmap = null;
-            }
-
-        }
+        return bitmap;
     }
 
     @Override
