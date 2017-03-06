@@ -255,10 +255,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return The bottom margin, which has been calculated, in pixels as an {@link Integer} value
      */
     private int calculateBottomMargin(@NonNull final View view) {
-        Axis axis =
-                getLayout() == Layout.PHONE_LANDSCAPE ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         float tabHeight = (view.getHeight() - 2 * tabInset) * arithmetics.getScale(view, true);
-        float containerHeight = arithmetics.getSize(axis, tabContainer);
+        float containerHeight = arithmetics.getSize(Axis.Y_AXIS, tabContainer);
         int toolbarHeight = isToolbarShown() ? toolbar.getHeight() - tabInset : 0;
         int stackHeight =
                 getLayout() == Layout.PHONE_LANDSCAPE ? 0 : stackedTabCount * stackedTabSpacing;
