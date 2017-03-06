@@ -136,7 +136,7 @@ public abstract class AbstractTabSwitcherLayout
      * listener allows to encapsulate another listener, which is notified, when the listener is
      * invoked.
      */
-    protected class LayoutListenerWrapper implements OnGlobalLayoutListener {
+    protected static class LayoutListenerWrapper implements OnGlobalLayoutListener {
 
         /**
          * The observed view.

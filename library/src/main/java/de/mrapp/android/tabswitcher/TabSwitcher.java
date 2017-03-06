@@ -38,6 +38,7 @@ import android.widget.FrameLayout;
 
 import java.util.Iterator;
 
+import de.mrapp.android.tabswitcher.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 
@@ -73,7 +74,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                             @StyleRes final int defaultStyleResource) {
         layout = new PhoneTabSwitcherLayout(this);
         layout.inflateLayout();
-        getViewTreeObserver().addOnGlobalLayoutListener(layout);
+        getViewTreeObserver().addOnGlobalLayoutListener(new LayoutListenerWrapper(this, layout));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);

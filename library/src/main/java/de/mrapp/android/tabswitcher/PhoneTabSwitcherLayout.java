@@ -2108,8 +2108,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void onGlobalLayout() {
-        ViewUtil.removeOnGlobalLayoutListener(getTabSwitcher().getViewTreeObserver(), this);
-
         if (isSwitcherShown()) {
             TabItem[] tabItems = calculateInitialTabItems();
             AbstractTabItemIterator iterator =
