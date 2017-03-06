@@ -722,7 +722,7 @@ public class DragHandler {
     private TabItem getFocusedTabView(@NonNull final AbstractTabItemIterator.Factory factory,
                                       final float position) {
         AbstractTabItemIterator.AbstractBuilder<?, ?> builder = factory.create();
-        AbstractTabItemIterator iterator = builder.create();
+        AbstractTabItemIterator iterator = builder.start(firstVisibleIndex).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
