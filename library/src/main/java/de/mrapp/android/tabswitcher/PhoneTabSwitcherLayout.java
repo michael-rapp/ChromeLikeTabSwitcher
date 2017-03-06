@@ -786,8 +786,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 createRevealAnimationListener(tabItem.getTab(), index)));
         animation.setStartDelay(0);
         animation.setDuration(revealAnimationDuration);
-        animation.scaleY(1);
-        animation.scaleX(1);
+        arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, 1);
+        arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         animation.start();
         animateToolbarVisibility(isToolbarShown() && isEmpty(), 0);
     }
@@ -927,10 +927,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 View view = tabItem.getView();
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
-                view.setPivotX(revealAnimation.getX() - layoutParams.leftMargin);
-                view.setPivotY(revealAnimation.getY() - layoutParams.topMargin);
-                view.setScaleX(0);
-                view.setScaleY(0);
+                arithmetics.setPivot(getLayout() == Layout.PHONE_LANDSCAPE ? Axis.DRAGGING_AXIS :
+                        Axis.ORTHOGONAL_AXIS, view, revealAnimation.getX());
+                arithmetics.setPivot(getLayout() == Layout.PHONE_LANDSCAPE ? Axis.ORTHOGONAL_AXIS :
+                        Axis.DRAGGING_AXIS, view, revealAnimation.getY());
+                arithmetics.setScale(Axis.DRAGGING_AXIS, view, 0);
+                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 0);
                 animateReveal(tabItem, index);
             }
 
