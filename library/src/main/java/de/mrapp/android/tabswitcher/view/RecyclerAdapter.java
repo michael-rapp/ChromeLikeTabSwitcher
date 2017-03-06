@@ -462,7 +462,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
             if (drawable instanceof BitmapDrawable) {
                 Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 
-                if (!bitmap.isRecycled()) {
+                if (bitmap != null && !bitmap.isRecycled()) {
                     bitmap.recycle();
                 }
             }
