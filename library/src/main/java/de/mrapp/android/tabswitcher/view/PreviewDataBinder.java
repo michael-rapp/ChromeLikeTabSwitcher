@@ -99,6 +99,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {
         ByteArrayOutputStream outputStream = null;
+        Bitmap bitmap = null;
 
         try {
             TabItem tabItem = params[0];
@@ -110,7 +111,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
             child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             child.draw(canvas);
 
@@ -127,6 +128,12 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
             return BitmapFactory.decodeByteArray(array, 0, array.length);
         } finally {
             StreamUtil.close(outputStream);
+
+            if (bitmap != null) {
+                bitmap.recycle();
+                bitmap = null;
+            }
+
         }
     }
 
