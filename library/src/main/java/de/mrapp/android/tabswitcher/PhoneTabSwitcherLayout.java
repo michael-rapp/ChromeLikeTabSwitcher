@@ -939,6 +939,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float y = revealAnimation.getY() + tabTitleContainerHeight;
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
+                view.setAlpha(1f);
                 arithmetics.setPivot(Axis.X_AXIS, view, x);
                 arithmetics.setPivot(Axis.Y_AXIS, view, y);
                 view.setX(layoutParams.leftMargin);
@@ -1206,6 +1207,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 View view = pair.first;
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
+                view.setAlpha(1f);
                 arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
                 arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
                 view.setX(layoutParams.leftMargin);
