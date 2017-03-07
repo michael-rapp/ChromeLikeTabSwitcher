@@ -370,6 +370,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private TabItem[] calculateInitialTabItems() {
         dragHandler.reset(0);
         dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
+        dragHandler.setCallback(null);
         TabItem[] tabItems = new TabItem[getCount()];
 
         if (!isEmpty()) {
@@ -785,6 +786,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The index, the tab should be added at, as an {@link Integer} value
      */
     private void animateReveal(@NonNull final TabItem tabItem, final int index) {
+        tabViewBottomMargin = -1;
+        recyclerAdapter.clearCachedPreviews();
+        dragHandler.setCallback(null);
         View view = tabItem.getView();
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
