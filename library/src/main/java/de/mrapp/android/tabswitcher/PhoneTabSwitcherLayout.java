@@ -1584,7 +1584,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             dragHandler.calculateNonLinearPosition(tabItem, predecessor);
                 }
 
-                dragHandler.clipTabPosition(position, tabItem, predecessor);
+                dragHandler.clipTabPosition(position, tabItem,
+                        predecessor.getIndex() != removedTabItem.getIndex() ? predecessor : null);
                 Tag tag = tabItem.getTag().clone();
 
                 if (tabItem.isInflated() || tabItem.isVisible()) {
