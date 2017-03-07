@@ -1197,7 +1197,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 setSelectedTabIndex(index);
                 setSwitcherShown(false);
                 viewRecycler.removeAll();
-                viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
+                Pair<View, Boolean> pair =
+                        viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
+                View view = pair.first;
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
+                arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
+                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
+                view.setX(layoutParams.leftMargin);
+                view.setY(layoutParams.topMargin);
                 viewRecycler.clearCache();
             }
 
