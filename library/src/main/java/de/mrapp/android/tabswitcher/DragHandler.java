@@ -598,8 +598,8 @@ public class DragHandler {
      *         be null
      * @return The position, which has been calculated, as a {@link Float} value
      */
-    private float calculateNonLinearPosition(@NonNull final TabItem tabItem,
-                                             @NonNull final TabItem predecessor) {
+    public final float calculateNonLinearPosition(@NonNull final TabItem tabItem,
+                                                  @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
         float ratio = Math.min(1, predecessorPosition /
                 Math.max(getAttachedPosition(), calculateMaxTabSpacing(null)));
@@ -693,7 +693,8 @@ public class DragHandler {
      *         The factory may not be null
      * @return True, if the tabs are overshooting at the end, false otherwise
      */
-    private boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator.Factory factory) {
+    public final boolean isOvershootingAtEnd(
+            @NonNull final AbstractTabItemIterator.Factory factory) {
         if (tabSwitcher.getCount() <= 1) {
             return true;
         } else {
@@ -757,7 +758,7 @@ public class DragHandler {
      * @return The maximum space between the given tab and its predecessor in pixels as a {@link
      * Float} value
      */
-    private float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
+    public final float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
         ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
                 IllegalStateException.class);
         return tabSwitcher.getCount() > 4 && tabItem != null &&
@@ -994,26 +995,36 @@ public class DragHandler {
      * @param predecessor
      *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
      *         null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the tab item, as an instance of the
+     * class {@link Pair}. The pair may not be null
      */
-    public final void clipTabPosition(final float position, @NonNull final TabItem tabItem,
-                                      @Nullable final TabItem predecessor) {
+    @NonNull
+    public final Pair<Float, State> clipTabPosition(final float position,
+                                                    @NonNull final TabItem tabItem,
+                                                    @Nullable final TabItem predecessor) {
         Pair<Float, State> startPair =
                 calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor);
         float startPosition = startPair.first;
 
         if (position <= startPosition) {
+            State state = startPair.second;
             tabItem.getTag().setPosition(startPosition);
-            tabItem.getTag().setState(startPair.second);
+            tabItem.getTag().setState(state);
+            return Pair.create(startPosition, state);
         } else {
             Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
             float endPosition = endPair.first;
 
             if (position >= endPosition) {
+                State state = endPair.second;
                 tabItem.getTag().setPosition(endPosition);
-                tabItem.getTag().setState(endPair.second);
+                tabItem.getTag().setState(state);
+                return Pair.create(endPosition, state);
             } else {
+                State state = State.FLOATING;
                 tabItem.getTag().setPosition(position);
-                tabItem.getTag().setState(State.FLOATING);
+                tabItem.getTag().setState(state);
+                return Pair.create(position, state);
             }
         }
     }
@@ -1234,8 +1245,14 @@ public class DragHandler {
                 } else if (dragState == DragState.OVERSHOOT_END) {
                     dragState = DragState.DRAG_TO_START;
                 } else {
-                    dragState = previousDistance - dragHelper.getDragDistance() <= 0 ?
-                            DragState.DRAG_TO_END : DragState.DRAG_TO_START;
+                    float dragDistance = dragHelper.getDragDistance();
+
+                    if (dragDistance == 0) {
+                        dragState = DragState.NONE;
+                    } else {
+                        dragState = previousDistance - dragDistance < 0 ? DragState.DRAG_TO_END :
+                                DragState.DRAG_TO_START;
+                    }
                 }
             }
 
@@ -1314,6 +1331,14 @@ public class DragHandler {
         firstVisibleIndex = -1;
         attachedPosition = -1;
 
+    }
+
+    public final int getFirstVisibleIndex() {
+        return firstVisibleIndex;
+    }
+
+    public final void setFirstVisibleIndex(final int index) {
+        this.firstVisibleIndex = index;
     }
 
 }
