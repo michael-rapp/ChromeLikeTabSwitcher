@@ -387,7 +387,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (tabItem.getIndex() == getSelectedTabIndex()) {
                     selectedTabItem = tabItem;
-                    position = dragHandler.getAttachedPosition();
+                    position = dragHandler.getAttachedPosition(false);
                 } else {
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
                 }
@@ -418,7 +418,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         position = (getCount() - 1 - tabItem.getIndex()) * defaultTabSpacing;
                     }
                 } else {
-                    position = dragHandler.getAttachedPosition() + maxTabSpacing +
+                    position = dragHandler.getAttachedPosition(false) + maxTabSpacing +
                             ((getSelectedTabIndex() - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
@@ -1186,20 +1186,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
+                dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
+                dragHandler.getAttachedPosition(true);
 
                 if (tabItem.getTag().getState() == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);
                 } else if (tabItem.getTag().getState() == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
                 } else {
-                    relocateWhenRemovingFloatingTab(tabItem);
+                    relocateWhenRemovingFloatingTab2(tabItem);
                 }
             }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-
                 int index = tabItem.getIndex();
                 viewRecycler.remove(tabItem);
                 Tab tab = removeTabInternal(index);
@@ -1548,6 +1549,74 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setPosition(Axis.DRAGGING_AXIS, view, position);
         arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
         arithmetics.setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
+    }
+
+    private void relocateWhenRemovingFloatingTab2(@NonNull final TabItem removedTabItem) {
+        float removedTabPosition = removedTabItem.getTag().getPosition();
+        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(null);
+        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(
+                TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex()));
+        AbstractTabItemIterator.AbstractBuilder builder =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
+        AbstractTabItemIterator iterator = builder.create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.getIndex() != removedTabItem.getIndex()) {
+                TabItem predecessor = iterator.previous();
+                float position;
+
+                if (tabItem.getIndex() < removedTabItem.getIndex()) {
+                    if (getSelectedTabIndex() > tabItem.getIndex() &&
+                            getSelectedTabIndex() <= removedTabItem.getIndex() &&
+                            !(getSelectedTabIndex() == removedTabItem.getIndex() &&
+                                    tabItem.getIndex() == getSelectedTabIndex() - 1)) {
+                        position = removedTabPosition + maxTabSpacing +
+                                ((removedTabItem.getIndex() - 1 - tabItem.getIndex() - 1) *
+                                        defaultTabSpacing);
+                    } else {
+                        position = removedTabPosition +
+                                (removedTabItem.getIndex() - 1 - tabItem.getIndex()) *
+                                        defaultTabSpacing;
+                    }
+                } else {
+                    position = tabItem.getIndex() == getCount() - 1 ? 0 :
+                            dragHandler.calculateNonLinearPosition(tabItem, predecessor);
+                }
+
+                dragHandler.clipTabPosition(position, tabItem, predecessor);
+                Tag tag = tabItem.getTag().clone();
+
+                if (tabItem.isInflated() || tabItem.isVisible()) {
+                    float relocatePosition = tag.getPosition();
+                    long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
+                            relocateAnimationDelay;
+                    AnimatorListener relocateAnimationListener =
+                            createRelocateAnimationListener(tabItem);
+                    AnimatorListener listener =
+                            tabItem.getIndex() == removedTabItem.getIndex() - 1 ?
+                                    createRelocateAnimationListenerWrapper(removedTabItem,
+                                            relocateAnimationListener) : relocateAnimationListener;
+
+                    if (tabItem.isInflated()) {
+                        animateRelocate(tabItem, relocatePosition, tag, startDelay, listener);
+                    } else {
+                        Pair<Float, State> pair =
+                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem);
+                        tabItem.getTag().setPosition(pair.first);
+                        tabItem.getTag().setState(pair.second);
+                        inflateAndUpdateView(tabItem,
+                                createRelocateLayoutListener(tabItem, relocatePosition, tag,
+                                        startDelay, listener));
+                        tabItem.getView().setVisibility(View.INVISIBLE);
+                    }
+                }
+
+                if (tag.getState() == State.STACKED_START_ATOP) {
+                    break;
+                }
+            }
+        }
     }
 
     /**

@@ -565,7 +565,7 @@ public class DragHandler {
                                                          @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() >
-                        Math.max(getAttachedPosition(), calculateMaxTabSpacing(null))) {
+                        Math.max(getAttachedPosition(false), calculateMaxTabSpacing(null))) {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -602,7 +602,7 @@ public class DragHandler {
                                                   @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
         float ratio = Math.min(1, predecessorPosition /
-                Math.max(getAttachedPosition(), calculateMaxTabSpacing(null)));
+                Math.max(getAttachedPosition(false), calculateMaxTabSpacing(null)));
         float minTabSpacing = calculateMinTabSpacing();
         float maxTabSpacing = calculateMaxTabSpacing(tabItem);
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
@@ -962,10 +962,12 @@ public class DragHandler {
      * Calculates and returns the position on the dragging axis, where the distance between a tab
      * and its predecessor should have reached the maximum.
      *
+     * @param recalculate
+     *         True, if the position should be forced to be recalculated, false otherwise
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
-    public final float getAttachedPosition() {
-        if (attachedPosition == -1) {
+    public final float getAttachedPosition(final boolean recalculate) {
+        if (recalculate || attachedPosition == -1) {
             float totalSpace =
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
                             (tabSwitcher.getLayout() == Layout.PHONE_PORTRAIT &&
