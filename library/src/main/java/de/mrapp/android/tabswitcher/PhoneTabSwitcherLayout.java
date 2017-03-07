@@ -1194,7 +1194,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else if (tabItem.getTag().getState() == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
                 } else {
-                    relocateWhenRemovingFloatingTab2(tabItem);
+                    relocateWhenRemovingFloatingTab(tabItem);
                 }
             }
 
@@ -1514,7 +1514,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
-    private void relocateWhenRemovingFloatingTab2(@NonNull final TabItem removedTabItem) {
+    /**
+     * Relocates all previous tabs, when a floating tab has been removed.
+     *
+     * @param removedTabItem
+     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     */
+    private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem) {
         float removedTabPosition = removedTabItem.getTag().getPosition();
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(null);
         float maxTabSpacing = dragHandler.calculateMaxTabSpacing(
