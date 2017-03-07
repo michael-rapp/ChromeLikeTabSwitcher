@@ -1362,7 +1362,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         value
      */
     private void adaptStackOnSwipe(@NonNull final TabItem swipedTabItem, final int successorIndex) {
-        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP) {
+        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
+                successorIndex < getCount()) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
 
             if (tabItem.getTag().getState() == State.HIDDEN) {
@@ -1387,7 +1388,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void adaptStackOnSwipeAborted(@NonNull final TabItem swipedTabItem,
                                           final int successorIndex) {
-        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP) {
+        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
+                successorIndex < getCount()) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
             tabItem.getTag().setPosition(Float.NaN);
             tabItem.getTag().setState(State.HIDDEN);
