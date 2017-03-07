@@ -370,7 +370,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private TabItem[] calculateInitialTabItems() {
         dragHandler.reset(0);
         dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
-        dragHandler.setCallback(null);
         TabItem[] tabItems = new TabItem[getCount()];
 
         if (!isEmpty()) {
