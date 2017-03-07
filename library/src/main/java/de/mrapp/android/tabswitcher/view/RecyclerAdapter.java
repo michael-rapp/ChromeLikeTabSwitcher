@@ -407,15 +407,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         Drawable borderDrawable =
                 ContextCompat.getDrawable(tabSwitcher.getContext(), R.drawable.tab_border);
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
-        LayoutParams layoutParams =
-                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        int borderMargin = -(tabInset + tabBorderWidth);
-        int bottomMargin = params.length > 0 && params[0] != -1 ? params[0] : borderMargin;
-        layoutParams.leftMargin = borderMargin;
-        layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
-        layoutParams.rightMargin = borderMargin;
-        layoutParams.bottomMargin = bottomMargin;
-        view.setLayoutParams(layoutParams);
         view.setTag(R.id.tag_view_holder, viewHolder);
         tabItem.setView(view);
         tabItem.setViewHolder(viewHolder);
@@ -433,6 +424,15 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
             view.setTag(R.id.tag_properties, tabItem.getTag());
         }
 
+        LayoutParams layoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        int borderMargin = -(tabInset + tabBorderWidth);
+        int bottomMargin = params.length > 0 && params[0] != -1 ? params[0] : borderMargin;
+        layoutParams.leftMargin = borderMargin;
+        layoutParams.topMargin = -(tabInset + tabTitleContainerHeight);
+        layoutParams.rightMargin = borderMargin;
+        layoutParams.bottomMargin = bottomMargin;
+        view.setLayoutParams(layoutParams);
         Tab tab = tabItem.getTab();
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
         adaptTitle(viewHolder, tab);

@@ -424,8 +424,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateShowSwitcher(@NonNull final TabItem tabItem) {
         View view = tabItem.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
-        layoutParams.bottomMargin = -(tabInset + tabBorderWidth);
-        view.setLayoutParams(layoutParams);
         view.setX(layoutParams.leftMargin);
         view.setY(layoutParams.topMargin);
         arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
@@ -935,8 +933,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 View view = tabItem.getView();
                 float x = revealAnimation.getX();
                 float y = revealAnimation.getY() + tabTitleContainerHeight;
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
                 arithmetics.setPivot(Axis.X_AXIS, view, x);
                 arithmetics.setPivot(Axis.Y_AXIS, view, y);
+                view.setX(layoutParams.leftMargin);
+                view.setY(layoutParams.topMargin);
                 arithmetics.setScale(Axis.DRAGGING_AXIS, view, 0);
                 arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 0);
                 animateReveal(tabItem, index);
