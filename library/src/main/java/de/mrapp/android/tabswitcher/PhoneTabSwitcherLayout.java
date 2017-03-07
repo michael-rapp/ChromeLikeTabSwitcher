@@ -1262,47 +1262,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Creates and returns an animation listener, which allows to update the top stack, when an
-     * animation, which is used to relocate a tab, has been started.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which is relocated, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
-     * @param listener
-     *         The listener, which should be notified, when the created listener is invoked, as an
-     *         instance of the type {@link AnimatorListener} or null, if no listener should be
-     *         notified
-     * @return The listener, which has been created, as an instance of the type {@link
-     * AnimatorListener}. The listener may not be null
-     */
-    @NonNull
-    private AnimatorListener createRelocateAnimationListenerWrapper(@NonNull final TabItem tabItem,
-                                                                    @Nullable final AnimatorListener listener) {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(final Animator animation) {
-                super.onAnimationStart(animation);
-
-                if (listener != null) {
-                    listener.onAnimationStart(animation);
-                }
-            }
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                adaptStackOnSwipeAborted(tabItem, tabItem.getIndex());
-
-                if (listener != null) {
-                    listener.onAnimationEnd(animation);
-                }
-            }
-
-        };
-    }
-
-    /**
      * Creates and returns an animation listener, which allows to update or remove the view, which
      * is used to visualize a tab, when the animation, which has been used to relocate it, has been
      * ended.
@@ -1326,6 +1285,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+
+                if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+                    adaptStackOnSwipeAborted(tabItem, tabItem.getIndex() + 1);
+                }
 
                 if (tabItem.isVisible()) {
                     updateView(tabItem);
@@ -1593,12 +1556,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     float relocatePosition = tag.getPosition();
                     long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
                             relocateAnimationDelay;
-                    AnimatorListener relocateAnimationListener =
-                            createRelocateAnimationListener(tabItem);
-                    AnimatorListener listener =
-                            tabItem.getIndex() == removedTabItem.getIndex() - 1 ?
-                                    createRelocateAnimationListenerWrapper(removedTabItem,
-                                            relocateAnimationListener) : relocateAnimationListener;
+                    AnimatorListener listener = createRelocateAnimationListener(tabItem);
 
                     if (tabItem.isInflated()) {
                         animateRelocate(tabItem, relocatePosition, tag, startDelay, listener);
@@ -1617,61 +1575,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (tag.getState() == State.STACKED_START_ATOP) {
                     break;
                 }
-            }
-        }
-    }
-
-    /**
-     * Relocates all previous tabs, when a floating tab has been removed.
-     *
-     * @param removedTabItem
-     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
-     */
-    private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem) {
-        if (removedTabItem.getIndex() > 0) {
-            TabItemIterator iterator =
-                    new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
-                            .start(removedTabItem.getIndex()).create();
-            TabItem tabItem;
-            Tag previousTag = null;
-            boolean abort = false;
-
-            while ((tabItem = iterator.next()) != null && !abort) {
-                Tag currentTag = tabItem.getTag().clone();
-
-                if (previousTag != null) {
-                    if (tabItem.getTag().getState() != State.FLOATING) {
-                        abort = true;
-                    }
-
-                    float relocatePosition = previousTag.getPosition();
-                    long startDelay = (removedTabItem.getIndex() - tabItem.getIndex()) *
-                            relocateAnimationDelay;
-                    AnimatorListener relocateAnimationListener =
-                            createRelocateAnimationListener(tabItem);
-                    AnimatorListener listener =
-                            tabItem.getIndex() == removedTabItem.getIndex() - 1 ?
-                                    createRelocateAnimationListenerWrapper(removedTabItem,
-                                            relocateAnimationListener) : relocateAnimationListener;
-
-                    if (tabItem.isInflated()) {
-                        animateRelocate(tabItem, relocatePosition, previousTag, startDelay,
-                                listener);
-                    } else {
-                        Pair<Float, State> pair =
-                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem);
-                        tabItem.getTag().setPosition(pair.first);
-                        tabItem.getTag().setState(pair.second);
-                        inflateAndUpdateView(tabItem,
-                                createRelocateLayoutListener(tabItem, relocatePosition, previousTag,
-                                        startDelay, listener));
-                        tabItem.getView().setVisibility(View.INVISIBLE);
-                    }
-                }
-
-                previousTag = currentTag;
-                previousTag.setClosing(false);
             }
         }
     }
