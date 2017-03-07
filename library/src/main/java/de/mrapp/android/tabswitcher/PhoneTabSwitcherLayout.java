@@ -424,6 +424,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateShowSwitcher(@NonNull final TabItem tabItem) {
         View view = tabItem.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.bottomMargin = -(tabInset + tabBorderWidth);
+        view.setLayoutParams(layoutParams);
         view.setX(layoutParams.leftMargin);
         view.setY(layoutParams.topMargin);
         arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
