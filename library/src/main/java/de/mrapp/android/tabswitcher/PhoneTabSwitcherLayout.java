@@ -406,38 +406,29 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(null);
             float maxTabSpacing = dragHandler.calculateMaxTabSpacing(selectedTabItem);
 
-            if (overshooting) {
-                while ((tabItem = iterator.next()) != null) {
-                    float position;
+            while ((tabItem = iterator.next()) != null &&
+                    (overshooting || tabItem.getIndex() < getSelectedTabIndex())) {
+                float position;
 
+                if (overshooting) {
                     if (getSelectedTabIndex() > tabItem.getIndex()) {
                         position = maxTabSpacing +
                                 ((getCount() - 1 - tabItem.getIndex() - 1) * defaultTabSpacing);
                     } else {
                         position = (getCount() - 1 - tabItem.getIndex()) * defaultTabSpacing;
                     }
-
-                    Pair<Float, State> pair =
-                            dragHandler.clipTabPosition(position, tabItem, iterator.previous());
-
-                    if (dragHandler.getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
-                        dragHandler.setFirstVisibleIndex(tabItem.getIndex());
-                    }
-                }
-            } else {
-                while ((tabItem = iterator.next()) != null &&
-                        tabItem.getIndex() < getSelectedTabIndex()) {
-                    float position = dragHandler.getAttachedPosition() + maxTabSpacing +
+                } else {
+                    position = dragHandler.getAttachedPosition() + maxTabSpacing +
                             ((getSelectedTabIndex() - tabItem.getIndex() - 1) * defaultTabSpacing);
-                    Pair<Float, State> pair =
-                            dragHandler.clipTabPosition(position, tabItem, iterator.previous());
+                }
 
-                    if (dragHandler.getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
-                        dragHandler.setFirstVisibleIndex(tabItem.getIndex());
-                    }
+                Pair<Float, State> pair =
+                        dragHandler.clipTabPosition(position, tabItem, iterator.previous());
+
+                if (dragHandler.getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
+                    dragHandler.setFirstVisibleIndex(tabItem.getIndex());
                 }
             }
-
         }
 
         dragHandler.setCallback(PhoneTabSwitcherLayout.this);
