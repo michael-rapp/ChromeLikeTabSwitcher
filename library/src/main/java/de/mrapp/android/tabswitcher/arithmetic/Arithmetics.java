@@ -152,7 +152,8 @@ public class Arithmetics {
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             return view.getX() - layoutParams.leftMargin - tabSwitcher.getPaddingLeft() / 2f +
                     tabSwitcher.getPaddingRight() / 2f +
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
+                            tabSwitcher.isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0);
         }
     }
@@ -182,7 +183,8 @@ public class Arithmetics {
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             view.setX(position + layoutParams.leftMargin + tabSwitcher.getPaddingLeft() / 2f -
                     tabSwitcher.getPaddingRight() / 2f -
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
+                            tabSwitcher.isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
@@ -220,7 +222,8 @@ public class Arithmetics {
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin + (includePadding ?
                     tabSwitcher.getPaddingLeft() / 2f - tabSwitcher.getPaddingRight() / 2f : 0) -
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
+                            tabSwitcher.isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
