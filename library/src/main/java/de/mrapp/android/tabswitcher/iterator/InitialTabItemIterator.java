@@ -306,7 +306,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
 
         if (tabItem == null) {
             tabItem = TabItem.create(tabSwitcher, viewRecycler, index);
-            calculateAndClipStartPosition(tabItem, previous());
+            calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
             array[index] = tabItem;
         }
 
