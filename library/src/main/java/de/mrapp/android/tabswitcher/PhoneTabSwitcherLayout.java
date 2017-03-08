@@ -1524,66 +1524,44 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         the class {@link TabItem}. The tab item may not be null
      */
     private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem) {
-        float removedTabPosition = removedTabItem.getTag().getPosition();
-        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(null);
-        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(
-                TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex()));
-        AbstractTabItemIterator.AbstractBuilder builder =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
-        AbstractTabItemIterator iterator = builder.create();
-        TabItem tabItem;
+        if (removedTabItem.getIndex() > 0) {
+            TabItemIterator iterator =
+                    new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
+                            .start(removedTabItem.getIndex()).create();
+            TabItem tabItem;
+            Tag previousTag = null;
+            boolean abort = false;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getIndex() != removedTabItem.getIndex()) {
-                TabItem predecessor = iterator.previous();
-                float position;
+            while ((tabItem = iterator.next()) != null && !abort) {
+                Tag currentTag = tabItem.getTag().clone();
 
-                if (tabItem.getIndex() < removedTabItem.getIndex()) {
-                    if (getSelectedTabIndex() > tabItem.getIndex() &&
-                            getSelectedTabIndex() <= removedTabItem.getIndex() &&
-                            !(getSelectedTabIndex() == removedTabItem.getIndex() &&
-                                    tabItem.getIndex() == getSelectedTabIndex() - 1)) {
-                        position = removedTabPosition + maxTabSpacing +
-                                ((removedTabItem.getIndex() - 1 - tabItem.getIndex() - 1) *
-                                        defaultTabSpacing);
-                    } else {
-                        position = removedTabPosition +
-                                (removedTabItem.getIndex() - 1 - tabItem.getIndex()) *
-                                        defaultTabSpacing;
+                if (previousTag != null) {
+                    if (tabItem.getTag().getState() != State.FLOATING) {
+                        abort = true;
                     }
-                } else {
-                    position = tabItem.getIndex() == getCount() - 1 ? 0 :
-                            dragHandler.calculateNonLinearPosition(tabItem, predecessor);
-                }
 
-                dragHandler.clipTabPosition(position, tabItem,
-                        predecessor != null && predecessor.getIndex() != removedTabItem.getIndex() ?
-                                predecessor : null);
-                Tag tag = tabItem.getTag().clone();
-
-                if (tabItem.isInflated() || tabItem.isVisible()) {
-                    float relocatePosition = tag.getPosition();
-                    long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
+                    float relocatePosition = previousTag.getPosition();
+                    long startDelay = (removedTabItem.getIndex() - tabItem.getIndex()) *
                             relocateAnimationDelay;
                     AnimatorListener listener = createRelocateAnimationListener(tabItem);
 
                     if (tabItem.isInflated()) {
-                        animateRelocate(tabItem, relocatePosition, tag, startDelay, listener);
+                        animateRelocate(tabItem, relocatePosition, previousTag, startDelay,
+                                listener);
                     } else {
                         Pair<Float, State> pair =
                                 dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem);
                         tabItem.getTag().setPosition(pair.first);
                         tabItem.getTag().setState(pair.second);
                         inflateAndUpdateView(tabItem,
-                                createRelocateLayoutListener(tabItem, relocatePosition, tag,
+                                createRelocateLayoutListener(tabItem, relocatePosition, previousTag,
                                         startDelay, listener));
                         tabItem.getView().setVisibility(View.INVISIBLE);
                     }
                 }
 
-                if (tag.getState() == State.STACKED_START_ATOP) {
-                    break;
-                }
+                previousTag = currentTag;
+                previousTag.setClosing(false);
             }
         }
     }
