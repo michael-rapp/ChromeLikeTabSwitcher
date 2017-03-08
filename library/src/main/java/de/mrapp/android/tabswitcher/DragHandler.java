@@ -1005,7 +1005,8 @@ public class DragHandler {
                                                     @NonNull final TabItem tabItem,
                                                     @Nullable final TabItem predecessor) {
         Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor);
+                calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor,
+                        tabSwitcher.getCount());
         float startPosition = startPair.first;
 
         if (position <= startPosition) {
@@ -1041,15 +1042,17 @@ public class DragHandler {
      * @param predecessor
      *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
      *         null, if the tab item does not have a predecessor
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
      * @return A pair, which contains the position and state of the given tab item, when stacked at
      * the start, as an instance of the class {@link Pair}. The pair may not be null
      */
     @NonNull
     public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
-            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor) {
-        if ((tabSwitcher.getCount() - tabItem.getIndex()) <= stackedTabCount) {
-            float position =
-                    stackedTabSpacing * (tabSwitcher.getCount() - (tabItem.getIndex() + 1));
+            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor, final int count) {
+        if ((count - tabItem.getIndex()) <= stackedTabCount) {
+            float position = stackedTabSpacing * (count - (tabItem.getIndex() + 1));
             return Pair.create(position,
                     (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.STACKED_START);

@@ -1375,13 +1375,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
                 successorIndex < getCount()) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
+            State state = tabItem.getTag().getState();
 
-            if (tabItem.getTag().getState() == State.HIDDEN) {
+            if (state == State.HIDDEN || state == State.STACKED_START) {
                 Pair<Float, State> pair = dragHandler
-                        .calculatePositionAndStateWhenStackedAtStart(swipedTabItem, null);
+                        .calculatePositionAndStateWhenStackedAtStart(swipedTabItem, null,
+                                getTabSwitcher().getCount() - 1);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
-                inflateAndUpdateView(tabItem, null);
+                inflateOrRemoveView(tabItem);
             }
         }
     }
@@ -1403,9 +1405,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
 
             if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
-                tabItem.getTag().setPosition(Float.NaN);
-                tabItem.getTag().setState(State.HIDDEN);
-                viewRecycler.remove(tabItem);
+                Pair<Float, State> pair = dragHandler
+                        .calculatePositionAndStateWhenStackedAtStart(tabItem, swipedTabItem,
+                                getTabSwitcher().getCount());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+                inflateOrRemoveView(tabItem);
             }
         }
     }
@@ -1605,7 +1610,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                     if (tabItem.isVisible()) {
                         Pair<Float, State> pair = start ? dragHandler
-                                .calculatePositionAndStateWhenStackedAtStart(previous, tabItem) :
+                                .calculatePositionAndStateWhenStackedAtStart(previous, tabItem,
+                                        getTabSwitcher().getCount()) :
                                 dragHandler.calculatePositionAndStateWhenStackedAtEnd(previous);
                         tabItem.getTag().setPosition(pair.first);
                         tabItem.getTag().setState(pair.second);
