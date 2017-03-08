@@ -1401,9 +1401,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
                 successorIndex < getCount()) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
-            tabItem.getTag().setPosition(Float.NaN);
-            tabItem.getTag().setState(State.HIDDEN);
-            viewRecycler.remove(tabItem);
+
+            if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+                tabItem.getTag().setPosition(Float.NaN);
+                tabItem.getTag().setState(State.HIDDEN);
+                viewRecycler.remove(tabItem);
+            }
         }
     }
 
