@@ -42,7 +42,7 @@ public class TabItem {
 
         @Override
         public int compare(final TabItem o1, final TabItem o2) {
-            return ((Integer) o1.getIndex()).compareTo(o2.getIndex());
+            return o1.getIndex() <= o2.getIndex() ? -1 : 1;
         }
 
     };
