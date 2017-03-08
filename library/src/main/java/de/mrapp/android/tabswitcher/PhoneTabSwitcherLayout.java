@@ -385,7 +385,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 TabItem predecessor = iterator.previous();
                 float position;
 
-                if (tabItem.getIndex() == getSelectedTabIndex()) {
+                if (tabItem.getIndex() == getCount() - 1) {
+                    position = 0;
+                } else if (tabItem.getIndex() == getSelectedTabIndex()) {
                     selectedTabItem = tabItem;
                     position = dragHandler.getAttachedPosition(false);
                 } else {
