@@ -837,8 +837,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         View view = tabItem.getView();
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setListener(new AnimationListenerWrapper(
-                createRevealAnimationListener(tabItem.getTab(), index)));
+        animation.setListener(new AnimationListenerWrapper(createHideSwitcherAnimationListener()));
         animation.setStartDelay(0);
         animation.setDuration(revealAnimationDuration);
         arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, 1);
@@ -1227,35 +1226,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         setSelectedTabIndex(getSelectedTabIndex());
                     }
                 }
-            }
-
-        };
-    }
-
-    /**
-     * Creates and returns a listener, which allows to handle, when a tab has been added by using a
-     * reveal animation.
-     *
-     * @param tab
-     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     * @param index
-     *         The index, the tab has been added at, as an {@link Integer} value
-     * @return The listener, which has been created, as an instance of the type {@link
-     * AnimatorListener}. The listener may not be null
-     */
-    @NonNull
-    private AnimatorListener createRevealAnimationListener(@NonNull final Tab tab,
-                                                           final int index) {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                addTabInternal(index, tab);
-                setSelectedTabIndex(index);
-                setSwitcherShown(false);
-                createHideSwitcherAnimationListener().onAnimationEnd(animation);
             }
 
         };
@@ -1961,7 +1931,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else {
                     if (animation instanceof RevealAnimation) {
                         RevealAnimation revealAnimation = (RevealAnimation) animation;
-                        TabItem tabItem = new TabItem(-1, tab);
+                        addTabInternal(index, tab);
+                        setSelectedTabIndex(index);
+                        setSwitcherShown(false);
+                        TabItem tabItem = new TabItem(0, tab);
                         inflateView(tabItem,
                                 createRevealLayoutListener(tabItem, index, revealAnimation));
                     }

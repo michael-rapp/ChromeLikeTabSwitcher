@@ -23,6 +23,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -68,7 +69,7 @@ public class TabItem {
                 throw new RuntimeException("Tab not contained by tab switcher");
             }
 
-            return ((Integer) index1).compareTo(index2);
+            return index1 <= index2 ? -1 : 1;
         }
 
     }
@@ -103,11 +104,12 @@ public class TabItem {
      * default, the item is neither associated with a view, nor with a view holder.
      *
      * @param index
-     *         The index of the tab as an {@link Integer} value
+     *         The index of the tab as an {@link Integer} value. The index must be at least 0
      * @param tab
      *         The tab as an instance of the class {@link Tab}. The tab may not be null
      */
     public TabItem(final int index, @NonNull final Tab tab) {
+        ensureAtLeast(index, 0, "The index must be at least 0");
         ensureNotNull(tab, "The tab may not be null");
         this.index = index;
         this.tab = tab;
