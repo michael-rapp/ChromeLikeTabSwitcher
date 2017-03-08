@@ -537,11 +537,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateHideSwitcher(@NonNull final TabItem tabItem) {
         View view = tabItem.getView();
         animateBottomMargin(view, -(tabInset + tabBorderWidth), hideSwitcherAnimationDuration);
+        AnimatorListener listener = tabItem.getIndex() == getSelectedTabIndex() ?
+                createHideSwitcherAnimationListener() : null;
         ViewPropertyAnimator animation = view.animate();
         animation.setDuration(hideSwitcherAnimationDuration);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setListener(
-                new AnimationListenerWrapper(createHideSwitcherAnimationListener(tabItem)));
+        animation.setListener(new AnimationListenerWrapper(listener));
         arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, 1);
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -1084,33 +1085,41 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Creates and returns an animation listener, which allows to inflate or remove the view, which
-     * is used to visualize a tab, when an animation, which is used to hide the tab switcher, has
-     * been finished.
+     * Creates and returns an animation listener, which allows to inflate or remove the views, which
+     * are used to visualize tabs, when an animation, which is used to hide the tab switcher,
+     * has been finished.
      *
-     * @param tabItem
-     *         The tab item, which has been animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
      * @return The animation listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createHideSwitcherAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createHideSwitcherAnimationListener() {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+                AbstractTabItemIterator iterator =
+                        new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+                TabItem tabItem;
 
-                if (tabItem.getIndex() == getSelectedTabIndex()) {
-                    viewRecycler.inflate(tabItem);
-                } else {
-                    viewRecycler.remove(tabItem);
+                while ((tabItem = iterator.next()) != null) {
+                    if (tabItem.getIndex() == getSelectedTabIndex()) {
+                        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem);
+                        View view = pair.first;
+                        FrameLayout.LayoutParams layoutParams =
+                                (FrameLayout.LayoutParams) view.getLayoutParams();
+                        view.setAlpha(1f);
+                        arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
+                        arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
+                        view.setX(layoutParams.leftMargin);
+                        view.setY(layoutParams.topMargin);
+                    } else {
+                        viewRecycler.remove(tabItem);
+                    }
                 }
 
-                if (tabItem.getIndex() == getCount() - 1) {
-                    viewRecycler.clearCache();
-                }
+                viewRecycler.clearCache();
             }
 
         };
@@ -1246,18 +1255,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 addTabInternal(index, tab);
                 setSelectedTabIndex(index);
                 setSwitcherShown(false);
-                viewRecycler.removeAll();
-                Pair<View, Boolean> pair =
-                        viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
-                View view = pair.first;
-                FrameLayout.LayoutParams layoutParams =
-                        (FrameLayout.LayoutParams) view.getLayoutParams();
-                view.setAlpha(1f);
-                arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
-                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
-                view.setX(layoutParams.leftMargin);
-                view.setY(layoutParams.topMargin);
-                viewRecycler.clearCache();
+                createHideSwitcherAnimationListener().onAnimationEnd(animation);
             }
 
         };
