@@ -1900,7 +1900,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         childViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
-                Collections.reverseOrder(TabItem.COMPARATOR));
+                Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new DragHandler(getTabSwitcher(), arithmetics);
