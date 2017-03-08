@@ -157,6 +157,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         if (viewHolder.childContainer.getChildCount() > 2) {
             viewHolder.childContainer.removeViewAt(0);
         }
+
+        viewHolder.child = null;
     }
 
     /**
@@ -454,7 +456,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     public final void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
         removeChildView(viewHolder);
-        viewHolder.child = null;
 
         if (!dataBinder.isCached(tabItem.getTab())) {
             Drawable drawable = viewHolder.previewImageView.getDrawable();
