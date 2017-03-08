@@ -418,9 +418,11 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
                                  @NonNull final TabItem tabItem, final boolean inflated,
                                  @NonNull final Integer... params) {
+        TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
+
         if (!tabItem.isInflated()) {
             tabItem.setView(view);
-            tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));
+            tabItem.setViewHolder(viewHolder);
             view.setTag(R.id.tag_properties, tabItem.getTag());
         }
 
@@ -434,7 +436,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         layoutParams.bottomMargin = bottomMargin;
         view.setLayoutParams(layoutParams);
         Tab tab = tabItem.getTab();
-        TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
         adaptTitle(viewHolder, tab);
         adaptIcon(viewHolder, tab);
         adaptCloseButton(viewHolder, tab);
