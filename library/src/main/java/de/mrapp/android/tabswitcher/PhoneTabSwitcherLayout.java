@@ -1245,9 +1245,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         setSelectedTabIndex(getSelectedTabIndex());
                     }
                 }
+
+                printPositions();
             }
 
         };
+    }
+
+    private void printPositions() {
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
+        TabItem tabItem;
+
+        System.out.println("-----------------------");
+
+        while ((tabItem = iterator.next()) != null) {
+            System.out.println(tabItem.getIndex() + ": pos = " + tabItem.getTag().getPosition() +
+                    ", state = " + tabItem.getTag().getState());
+        }
     }
 
     /**
@@ -1536,7 +1551,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Pair<Float, State> pair =
                         dragHandler.clipTabPosition(relocatePosition, tabItem, predecessor);
                 Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
+                tag.setPosition(relocatePosition);
                 tag.setState(pair.second);
                 long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
                         relocateAnimationDelay;
