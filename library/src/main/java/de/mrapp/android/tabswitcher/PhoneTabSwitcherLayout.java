@@ -396,6 +396,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 Pair<Float, State> pair =
                         dragHandler.clipTabPosition(position, tabItem, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
 
                 if (pair.second != State.FLOATING) {
                     break;
@@ -429,6 +431,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 Pair<Float, State> pair =
                         dragHandler.clipTabPosition(position, tabItem, iterator.previous());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
 
                 if (dragHandler.getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
                     dragHandler.setFirstVisibleIndex(tabItem.getIndex());

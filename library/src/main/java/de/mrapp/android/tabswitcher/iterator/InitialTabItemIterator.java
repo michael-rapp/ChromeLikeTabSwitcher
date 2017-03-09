@@ -16,10 +16,12 @@ package de.mrapp.android.tabswitcher.iterator;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import de.mrapp.android.tabswitcher.DragHandler;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
 
@@ -227,7 +229,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
                                                @Nullable final TabItem predecessor) {
         float position = calculateStartPosition(tabItem);
-        dragHandler.clipTabPosition(position, tabItem, predecessor);
+        Pair<Float, State> pair = dragHandler.clipTabPosition(position, tabItem, predecessor);
+        tabItem.getTag().setPosition(pair.first);
+        tabItem.getTag().setState(pair.second);
     }
 
     /**

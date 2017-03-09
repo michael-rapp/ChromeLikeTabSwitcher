@@ -438,7 +438,10 @@ public class DragHandler {
                     firstVisibleIndex = tabItem.getIndex();
                 }
             } else {
-                clipTabPosition(tabItem.getTag().getPosition(), tabItem, iterator.previous());
+                Pair<Float, State> pair = clipTabPosition(tabItem.getTag().getPosition(), tabItem,
+                        iterator.previous());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
             }
 
             notifyOnViewStateChanged(tabItem);
@@ -471,7 +474,9 @@ public class DragHandler {
                 float currentPosition = tabItem.getTag().getPosition();
                 float thresholdPosition = calculateEndPosition(factory, tabItem);
                 float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
-                clipTabPosition(newPosition, tabItem, predecessor);
+                Pair<Float, State> pair = clipTabPosition(newPosition, tabItem, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 return true;
             }
@@ -479,7 +484,9 @@ public class DragHandler {
             float thresholdPosition = calculateEndPosition(factory, tabItem);
             float newPosition =
                     Math.min(calculateNonLinearPosition(tabItem, predecessor), thresholdPosition);
-            clipTabPosition(newPosition, tabItem, predecessor);
+            Pair<Float, State> pair = clipTabPosition(newPosition, tabItem, predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
         }
 
         return false;
@@ -507,7 +514,10 @@ public class DragHandler {
                 abort = calculatePositionWhenDraggingToStart(dragDistance, tabItem,
                         iterator.previous());
             } else {
-                clipTabPosition(tabItem.getTag().getPosition(), tabItem, iterator.previous());
+                Pair<Float, State> pair = clipTabPosition(tabItem.getTag().getPosition(), tabItem,
+                        iterator.previous());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
             }
 
             notifyOnViewStateChanged(tabItem);
@@ -526,7 +536,11 @@ public class DragHandler {
                 tabItem.getTag().setPosition(newPosition);
 
                 if (tabItem.getIndex() < start) {
-                    clipTabPosition(predecessor.getTag().getPosition(), predecessor, tabItem);
+                    Pair<Float, State> pair =
+                            clipTabPosition(predecessor.getTag().getPosition(), predecessor,
+                                    tabItem);
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
                     notifyOnViewStateChanged(predecessor);
 
                     if (predecessor.getTag().getState() == State.FLOATING) {
@@ -537,7 +551,9 @@ public class DragHandler {
                 }
 
                 if (!iterator.hasNext()) {
-                    clipTabPosition(newPosition, tabItem, null);
+                    Pair<Float, State> pair = clipTabPosition(newPosition, tabItem, null);
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
                     notifyOnViewStateChanged(tabItem);
 
                     if (tabItem.getTag().getState() == State.FLOATING) {
@@ -571,10 +587,14 @@ public class DragHandler {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
-                clipTabPosition(newPosition, tabItem, predecessor);
+                Pair<Float, State> pair = clipTabPosition(newPosition, tabItem, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 float currentPosition = tabItem.getTag().getPosition();
-                clipTabPosition(currentPosition, tabItem, predecessor);
+                Pair<Float, State> pair = clipTabPosition(currentPosition, tabItem, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
                 return true;
             } else if (tabItem.getTag().getState() == State.HIDDEN ||
                     tabItem.getTag().getState() == State.STACKED_START) {
@@ -582,7 +602,9 @@ public class DragHandler {
             }
         } else {
             float newPosition = calculateNonLinearPosition(tabItem, predecessor);
-            clipTabPosition(newPosition, tabItem, predecessor);
+            Pair<Float, State> pair = clipTabPosition(newPosition, tabItem, predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
         }
 
         return false;
@@ -1025,8 +1047,6 @@ public class DragHandler {
 
         if (position <= startPosition) {
             State state = startPair.second;
-            tabItem.getTag().setPosition(startPosition);
-            tabItem.getTag().setState(state);
             return Pair.create(startPosition, state);
         } else {
             Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
@@ -1034,13 +1054,9 @@ public class DragHandler {
 
             if (position >= endPosition) {
                 State state = endPair.second;
-                tabItem.getTag().setPosition(endPosition);
-                tabItem.getTag().setState(state);
                 return Pair.create(endPosition, state);
             } else {
                 State state = State.FLOATING;
-                tabItem.getTag().setPosition(position);
-                tabItem.getTag().setState(state);
                 return Pair.create(position, state);
             }
         }
