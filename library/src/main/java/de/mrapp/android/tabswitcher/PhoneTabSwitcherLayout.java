@@ -369,7 +369,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @NonNull
     private TabItem[] calculateInitialTabItems() {
         dragHandler.reset(dragThreshold);
-        dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
+        dragHandler.setMaxTabSpacing(calculateMaxTabSpacing(getTabSwitcher().getCount()));
         TabItem[] tabItems = new TabItem[getCount()];
 
         if (!isEmpty()) {
@@ -389,7 +389,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     position = 0;
                 } else if (tabItem.getIndex() == getSelectedTabIndex()) {
                     selectedTabItem = tabItem;
-                    position = dragHandler.getAttachedPosition(false);
+                    position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount());
                 } else {
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
                 }
@@ -405,8 +405,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             boolean overshooting = getSelectedTabIndex() == getCount() - 1 ||
                     dragHandler.isOvershootingAtEnd(factory);
             iterator = factory.create().create();
-            float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(null);
-            float maxTabSpacing = dragHandler.calculateMaxTabSpacing(selectedTabItem);
+            float defaultTabSpacing =
+                    dragHandler.calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
+            float maxTabSpacing = dragHandler
+                    .calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
 
             while ((tabItem = iterator.next()) != null &&
                     (overshooting || tabItem.getIndex() < getSelectedTabIndex())) {
@@ -420,7 +422,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         position = (getCount() - 1 - tabItem.getIndex()) * defaultTabSpacing;
                     }
                 } else {
-                    position = dragHandler.getAttachedPosition(false) + maxTabSpacing +
+                    position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount()) +
+                            maxTabSpacing +
                             ((getSelectedTabIndex() - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
@@ -441,18 +444,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Calculates and returns the maximum space between two neighboring tabs, depending on the
      * number of tabs, which are contained by the tab switcher.
      *
+     * @param count
+     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
+     *         Integer} value
      * @return The maximum space, which has been calculated, in pixels as a {@link Float} value
      */
-    private float calculateMaxTabSpacing() {
+    private float calculateMaxTabSpacing(final int count) {
         float totalSpace = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
                 (getLayout() == Layout.PHONE_PORTRAIT && isToolbarShown() ?
                         toolbar.getHeight() + tabInset : 0);
 
-        if (getCount() <= 2) {
+        if (count <= 2) {
             return totalSpace * 0.66f;
-        } else if (getCount() == 3) {
+        } else if (count == 3) {
             return totalSpace * 0.33f;
-        } else if (getCount() == 4) {
+        } else if (count == 4) {
             return totalSpace * 0.375f;
         } else {
             return totalSpace * 0.25f;
@@ -1196,8 +1202,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
-                dragHandler.setMaxTabSpacing(calculateMaxTabSpacing());
-                dragHandler.getAttachedPosition(true);
+                int count = getCount() - 1;
+                dragHandler.getAttachedPosition(true, count);
+                dragHandler.setMaxTabSpacing(calculateMaxTabSpacing(count));
 
                 if (tabItem.getTag().getState() == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);

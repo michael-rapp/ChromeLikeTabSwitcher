@@ -521,7 +521,8 @@ public class DragHandler {
             while ((tabItem = iterator.next()) != null && !abort) {
                 TabItem predecessor = iterator.previous();
                 float predecessorPosition = predecessor.getTag().getPosition();
-                float newPosition = predecessorPosition + calculateMaxTabSpacing(predecessor);
+                float newPosition = predecessorPosition +
+                        calculateMaxTabSpacing(tabSwitcher.getCount(), predecessor);
                 tabItem.getTag().setPosition(newPosition);
 
                 if (tabItem.getIndex() < start) {
@@ -565,7 +566,8 @@ public class DragHandler {
                                                          @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() >
-                        Math.max(getAttachedPosition(false), calculateMaxTabSpacing(null))) {
+                        Math.max(getAttachedPosition(false, tabSwitcher.getCount()),
+                                calculateMaxTabSpacing(tabSwitcher.getCount(), null))) {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -602,9 +604,10 @@ public class DragHandler {
                                                   @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
         float ratio = Math.min(1, predecessorPosition /
-                Math.max(getAttachedPosition(false), calculateMaxTabSpacing(null)));
-        float minTabSpacing = calculateMinTabSpacing();
-        float maxTabSpacing = calculateMaxTabSpacing(tabItem);
+                Math.max(getAttachedPosition(false, tabSwitcher.getCount()),
+                        calculateMaxTabSpacing(tabSwitcher.getCount(), null)));
+        float minTabSpacing = calculateMinTabSpacing(tabSwitcher.getCount());
+        float maxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), tabItem);
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
 
@@ -622,13 +625,14 @@ public class DragHandler {
      */
     private float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
                                        @NonNull final TabItem tabItem) {
-        float defaultMaxTabSpacing = calculateMaxTabSpacing(null);
+        float defaultMaxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), null);
 
         if (tabSwitcher.getSelectedTabIndex() > tabItem.getIndex()) {
             AbstractTabItemIterator.AbstractBuilder builder = factory.create();
             AbstractTabItemIterator iterator = builder.create();
             TabItem selectedTabItem = iterator.getItem(tabSwitcher.getSelectedTabIndex());
-            float selectedTabSpacing = calculateMaxTabSpacing(selectedTabItem);
+            float selectedTabSpacing =
+                    calculateMaxTabSpacing(tabSwitcher.getCount(), selectedTabItem);
             return (tabSwitcher.getCount() - 2 - tabItem.getIndex()) * defaultMaxTabSpacing +
                     selectedTabSpacing;
         }
@@ -702,7 +706,8 @@ public class DragHandler {
             AbstractTabItemIterator iterator = builder.create();
             TabItem lastTabItem = iterator.getItem(tabSwitcher.getCount() - 1);
             TabItem predecessor = iterator.getItem(tabSwitcher.getCount() - 2);
-            return predecessor.getTag().getPosition() >= calculateMaxTabSpacing(lastTabItem);
+            return predecessor.getTag().getPosition() >=
+                    calculateMaxTabSpacing(tabSwitcher.getCount(), lastTabItem);
         }
     }
 
@@ -751,6 +756,9 @@ public class DragHandler {
      * Calculates and returns the maximum space between a specific tab and its predecessor. The
      * maximum space is greater for the currently selected tab.
      *
+     * @param count
+     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
+     *         Integer} value
      * @param tabItem
      *         The tab item, which corresponds to the tab, the maximum space should be returned for,
      *         as an instance of the class {@link TabItem} or null, if the default maximum space
@@ -758,10 +766,10 @@ public class DragHandler {
      * @return The maximum space between the given tab and its predecessor in pixels as a {@link
      * Float} value
      */
-    public final float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
+    public final float calculateMaxTabSpacing(final int count, @Nullable final TabItem tabItem) {
         ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
                 IllegalStateException.class);
-        return tabSwitcher.getCount() > 4 && tabItem != null &&
+        return count > 4 && tabItem != null &&
                 tabItem.getIndex() == tabSwitcher.getSelectedTabIndex() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
     }
@@ -769,10 +777,13 @@ public class DragHandler {
     /**
      * Calculates and returns the minimum space between two neighboring tabs.
      *
+     * @param count
+     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
+     *         Integer} value
      * @return The minimum space between two neighboring tabs in pixels as a {@link Float} value
      */
-    private float calculateMinTabSpacing() {
-        return calculateMaxTabSpacing(null) * MIN_TAB_SPACING_RATIO;
+    private float calculateMinTabSpacing(final int count) {
+        return calculateMaxTabSpacing(count, null) * MIN_TAB_SPACING_RATIO;
     }
 
     /**
@@ -964,9 +975,12 @@ public class DragHandler {
      *
      * @param recalculate
      *         True, if the position should be forced to be recalculated, false otherwise
+     * @param count
+     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
+     *         Integer} value
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
-    public final float getAttachedPosition(final boolean recalculate) {
+    public final float getAttachedPosition(final boolean recalculate, final int count) {
         if (recalculate || attachedPosition == -1) {
             float totalSpace =
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
@@ -974,9 +988,9 @@ public class DragHandler {
                                     tabSwitcher.isToolbarShown() ?
                                     tabSwitcher.getToolbar().getHeight() + tabInset : 0);
 
-            if (tabSwitcher.getCount() == 3) {
+            if (count == 3) {
                 attachedPosition = totalSpace * 0.66f;
-            } else if (tabSwitcher.getCount() == 4) {
+            } else if (count == 4) {
                 attachedPosition = totalSpace * 0.75f;
             } else {
                 attachedPosition = totalSpace * 0.5f;
