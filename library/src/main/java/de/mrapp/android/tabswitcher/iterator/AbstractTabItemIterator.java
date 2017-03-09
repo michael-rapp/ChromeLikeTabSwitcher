@@ -194,7 +194,7 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
      * Returns the tab item, which corresponds to the first tab.
      *
      * @return The tab item, which corresponds to the first tab, as an instance of the class {@link
-     * TabItem}. The tab item may not be null
+     * TabItem} or null, if no tabs are available
      */
     public final TabItem first() {
         return first;
@@ -204,10 +204,20 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
      * Returns the tab item, which corresponds to the previous tab.
      *
      * @return The tab item, which corresponds to the previous tab, as an instance of the class
-     * {@link TabItem}. The tab item may not be null
+     * {@link TabItem} or null, if no previous tab is available
      */
     public final TabItem previous() {
         return previous;
+    }
+
+    /**
+     * Returns the tab item, which corresponds to the next tab.
+     *
+     * @return The tab item, which corresponds to the next tab, as an instance of the class {@link
+     * TabItem} or null, if no next tab is available
+     */
+    public final TabItem peek() {
+        return getItem(index);
     }
 
     @Override
