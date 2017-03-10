@@ -1586,8 +1586,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             .calculateNonLinearPosition(previousTag.getPosition(), maxTabSpacing);
                 }
 
-                Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                int index =
+                        removedTabItem.getIndex() < tabItem.getIndex() ? tabItem.getIndex() - 1 :
+                                tabItem.getIndex();
+                Pair<Float, State> pair =
+                        dragHandler.clipTabPosition(count, index, position, predecessor);
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
@@ -1631,11 +1634,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     relocatePosition = position + distance * 0.5f;
                 }
 
+                int index =
+                        removedTabItem.getIndex() < tabItem.getIndex() ? tabItem.getIndex() - 1 :
+                                tabItem.getIndex();
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(getTabSwitcher().getCount() - 1, tabItem.getIndex(),
-                                relocatePosition, predecessor);
+                        .clipTabPosition(getTabSwitcher().getCount() - 1, index, relocatePosition,
+                                predecessor);
                 Tag tag = tabItem.getTag().clone();
-                tag.setPosition(relocatePosition);
+                tag.setPosition(pair.first);
                 tag.setState(pair.second);
                 long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
                         relocateAnimationDelay;
