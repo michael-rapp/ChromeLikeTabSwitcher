@@ -1551,14 +1551,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (firstAttachedIndex == -1) {
             firstAttachedIndex = 0;
-            float firstTabPosition = iterator.first().getTag().getPosition();
+            float firstTabPosition = iterator.getItem(0).getTag().getPosition();
             referencePosition = -1;
+            float position = attachedPosition;
 
             while (referencePosition == -1) {
-                float position =
-                        dragHandler.calculateNonLinearPosition(attachedPosition, maxTabSpacing);
+                position = dragHandler.calculateNonLinearPosition(position, maxTabSpacing);
 
-                if (referencePosition <= firstTabPosition) {
+                if (position <= firstTabPosition) {
                     referencePosition = position;
                 }
             }
