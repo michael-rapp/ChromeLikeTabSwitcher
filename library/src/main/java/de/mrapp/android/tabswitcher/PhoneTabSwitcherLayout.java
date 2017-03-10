@@ -1572,7 +1572,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             if (tabItem.getIndex() != removedTabItem.getIndex()) {
                 float position;
 
-                if (tabItem.getIndex() == firstAttachedIndex) {
+                if (removedTabItem.getIndex() == getCount() - 1 &&
+                        tabItem.getIndex() == removedTabItem.getIndex() - 1) {
+                    position = 0;
+                } else if (tabItem.getIndex() == firstAttachedIndex) {
                     position = referencePosition;
                 } else if (tabItem.getIndex() < firstAttachedIndex) {
                     position = firstAttachedPosition +
@@ -1585,7 +1588,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Pair<Float, State> pair =
                         dragHandler.clipTabPosition(position, tabItem, predecessor);
                 Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
+                tag.setPosition(position);
                 tag.setState(pair.second);
 
                 if (tabItem.isInflated() || tabItem.isVisible()) {
