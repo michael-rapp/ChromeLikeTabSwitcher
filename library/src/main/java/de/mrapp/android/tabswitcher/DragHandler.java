@@ -590,8 +590,7 @@ public class DragHandler {
                                                          @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() >
-                        Math.max(getAttachedPosition(false, tabSwitcher.getCount()),
-                                calculateMaxTabSpacing(tabSwitcher.getCount(), null))) {
+                        getAttachedPosition(false, tabSwitcher.getCount())) {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -645,9 +644,8 @@ public class DragHandler {
 
     public final float calculateNonLinearPosition(final float predecessorPosition,
                                                   final float maxTabSpacing) {
-        float ratio = Math.min(1, predecessorPosition /
-                Math.max(getAttachedPosition(false, tabSwitcher.getCount()),
-                        calculateMaxTabSpacing(tabSwitcher.getCount(), null)));
+        float ratio = Math.min(1,
+                predecessorPosition / getAttachedPosition(false, tabSwitcher.getCount()));
         float minTabSpacing = calculateMinTabSpacing(tabSwitcher.getCount());
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
