@@ -1207,18 +1207,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
                 int count = getCount() - 1;
-                dragHandler.getAttachedPosition(true, count);
-                dragHandler.setMaxTabSpacing(calculateMaxTabSpacing(count));
+                float attachedPosition = dragHandler.getAttachedPosition(true, count);
+                float maxTabSpacing = calculateMaxTabSpacing(count);
+                dragHandler.setMaxTabSpacing(maxTabSpacing);
 
                 if (tabItem.getTag().getState() == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);
                 } else if (tabItem.getTag().getState() == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
                 } else {
-                    if (count == 4) {
-
-                    } else if (count == 3) {
-
+                    if (count == 4 || count == 3) {
+                        relocateWhenRemovingFloatingTab3or4(tabItem, attachedPosition,
+                                maxTabSpacing);
                     } else if (count == 2) {
                         relocateWhenRemovingFloatingTab2(tabItem);
                     } else {
@@ -1524,6 +1524,85 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setPosition(Axis.DRAGGING_AXIS, view, position);
         arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
         arithmetics.setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
+    }
+
+    private void relocateWhenRemovingFloatingTab3or4(@NonNull final TabItem removedTabItem,
+                                                     final float attachedPosition,
+                                                     final float maxTabSpacing) {
+        int count = getTabSwitcher().getCount() - 1;
+        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
+        AbstractTabItemIterator.AbstractBuilder builder =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
+        AbstractTabItemIterator iterator =
+                builder.start(removedTabItem.getIndex()).reverse(true).create();
+        TabItem tabItem;
+        float referencePosition = attachedPosition;
+        int firstAttachedIndex = -1;
+        float firstAttachedPosition = 0;
+
+        while ((tabItem = iterator.next()) != null && firstAttachedIndex == -1) {
+            float position = tabItem.getTag().getPosition();
+
+            if (position >= attachedPosition) {
+                firstAttachedIndex = tabItem.getIndex();
+                firstAttachedPosition = position;
+            }
+        }
+
+        if (firstAttachedIndex == -1) {
+            firstAttachedIndex = 0;
+            float firstTabPosition = iterator.first().getTag().getPosition();
+            referencePosition = -1;
+
+            while (referencePosition == -1) {
+                float position =
+                        dragHandler.calculateNonLinearPosition(attachedPosition, maxTabSpacing);
+
+                if (referencePosition <= firstTabPosition) {
+                    referencePosition = position;
+                }
+            }
+        }
+
+        iterator = builder.start(0).reverse(false).create();
+        TabItem predecessor = null;
+        Tag previousTag = null;
+
+        while ((tabItem = iterator.next()) != null && tabItem.getIndex() < getCount() - 1) {
+            if (tabItem.getIndex() != removedTabItem.getIndex()) {
+                float position;
+
+                if (tabItem.getIndex() == firstAttachedIndex) {
+                    position = referencePosition;
+                } else if (tabItem.getIndex() < firstAttachedIndex) {
+                    position = firstAttachedPosition +
+                            (firstAttachedIndex - 1 - tabItem.getIndex()) * defaultTabSpacing;
+                } else {
+                    position = dragHandler
+                            .calculateNonLinearPosition(previousTag.getPosition(), maxTabSpacing);
+                }
+
+                Pair<Float, State> pair =
+                        dragHandler.clipTabPosition(position, tabItem, predecessor);
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+
+                if (tabItem.isInflated() || tabItem.isVisible()) {
+                    float relocatePosition = tag.getPosition();
+                    long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
+                            relocateAnimationDelay;
+                    relocate(tabItem, relocatePosition, tag, startDelay);
+                }
+
+                if (tag.getState() == State.STACKED_START_ATOP) {
+                    break;
+                }
+
+                predecessor = tabItem;
+                previousTag = tag;
+            }
+        }
     }
 
     private void relocateWhenRemovingFloatingTab2(@NonNull final TabItem removedTabItem) {

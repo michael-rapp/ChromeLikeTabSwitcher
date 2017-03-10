@@ -625,11 +625,16 @@ public class DragHandler {
     public final float calculateNonLinearPosition(@NonNull final TabItem tabItem,
                                                   @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
+        float maxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), tabItem);
+        return calculateNonLinearPosition(predecessorPosition, maxTabSpacing);
+    }
+
+    public final float calculateNonLinearPosition(final float predecessorPosition,
+                                                  final float maxTabSpacing) {
         float ratio = Math.min(1, predecessorPosition /
                 Math.max(getAttachedPosition(false, tabSwitcher.getCount()),
                         calculateMaxTabSpacing(tabSwitcher.getCount(), null)));
         float minTabSpacing = calculateMinTabSpacing(tabSwitcher.getCount());
-        float maxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), tabItem);
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
 
