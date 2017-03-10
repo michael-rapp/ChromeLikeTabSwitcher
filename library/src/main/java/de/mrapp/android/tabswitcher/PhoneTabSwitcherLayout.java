@@ -395,8 +395,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(position, tabItem, predecessor,
-                                getTabSwitcher().getCount());
+                        .clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), position,
+                                predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -431,8 +431,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(position, tabItem, iterator.previous(),
-                                getTabSwitcher().getCount());
+                        .clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), position,
+                                iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -1382,9 +1382,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             State state = tabItem.getTag().getState();
 
             if (state == State.HIDDEN || state == State.STACKED_START) {
-                Pair<Float, State> pair = dragHandler
-                        .calculatePositionAndStateWhenStackedAtStart(swipedTabItem, null,
-                                getTabSwitcher().getCount() - 1);
+                Pair<Float, State> pair = dragHandler.calculatePositionAndStateWhenStackedAtStart(
+                        getTabSwitcher().getCount() - 1, swipedTabItem.getIndex(), null);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateOrRemoveView(tabItem);
@@ -1410,8 +1409,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 Pair<Float, State> pair = dragHandler
-                        .calculatePositionAndStateWhenStackedAtStart(tabItem, swipedTabItem,
-                                getTabSwitcher().getCount());
+                        .calculatePositionAndStateWhenStackedAtStart(getTabSwitcher().getCount(),
+                                tabItem.getIndex(), swipedTabItem);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateOrRemoveView(tabItem);
@@ -1587,8 +1586,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             .calculateNonLinearPosition(previousTag.getPosition(), maxTabSpacing);
                 }
 
-                Pair<Float, State> pair =
-                        dragHandler.clipTabPosition(position, tabItem, predecessor, count);
+                Pair<Float, State> pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
@@ -1633,8 +1632,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(relocatePosition, tabItem, predecessor,
-                                getTabSwitcher().getCount() - 1);
+                        .clipTabPosition(getTabSwitcher().getCount() - 1, tabItem.getIndex(),
+                                relocatePosition, predecessor);
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(relocatePosition);
                 tag.setState(pair.second);
@@ -1653,7 +1652,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     createRelocateAnimationListener(tabItem));
         } else {
             Pair<Float, State> pair =
-                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem);
+                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
             inflateAndUpdateView(tabItem,
@@ -1735,9 +1734,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                     if (tabItem.isVisible()) {
                         Pair<Float, State> pair = start ? dragHandler
-                                .calculatePositionAndStateWhenStackedAtStart(previous, tabItem,
-                                        getTabSwitcher().getCount()) :
-                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(previous);
+                                .calculatePositionAndStateWhenStackedAtStart(
+                                        getTabSwitcher().getCount(), previous.getIndex(), tabItem) :
+                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(
+                                        previous.getIndex());
                         tabItem.getTag().setPosition(pair.first);
                         tabItem.getTag().setState(pair.second);
                         inflateAndUpdateView(tabItem, null);

@@ -438,8 +438,9 @@ public class DragHandler {
                     firstVisibleIndex = tabItem.getIndex();
                 }
             } else {
-                Pair<Float, State> pair = clipTabPosition(tabItem.getTag().getPosition(), tabItem,
-                        iterator.previous(), tabSwitcher.getCount());
+                Pair<Float, State> pair =
+                        clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(),
+                                tabItem.getTag().getPosition(), iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             }
@@ -475,7 +476,8 @@ public class DragHandler {
                 float thresholdPosition = calculateEndPosition(factory, tabItem);
                 float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
                 Pair<Float, State> pair =
-                        clipTabPosition(newPosition, tabItem, predecessor, tabSwitcher.getCount());
+                        clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
+                                predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
@@ -486,7 +488,8 @@ public class DragHandler {
             float newPosition =
                     Math.min(calculateNonLinearPosition(tabItem, predecessor), thresholdPosition);
             Pair<Float, State> pair =
-                    clipTabPosition(newPosition, tabItem, predecessor, tabSwitcher.getCount());
+                    clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
+                            predecessor);
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
         }
@@ -516,8 +519,9 @@ public class DragHandler {
                 abort = calculatePositionWhenDraggingToStart(dragDistance, tabItem,
                         iterator.previous());
             } else {
-                Pair<Float, State> pair = clipTabPosition(tabItem.getTag().getPosition(), tabItem,
-                        iterator.previous(), tabSwitcher.getCount());
+                Pair<Float, State> pair =
+                        clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(),
+                                tabItem.getTag().getPosition(), iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             }
@@ -539,8 +543,8 @@ public class DragHandler {
 
                 if (tabItem.getIndex() < start) {
                     Pair<Float, State> pair =
-                            clipTabPosition(predecessor.getTag().getPosition(), predecessor,
-                                    tabItem, tabSwitcher.getCount());
+                            clipTabPosition(tabSwitcher.getCount(), predecessor.getIndex(),
+                                    predecessor.getTag().getPosition(), tabItem);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
                     notifyOnViewStateChanged(predecessor);
@@ -554,7 +558,8 @@ public class DragHandler {
 
                 if (!iterator.hasNext()) {
                     Pair<Float, State> pair =
-                            clipTabPosition(newPosition, tabItem, null, tabSwitcher.getCount());
+                            clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
+                                    null);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
                     notifyOnViewStateChanged(tabItem);
@@ -591,13 +596,15 @@ public class DragHandler {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
                 Pair<Float, State> pair =
-                        clipTabPosition(newPosition, tabItem, predecessor, tabSwitcher.getCount());
+                        clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
+                                predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 float currentPosition = tabItem.getTag().getPosition();
-                Pair<Float, State> pair = clipTabPosition(currentPosition, tabItem, predecessor,
-                        tabSwitcher.getCount());
+                Pair<Float, State> pair =
+                        clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), currentPosition,
+                                predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 return true;
@@ -608,7 +615,8 @@ public class DragHandler {
         } else {
             float newPosition = calculateNonLinearPosition(tabItem, predecessor);
             Pair<Float, State> pair =
-                    clipTabPosition(newPosition, tabItem, predecessor, tabSwitcher.getCount());
+                    clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
+                            predecessor);
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
         }
@@ -1034,36 +1042,34 @@ public class DragHandler {
     }
 
     /**
-     * Clips the position of a specific tab item.
+     * Clips the position of a specific tab.
      *
-     * @param position
-     *         The position, which should be clipped, in pixels as a {@link Float} value
-     * @param tabItem
-     *         The tab item, whose position should be clipped, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
      * @param count
      *         The total number of tabs, which are currently contained by the tab switcher, as an
      *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
+     * @param position
+     *         The position, which should be clipped, in pixels as a {@link Float} value
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
      * @return A pair, which contains the position and state of the tab item, as an instance of the
      * class {@link Pair}. The pair may not be null
      */
     @NonNull
-    public final Pair<Float, State> clipTabPosition(final float position,
-                                                    @NonNull final TabItem tabItem,
-                                                    @Nullable final TabItem predecessor,
-                                                    final int count) {
+    public final Pair<Float, State> clipTabPosition(final int count, final int index,
+                                                    final float position,
+                                                    @Nullable final TabItem predecessor) {
         Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(tabItem, predecessor, count);
+                calculatePositionAndStateWhenStackedAtStart(count, index, predecessor);
         float startPosition = startPair.first;
 
         if (position <= startPosition) {
             State state = startPair.second;
             return Pair.create(startPosition, state);
         } else {
-            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(tabItem);
+            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(index);
             float endPosition = endPair.first;
 
             if (position >= endPosition) {
@@ -1077,26 +1083,26 @@ public class DragHandler {
     }
 
     /**
-     * Calculates and returns the position and state of a specific tab item, when stacked at the
-     * start.
+     * Calculates and returns the position and state of a specific tab, when stacked at the start.
      *
-     * @param tabItem
-     *         The tab item, whose position and state should be returned, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
      * @param count
      *         The total number of tabs, which are currently contained by the tab switcher, as an
      *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
      * @return A pair, which contains the position and state of the given tab item, when stacked at
      * the start, as an instance of the class {@link Pair}. The pair may not be null
      */
     @NonNull
-    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
-            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor, final int count) {
-        if ((count - tabItem.getIndex()) <= stackedTabCount) {
-            float position = stackedTabSpacing * (count - (tabItem.getIndex() + 1));
+    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                                final int index,
+                                                                                @Nullable final TabItem predecessor) {
+        if ((count - index) <= stackedTabCount) {
+            float position = stackedTabSpacing * (count - (index + 1));
             return Pair.create(position,
                     (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.STACKED_START);
@@ -1109,18 +1115,16 @@ public class DragHandler {
     }
 
     /**
-     * Calculates and returns the position and state of a specific tab item, when stacked at the
-     * end.
+     * Calculates and returns the position and state of a specific tab, when stacked at the end.
      *
-     * @param tabItem
-     *         The tab item, whose position and state should be returned, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
      * @return A pair, which contains the position and state of the given tab item, when stacked at
      * the end, as an instance of the class {@link Pair}. The pair may not be null
      */
     @NonNull
-    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(
-            @NonNull final TabItem tabItem) {
+    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float size = arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer());
         int toolbarHeight =
                 tabSwitcher.isToolbarShown() && tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
@@ -1130,9 +1134,10 @@ public class DragHandler {
         int offset = tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
                 stackedTabCount * stackedTabSpacing : 0;
 
-        if (tabItem.getIndex() < stackedTabCount) {
-            float position = size - toolbarHeight - tabInset -
-                    (stackedTabSpacing * (tabItem.getIndex() + 1)) - padding + offset;
+        if (index < stackedTabCount) {
+            float position =
+                    size - toolbarHeight - tabInset - (stackedTabSpacing * (index + 1)) - padding +
+                            offset;
             return Pair.create(position, State.STACKED_END);
         } else {
             float position =

@@ -229,8 +229,8 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
                                                @Nullable final TabItem predecessor) {
         float position = calculateStartPosition(tabItem);
-        Pair<Float, State> pair =
-                dragHandler.clipTabPosition(position, tabItem, predecessor, tabSwitcher.getCount());
+        Pair<Float, State> pair = dragHandler
+                .clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), position, predecessor);
         tabItem.getTag().setPosition(pair.first);
         tabItem.getTag().setState(pair.second);
     }
