@@ -1540,7 +1540,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem tabItem;
         float referencePosition = attachedPosition;
         int firstAttachedIndex = -1;
-        float firstAttachedPosition = 0;
 
         while ((tabItem = iterator.next()) != null && firstAttachedIndex == -1) {
             if (tabItem.getIndex() != removedTabItem.getIndex()) {
@@ -1548,7 +1547,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (position >= attachedPosition) {
                     firstAttachedIndex = tabItem.getIndex();
-                    firstAttachedPosition = position;
                 }
             }
         }
@@ -1582,7 +1580,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else if (tabItem.getIndex() == firstAttachedIndex) {
                     position = referencePosition;
                 } else if (tabItem.getIndex() < firstAttachedIndex) {
-                    position = firstAttachedPosition +
+                    position = referencePosition +
                             (firstAttachedIndex - 1 - tabItem.getIndex()) * defaultTabSpacing;
                 } else {
                     position = dragHandler
