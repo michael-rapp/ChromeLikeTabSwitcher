@@ -394,8 +394,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
                 }
 
-                Pair<Float, State> pair =
-                        dragHandler.clipTabPosition(position, tabItem, predecessor);
+                Pair<Float, State> pair = dragHandler
+                        .clipTabPosition(position, tabItem, predecessor,
+                                getTabSwitcher().getCount());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -429,8 +430,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             ((getSelectedTabIndex() - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
-                Pair<Float, State> pair =
-                        dragHandler.clipTabPosition(position, tabItem, iterator.previous());
+                Pair<Float, State> pair = dragHandler
+                        .clipTabPosition(position, tabItem, iterator.previous(),
+                                getTabSwitcher().getCount());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -1588,7 +1590,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 Pair<Float, State> pair =
-                        dragHandler.clipTabPosition(position, tabItem, predecessor);
+                        dragHandler.clipTabPosition(position, tabItem, predecessor, count);
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
@@ -1632,8 +1634,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     relocatePosition = position + distance * 0.5f;
                 }
 
-                Pair<Float, State> pair =
-                        dragHandler.clipTabPosition(relocatePosition, tabItem, predecessor);
+                Pair<Float, State> pair = dragHandler
+                        .clipTabPosition(relocatePosition, tabItem, predecessor,
+                                getTabSwitcher().getCount() - 1);
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(relocatePosition);
                 tag.setState(pair.second);
