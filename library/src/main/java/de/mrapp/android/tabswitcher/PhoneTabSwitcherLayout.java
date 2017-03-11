@@ -1534,8 +1534,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
         AbstractTabItemIterator.AbstractBuilder builder =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
-        AbstractTabItemIterator iterator =
-                builder.start(removedTabItem.getIndex()).reverse(true).create();
+        AbstractTabItemIterator iterator = builder.create();
         TabItem tabItem;
         float referencePosition = attachedPosition;
         int firstAttachedIndex = -1;
@@ -1565,7 +1564,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        iterator = builder.start(0).reverse(false).create();
+        iterator = builder.create();
         TabItem predecessor = null;
         Tag previousTag = null;
 
