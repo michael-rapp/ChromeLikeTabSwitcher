@@ -1597,6 +1597,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 int index =
                         removedTabItem.getIndex() < tabItem.getIndex() ? tabItem.getIndex() - 1 :
                                 tabItem.getIndex();
+                float thresholdPosition = (count - 1 - index) * maxTabSpacing;
+                position = Math.min(thresholdPosition, position);
                 Pair<Float, State> pair =
                         dragHandler.clipTabPosition(count, index, position, predecessor);
                 Tag tag = tabItem.getTag().clone();
