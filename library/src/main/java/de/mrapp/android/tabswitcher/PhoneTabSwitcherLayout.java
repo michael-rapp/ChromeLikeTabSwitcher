@@ -378,7 +378,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             tabItems);
             AbstractTabItemIterator iterator =
                     factory.create().start(getSelectedTabIndex()).create();
-            TabItem selectedTabItem = null;
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -388,7 +387,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (tabItem.getIndex() == getCount() - 1) {
                     position = 0;
                 } else if (tabItem.getIndex() == getSelectedTabIndex()) {
-                    selectedTabItem = tabItem;
                     position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount());
                 } else {
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
@@ -410,6 +408,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             iterator = factory.create().create();
             float defaultTabSpacing =
                     dragHandler.calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
+            TabItem selectedTabItem =
+                    TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex());
             float maxTabSpacing = dragHandler
                     .calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
 
