@@ -1030,7 +1030,7 @@ public class DragHandler {
             if (count == 3) {
                 attachedPosition = totalSpace * 0.66f;
             } else if (count == 4) {
-                attachedPosition = totalSpace * 0.75f;
+                attachedPosition = totalSpace * 0.6f;
             } else {
                 attachedPosition = totalSpace * 0.5f;
             }

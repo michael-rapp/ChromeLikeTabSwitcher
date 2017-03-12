@@ -465,7 +465,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         } else if (count == 3) {
             return totalSpace * 0.33f;
         } else if (count == 4) {
-            return totalSpace * 0.375f;
+            return totalSpace * 0.3f;
         } else {
             return totalSpace * 0.25f;
         }
@@ -1538,13 +1538,26 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem tabItem;
         float referencePosition = attachedPosition;
         int firstAttachedIndex = -1;
+        float currentPosition = attachedPosition;
+        int unttachedCount = -1;
 
-        while ((tabItem = iterator.next()) != null && firstAttachedIndex == -1) {
-            if (tabItem.getIndex() != removedTabItem.getIndex()) {
-                float position = tabItem.getTag().getPosition();
+        while (currentPosition > removedTabItem.getTag().getPosition()) {
+            currentPosition =
+                    dragHandler.calculateNonLinearPosition(currentPosition, maxTabSpacing);
+            unttachedCount++;
+        }
 
-                if (position >= attachedPosition) {
-                    firstAttachedIndex = tabItem.getIndex();
+        if (unttachedCount == -1) {
+            firstAttachedIndex = removedTabItem.getIndex() + 1;
+        } else {
+            while ((tabItem = iterator.next()) != null && firstAttachedIndex == -1) {
+                if (tabItem.getIndex() != removedTabItem.getIndex()) {
+                    float position = tabItem.getTag().getPosition();
+
+                    if (position >= attachedPosition) {
+                        firstAttachedIndex = Math.max(tabItem.getIndex(),
+                                removedTabItem.getIndex() - unttachedCount - 1);
+                    }
                 }
             }
         }
@@ -1553,13 +1566,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             firstAttachedIndex = removedTabItem.getIndex() == 0 ? 1 : 0;
             float firstTabPosition = iterator.getItem(firstAttachedIndex).getTag().getPosition();
             referencePosition = -1;
-            float position = attachedPosition;
+            currentPosition = attachedPosition;
 
             while (referencePosition == -1) {
-                position = dragHandler.calculateNonLinearPosition(position, maxTabSpacing);
+                currentPosition =
+                        dragHandler.calculateNonLinearPosition(currentPosition, maxTabSpacing);
 
-                if (position <= firstTabPosition) {
-                    referencePosition = position;
+                if (currentPosition <= firstTabPosition) {
+                    referencePosition = currentPosition;
                 }
             }
         }
