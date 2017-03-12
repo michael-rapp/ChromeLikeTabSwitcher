@@ -1534,6 +1534,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (unattachedCount == -1) {
             firstAttachedIndex = removedTabItem.getIndex() + 1;
+
+            if (firstAttachedIndex < 3) {
+                referencePosition = attachedPosition +
+                        ((removedTabItem.getTag().getPosition() - attachedPosition) / 2f);
+            }
         } else {
             while ((tabItem = iterator.next()) != null && firstAttachedIndex == -1) {
                 if (tabItem.getIndex() != removedTabItem.getIndex()) {
