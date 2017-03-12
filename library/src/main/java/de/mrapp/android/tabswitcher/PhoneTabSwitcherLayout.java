@@ -1247,24 +1247,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         setSelectedTabIndex(getSelectedTabIndex());
                     }
                 }
-
-                printPositions();
             }
 
         };
-    }
-
-    private void printPositions() {
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
-        TabItem tabItem;
-
-        System.out.println("-----------------------");
-
-        while ((tabItem = iterator.next()) != null) {
-            System.out.println(tabItem.getIndex() + ": pos = " + tabItem.getTag().getPosition() +
-                    ", state = " + tabItem.getTag().getState());
-        }
     }
 
     /**
