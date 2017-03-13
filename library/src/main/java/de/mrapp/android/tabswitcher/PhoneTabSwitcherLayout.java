@@ -968,6 +968,40 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Creates and returns a layout listener, which allows to show a tab as the currently selected
+     * one, once it view has been inflated.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which has been added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createAddSelectedTabLayoutListener(
+            @NonNull final TabItem tabItem) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = tabItem.getView();
+                FrameLayout.LayoutParams layoutParams =
+                        (FrameLayout.LayoutParams) view.getLayoutParams();
+                view.setAlpha(1f);
+                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+                view.setX(layoutParams.leftMargin);
+                view.setY(layoutParams.topMargin);
+                arithmetics.setScale(Axis.DRAGGING_AXIS, view, 1);
+                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, 1);
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to start a reveal animation to add a tab,
      * once its view has been inflated.
      *
@@ -2091,7 +2125,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void run() {
                 tab.addCallback(recyclerAdapter);
 
-                if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
+                if (animation instanceof RevealAnimation &&
+                        ViewCompat.isLaidOut(getTabSwitcher())) {
+                    RevealAnimation revealAnimation = (RevealAnimation) animation;
+                    addTabInternal(index, tab);
+                    setSelectedTabIndex(index);
+                    setSwitcherShown(false);
+                    TabItem tabItem = new TabItem(0, tab);
+                    inflateView(tabItem,
+                            createRevealLayoutListener(tabItem, index, revealAnimation));
+                } else if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
                     addTabInternal(index, tab);
 
                     if (getCount() == 1) {
@@ -2101,19 +2144,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     toolbar.setAlpha(0);
 
                     if (getSelectedTabIndex() == index && ViewCompat.isLaidOut(getTabSwitcher())) {
-                        viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
+                        TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
+                        inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
                     }
                 } else {
-                    if (animation instanceof RevealAnimation) {
-                        RevealAnimation revealAnimation = (RevealAnimation) animation;
-                        addTabInternal(index, tab);
-                        setSelectedTabIndex(index);
-                        setSwitcherShown(false);
-                        TabItem tabItem = new TabItem(0, tab);
-                        inflateView(tabItem,
-                                createRevealLayoutListener(tabItem, index, revealAnimation));
-                    }
-
                     // TODO: Add support for adding tab, while switcher is shown
                     // TODO: Only modify views if tab switcher is already laid out
                 }
