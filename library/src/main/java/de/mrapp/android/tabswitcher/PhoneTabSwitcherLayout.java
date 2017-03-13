@@ -1253,10 +1253,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     relocateWhenRemovingStackedTab(tabItem, true);
                 } else {
                     if (count == 4 || count == 3) {
-                        relocateWhenRemovingFloatingTab3or4(tabItem, attachedPosition,
-                                maxTabSpacing);
+                        relocateWhenRemovingFloatingTabOutOfFourOrFiveTabs(tabItem,
+                                attachedPosition, maxTabSpacing);
                     } else if (count == 2) {
-                        relocateWhenRemovingFloatingTab2(tabItem);
+                        relocateWhenRemovingFloatingTabOutOfThreeTabs(tabItem);
                     } else {
                         relocateWhenRemovingFloatingTab(tabItem);
                     }
@@ -1548,9 +1548,71 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setRotation(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
-    private void relocateWhenRemovingFloatingTab3or4(@NonNull final TabItem removedTabItem,
-                                                     final float attachedPosition,
-                                                     final float maxTabSpacing) {
+    /**
+     * Relocates all neighboring tab, when a floating tab has been removed and three tabs are
+     * contained by the tab switcher.
+     *
+     * @param removedTabItem
+     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     */
+    private void relocateWhenRemovingFloatingTabOutOfThreeTabs(
+            @NonNull final TabItem removedTabItem) {
+        TabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabItem tabItem;
+        TabItem predecessor = null;
+
+        while ((tabItem = iterator.next()) != null && tabItem.getIndex() < getCount() - 1) {
+            if (tabItem.getIndex() != removedTabItem.getIndex()) {
+                float relocatePosition;
+
+                if (removedTabItem.getIndex() == getCount() - 1 &&
+                        tabItem.getIndex() == getCount() - 2) {
+                    relocatePosition = 0;
+                } else {
+                    float position = tabItem.getTag().getPosition();
+                    float referencePosition = removedTabItem.getIndex() == getCount() - 1 ?
+                            iterator.peek().getTag().getPosition() :
+                            removedTabItem.getTag().getPosition();
+                    float distance = referencePosition - position;
+                    relocatePosition = position + distance * 0.5f;
+                }
+
+                int index =
+                        removedTabItem.getIndex() < tabItem.getIndex() ? tabItem.getIndex() - 1 :
+                                tabItem.getIndex();
+                Pair<Float, State> pair = dragHandler
+                        .clipTabPosition(getTabSwitcher().getCount() - 1, index, relocatePosition,
+                                predecessor);
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
+                        relocateAnimationDelay;
+                relocate(tabItem, pair.first, tag, startDelay);
+                predecessor = tabItem;
+            }
+        }
+    }
+
+    /**
+     * Relocates all neighboring tabs, when a floating tab has been removed and four or five tabs
+     * are contained by the tab switcher.
+     *
+     * @param removedTabItem
+     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param attachedPosition
+     *         The updated attached position after the tab has been removed in pixels as a {@link
+     *         Float} value
+     * @param maxTabSpacing
+     *         The maximum space between neighboring tabs after the tab has been removed in pixes as
+     *         a {@link Float} value
+     */
+    private void relocateWhenRemovingFloatingTabOutOfFourOrFiveTabs(
+            @NonNull final TabItem removedTabItem, final float attachedPosition,
+            final float maxTabSpacing) {
         int count = getTabSwitcher().getCount() - 1;
         AbstractTabItemIterator.AbstractBuilder builder =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
@@ -1658,64 +1720,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
     }
 
-    private void relocateWhenRemovingFloatingTab2(@NonNull final TabItem removedTabItem) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-        TabItem tabItem;
-        TabItem predecessor = null;
-
-        while ((tabItem = iterator.next()) != null && tabItem.getIndex() < getCount() - 1) {
-            if (tabItem.getIndex() != removedTabItem.getIndex()) {
-                float relocatePosition;
-
-                if (removedTabItem.getIndex() == getCount() - 1 &&
-                        tabItem.getIndex() == getCount() - 2) {
-                    relocatePosition = 0;
-                } else {
-                    float position = tabItem.getTag().getPosition();
-                    float referencePosition = removedTabItem.getIndex() == getCount() - 1 ?
-                            iterator.peek().getTag().getPosition() :
-                            removedTabItem.getTag().getPosition();
-                    float distance = referencePosition - position;
-                    relocatePosition = position + distance * 0.5f;
-                }
-
-                int index =
-                        removedTabItem.getIndex() < tabItem.getIndex() ? tabItem.getIndex() - 1 :
-                                tabItem.getIndex();
-                Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(getTabSwitcher().getCount() - 1, index, relocatePosition,
-                                predecessor);
-                Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
-                tag.setState(pair.second);
-                long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
-                        relocateAnimationDelay;
-                relocate(tabItem, pair.first, tag, startDelay);
-                predecessor = tabItem;
-            }
-        }
-    }
-
-    private void relocate(@NonNull final TabItem tabItem, final float relocatePosition,
-                          @Nullable final Tag tag, final long startDelay) {
-        if (tabItem.isInflated()) {
-            animateRelocate(tabItem, relocatePosition, tag, startDelay,
-                    createRelocateAnimationListener(tabItem));
-        } else {
-            Pair<Float, State> pair =
-                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-            tabItem.getTag().setPosition(pair.first);
-            tabItem.getTag().setState(pair.second);
-            inflateAndUpdateView(tabItem,
-                    createRelocateLayoutListener(tabItem, relocatePosition, tag, startDelay,
-                            createRelocateAnimationListener(tabItem)));
-            tabItem.getView().setVisibility(View.INVISIBLE);
-        }
-    }
-
     /**
-     * Relocates all previous tabs, when a floating tab has been removed.
+     * Relocates all previous tabs, when a floating tab has been removed and more than five tabs are
+     * contained by the tab switcher.
      *
      * @param removedTabItem
      *         The tab item, which corresponds to the tab, which has been removed, as an instance of
@@ -1806,6 +1813,37 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             previousProjectedPosition = projectedPosition;
+        }
+    }
+
+    /**
+     * Relocates a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be relocated, as an instance
+     *         of the class {@link TabItem}. The tab item may not be null
+     * @param relocatePosition
+     *         The position, the tab should be moved to, in pixels as an {@link Float} value
+     * @param tag
+     *         The tag, which should be applied to the tab, once it has been relocated, as an
+     *         instance of the class {@link Tag} or null, if no tag should be applied
+     * @param startDelay
+     *         The start delay of the relocate animation in milliseconds as a {@link Long} value
+     */
+    private void relocate(@NonNull final TabItem tabItem, final float relocatePosition,
+                          @Nullable final Tag tag, final long startDelay) {
+        if (tabItem.isInflated()) {
+            animateRelocate(tabItem, relocatePosition, tag, startDelay,
+                    createRelocateAnimationListener(tabItem));
+        } else {
+            Pair<Float, State> pair =
+                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
+            inflateAndUpdateView(tabItem,
+                    createRelocateLayoutListener(tabItem, relocatePosition, tag, startDelay,
+                            createRelocateAnimationListener(tabItem)));
+            tabItem.getView().setVisibility(View.INVISIBLE);
         }
     }
 
