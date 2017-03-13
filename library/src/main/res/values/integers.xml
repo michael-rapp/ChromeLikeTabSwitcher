@@ -18,8 +18,8 @@ License.
     <integer name="stacked_tab_count">3</integer>
     <integer name="max_start_overshoot_angle">2</integer>
     <integer name="max_end_overshoot_angle">3</integer>
-    <integer name="show_switcher_animation_duration">@android:integer/config_mediumAnimTime</integer>
-    <integer name="hide_switcher_animation_duration">@android:integer/config_mediumAnimTime</integer>
+    <integer name="show_switcher_animation_duration">@android:integer/config_shortAnimTime</integer>
+    <integer name="hide_switcher_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="toolbar_visibility_animation_duration">@android:integer/config_mediumAnimTime</integer>
     <integer name="toolbar_visibility_animation_delay">@android:integer/config_shortAnimTime</integer>
     <integer name="swipe_animation_duration">@android:integer/config_longAnimTime</integer>
@@ -27,6 +27,6 @@ License.
     <integer name="relocate_animation_duration">@android:integer/config_mediumAnimTime</integer>
     <integer name="relocate_animation_delay">@android:integer/config_shortAnimTime</integer>
     <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime</integer>
-    <integer name="reveal_animation_duration">@android:integer/config_longAnimTime</integer>
+    <integer name="reveal_animation_duration">@android:integer/config_shortAnimTime</integer>
 
 </resources>
