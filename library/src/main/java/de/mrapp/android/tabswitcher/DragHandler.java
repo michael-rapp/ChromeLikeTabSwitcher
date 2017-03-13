@@ -545,8 +545,8 @@ public class DragHandler {
                     Pair<Float, State> pair =
                             clipTabPosition(tabSwitcher.getCount(), predecessor.getIndex(),
                                     predecessor.getTag().getPosition(), tabItem);
-                    tabItem.getTag().setPosition(pair.first);
-                    tabItem.getTag().setState(pair.second);
+                    predecessor.getTag().setPosition(pair.first);
+                    predecessor.getTag().setState(pair.second);
                     notifyOnViewStateChanged(predecessor);
 
                     if (predecessor.getTag().getState() == State.FLOATING) {

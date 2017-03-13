@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     /**
      * The number of tabs, which are contained by the example app's tab switcher.
      */
-    private static final int TAB_COUNT = 5;
+    private static final int TAB_COUNT = 12;
 
     /**
      * The activity's tab switcher.
