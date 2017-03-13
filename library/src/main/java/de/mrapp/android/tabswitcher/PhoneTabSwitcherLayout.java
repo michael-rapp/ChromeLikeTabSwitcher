@@ -1244,8 +1244,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     if (getSelectedTabIndex() > 0) {
                         setSelectedTabIndex(getSelectedTabIndex() - 1);
                     } else {
-                        setSelectedTabIndex(getSelectedTabIndex());
+                        setSelectedTabIndex(0);
                     }
+                } else if (getSelectedTabIndex() > tabItem.getIndex()) {
+                    setSelectedTabIndex(getSelectedTabIndex() - 1);
                 }
             }
 
@@ -2146,13 +2148,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         if (getSelectedTabIndex() > 0) {
                             setSelectedTabIndex(getSelectedTabIndex() - 1);
                         } else {
-                            setSelectedTabIndex(getSelectedTabIndex());
+                            setSelectedTabIndex(0);
                         }
 
                         if (ViewCompat.isLaidOut(getTabSwitcher())) {
                             viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler,
                                     getSelectedTabIndex()));
                         }
+                    } else if (getSelectedTabIndex() > tabItem.getIndex()) {
+                        setSelectedTabIndex(getSelectedTabIndex() - 1);
                     }
                 } else {
                     adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
