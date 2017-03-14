@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -104,11 +105,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public void onClick(final View view) {
                 int index = tabSwitcher.getCount();
-                int[] location = new int[2];
-                view.getLocationInWindow(location);
-                float x = location[0] + (view.getWidth() / 2f);
-                float y = location[1] + (view.getHeight() / 2f);
-                Animation animation = Animation.createRevealAnimation(x, y);
+                Animation animation = createRevealAnimation();
                 tabSwitcher.addTab(createTab(index), 0, animation);
             }
 
@@ -123,7 +120,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 switch (item.getItemId()) {
                     case R.id.add_tab_menu_item:
                         int index = tabSwitcher.getCount();
-                        Animation animation = Animation.createSwipeAnimation();
+                        Animation animation =
+                                tabSwitcher.isSwitcherShown() ? createRevealAnimation() :
+                                        Animation.createSwipeAnimation();
                         tabSwitcher.addTab(createTab(index), 0, animation);
                         return true;
                     case R.id.clear_tabs_menu_item:
@@ -157,6 +156,38 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             }
 
         };
+    }
+
+    @NonNull
+    private Animation createRevealAnimation() {
+        float x = 0;
+        float y = 0;
+        View view = getNavigationMenuItem();
+
+        if (view != null) {
+            int[] location = new int[2];
+            view.getLocationInWindow(location);
+            x = location[0] + (view.getWidth() / 2f);
+            y = location[1] + (view.getHeight() / 2f);
+        }
+
+        return Animation.createRevealAnimation(x, y);
+    }
+
+    @Nullable
+    private View getNavigationMenuItem() {
+        Toolbar toolbar = tabSwitcher.getToolbar();
+        int size = toolbar.getChildCount();
+
+        for (int i = 0; i < size; i++) {
+            View child = toolbar.getChildAt(i);
+
+            if (child instanceof ImageButton) {
+                return child;
+            }
+        }
+
+        return null;
     }
 
     private Tab createTab(final int index) {
