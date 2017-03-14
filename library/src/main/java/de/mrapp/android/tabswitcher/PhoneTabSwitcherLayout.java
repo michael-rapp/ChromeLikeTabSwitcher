@@ -1043,6 +1043,72 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Creates and returns a layout listener, which allows to start a swipe animation to add a tab,
+     * once its view has been inflated.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param swipeAnimation
+     *         The swipe animation, which should be started, as an instance of the class {@link
+     *         SwipeAnimation}. The swipe animation may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem tabItem,
+                                                             @NonNull final SwipeAnimation swipeAnimation) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                Tag tag = relocateWhenAddingFloatingTab(tabItem);
+                tabItem.setTag(tag);
+                View view = tabItem.getView();
+                view.setAlpha(swipedTabAlpha);
+                float swipePosition = calculateSwipePosition();
+                float scale = arithmetics.getScale(view, true);
+                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
+                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
+                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
+                arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view,
+                        swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
+                                swipePosition);
+                arithmetics.setScale(Axis.DRAGGING_AXIS, view, scale);
+                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                        arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
+                arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
+                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
+                animateSwipe(tabItem, false, 0, 0, swipeAnimation,
+                        null); // TODO: Update view when animation ends
+            }
+
+        };
+    }
+
+    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem) {
+        int index = addedTabItem.getIndex();
+        int count = getTabSwitcher().getCount();
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+        TabItem tabItem = iterator.getItem(index + 1);
+        float position = tabItem.getTag().getPosition();
+        float relocatePosition = position + dragHandler.calculateMaxTabSpacing(count, tabItem);
+        TabItem predecessor = index - 1 >= 0 ? iterator.getItem(index - 1) : null;
+        Pair<Float, State> pair =
+                dragHandler.clipTabPosition(count, index, relocatePosition, predecessor);
+        Tag tag = addedTabItem.getTag();
+        tag.setPosition(pair.first);
+        tag.setState(pair.second);
+        return tag;
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to adapt the bottom margin of a tab, once
      * its view has been inflated.
      *
@@ -2162,32 +2228,40 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void run() {
                 tab.addCallback(recyclerAdapter);
+                addTabInternal(index, tab);
 
                 if (animation instanceof RevealAnimation &&
                         ViewCompat.isLaidOut(getTabSwitcher())) {
                     RevealAnimation revealAnimation = (RevealAnimation) animation;
-                    addTabInternal(index, tab);
                     setSelectedTabIndex(index);
                     setSwitcherShown(false);
                     TabItem tabItem = new TabItem(0, tab);
                     inflateView(tabItem,
                             createRevealLayoutListener(tabItem, index, revealAnimation));
-                } else if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
-                    addTabInternal(index, tab);
+                } else if (animation instanceof SwipeAnimation && isSwitcherShown() &&
+                        ViewCompat.isLaidOut(getTabSwitcher())) {
+                    SwipeAnimation swipeAnimation = (SwipeAnimation) animation;
 
                     if (getCount() == 1) {
                         setSelectedTabIndex(0);
                     }
 
-                    toolbar.setAlpha(0);
-
-                    if (getSelectedTabIndex() == index && ViewCompat.isLaidOut(getTabSwitcher())) {
-                        TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
-                        inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
-                    }
+                    TabItem tabItem = new TabItem(index, tab);
+                    inflateView(tabItem, createSwipeLayoutListener(tabItem, swipeAnimation));
                 } else {
-                    // TODO: Add support for adding tab, while switcher is shown
-                    // TODO: Only modify views if tab switcher is already laid out
+                    if (getCount() == 1) {
+                        setSelectedTabIndex(0);
+                    }
+
+                    if (!isSwitcherShown()) {
+                        toolbar.setAlpha(0);
+
+                        if (getSelectedTabIndex() == index &&
+                                ViewCompat.isLaidOut(getTabSwitcher())) {
+                            TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
+                            inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
+                        }
+                    }
                 }
             }
 
