@@ -122,7 +122,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.add_tab_menu_item:
-                        // TODO: Implement
+                        int index = tabSwitcher.getCount();
+                        Animation animation = Animation.createSwipeAnimation();
+                        tabSwitcher.addTab(createTab(index), 0, animation);
                         return true;
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
