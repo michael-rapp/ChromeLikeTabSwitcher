@@ -368,9 +368,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     @NonNull
     private TabItem[] calculateInitialTabItems() {
+        int count = getTabSwitcher().getCount();
         dragHandler.reset(dragThreshold);
-        dragHandler.setMaxTabSpacing(calculateMaxTabSpacing(getTabSwitcher().getCount()));
-        TabItem[] tabItems = new TabItem[getCount()];
+        dragHandler.setMaxTabSpacing(calculateMaxTabSpacing(count));
+        TabItem[] tabItems = new TabItem[count];
 
         if (!isEmpty()) {
             int selectedTabIndex = getSelectedTabIndex();
@@ -384,17 +385,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 TabItem predecessor = iterator.previous();
                 float position;
 
-                if (tabItem.getIndex() == getCount() - 1) {
+                if (tabItem.getIndex() == count - 1) {
                     position = 0;
                 } else if (tabItem.getIndex() == selectedTabIndex) {
-                    position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount());
+                    position = dragHandler.getAttachedPosition(false, count);
                 } else {
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
                 }
 
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), position,
-                                predecessor);
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -404,14 +404,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             boolean overshooting =
-                    selectedTabIndex == getCount() - 1 || dragHandler.isOvershootingAtEnd(factory);
+                    selectedTabIndex == count - 1 || dragHandler.isOvershootingAtEnd(factory);
             iterator = factory.create().create();
-            float defaultTabSpacing =
-                    dragHandler.calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
+            float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
-            float maxTabSpacing = dragHandler
-                    .calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
+            float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
 
             while ((tabItem = iterator.next()) != null &&
                     (overshooting || tabItem.getIndex() < selectedTabIndex)) {
@@ -420,19 +418,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (overshooting) {
                     if (selectedTabIndex > tabItem.getIndex()) {
                         position = maxTabSpacing +
-                                ((getCount() - 1 - tabItem.getIndex() - 1) * defaultTabSpacing);
+                                ((count - 1 - tabItem.getIndex() - 1) * defaultTabSpacing);
                     } else {
-                        position = (getCount() - 1 - tabItem.getIndex()) * defaultTabSpacing;
+                        position = (count - 1 - tabItem.getIndex()) * defaultTabSpacing;
                     }
                 } else {
-                    position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount()) +
-                            maxTabSpacing +
+                    position = dragHandler.getAttachedPosition(false, count) + maxTabSpacing +
                             ((selectedTabIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
                 Pair<Float, State> pair = dragHandler
-                        .clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), position,
-                                iterator.previous());
+                        .clipTabPosition(count, tabItem.getIndex(), position, iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
