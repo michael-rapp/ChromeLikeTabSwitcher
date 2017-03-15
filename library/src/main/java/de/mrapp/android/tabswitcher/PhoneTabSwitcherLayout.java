@@ -1062,23 +1062,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 int index = tabItem.getIndex();
-                TabItem referenceTabItem =
-                        TabItem.create(getTabSwitcher(), viewRecycler, index + 1);
-                State state = referenceTabItem.getTag().getState();
+                TabItem referenceTabItem = index < getCount() - 1 ?
+                        TabItem.create(getTabSwitcher(), viewRecycler, index + 1) : null;
+                State state =
+                        referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
+                Tag tag;
 
-                if (state == State.STACKED_END) {
-                    throw new UnsupportedOperationException(
-                            "Adding to end stack not supported yet");
-                } else if (state == State.STACKED_START) {
-                    throw new UnsupportedOperationException(
-                            "Adding to start stack not supported yet");
+                if (state == null || state == State.STACKED_START) {
+                    tag = relocateWhenAddingStackedTab(true, tabItem);
+                } else if (state == State.STACKED_END) {
+                    tag = relocateWhenAddingStackedTab(false, tabItem);
                 } else if (state == State.FLOATING) {
-                    relocateWhenAddingFloatingTab(tabItem, referenceTabItem);
+                    tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem);
                 } else {
-                    relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
+                    tag = relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
                 }
 
+                tabItem.setTag(tag);
                 View view = tabItem.getView();
+                view.setTag(R.id.tag_properties, tag);
                 view.setAlpha(swipedTabAlpha);
                 float swipePosition = calculateSwipePosition();
                 float scale = arithmetics.getScale(view, true);
@@ -1086,7 +1088,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                         arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
-                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tabItem.getTag().getPosition());
+                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
                 arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view,
                         swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
                                 swipePosition);
@@ -1099,14 +1101,66 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
                 arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
                 animateSwipe(tabItem, false, 0, 0, swipeAnimation,
-                        createUpdateViewAnimationListener(tabItem));
+                        createSwipeAnimationListener(tabItem));
             }
 
         };
     }
 
-    private void relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
-                                             @NonNull final TabItem referenceTabItem) {
+    @NonNull
+    private Tag relocateWhenAddingStackedTab(final boolean start,
+                                             @NonNull final TabItem addedTabItem) {
+        dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+        int count = getTabSwitcher().getCount();
+        Tag result = addedTabItem.getTag();
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(addedTabItem.getIndex()).reverse(start).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null &&
+                (tabItem.getTag().getState() == State.STACKED_START ||
+                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
+                        tabItem.getTag().getState() == State.STACKED_END ||
+                        tabItem.getTag().getState() == State.HIDDEN)) {
+            TabItem predecessor = iterator.peek();
+            Pair<Float, State> pair = start ? dragHandler
+                    .calculatePositionAndStateWhenStackedAtStart(count, tabItem.getIndex(),
+                            predecessor) :
+                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+
+            if (start && predecessor != null && predecessor.getTag().getState() == State.FLOATING) {
+                float predecessorPosition = predecessor.getTag().getPosition();
+                float distance = predecessorPosition - pair.first;
+
+                if (distance > dragHandler.calculateMinTabSpacing(count)) {
+                    float position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
+                    pair = dragHandler
+                            .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                }
+            }
+
+            if (tabItem.getIndex() == addedTabItem.getIndex()) {
+                result.setPosition(pair.first);
+                result.setState(pair.second);
+            } else {
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                relocate(tabItem, tag.getPosition(), tag, 0);
+            }
+
+            if (pair.second == State.HIDDEN) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    @NonNull
+    private Tag relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
+                                            @NonNull final TabItem referenceTabItem) {
         int addedTabItemIndex = addedTabItem.getIndex();
         Pair<Float, State> pair;
 
@@ -1120,12 +1174,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(addedTabItemIndex);
         }
 
-        addedTabItem.getTag().setPosition(pair.first);
-        addedTabItem.getTag().setState(pair.second);
+        Tag tag = addedTabItem.getTag();
+        tag.setPosition(pair.first);
+        tag.setState(pair.second);
+        return tag;
     }
 
-    private void relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
-                                               @NonNull final TabItem referenceTabItem) {
+    @NonNull
+    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
+                                              @NonNull final TabItem referenceTabItem) {
+        Tag result = addedTabItem.getTag();
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
         AbstractTabItemIterator iterator =
@@ -1153,18 +1211,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             Pair<Float, State> pair =
                     dragHandler.clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-            Tag tag = tabItem.getTag().clone();
-            tag.setPosition(pair.first);
-            tag.setState(pair.second);
 
             if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                tabItem.getView().setTag(R.id.tag_properties, tag);
-                tabItem.setTag(tag);
+                result.setPosition(pair.first);
+                result.setState(pair.second);
             } else {
-                float relocatePosition = tag.getPosition();
-                relocate(tabItem, relocatePosition, tag, 0);
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                relocate(tabItem, tag.getPosition(), tag, 0);
             }
         }
+
+        return result;
     }
 
     /**
@@ -1247,12 +1306,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-
-                if (tabItem.isVisible()) {
-                    updateView(tabItem);
-                } else {
-                    viewRecycler.remove(tabItem);
-                }
+                inflateOrRemoveView(tabItem);
             }
 
         };
@@ -1343,6 +1397,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
+                inflateOrRemoveView(tabItem);
                 View view = tabItem.getView();
                 adaptStackOnSwipeAborted(tabItem, tabItem.getIndex() + 1);
                 tabItem.getTag().setClosing(false);
@@ -1381,7 +1436,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     relocateWhenRemovingStackedTab(tabItem, false);
                 } else if (state == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
-                } else if (state == State.FLOATING) {
+                } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
                     if (count == 4 || count == 3) {
                         relocateWhenRemovingFloatingTabOutOfFourOrFiveTabs(tabItem,
                                 attachedPosition, maxTabSpacing);

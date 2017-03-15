@@ -821,7 +821,7 @@ public class DragHandler {
      *         Integer} value
      * @return The minimum space between two neighboring tabs in pixels as a {@link Float} value
      */
-    private float calculateMinTabSpacing(final int count) {
+    public final float calculateMinTabSpacing(final int count) {
         return calculateMaxTabSpacing(count, null) * MIN_TAB_SPACING_RATIO;
     }
 
