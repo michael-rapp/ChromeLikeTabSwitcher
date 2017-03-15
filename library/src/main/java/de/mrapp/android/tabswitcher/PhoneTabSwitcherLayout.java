@@ -1061,10 +1061,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
-                Tag tag = relocateWhenAddingFloatingTab(tabItem);
-                tabItem.setTag(tag);
+                relocateWhenAddingFloatingTab(tabItem);
                 View view = tabItem.getView();
-                view.setTag(R.id.tag_properties, tag);
                 view.setAlpha(swipedTabAlpha);
                 float swipePosition = calculateSwipePosition();
                 float scale = arithmetics.getScale(view, true);
@@ -1072,7 +1070,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         arithmetics.getDefaultPivot(Axis.DRAGGING_AXIS, view));
                 arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                         arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
-                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
+                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tabItem.getTag().getPosition());
                 arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view,
                         swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
                                 swipePosition);
@@ -1091,8 +1089,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         };
     }
 
-    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem) {
-        Tag result = null;
+    private void relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem) {
         int addedTabItemIndex = addedTabItem.getIndex();
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
@@ -1126,14 +1123,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             tag.setState(pair.second);
 
             if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                result = tag;
+                tabItem.getView().setTag(R.id.tag_properties, tag);
+                tabItem.setTag(tag);
             } else {
                 float relocatePosition = tag.getPosition();
                 relocate(tabItem, relocatePosition, tag, 0);
             }
         }
-
-        return result;
     }
 
     /**
