@@ -217,7 +217,7 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
      * TabItem} or null, if no next tab is available
      */
     public final TabItem peek() {
-        return getItem(index);
+        return index >= 0 && index < getCount() ? getItem(index) : null;
     }
 
     @Override
