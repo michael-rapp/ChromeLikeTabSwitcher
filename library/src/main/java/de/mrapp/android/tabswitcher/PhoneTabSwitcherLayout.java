@@ -509,7 +509,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setDuration(showSwitcherAnimationDuration);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setListener(
-                new AnimationListenerWrapper(createShowSwitcherAnimationListener(tabItem)));
+                new AnimationListenerWrapper(createUpdateViewAnimationListener(tabItem)));
         arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, scale);
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
         arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
@@ -1088,7 +1088,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
                 arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
                 animateSwipe(tabItem, false, 0, 0, swipeAnimation,
-                        null); // TODO: Update view when animation ends
+                        createUpdateViewAnimationListener(tabItem));
             }
 
         };
@@ -1176,22 +1176,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     /**
      * Creates and returns an animation listener, which allows to update the view, which is used to
-     * visualize a tab, when an animation, which is used to show the tab switcher, has been
-     * finished.
+     * visualize a specific tab, when an animation has been finished.
      *
      * @param tabItem
-     *         The tab item, which has been animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     *         The tab item, which corresponds to the tab, whose view should be updated, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      * @return The animation listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createShowSwitcherAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createUpdateViewAnimationListener(@NonNull final TabItem tabItem) {
         return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
+            public void onAnimationCancel(final Animator animation) {
+                super.onAnimationCancel(animation);
                 updateView(tabItem);
             }
 
