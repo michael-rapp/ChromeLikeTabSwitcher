@@ -1078,6 +1078,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     tag = relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
                 }
 
+                createBottomMarginLayoutListener(tabItem).onGlobalLayout();
                 tabItem.setTag(tag);
                 View view = tabItem.getView();
                 view.setTag(R.id.tag_properties, tag);
