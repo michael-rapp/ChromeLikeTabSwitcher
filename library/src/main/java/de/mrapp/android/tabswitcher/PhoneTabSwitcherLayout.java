@@ -1907,6 +1907,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         while ((tabItem = iterator.next()) != null &&
                 (tabItem.getTag().getState() == State.HIDDEN ||
                         tabItem.getTag().getState() == State.STACKED_START ||
+                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
                         tabItem.getTag().getState() == State.STACKED_END)) {
             float projectedPosition = tabItem.getTag().getPosition();
 
