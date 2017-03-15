@@ -344,7 +344,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getIndex() == getSelectedTabIndex() || tabItem.isVisible()) {
+            if (tabItem.getTab() == getSelectedTab() || tabItem.isVisible()) {
                 viewRecycler.inflate(tabItem);
                 View view = tabItem.getView();
 
@@ -373,11 +373,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem[] tabItems = new TabItem[getCount()];
 
         if (!isEmpty()) {
+            int selectedTabIndex = getSelectedTabIndex();
             AbstractTabItemIterator.Factory factory =
                     new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, dragHandler,
                             tabItems);
-            AbstractTabItemIterator iterator =
-                    factory.create().start(getSelectedTabIndex()).create();
+            AbstractTabItemIterator iterator = factory.create().start(selectedTabIndex).create();
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -386,7 +386,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (tabItem.getIndex() == getCount() - 1) {
                     position = 0;
-                } else if (tabItem.getIndex() == getSelectedTabIndex()) {
+                } else if (tabItem.getIndex() == selectedTabIndex) {
                     position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount());
                 } else {
                     position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
@@ -403,22 +403,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            boolean overshooting = getSelectedTabIndex() == getCount() - 1 ||
-                    dragHandler.isOvershootingAtEnd(factory);
+            boolean overshooting =
+                    selectedTabIndex == getCount() - 1 || dragHandler.isOvershootingAtEnd(factory);
             iterator = factory.create().create();
             float defaultTabSpacing =
                     dragHandler.calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
             TabItem selectedTabItem =
-                    TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex());
+                    TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
             float maxTabSpacing = dragHandler
                     .calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
 
             while ((tabItem = iterator.next()) != null &&
-                    (overshooting || tabItem.getIndex() < getSelectedTabIndex())) {
+                    (overshooting || tabItem.getIndex() < selectedTabIndex)) {
                 float position;
 
                 if (overshooting) {
-                    if (getSelectedTabIndex() > tabItem.getIndex()) {
+                    if (selectedTabIndex > tabItem.getIndex()) {
                         position = maxTabSpacing +
                                 ((getCount() - 1 - tabItem.getIndex() - 1) * defaultTabSpacing);
                     } else {
@@ -427,7 +427,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else {
                     position = dragHandler.getAttachedPosition(false, getTabSwitcher().getCount()) +
                             maxTabSpacing +
-                            ((getSelectedTabIndex() - tabItem.getIndex() - 1) * defaultTabSpacing);
+                            ((selectedTabIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
                 Pair<Float, State> pair = dragHandler
@@ -490,11 +490,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getDefaultPivot(Axis.ORTHOGONAL_AXIS, view));
         float scale = arithmetics.getScale(view, true);
+        int selectedTabIndex = getSelectedTabIndex();
 
-        if (tabItem.getIndex() < getSelectedTabIndex()) {
+        if (tabItem.getIndex() < selectedTabIndex) {
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer));
-        } else if (tabItem.getIndex() > getSelectedTabIndex()) {
+        } else if (tabItem.getIndex() > selectedTabIndex) {
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
                     getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin);
         }
@@ -533,7 +534,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
                 animateHideSwitcher(tabItem);
-            } else if (tabItem.getIndex() == getSelectedTabIndex()) {
+            } else if (tabItem.getTab() == getSelectedTab()) {
                 inflateAndUpdateView(tabItem, createHideSwitcherLayoutListener(tabItem));
             }
         }
@@ -547,10 +548,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The tab item may not be null
      */
     private void animateHideSwitcher(@NonNull final TabItem tabItem) {
+        int selectedTabIndex = getSelectedTabIndex();
         View view = tabItem.getView();
         animateBottomMargin(view, -(tabInset + tabBorderWidth), hideSwitcherAnimationDuration);
-        AnimatorListener listener = tabItem.getIndex() == getSelectedTabIndex() ?
-                createHideSwitcherAnimationListener() : null;
+        AnimatorListener listener =
+                tabItem.getIndex() == selectedTabIndex ? createHideSwitcherAnimationListener() :
+                        null;
         ViewPropertyAnimator animation = view.animate();
         animation.setDuration(hideSwitcherAnimationDuration);
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -561,10 +564,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
                 getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0, false);
 
-        if (tabItem.getIndex() < getSelectedTabIndex()) {
+        if (tabItem.getIndex() < selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     arithmetics.getSize(Axis.DRAGGING_AXIS, getTabSwitcher()), false);
-        } else if (tabItem.getIndex() > getSelectedTabIndex()) {
+        } else if (tabItem.getIndex() > selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin, false);
         } else {
@@ -1215,7 +1218,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 TabItem tabItem;
 
                 while ((tabItem = iterator.next()) != null) {
-                    if (tabItem.getIndex() == getSelectedTabIndex()) {
+                    if (tabItem.getTab() == getSelectedTab()) {
                         Pair<View, Boolean> pair = viewRecycler.inflate(tabItem);
                         View view = pair.first;
                         FrameLayout.LayoutParams layoutParams =
@@ -1256,7 +1259,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 viewRecycler.removeAll();
-                setSelectedTabIndex(-1);
+                setSelectedTab(null);
                 animateToolbarVisibility(isToolbarShown(), 0);
             }
 
@@ -1338,16 +1341,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tab.removeCallback(recyclerAdapter);
 
                 if (isEmpty()) {
-                    setSelectedTabIndex(-1);
+                    setSelectedTab(null);
                     animateToolbarVisibility(isToolbarShown(), 0);
-                } else if (getSelectedTabIndex() == tabItem.getIndex()) {
-                    if (getSelectedTabIndex() > 0) {
-                        setSelectedTabIndex(getSelectedTabIndex() - 1);
+                } else if (getSelectedTab() == tab) {
+                    if (index > 0) {
+                        setSelectedTab(getTab(index - 1));
                     } else {
-                        setSelectedTabIndex(0);
+                        setSelectedTab(getTab(0));
                     }
-                } else if (getSelectedTabIndex() > tabItem.getIndex()) {
-                    setSelectedTabIndex(getSelectedTabIndex() - 1);
                 }
             }
 
@@ -2233,7 +2234,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (animation instanceof RevealAnimation &&
                         ViewCompat.isLaidOut(getTabSwitcher())) {
                     RevealAnimation revealAnimation = (RevealAnimation) animation;
-                    setSelectedTabIndex(index);
+                    setSelectedTab(tab);
                     setSwitcherShown(false);
                     TabItem tabItem = new TabItem(0, tab);
                     inflateView(tabItem,
@@ -2242,22 +2243,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         ViewCompat.isLaidOut(getTabSwitcher())) {
                     SwipeAnimation swipeAnimation = (SwipeAnimation) animation;
 
-                    if (getCount() == 1) {
-                        setSelectedTabIndex(0);
+                    if (getSelectedTab() == null) {
+                        setSelectedTab(tab);
                     }
 
                     TabItem tabItem = new TabItem(index, tab);
                     inflateView(tabItem, createSwipeLayoutListener(tabItem, swipeAnimation));
                 } else {
-                    if (getCount() == 1) {
-                        setSelectedTabIndex(0);
+                    if (getSelectedTab() == null) {
+                        setSelectedTab(tab);
                     }
 
                     if (!isSwitcherShown()) {
                         toolbar.setAlpha(0);
 
-                        if (getSelectedTabIndex() == index &&
-                                ViewCompat.isLaidOut(getTabSwitcher())) {
+                        if (getSelectedTab() == tab && ViewCompat.isLaidOut(getTabSwitcher())) {
                             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
                             inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
                         }
@@ -2288,21 +2288,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     tab.removeCallback(recyclerAdapter);
 
                     if (isEmpty()) {
-                        setSelectedTabIndex(-1);
+                        setSelectedTab(null);
                         toolbar.setAlpha(isToolbarShown() ? 1 : 0);
-                    } else if (getSelectedTabIndex() == index) {
-                        if (getSelectedTabIndex() > 0) {
-                            setSelectedTabIndex(getSelectedTabIndex() - 1);
+                    } else if (getSelectedTab() == tab) {
+                        int selectedTabIndex;
+
+                        if (index > 0) {
+                            selectedTabIndex = setSelectedTab(getTab(index - 1));
                         } else {
-                            setSelectedTabIndex(0);
+                            selectedTabIndex = setSelectedTab(getTab(0));
                         }
 
                         if (ViewCompat.isLaidOut(getTabSwitcher())) {
                             viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler,
-                                    getSelectedTabIndex()));
+                                    selectedTabIndex));
                         }
-                    } else if (getSelectedTabIndex() > tabItem.getIndex()) {
-                        setSelectedTabIndex(getSelectedTabIndex() - 1);
                     }
                 } else {
                     adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
@@ -2338,7 +2338,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     }
 
                     viewRecycler.removeAll();
-                    setSelectedTabIndex(-1);
+                    setSelectedTab(null);
                     toolbar.setAlpha(isToolbarShown() ? 1 : 0);
                 } else {
                     TabItemIterator iterator =
@@ -2411,13 +2411,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void run() {
-                int index = indexOfOrThrowException(tab);
-                setSelectedTabIndex(index);
+                int selectedTabIndex = getSelectedTabIndex();
+                int index = setSelectedTab(tab);
 
                 if (ViewCompat.isLaidOut(getTabSwitcher())) {
                     if (!isSwitcherShown()) {
                         viewRecycler.remove(TabItem
-                                .create(getTabSwitcher(), viewRecycler, getSelectedTabIndex()));
+                                .create(getTabSwitcher(), viewRecycler, selectedTabIndex));
                         viewRecycler.inflate(TabItem.create(getTabSwitcher(), viewRecycler, index));
                     } else {
                         hideSwitcher();
@@ -2456,7 +2456,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             toolbar.setAlpha(isToolbarShown() ? 1 : 0);
-        } else if (getSelectedTabIndex() != -1) {
+        } else if (getSelectedTab() != null) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, getSelectedTabIndex());
             viewRecycler.inflate(tabItem);
         }

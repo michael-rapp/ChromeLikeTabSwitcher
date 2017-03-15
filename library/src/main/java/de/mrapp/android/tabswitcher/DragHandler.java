@@ -665,11 +665,12 @@ public class DragHandler {
     private float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
                                        @NonNull final TabItem tabItem) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), null);
+        int selectedTabIndex = tabSwitcher.getSelectedTabIndex();
 
-        if (tabSwitcher.getSelectedTabIndex() > tabItem.getIndex()) {
+        if (selectedTabIndex > tabItem.getIndex()) {
             AbstractTabItemIterator.AbstractBuilder builder = factory.create();
             AbstractTabItemIterator iterator = builder.create();
-            TabItem selectedTabItem = iterator.getItem(tabSwitcher.getSelectedTabIndex());
+            TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
             float selectedTabSpacing =
                     calculateMaxTabSpacing(tabSwitcher.getCount(), selectedTabItem);
             return (tabSwitcher.getCount() - 2 - tabItem.getIndex()) * defaultMaxTabSpacing +
@@ -808,8 +809,7 @@ public class DragHandler {
     public final float calculateMaxTabSpacing(final int count, @Nullable final TabItem tabItem) {
         ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
                 IllegalStateException.class);
-        return count > 4 && tabItem != null &&
-                tabItem.getIndex() == tabSwitcher.getSelectedTabIndex() ?
+        return count > 4 && tabItem != null && tabItem.getTab() == tabSwitcher.getSelectedTab() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
     }
 

@@ -444,7 +444,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptColor(view, viewHolder, tab);
 
         if (!tabSwitcher.isSwitcherShown()) {
-            if (tabItem.getIndex() == tabSwitcher.getSelectedTabIndex()) {
+            if (tab == tabSwitcher.getSelectedTab()) {
                 addChildView(tabItem);
             }
         } else {

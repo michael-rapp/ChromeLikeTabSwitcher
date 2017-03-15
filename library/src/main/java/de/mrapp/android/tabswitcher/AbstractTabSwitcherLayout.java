@@ -48,7 +48,6 @@ import java.util.Set;
 
 import de.mrapp.android.util.ViewUtil;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -215,9 +214,9 @@ public abstract class AbstractTabSwitcherLayout
     private boolean switcherShown;
 
     /**
-     * The index of the currently selected tab.
+     * The currently selected tab.
      */
-    private int selectedTabIndex;
+    private Tab selectedTab;
 
     /**
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
@@ -330,16 +329,20 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Sets the index of the currently selected tab.
+     * Sets the currently selected tab. If the tab is not contained by the tab switcher, a {@link
+     * NoSuchElementException} is thrown.
      *
-     * @param index
-     *         The index, which should be set, as an {@link Integer} value. The index must be at
-     *         least -1
+     * @param tab
+     *         The tab, which should be set, as an instance of the class {@link Tab} or null, if no
+     *         tab should be selected
+     * @return The index of the selected tab as an {@link Integer} value or -1, if no tab is
+     * selected
      */
-    protected final void setSelectedTabIndex(final int index) {
-        ensureAtLeast(index, -1, "The index must be at least -1");
-        this.selectedTabIndex = index;
-        notifyOnSelectionChanged(index, index != -1 ? getTab(index) : null);
+    protected final int setSelectedTab(@Nullable final Tab tab) {
+        int index = tab != null ? indexOfOrThrowException(tab) : -1;
+        this.selectedTab = tab;
+        notifyOnSelectionChanged(index, tab);
+        return index;
     }
 
     /**
@@ -548,7 +551,7 @@ public abstract class AbstractTabSwitcherLayout
         this.runningAnimations = 0;
         this.decorator = null;
         this.switcherShown = false;
-        this.selectedTabIndex = -1;
+        this.selectedTab = null;
         this.padding = new int[]{0, 0, 0, 0};
     }
 
@@ -676,12 +679,12 @@ public abstract class AbstractTabSwitcherLayout
     @Nullable
     @Override
     public final Tab getSelectedTab() {
-        return getSelectedTabIndex() != -1 ? getTab(getSelectedTabIndex()) : null;
+        return selectedTab;
     }
 
     @Override
     public final int getSelectedTabIndex() {
-        return selectedTabIndex;
+        return selectedTab != null ? indexOf(selectedTab) : -1;
     }
 
     @Override
