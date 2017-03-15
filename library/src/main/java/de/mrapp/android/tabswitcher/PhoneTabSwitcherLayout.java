@@ -1068,6 +1068,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Tag tag = relocateWhenAddingFloatingTab(tabItem);
                 tabItem.setTag(tag);
                 View view = tabItem.getView();
+                view.setTag(R.id.tag_properties, tag);
                 view.setAlpha(swipedTabAlpha);
                 float swipePosition = calculateSwipePosition();
                 float scale = arithmetics.getScale(view, true);
@@ -1095,20 +1096,48 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem) {
-        int index = addedTabItem.getIndex();
+        Tag result = null;
+        int addedTabItemIndex = addedTabItem.getIndex();
         int count = getTabSwitcher().getCount();
+        TabItem tabItem;
         AbstractTabItemIterator iterator =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-        TabItem tabItem = iterator.getItem(index + 1);
-        float position = tabItem.getTag().getPosition();
-        float relocatePosition = position + dragHandler.calculateMaxTabSpacing(count, tabItem);
-        TabItem predecessor = index - 1 >= 0 ? iterator.getItem(index - 1) : null;
-        Pair<Float, State> pair =
-                dragHandler.clipTabPosition(count, index, relocatePosition, predecessor);
-        Tag tag = addedTabItem.getTag();
-        tag.setPosition(pair.first);
-        tag.setState(pair.second);
-        return tag;
+        int selectedTabIndex = getSelectedTabIndex();
+        TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
+        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
+        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
+        TabItem referenceTabItem = iterator.getItem(addedTabItemIndex + 1);
+        float referencePosition = referenceTabItem.getTag().getPosition();
+
+        while ((tabItem = iterator.next()) != null && tabItem.getIndex() <= addedTabItemIndex) {
+            TabItem predecessor = iterator.previous();
+            float position;
+
+            if (selectedTabIndex > tabItem.getIndex() &&
+                    selectedTabIndex <= referenceTabItem.getIndex()) {
+                position = referencePosition + maxTabSpacing +
+                        ((referenceTabItem.getIndex() - tabItem.getIndex() - 1) *
+                                defaultTabSpacing);
+            } else {
+                position = referencePosition +
+                        ((referenceTabItem.getIndex() - tabItem.getIndex()) * defaultTabSpacing);
+            }
+
+            Pair<Float, State> pair =
+                    dragHandler.clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+            Tag tag = tabItem.getTag().clone();
+            tag.setPosition(pair.first);
+            tag.setState(pair.second);
+
+            if (tabItem.getIndex() == addedTabItem.getIndex()) {
+                result = tag;
+            } else {
+                float relocatePosition = tag.getPosition();
+                relocate(tabItem, relocatePosition, tag, 0);
+            }
+        }
+
+        return result;
     }
 
     /**
