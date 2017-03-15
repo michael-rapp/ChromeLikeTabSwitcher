@@ -1061,7 +1061,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
-                relocateWhenAddingFloatingTab(tabItem);
+                int index = tabItem.getIndex();
+                TabItem referenceTabItem =
+                        TabItem.create(getTabSwitcher(), viewRecycler, index + 1);
+                State state = referenceTabItem.getTag().getState();
+
+                if (state == State.STACKED_END) {
+                    throw new UnsupportedOperationException(
+                            "Adding to end stack not supported yet");
+                } else if (state == State.STACKED_START) {
+                    throw new UnsupportedOperationException(
+                            "Adding to start stack not supported yet");
+                } else if (state == State.FLOATING) {
+                    relocateWhenAddingFloatingTab(tabItem, referenceTabItem);
+                } else {
+                    relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
+                }
+
                 View view = tabItem.getView();
                 view.setAlpha(swipedTabAlpha);
                 float swipePosition = calculateSwipePosition();
@@ -1089,8 +1105,27 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         };
     }
 
-    private void relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem) {
+    private void relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
+                                             @NonNull final TabItem referenceTabItem) {
         int addedTabItemIndex = addedTabItem.getIndex();
+        Pair<Float, State> pair;
+
+        if (isStackedAtStart(referenceTabItem.getIndex())) {
+            TabItem predecessor = addedTabItemIndex > 0 ?
+                    TabItem.create(getTabSwitcher(), viewRecycler, addedTabItemIndex - 1) : null;
+            pair = dragHandler
+                    .calculatePositionAndStateWhenStackedAtStart(getCount(), addedTabItemIndex,
+                            predecessor);
+        } else {
+            pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(addedTabItemIndex);
+        }
+
+        addedTabItem.getTag().setPosition(pair.first);
+        addedTabItem.getTag().setState(pair.second);
+    }
+
+    private void relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
+                                               @NonNull final TabItem referenceTabItem) {
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
         AbstractTabItemIterator iterator =
@@ -1099,10 +1134,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
         float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
-        TabItem referenceTabItem = iterator.getItem(addedTabItemIndex + 1);
         float referencePosition = referenceTabItem.getTag().getPosition();
 
-        while ((tabItem = iterator.next()) != null && tabItem.getIndex() <= addedTabItemIndex) {
+        while ((tabItem = iterator.next()) != null &&
+                tabItem.getIndex() <= addedTabItem.getIndex()) {
             TabItem predecessor = iterator.previous();
             float position;
 
@@ -1210,9 +1245,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return new AnimatorListenerAdapter() {
 
             @Override
-            public void onAnimationCancel(final Animator animation) {
-                super.onAnimationCancel(animation);
-                updateView(tabItem);
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+
+                if (tabItem.isVisible()) {
+                    updateView(tabItem);
+                } else {
+                    viewRecycler.remove(tabItem);
+                }
             }
 
         };
