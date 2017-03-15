@@ -1314,12 +1314,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float attachedPosition = dragHandler.getAttachedPosition(true, count);
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
+                State state = tabItem.getTag().getState();
 
-                if (tabItem.getTag().getState() == State.STACKED_END) {
+                if (state == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);
-                } else if (tabItem.getTag().getState() == State.STACKED_START) {
+                } else if (state == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
-                } else {
+                } else if (state == State.FLOATING) {
                     if (count == 4 || count == 3) {
                         relocateWhenRemovingFloatingTabOutOfFourOrFiveTabs(tabItem,
                                 attachedPosition, maxTabSpacing);
@@ -2053,6 +2054,37 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns, whether a hidden tab at a specific index, is part of the stack, which is located at
+     * the start, or not.
+     *
+     * @param index
+     *         The index of the hidden tab, as an {@link Integer} value
+     * @return True, if the hidden tab is part of the stack, which is located at the start, false
+     * otherwise
+     */
+    private boolean isStackedAtStart(final int index) {
+        boolean start = true;
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).start(index + 1)
+                        .create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            State state = tabItem.getTag().getState();
+
+            if (state == State.STACKED_START) {
+                start = true;
+                break;
+            } else if (state == State.FLOATING) {
+                start = false;
+                break;
+            }
+        }
+
+        return start;
+    }
+
+    /**
      * Obtains the view's background from a specific typed array.
      *
      * @param typedArray
@@ -2312,6 +2344,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     if (tabItem.isInflated()) {
                         animateRemove(tabItem, swipeAnimation);
                     } else {
+                        boolean start = isStackedAtStart(index);
+                        TabItem predecessor =
+                                TabItem.create(getTabSwitcher(), viewRecycler, index - 1);
+                        Pair<Float, State> pair = start ? dragHandler
+                                .calculatePositionAndStateWhenStackedAtStart(getCount(), index,
+                                        predecessor) :
+                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(index);
+                        tabItem.getTag().setPosition(pair.first);
+                        tabItem.getTag().setState(pair.second);
                         inflateAndUpdateView(tabItem,
                                 createRemoveLayoutListener(tabItem, swipeAnimation));
                     }
