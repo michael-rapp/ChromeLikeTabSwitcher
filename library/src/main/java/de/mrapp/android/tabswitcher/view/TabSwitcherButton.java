@@ -20,8 +20,8 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
+import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
-import android.widget.ImageButton;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
@@ -39,7 +39,7 @@ import de.mrapp.android.util.ViewUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcherButton extends ImageButton implements TabSwitcherListener {
+public class TabSwitcherButton extends AppCompatImageButton implements TabSwitcherListener {
 
     private TabSwitcherDrawable drawable;
 
@@ -67,15 +67,6 @@ public class TabSwitcherButton extends ImageButton implements TabSwitcherListene
                              @Nullable final AttributeSet attributeSet,
                              @AttrRes final int defaultStyleAttribute) {
         super(context, attributeSet, defaultStyleAttribute);
-        initialize();
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public TabSwitcherButton(@NonNull final Context context,
-                             @Nullable final AttributeSet attributeSet,
-                             @AttrRes final int defaultStyleAttribute,
-                             @StyleRes final int defaultStyleResource) {
-        super(context, attributeSet, defaultStyleAttribute, defaultStyleResource);
         initialize();
     }
 
