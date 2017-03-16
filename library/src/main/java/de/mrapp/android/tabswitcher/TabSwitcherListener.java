@@ -93,7 +93,10 @@ public interface TabSwitcherListener {
      * @param tabSwitcher
      *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The tab
      *         switcher may not be null
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs have been removed
      */
-    void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher);
+    void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher, @NonNull Tab[] tabs);
 
 }

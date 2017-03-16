@@ -37,7 +37,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -283,13 +282,14 @@ public abstract class AbstractTabSwitcherLayout
      * Removes all tabs from the list, which contains the tabs,w hich are contained by the tab
      * switcher.
      *
-     * @return A collection, which contains the tabs, which have been removed, as an instance of the
-     * type {@link Collection} or an empty collection, if no tabs have been removed
+     * @return An array, which contains the tabs, which have been removed, as an array of the type
+     * {@link Tab} or an empty array, if no tabs have been removed
      */
-    protected final Collection<Tab> clearTabsInternal() {
-        Collection<Tab> result = new ArrayList<>(tabs);
+    protected final Tab[] clearTabsInternal() {
+        Tab[] result = new Tab[tabs.size()];
+        tabs.toArray(result);
         tabs.clear();
-        notifyOnAllTabsRemoved();
+        notifyOnAllTabsRemoved(result);
         return result;
     }
 
@@ -446,10 +446,14 @@ public abstract class AbstractTabSwitcherLayout
 
     /**
      * Notifies all listeners, that all tabs have been removed from the tab switcher.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs have been removed
      */
-    private void notifyOnAllTabsRemoved() {
+    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs) {
         for (TabSwitcherListener listener : listeners) {
-            listener.onAllTabsRemoved(tabSwitcher);
+            listener.onAllTabsRemoved(tabSwitcher, tabs);
         }
     }
 

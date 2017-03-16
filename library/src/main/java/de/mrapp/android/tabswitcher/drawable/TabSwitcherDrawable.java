@@ -166,7 +166,8 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
     }
 
     @Override
-    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
+                                       @NonNull final Tab[] tab) {
         update(tabSwitcher.getCount());
     }
 

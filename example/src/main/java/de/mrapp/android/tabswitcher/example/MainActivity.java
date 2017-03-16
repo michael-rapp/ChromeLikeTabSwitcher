@@ -147,12 +147,13 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
-    private OnClickListener createUndoSnackbarListener() {
+    private OnClickListener createUndoSnackbarListener(final int index,
+                                                       @NonNull final Tab... tabs) {
         return new OnClickListener() {
 
             @Override
             public void onClick(final View view) {
-
+                tabSwitcher.addTab(tabs[0], index);
             }
 
         };
@@ -228,14 +229,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                                    @NonNull final Tab tab) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo, createUndoSnackbarListener()).show();
+                .setAction(R.string.undo, createUndoSnackbarListener(index, tab)).show();
     }
 
     @Override
-    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
+                                       @NonNull final Tab[] tabs) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo, createUndoSnackbarListener()).show();
+                .setAction(R.string.undo, createUndoSnackbarListener(0, tabs)).show();
     }
 
     @Override

@@ -113,8 +113,9 @@ public class TabSwitcherButton extends ImageButton implements TabSwitcherListene
     }
 
     @Override
-    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher) {
-        drawable.onAllTabsRemoved(tabSwitcher);
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
+                                       @NonNull final Tab[] tabs) {
+        drawable.onAllTabsRemoved(tabSwitcher, tabs);
     }
 
 }
