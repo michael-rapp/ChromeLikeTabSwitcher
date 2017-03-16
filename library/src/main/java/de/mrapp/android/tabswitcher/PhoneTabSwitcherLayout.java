@@ -1224,13 +1224,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 pair = dragHandler
                         .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
             } else {
-
                 TabItem successor = iterator.previous();
                 float successorPosition = successor.getTag().getPosition();
-                float spacing = dragHandler.calculateMaxTabSpacing(count, successor);
                 float position = (attachedPosition * (successorPosition + minTabSpacing)) /
-                        (minTabSpacing + attachedPosition - spacing);
-
+                        (minTabSpacing + attachedPosition - currentTabSpacing);
                 pair = dragHandler
                         .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
 
