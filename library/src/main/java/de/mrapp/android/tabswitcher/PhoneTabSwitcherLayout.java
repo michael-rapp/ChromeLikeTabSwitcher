@@ -1061,8 +1061,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
+                int count = getCount();
+                dragHandler.getAttachedPosition(true, count);
+                float maxTabSpacing = calculateMaxTabSpacing(count);
+                dragHandler.setMaxTabSpacing(maxTabSpacing);
                 int index = tabItem.getIndex();
-                TabItem referenceTabItem = index < getCount() - 1 ?
+                TabItem referenceTabItem = index < count - 1 ?
                         TabItem.create(getTabSwitcher(), viewRecycler, index + 1) : null;
                 State state =
                         referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
