@@ -1192,30 +1192,54 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
         AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(addedTabItem.getIndex()).reverse(true).create();
         int selectedTabIndex = getSelectedTabIndex();
         TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
         float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
+        float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
+        float attachedPosition = dragHandler.getAttachedPosition(false, count);
+        TabItem currentReferenceTabItem = referenceTabItem;
         float referencePosition = referenceTabItem.getTag().getPosition();
+        int referenceIndex = referenceTabItem.getIndex();
 
-        while ((tabItem = iterator.next()) != null &&
-                tabItem.getIndex() <= addedTabItem.getIndex()) {
-            TabItem predecessor = iterator.previous();
-            float position;
+        while ((tabItem = iterator.next()) != null) {
+            TabItem predecessor = iterator.peek();
+            Pair<Float, State> pair;
+            float currentTabSpacing =
+                    dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
 
-            if (selectedTabIndex > tabItem.getIndex() &&
-                    selectedTabIndex <= referenceTabItem.getIndex()) {
-                position = referencePosition + maxTabSpacing +
-                        ((referenceTabItem.getIndex() - tabItem.getIndex() - 1) *
-                                defaultTabSpacing);
+            if (referencePosition >= attachedPosition - currentTabSpacing) {
+                float position;
+
+                if (selectedTabIndex > tabItem.getIndex() && selectedTabIndex <= referenceIndex) {
+                    position = referencePosition + maxTabSpacing +
+                            ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
+                } else {
+                    position = referencePosition +
+                            ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
+                }
+
+                pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
             } else {
-                position = referencePosition +
-                        ((referenceTabItem.getIndex() - tabItem.getIndex()) * defaultTabSpacing);
-            }
 
-            Pair<Float, State> pair =
-                    dragHandler.clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                TabItem successor = iterator.previous();
+                float successorPosition = successor.getTag().getPosition();
+                float spacing = dragHandler.calculateMaxTabSpacing(count, successor);
+                float position = (attachedPosition * (successorPosition + minTabSpacing)) /
+                        (minTabSpacing + attachedPosition - spacing);
+
+                pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+
+                if (pair.first >= attachedPosition - currentTabSpacing) {
+                    currentReferenceTabItem = tabItem;
+                    referencePosition = pair.first;
+                    referenceIndex = tabItem.getIndex();
+                }
+            }
 
             if (tabItem.getIndex() == addedTabItem.getIndex()) {
                 result.setPosition(pair.first);
@@ -1225,6 +1249,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
                 relocate(tabItem, tag.getPosition(), tag, 0);
+            }
+
+            if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
+                dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+                break;
             }
         }
 
