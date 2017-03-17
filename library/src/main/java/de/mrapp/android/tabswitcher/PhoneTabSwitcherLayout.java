@@ -217,7 +217,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private AttachedViewRecycler<TabItem, Integer> viewRecycler;
 
     /**
-     * The drag hander, which is used to calculate the positions of tabs.
+     * The drag handler, which is used to calculate the positions of tabs.
      */
     private DragHandler dragHandler;
 
@@ -1113,151 +1113,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         };
     }
 
-    @NonNull
-    private Tag relocateWhenAddingStackedTab(final boolean start,
-                                             @NonNull final TabItem addedTabItem) {
-        dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
-        int count = getTabSwitcher().getCount();
-        Tag result = addedTabItem.getTag();
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
-                        .start(addedTabItem.getIndex()).reverse(start).create();
-        TabItem tabItem;
-
-        while ((tabItem = iterator.next()) != null &&
-                (tabItem.getTag().getState() == State.STACKED_START ||
-                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
-                        tabItem.getTag().getState() == State.STACKED_END ||
-                        tabItem.getTag().getState() == State.HIDDEN)) {
-            TabItem predecessor = iterator.peek();
-            Pair<Float, State> pair = start ? dragHandler
-                    .calculatePositionAndStateWhenStackedAtStart(count, tabItem.getIndex(),
-                            predecessor) :
-                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-
-            if (start && predecessor != null && predecessor.getTag().getState() == State.FLOATING) {
-                float predecessorPosition = predecessor.getTag().getPosition();
-                float distance = predecessorPosition - pair.first;
-
-                if (distance > dragHandler.calculateMinTabSpacing(count)) {
-                    float position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
-                    pair = dragHandler
-                            .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-                }
-            }
-
-            if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                result.setPosition(pair.first);
-                result.setState(pair.second);
-            } else {
-                Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
-                tag.setState(pair.second);
-                relocate(tabItem, tag.getPosition(), tag, 0);
-            }
-
-            if (pair.second == State.HIDDEN) {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    @NonNull
-    private Tag relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
-                                            @NonNull final TabItem referenceTabItem) {
-        int addedTabItemIndex = addedTabItem.getIndex();
-        Pair<Float, State> pair;
-
-        if (isStackedAtStart(referenceTabItem.getIndex())) {
-            TabItem predecessor = addedTabItemIndex > 0 ?
-                    TabItem.create(getTabSwitcher(), viewRecycler, addedTabItemIndex - 1) : null;
-            pair = dragHandler
-                    .calculatePositionAndStateWhenStackedAtStart(getCount(), addedTabItemIndex,
-                            predecessor);
-        } else {
-            pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(addedTabItemIndex);
-        }
-
-        Tag tag = addedTabItem.getTag();
-        tag.setPosition(pair.first);
-        tag.setState(pair.second);
-        return tag;
-    }
-
-    @NonNull
-    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
-                                              @NonNull final TabItem referenceTabItem) {
-        Tag result = addedTabItem.getTag();
-        int count = getTabSwitcher().getCount();
-        TabItem tabItem;
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
-                        .start(addedTabItem.getIndex()).reverse(true).create();
-        int selectedTabIndex = getSelectedTabIndex();
-        TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
-        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
-        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
-        float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
-        float attachedPosition = dragHandler.getAttachedPosition(false, count);
-        TabItem currentReferenceTabItem = referenceTabItem;
-        float referencePosition = referenceTabItem.getTag().getPosition();
-        int referenceIndex = referenceTabItem.getIndex();
-
-        while ((tabItem = iterator.next()) != null) {
-            TabItem predecessor = iterator.peek();
-            Pair<Float, State> pair;
-            float currentTabSpacing =
-                    dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
-
-            if (referencePosition >= attachedPosition - currentTabSpacing) {
-                float position;
-
-                if (selectedTabIndex > tabItem.getIndex() && selectedTabIndex <= referenceIndex) {
-                    position = referencePosition + maxTabSpacing +
-                            ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
-                } else {
-                    position = referencePosition +
-                            ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
-                }
-
-                pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-            } else {
-                TabItem successor = iterator.previous();
-                float successorPosition = successor.getTag().getPosition();
-                float position = (attachedPosition * (successorPosition + minTabSpacing)) /
-                        (minTabSpacing + attachedPosition - currentTabSpacing);
-                pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-
-                if (pair.first >= attachedPosition - currentTabSpacing) {
-                    currentReferenceTabItem = tabItem;
-                    referencePosition = pair.first;
-                    referenceIndex = tabItem.getIndex();
-                }
-            }
-
-            if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                result.setPosition(pair.first);
-                result.setState(pair.second);
-            } else {
-                Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
-                tag.setState(pair.second);
-                relocate(tabItem, tag.getPosition(), tag, 0);
-            }
-
-            if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
-                dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
-                break;
-            }
-        }
-
-        return result;
-    }
-
     /**
      * Creates and returns a layout listener, which allows to adapt the bottom margin of a tab, once
      * its view has been inflated.
@@ -2030,6 +1885,188 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             previousProjectedPosition = projectedPosition;
         }
+    }
+
+    /**
+     * Relocates all previous tabs, when a floating tab has been added and more than four tabs are
+     * contained by the tab switcher.
+     *
+     * @param addedTabItem
+     *         The tab item, which corresponds to the tab, which has been added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param referenceTabItem
+     *         The tab item, which corresponds to the successor of the tab, which has been added, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
+     * The tag may not be null
+     */
+    @NonNull
+    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
+                                              @NonNull final TabItem referenceTabItem) {
+        Tag result = addedTabItem.getTag();
+        int count = getTabSwitcher().getCount();
+        TabItem tabItem;
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(addedTabItem.getIndex()).reverse(true).create();
+        int selectedTabIndex = getSelectedTabIndex();
+        TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
+        float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
+        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
+        float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
+        float attachedPosition = dragHandler.getAttachedPosition(false, count);
+        TabItem currentReferenceTabItem = referenceTabItem;
+        float referencePosition = referenceTabItem.getTag().getPosition();
+        int referenceIndex = referenceTabItem.getIndex();
+
+        while ((tabItem = iterator.next()) != null) {
+            TabItem predecessor = iterator.peek();
+            Pair<Float, State> pair;
+            float currentTabSpacing =
+                    dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
+
+            if (referencePosition >= attachedPosition - currentTabSpacing) {
+                float position;
+
+                if (selectedTabIndex > tabItem.getIndex() && selectedTabIndex <= referenceIndex) {
+                    position = referencePosition + maxTabSpacing +
+                            ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
+                } else {
+                    position = referencePosition +
+                            ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
+                }
+
+                pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+            } else {
+                TabItem successor = iterator.previous();
+                float successorPosition = successor.getTag().getPosition();
+                float position = (attachedPosition * (successorPosition + minTabSpacing)) /
+                        (minTabSpacing + attachedPosition - currentTabSpacing);
+                pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+
+                if (pair.first >= attachedPosition - currentTabSpacing) {
+                    currentReferenceTabItem = tabItem;
+                    referencePosition = pair.first;
+                    referenceIndex = tabItem.getIndex();
+                }
+            }
+
+            if (tabItem.getIndex() == addedTabItem.getIndex()) {
+                result.setPosition(pair.first);
+                result.setState(pair.second);
+            } else {
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                relocate(tabItem, tag.getPosition(), tag, 0);
+            }
+
+            if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
+                dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Relocates all neighboring tabs, when a stacked tab has been added.
+     *
+     * @param start
+     *         True, if the added tab was part of the stack, which is located at the start, false,
+     *         if it was part of the stack, which is located at the end
+     * @param addedTabItem
+     *         The tab item, which corresponds to the tab, which has been added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
+     * The tag may not be null
+     */
+    @NonNull
+    private Tag relocateWhenAddingStackedTab(final boolean start,
+                                             @NonNull final TabItem addedTabItem) {
+        dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+        int count = getTabSwitcher().getCount();
+        Tag result = addedTabItem.getTag();
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(addedTabItem.getIndex()).reverse(start).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null &&
+                (tabItem.getTag().getState() == State.STACKED_START ||
+                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
+                        tabItem.getTag().getState() == State.STACKED_END ||
+                        tabItem.getTag().getState() == State.HIDDEN)) {
+            TabItem predecessor = iterator.peek();
+            Pair<Float, State> pair = start ? dragHandler
+                    .calculatePositionAndStateWhenStackedAtStart(count, tabItem.getIndex(),
+                            predecessor) :
+                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+
+            if (start && predecessor != null && predecessor.getTag().getState() == State.FLOATING) {
+                float predecessorPosition = predecessor.getTag().getPosition();
+                float distance = predecessorPosition - pair.first;
+
+                if (distance > dragHandler.calculateMinTabSpacing(count)) {
+                    float position = dragHandler.calculateNonLinearPosition(tabItem, predecessor);
+                    pair = dragHandler
+                            .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                }
+            }
+
+            if (tabItem.getIndex() == addedTabItem.getIndex()) {
+                result.setPosition(pair.first);
+                result.setState(pair.second);
+            } else {
+                Tag tag = tabItem.getTag().clone();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                relocate(tabItem, tag.getPosition(), tag, 0);
+            }
+
+            if (pair.second == State.HIDDEN) {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculates the position and state of a hidden tab, which has been added.
+     *
+     * @param addedTabItem
+     *         The tab item, which corresponds to the tab, which has been added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param referenceTabItem
+     *         The tab item, which corresponds to the successor of the tab, which has been added, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
+     * The tag may not be null
+     */
+    @NonNull
+    private Tag relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
+                                            @NonNull final TabItem referenceTabItem) {
+        int addedTabItemIndex = addedTabItem.getIndex();
+        Pair<Float, State> pair;
+
+        if (isStackedAtStart(referenceTabItem.getIndex())) {
+            TabItem predecessor = addedTabItemIndex > 0 ?
+                    TabItem.create(getTabSwitcher(), viewRecycler, addedTabItemIndex - 1) : null;
+            pair = dragHandler
+                    .calculatePositionAndStateWhenStackedAtStart(getCount(), addedTabItemIndex,
+                            predecessor);
+        } else {
+            pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(addedTabItemIndex);
+        }
+
+        Tag tag = addedTabItem.getTag();
+        tag.setPosition(pair.first);
+        tag.setState(pair.second);
+        return tag;
     }
 
     /**
