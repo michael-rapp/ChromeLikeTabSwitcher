@@ -1071,8 +1071,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
                 int index = tabItem.getIndex();
-                TabItem referenceTabItem = index < count - 1 ?
-                        TabItem.create(getTabSwitcher(), viewRecycler, index + 1) : null;
+                boolean referencePredecessor = index > 0;
+                int referenceIndex =
+                        referencePredecessor ? index - 1 : (index < count - 1 ? index + 1 : -1);
+                TabItem referenceTabItem = referenceIndex != -1 ?
+                        TabItem.create(getTabSwitcher(), viewRecycler, referenceIndex) : null;
                 State state =
                         referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
                 Tag tag;
@@ -1081,9 +1084,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     tag = relocateWhenAddingStackedTab(true, tabItem);
                 } else if (state == State.STACKED_END) {
                     tag = relocateWhenAddingStackedTab(false, tabItem);
-                } else if (state == State.FLOATING ||
-                        (state == State.STACKED_START_ATOP && referenceTabItem.getIndex() != 0)) {
-                    tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem);
+                } else if (state == State.FLOATING) {
+                    tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem,
+                            referencePredecessor);
                 } else {
                     tag = relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
                 }
@@ -1900,14 +1903,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The tab item, which corresponds to the tab, which has been added, as an instance of
      *         the class {@link TabItem}. The tab item may not be null
      * @param referenceTabItem
-     *         The tab item, which corresponds to the successor of the tab, which has been added, as
-     *         an instance of the class {@link TabItem}. The tab item may not be null
+     *         The tab item, which corresponds to the tab, which is used as a reference, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param referencePredecessor
+     *         True, if the tab, which is used as a reference, is the predecessor of the added tab,
+     *         false if it is the successor
      * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
      * The tag may not be null
      */
     @NonNull
     private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
-                                              @NonNull final TabItem referenceTabItem) {
+                                              @NonNull final TabItem referenceTabItem,
+                                              final boolean referencePredecessor) {
         Tag result = addedTabItem.getTag();
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
@@ -1930,7 +1937,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             float currentTabSpacing =
                     dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
 
-            if (referencePosition >= attachedPosition - currentTabSpacing) {
+            if (referencePredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
+                pair = dragHandler
+                        .clipTabPosition(count, tabItem.getIndex(), referencePosition, predecessor);
+                currentReferenceTabItem = tabItem;
+                referencePosition = pair.first;
+                referenceIndex = tabItem.getIndex();
+            } else if (referencePosition >= attachedPosition - currentTabSpacing) {
                 float position;
 
                 if (selectedTabIndex > tabItem.getIndex() && selectedTabIndex <= referenceIndex) {
@@ -2047,8 +2060,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The tab item, which corresponds to the tab, which has been added, as an instance of
      *         the class {@link TabItem}. The tab item may not be null
      * @param referenceTabItem
-     *         The tab item, which corresponds to the successor of the tab, which has been added, as
-     *         an instance of the class {@link TabItem}. The tab item may not be null
+     *         The tab item, which corresponds to the tab, which is used as a reference, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
      * The tag may not be null
      */
