@@ -147,16 +147,25 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
-    private OnClickListener createUndoSnackbarListener(final int index,
+    private OnClickListener createUndoSnackbarListener(@NonNull final Snackbar snackbar,
+                                                       final int index,
                                                        @NonNull final Tab... tabs) {
         return new OnClickListener() {
 
             @Override
             public void onClick(final View view) {
+                snackbar.setAction(null, null);
                 tabSwitcher.addTab(tabs[0], index);
             }
 
         };
+    }
+
+    private void showUndoSnackbar(@NonNull final CharSequence text, final int index,
+                                  @NonNull final Tab... tabs) {
+        Snackbar snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.undo, createUndoSnackbarListener(snackbar, index, tabs));
+        snackbar.show();
     }
 
     @NonNull
@@ -228,16 +237,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
                                    @NonNull final Tab tab) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
-        Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo, createUndoSnackbarListener(index, tab)).show();
+        showUndoSnackbar(text, index, tab);
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
                                        @NonNull final Tab[] tabs) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
-        Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG)
-                .setAction(R.string.undo, createUndoSnackbarListener(0, tabs)).show();
+        showUndoSnackbar(text, 0, tabs);
     }
 
     @Override
