@@ -142,6 +142,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final int stackedTabSpacing;
 
     /**
+     * The maximum camera distance, when tilting a tab, in pixels.
+     */
+    private final int maxCameraDistance;
+
+    /**
      * The alpha of a tab, when it is swiped.
      */
     private final float swipedTabAlpha;
@@ -2175,7 +2180,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             View view = tabItem.getView();
 
             if (tabItem.getIndex() == 0) {
-                view.setCameraDistance(getMaxCameraDistance());
+                view.setCameraDistance(maxCameraDistance);
                 arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                         arithmetics.getPivotOnOvershootStart(Axis.DRAGGING_AXIS, view));
                 arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
@@ -2194,7 +2199,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The angle, the tabs should be rotated by, in degrees as a {@link Float} value
      */
     private void tiltOnEndOvershoot(final float angle) {
-        float maxCameraDistance = getMaxCameraDistance();
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
         TabItemIterator iterator =
@@ -2227,16 +2231,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 arithmetics.setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             }
         }
-    }
-
-    /**
-     * Returns the maximum camera distance.
-     *
-     * @return The maximum camera distance in pixels as a {@link Float} value
-     */
-    private float getMaxCameraDistance() {
-        float density = getContext().getResources().getDisplayMetrics().density;
-        return density * 1280;
     }
 
     /**
@@ -2325,6 +2319,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        maxCameraDistance = resources.getDimensionPixelSize(R.dimen.max_camera_distance);
         TypedValue typedValue = new TypedValue();
         resources.getValue(R.dimen.swiped_tab_scale, typedValue, true);
         swipedTabScale = typedValue.getFloat();
