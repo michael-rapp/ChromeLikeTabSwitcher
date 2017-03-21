@@ -32,7 +32,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Tab;
@@ -231,10 +230,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     public final void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher,
                                          final int selectedTabIndex,
                                          @Nullable final Tab selectedTab) {
-        if (selectedTab != null) {
-            CharSequence text = getString(R.string.selection_changed_toast, selectedTab.getTitle());
-            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-        }
+
     }
 
     @Override
