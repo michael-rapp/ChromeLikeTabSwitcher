@@ -147,6 +147,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final int maxCameraDistance;
 
     /**
+     * The maximum swipe distance of non-closeable tabs in pixels.
+     */
+    private final int maxSwipeDistance;
+
+    /**
      * The alpha of a tab, when it is swiped.
      */
     private final float swipedTabAlpha;
@@ -2135,18 +2140,28 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         tabItem.getTag().setClosing(true);
-        arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
-        arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
-                arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-        float scale = arithmetics.getScale(view, true);
-        arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view, distance);
-        float ratio = 1 - (Math.abs(distance) / calculateSwipePosition());
-        float scaledClosedTabScale = swipedTabScale * scale;
-        float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
-        arithmetics.setScale(Axis.DRAGGING_AXIS, view, targetScale);
-        arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
-        view.setAlpha(swipedTabAlpha + ratio * (1 - swipedTabAlpha));
+        float dragDistance;
+
+        if (tabItem.getTab().isCloseable()) {
+            dragDistance = distance;
+            arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                    arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+            arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                    arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
+            float scale = arithmetics.getScale(view, true);
+            float ratio = 1 - (Math.abs(dragDistance) / calculateSwipePosition());
+            float scaledClosedTabScale = swipedTabScale * scale;
+            float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
+            arithmetics.setScale(Axis.DRAGGING_AXIS, view, targetScale);
+            arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
+            view.setAlpha(swipedTabAlpha + ratio * (1 - swipedTabAlpha));
+        } else {
+            float maxDistance = tabInset / 2f;
+            float ratio = Math.abs(distance) / (float) maxSwipeDistance;
+            dragDistance = Math.max(Math.min(ratio * distance, maxDistance), -maxDistance);
+        }
+
+        arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
     }
 
     /**
@@ -2333,6 +2348,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         maxCameraDistance = resources.getDimensionPixelSize(R.dimen.max_camera_distance);
+        maxSwipeDistance = resources.getDimensionPixelSize(R.dimen.max_swipe_distance);
         TypedValue typedValue = new TypedValue();
         resources.getValue(R.dimen.swiped_tab_scale, typedValue, true);
         swipedTabScale = typedValue.getFloat();

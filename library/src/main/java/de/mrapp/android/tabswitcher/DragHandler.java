@@ -1286,7 +1286,7 @@ public class DragHandler {
                     swipeDragHelper.hasThresholdBeenReached()) {
                 TabItem tabItem = getFocusedTabView(factory, dragHelper.getDragStartPosition());
 
-                if (tabItem != null && tabItem.getTab().isCloseable()) {
+                if (tabItem != null) {
                     swipedTabItem = tabItem;
                 }
             }
@@ -1342,7 +1342,7 @@ public class DragHandler {
         if (swipedTabItem != null) {
             float swipeVelocity = 0;
 
-            if (event != null && velocityTracker != null) {
+            if (event != null && velocityTracker != null && swipedTabItem.getTab().isCloseable()) {
                 int pointerId = event.getPointerId(0);
                 velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
                 swipeVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));

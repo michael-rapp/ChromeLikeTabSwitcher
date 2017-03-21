@@ -23,6 +23,7 @@ License.
     <dimen name="end_overshoot_pivot">128dp</dimen>
     <dimen name="stacked_tab_spacing">4dp</dimen>
     <dimen name="max_overshoot_distance">48dp</dimen>
+    <dimen name="max_swipe_distance">1024dp</dimen>
     <dimen name="max_camera_distance">1280dp</dimen>
     <dimen name="min_swipe_velocity">1024dp</dimen>
     <dimen name="drag_threshold">8dp</dimen>
