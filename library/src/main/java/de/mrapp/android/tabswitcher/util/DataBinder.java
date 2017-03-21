@@ -55,7 +55,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.14.0
  */
-public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends View, ParamType>
+public abstract class DataBinder<DataType, KeyType, ViewType extends View, ParamType>
         extends Handler {
 
     /**
@@ -327,7 +327,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         The context, which should be used by the data binder, as an instance of the class
      *         {@link Context}. The context may not be null
      */
-    public AbstractDataBinder(@NonNull final Context context) {
+    public DataBinder(@NonNull final Context context) {
         this(context, Executors.newCachedThreadPool());
     }
 
@@ -343,8 +343,7 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         The executor service, which should be used to manage asynchronous tasks, as an
      *         instance of the type {@link ExecutorService}. The executor service may not be null
      */
-    public AbstractDataBinder(@NonNull final Context context,
-                              @NonNull final ExecutorService threadPool) {
+    public DataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool) {
         this(context, threadPool, new LruCache<KeyType, DataType>(CACHE_SIZE));
     }
 
@@ -361,8 +360,8 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         The LRU cache, which should be used to cache already loaded data, as an instance of
      *         the class {@link LruCache}. The cache may not be null
      */
-    public AbstractDataBinder(@NonNull final Context context,
-                              @NonNull final LruCache<KeyType, DataType> cache) {
+    public DataBinder(@NonNull final Context context,
+                      @NonNull final LruCache<KeyType, DataType> cache) {
         this(context, Executors.newCachedThreadPool(), cache);
     }
 
@@ -380,9 +379,8 @@ public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends Vie
      *         The LRU cache, which should be used to cache already loaded data, as an instance of
      *         the class {@link LruCache}. The cache may not be null
      */
-    public AbstractDataBinder(@NonNull final Context context,
-                              @NonNull final ExecutorService threadPool,
-                              @NonNull final LruCache<KeyType, DataType> cache) {
+    public DataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool,
+                      @NonNull final LruCache<KeyType, DataType> cache) {
         ensureNotNull(context, "The context may not be null");
         ensureNotNull(threadPool, "The executor service may not be null");
         ensureNotNull(cache, "The cache may not be null");
