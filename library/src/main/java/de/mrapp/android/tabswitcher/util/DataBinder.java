@@ -23,7 +23,9 @@ import android.support.v4.util.LruCache;
 import android.view.View;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +59,76 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  */
 public abstract class DataBinder<DataType, KeyType, ViewType extends View, ParamType>
         extends Handler {
+
+    /**
+     * Defines the interface, a class, which should be notified about the progress of a {@link
+     * DataBinder} must implement.
+     *
+     * @param <DataType>
+     *         The type of the data, which is bound to views
+     * @param <KeyType>
+     *         The type of the keys, which allow to uniquely identify already loaded data
+     * @param <ViewType>
+     *         The type of the views, which are used to display data
+     * @param <ParamType>
+     *         The type of parameters, which can be passed when loading data
+     */
+    public interface Listener<DataType, KeyType, ViewType extends View, ParamType> {
+
+        /**
+         * The method, which is invoked, when the data binder starts to load data asynchronously.
+         *
+         * @param dataBinder
+         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         binder may not be null
+         * @param key
+         *         The key of the data, which should be loaded, as an instance of the generic type
+         *         KeyType. The key may not be null
+         * @param params
+         *         An array, which contains optional parameters, as an array of the type ParamType
+         *         or an empty array, if no parameters should be used
+         * @return True, if the loading the data should be proceeded, false otherwise. When
+         * returning false, the method gets invoked repeatedly until true is returned.
+         */
+        @SuppressWarnings("unchecked")
+        boolean onLoadData(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
+                           @NonNull KeyType key, @NonNull ParamType... params);
+
+        /**
+         * The method, which is invoked, when the data binder shows data, which has been loaded
+         * either asynchronously or from cache.
+         *
+         * @param dataBinder
+         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         binder may not be null
+         * @param key
+         *         The key of the data, which has be loaded, as an instance of the generic type
+         *         KeyType. The key may not be null
+         * @param data
+         *         The data, which has been loaded, as an instance of the generic type DataType or
+         *         null, if no data has been loaded
+         * @param view
+         *         The view, which is used to display the data, as an instance of the generic type
+         *         ViewType. The view may not be null
+         * @param params
+         *         An array, which contains optional parameters, as an array of the type ParamType
+         *         or an empty array, if no parameters should be used
+         */
+        @SuppressWarnings("unchecked")
+        void onFinished(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
+                        @NonNull final KeyType key, @Nullable DataType data,
+                        @NonNull final ViewType view, @NonNull final ParamType... params);
+
+        /**
+         * The method, which is invoked, when the data binder has been canceled.
+         *
+         * @param dataBinder
+         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         binder may not be null
+         */
+        void onCanceled(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder);
+
+    }
 
     /**
      * A task, which encapsulates all information, which is required to asynchronously load data and
@@ -133,6 +205,12 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
     private final Logger logger;
 
     /**
+     * A set, which contains the listeners, which are notified about the progress of the data
+     * binder.
+     */
+    private final Set<Listener<DataType, KeyType, ViewType, ParamType>> listeners;
+
+    /**
      * A LRU cache, which is used to cache already loaded data.
      */
     private final LruCache<KeyType, DataType> cache;
@@ -162,6 +240,70 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      * True, if data should be cached, false otherwise.
      */
     private boolean useCache;
+
+    /**
+     * Notifies all listeners, that the data binder starts to load data asynchronously.
+     *
+     * @param key
+     *         The key of the data, which should be loaded, as an instance of the generic type
+     *         KeyType. The key may not be null
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     * @return True, if loading the data should be proceeded, false otherwise
+     */
+    @SafeVarargs
+    private final boolean notifyOnLoad(@NonNull final KeyType key,
+                                       @NonNull final ParamType... params) {
+        synchronized (listeners) {
+            boolean result = true;
+
+            for (Listener<DataType, KeyType, ViewType, ParamType> listener : listeners) {
+                result &= listener.onLoadData(this, key, params);
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the data binder is showing data, which has been loaded either
+     * asynchronously or from cache.
+     *
+     * @param key
+     *         The key of the data, which has be loaded, as an instance of the generic type KeyType.
+     *         The key may not be null
+     * @param data
+     *         The data, which has been loaded, as an instance of the generic type DataType or null,
+     *         if no data has been loaded
+     * @param view
+     *         The view, which is used to display the data, as an instance of the generic type
+     *         ViewType. The view may not be null
+     * @param params
+     *         An array, which contains optional parameters, as an array of the type ParamType or an
+     *         empty array, if no parameters should be used
+     */
+    @SafeVarargs
+    private final void notifyOnFinished(@NonNull final KeyType key, @Nullable final DataType data,
+                                        @NonNull final ViewType view,
+                                        @NonNull final ParamType... params) {
+        synchronized (listeners) {
+            for (Listener<DataType, KeyType, ViewType, ParamType> listener : listeners) {
+                listener.onFinished(this, key, data, view, params);
+            }
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the data binder has been canceled.
+     */
+    private void notifyOnCanceled() {
+        synchronized (listeners) {
+            for (Listener<DataType, KeyType, ViewType, ParamType> listener : listeners) {
+                listener.onCanceled(this);
+            }
+        }
+    }
 
     /**
      * Returns the data, which corresponds to a specific key, from the cache.
@@ -211,6 +353,14 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
             @Override
             public void run() {
                 if (!isCanceled()) {
+                    while (!notifyOnLoad(task.key, task.params)) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
+
                     task.result = loadData(task);
                     Message message = Message.obtain();
                     message.obj = task;
@@ -386,6 +536,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
         ensureNotNull(cache, "The cache may not be null");
         this.context = context;
         this.logger = new Logger(LogLevel.INFO);
+        this.listeners = new LinkedHashSet<>();
         this.cache = cache;
         this.views = Collections.synchronizedMap(new WeakHashMap<ViewType, KeyType>());
         this.threadPool = threadPool;
@@ -425,6 +576,39 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      */
     public final void setLogLevel(@NonNull final LogLevel logLevel) {
         logger.setLogLevel(logLevel);
+    }
+
+    /**
+     * Adds a new listener, which should be notified about the events of the data binder.
+     *
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link Listener}. The
+     *         listener may not be null
+     */
+    public final void addListener(
+            @NonNull final Listener<DataType, KeyType, ViewType, ParamType> listener) {
+        ensureNotNull(listener, "The listener may not be null");
+
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a specific listener, which should not be notified about the events of the data
+     * binder, anymore.
+     *
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link Listener}.
+     *         The listener may not be null
+     */
+    public final void removeListener(
+            @NonNull final Listener<DataType, KeyType, ViewType, ParamType> listener) {
+        ensureNotNull(listener, "The listener may not be null");
+
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
     }
 
     /**
@@ -477,6 +661,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
         if (!isCanceled()) {
             if (data != null) {
                 onPostExecute(view, data, params);
+                notifyOnFinished(key, data, view, params);
                 logger.logInfo(getClass(), "Loaded data with key " + key + " from cache");
             } else {
                 onPreExecute(view, params);
@@ -487,6 +672,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
                 } else {
                     data = loadData(task);
                     onPostExecute(view, data, params);
+                    notifyOnFinished(key, data, view, params);
                 }
             }
         }
@@ -497,6 +683,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      */
     public final void cancel() {
         setCanceled(true);
+        notifyOnCanceled();
         logger.logInfo(getClass(), "Canceled to load data");
     }
 
@@ -576,6 +763,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
 
             if (key != null && key.equals(task.key)) {
                 onPostExecute(task.view, task.result, task.params);
+                notifyOnFinished(task.key, task.result, task.view, task.params);
             } else {
                 logger.logVerbose(getClass(),
                         "Data with key " + task.key + " not displayed. View has been recycled");
