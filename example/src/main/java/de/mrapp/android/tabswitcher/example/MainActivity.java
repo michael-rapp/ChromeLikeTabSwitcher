@@ -84,6 +84,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
      */
     private TabSwitcher tabSwitcher;
 
+    /**
+     * The activity's snackbar.
+     */
+    private Snackbar snackbar;
+
     private OnApplyWindowInsetsListener createWindowInsetsListener() {
         return new OnApplyWindowInsetsListener() {
 
@@ -155,7 +160,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public void onClick(final View view) {
                 snackbar.setAction(null, null);
-                tabSwitcher.addTab(tabs[0], index);
+
+                if (tabSwitcher.isSwitcherShown()) {
+                    tabSwitcher.addTab(tabs[0], index);
+                }
             }
 
         };
@@ -163,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
     private void showUndoSnackbar(@NonNull final CharSequence text, final int index,
                                   @NonNull final Tab... tabs) {
-        Snackbar snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG);
+        snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG);
         snackbar.setAction(R.string.undo, createUndoSnackbarListener(snackbar, index, tabs));
         snackbar.show();
     }
@@ -214,7 +222,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
     @Override
     public final void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher) {
-
+        if (snackbar != null) {
+            snackbar.dismiss();
+        }
     }
 
     @Override
