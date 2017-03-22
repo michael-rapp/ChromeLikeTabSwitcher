@@ -17,7 +17,7 @@ import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
+import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 

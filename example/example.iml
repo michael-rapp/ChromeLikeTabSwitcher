@@ -95,10 +95,10 @@
     <orderEntry type="jdk" jdkName="Android API 25 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="design-25.3.0" level="project" />
-    <orderEntry type="library" exported="" name="android-util-1.14.0" level="project" />
     <orderEntry type="library" exported="" name="transition-25.3.0" level="project" />
     <orderEntry type="library" exported="" name="support-compat-25.3.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.3.0" level="project" />
+    <orderEntry type="library" exported="" name="android-util-1.15.0" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-25.3.0" level="project" />
     <orderEntry type="library" exported="" name="support-core-ui-25.3.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-25.3.0" level="project" />

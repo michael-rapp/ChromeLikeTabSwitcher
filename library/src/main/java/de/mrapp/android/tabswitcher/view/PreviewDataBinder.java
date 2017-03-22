@@ -29,8 +29,8 @@ import android.widget.ImageView;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
+import de.mrapp.android.util.multithreading.AbstractDataBinder;
+import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 

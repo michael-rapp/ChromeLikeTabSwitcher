@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.util.AbstractViewRecycler;
+import de.mrapp.android.util.view.AbstractViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 

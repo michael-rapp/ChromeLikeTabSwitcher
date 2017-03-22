@@ -55,13 +55,13 @@ import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.tabswitcher.view.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.TabViewHolder;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.view.AttachedViewRecycler;
+import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;

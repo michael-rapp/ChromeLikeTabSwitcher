@@ -40,10 +40,10 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.AbstractViewRecycler;
-import de.mrapp.android.tabswitcher.util.AttachedViewRecycler;
-import de.mrapp.android.tabswitcher.util.ViewRecycler;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.view.AbstractViewRecycler;
+import de.mrapp.android.util.view.AttachedViewRecycler;
+import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
