@@ -29,7 +29,7 @@ import android.widget.ImageView;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.tabswitcher.util.DataBinder;
+import de.mrapp.android.tabswitcher.util.AbstractDataBinder;
 import de.mrapp.android.tabswitcher.util.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -41,7 +41,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class PreviewDataBinder extends DataBinder<Bitmap, Tab, ImageView, TabItem> {
+public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> {
 
     /**
      * The tab switcher, the tabs belong to.

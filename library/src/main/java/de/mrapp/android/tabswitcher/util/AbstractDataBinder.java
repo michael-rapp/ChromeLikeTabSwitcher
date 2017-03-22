@@ -57,12 +57,12 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.14.0
  */
-public abstract class DataBinder<DataType, KeyType, ViewType extends View, ParamType>
+public abstract class AbstractDataBinder<DataType, KeyType, ViewType extends View, ParamType>
         extends Handler {
 
     /**
      * Defines the interface, a class, which should be notified about the progress of a {@link
-     * DataBinder} must implement.
+     * AbstractDataBinder} must implement.
      *
      * @param <DataType>
      *         The type of the data, which is bound to views
@@ -79,7 +79,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
          * The method, which is invoked, when the data binder starts to load data asynchronously.
          *
          * @param dataBinder
-         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         The observed data binder as an instance of the class {@link AbstractDataBinder}. The data
          *         binder may not be null
          * @param key
          *         The key of the data, which should be loaded, as an instance of the generic type
@@ -91,7 +91,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
          * returning false, the method gets invoked repeatedly until true is returned.
          */
         @SuppressWarnings("unchecked")
-        boolean onLoadData(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
+        boolean onLoadData(@NonNull AbstractDataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
                            @NonNull KeyType key, @NonNull ParamType... params);
 
         /**
@@ -99,7 +99,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
          * either asynchronously or from cache.
          *
          * @param dataBinder
-         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         The observed data binder as an instance of the class {@link AbstractDataBinder}. The data
          *         binder may not be null
          * @param key
          *         The key of the data, which has be loaded, as an instance of the generic type
@@ -115,7 +115,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
          *         or an empty array, if no parameters should be used
          */
         @SuppressWarnings("unchecked")
-        void onFinished(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
+        void onFinished(@NonNull AbstractDataBinder<DataType, KeyType, ViewType, ParamType> dataBinder,
                         @NonNull final KeyType key, @Nullable DataType data,
                         @NonNull final ViewType view, @NonNull final ParamType... params);
 
@@ -123,10 +123,10 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
          * The method, which is invoked, when the data binder has been canceled.
          *
          * @param dataBinder
-         *         The observed data binder as an instance of the class {@link DataBinder}. The data
+         *         The observed data binder as an instance of the class {@link AbstractDataBinder}. The data
          *         binder may not be null
          */
-        void onCanceled(@NonNull DataBinder<DataType, KeyType, ViewType, ParamType> dataBinder);
+        void onCanceled(@NonNull AbstractDataBinder<DataType, KeyType, ViewType, ParamType> dataBinder);
 
     }
 
@@ -477,7 +477,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      *         The context, which should be used by the data binder, as an instance of the class
      *         {@link Context}. The context may not be null
      */
-    public DataBinder(@NonNull final Context context) {
+    public AbstractDataBinder(@NonNull final Context context) {
         this(context, Executors.newCachedThreadPool());
     }
 
@@ -493,7 +493,7 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      *         The executor service, which should be used to manage asynchronous tasks, as an
      *         instance of the type {@link ExecutorService}. The executor service may not be null
      */
-    public DataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool) {
+    public AbstractDataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool) {
         this(context, threadPool, new LruCache<KeyType, DataType>(CACHE_SIZE));
     }
 
@@ -510,8 +510,8 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      *         The LRU cache, which should be used to cache already loaded data, as an instance of
      *         the class {@link LruCache}. The cache may not be null
      */
-    public DataBinder(@NonNull final Context context,
-                      @NonNull final LruCache<KeyType, DataType> cache) {
+    public AbstractDataBinder(@NonNull final Context context,
+                              @NonNull final LruCache<KeyType, DataType> cache) {
         this(context, Executors.newCachedThreadPool(), cache);
     }
 
@@ -529,8 +529,8 @@ public abstract class DataBinder<DataType, KeyType, ViewType extends View, Param
      *         The LRU cache, which should be used to cache already loaded data, as an instance of
      *         the class {@link LruCache}. The cache may not be null
      */
-    public DataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool,
-                      @NonNull final LruCache<KeyType, DataType> cache) {
+    public AbstractDataBinder(@NonNull final Context context, @NonNull final ExecutorService threadPool,
+                              @NonNull final LruCache<KeyType, DataType> cache) {
         ensureNotNull(context, "The context may not be null");
         ensureNotNull(threadPool, "The executor service may not be null");
         ensureNotNull(cache, "The cache may not be null");
