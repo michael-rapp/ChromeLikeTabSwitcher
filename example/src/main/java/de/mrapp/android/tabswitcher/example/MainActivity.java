@@ -272,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     @Override
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
