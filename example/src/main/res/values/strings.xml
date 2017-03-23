@@ -24,5 +24,6 @@ License.
     <string name="removed_tab_snackbar">Removed %1$s</string>
     <string name="cleared_tabs_snackbar">Removed all tabs</string>
     <string name="undo">Undo</string>
+    <string name="edit_text_hint">Text</string>
 
 </resources>
