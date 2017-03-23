@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         public View onInflateView(@NonNull final LayoutInflater inflater,
                                   @Nullable final ViewGroup parent, final int viewType) {
             View view;
+
             if (viewType == 0) {
                 view = inflater.inflate(R.layout.tab_text_view, parent, false);
             } else {
