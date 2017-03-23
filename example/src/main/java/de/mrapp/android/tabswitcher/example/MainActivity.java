@@ -47,6 +47,8 @@ import de.mrapp.android.tabswitcher.TabSwitcherListener;
  */
 public class MainActivity extends AppCompatActivity implements TabSwitcherListener {
 
+    private static final String VIEW_TYPE_EXTRA = MainActivity.class.getName() + "::ViewType";
+
     public final class Decorator extends TabSwitcherDecorator {
 
         @NonNull
@@ -92,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
         @Override
         public int getViewType(@NonNull final Tab tab, final int index) {
-            return index % 2;
+            Bundle parameters = tab.getParameters();
+            return parameters != null ? parameters.getInt(VIEW_TYPE_EXTRA) : 0;
         }
 
     }
@@ -235,6 +238,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         CharSequence title = getString(R.string.tab_title, index + 1);
         Tab tab = new Tab(title);
         tab.setIcon(R.drawable.ic_file_outline_18dp);
+        Bundle parameters = new Bundle();
+        parameters.putInt(VIEW_TYPE_EXTRA, index % 2);
+        tab.setParameters(parameters);
         return tab;
     }
 
