@@ -1342,16 +1342,17 @@ public class DragHandler {
         if (swipedTabItem != null) {
             float swipeVelocity = 0;
 
-            if (event != null && velocityTracker != null && swipedTabItem.getTab().isCloseable()) {
+            if (event != null && velocityTracker != null) {
                 int pointerId = event.getPointerId(0);
                 velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
                 swipeVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));
             }
 
             View view = swipedTabItem.getView();
-            boolean remove = swipeVelocity >= minSwipeVelocity ||
-                    Math.abs(arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view)) >
-                            arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f;
+            boolean remove = swipedTabItem.getTab().isCloseable() &&
+                    (swipeVelocity >= minSwipeVelocity ||
+                            Math.abs(arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view)) >
+                                    arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f);
             notifyOnSwipeEnded(swipedTabItem, remove,
                     swipeVelocity > minSwipeVelocity ? swipeVelocity : 0);
             swipedTabItem = null;
