@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         @Override
         public void onShowTab(@NonNull final Context context,
                               @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
-                              @NonNull final Tab tab, final int viewType) {
+                              @NonNull final Tab tab, final int index, final int viewType) {
             TextView textView = findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
             Toolbar toolbar = findViewById(R.id.toolbar);

@@ -36,14 +36,16 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     public final View onInflateView(@NonNull final LayoutInflater inflater,
                                     @Nullable final ViewGroup parent, @NonNull final Tab item,
                                     final int viewType, @NonNull final Void... params) {
-        return decorator.inflateView(inflater, parent, item);
+        int index = tabSwitcher.indexOf(item);
+        return decorator.inflateView(inflater, parent, item, index);
     }
 
     @Override
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
                                  @NonNull final Tab item, final boolean inflated,
                                  @NonNull final Void... params) {
-        decorator.applyDecorator(context, tabSwitcher, view, item);
+        int index = tabSwitcher.indexOf(item);
+        decorator.applyDecorator(context, tabSwitcher, view, item, index);
     }
 
     @Override
@@ -53,7 +55,8 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
 
     @Override
     public final int getViewType(@NonNull final Tab item) {
-        return decorator.getViewType(item);
+        int index = tabSwitcher.indexOf(item);
+        return decorator.getViewType(item, index);
     }
 
 }

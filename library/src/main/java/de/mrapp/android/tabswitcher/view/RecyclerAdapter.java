@@ -125,7 +125,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         viewHolder.previewImageView.setVisibility(View.GONE);
         viewHolder.previewImageView.setImageBitmap(null);
         viewHolder.borderView.setVisibility(View.GONE);
-        tabSwitcher.getDecorator().applyDecorator(tabSwitcher.getContext(), tabSwitcher, view, tab);
+        tabSwitcher.getDecorator().applyDecorator(tabSwitcher.getContext(), tabSwitcher, view, tab,
+                tabItem.getIndex());
     }
 
     /**
