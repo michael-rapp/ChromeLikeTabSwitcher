@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -71,11 +72,30 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         @Override
         public void onShowTab(@NonNull final Context context,
                               @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
-                              @NonNull final Tab tab, final int index, final int viewType) {
+                              @NonNull final Tab tab, final int index, final int viewType,
+                              @Nullable final Bundle savedInstanceState) {
             TextView textView = findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
             Toolbar toolbar = findViewById(R.id.toolbar);
             toolbar.setVisibility(tabSwitcher.isSwitcherShown() ? View.GONE : View.VISIBLE);
+
+            if (viewType != 0) {
+                EditText editText = findViewById(android.R.id.edit);
+                editText.setText(
+                        savedInstanceState != null ? savedInstanceState.getCharSequence("text") :
+                                null);
+                editText.requestFocus();
+            }
+        }
+
+        @Override
+        public void onSaveInstanceState(@NonNull final View view, @NonNull final Tab tab,
+                                        final int index, final int viewType,
+                                        @NonNull final Bundle outState) {
+            if (viewType != 0) {
+                EditText editText = findViewById(android.R.id.edit);
+                outState.putCharSequence("text", editText.getText());
+            }
         }
 
         @Override

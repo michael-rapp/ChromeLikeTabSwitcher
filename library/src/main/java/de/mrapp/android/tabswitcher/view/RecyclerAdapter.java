@@ -109,28 +109,24 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         TabViewHolder viewHolder = tabItem.getViewHolder();
         View view = viewHolder.child;
         Tab tab = tabItem.getTab();
-        boolean inflated = false;
 
         if (view == null) {
             ViewGroup parent = viewHolder.childContainer;
-            Pair<View, Boolean> pair = childViewRecycler.inflate(tab, parent);
+            Pair<View, ?> pair = childViewRecycler.inflate(tab, parent);
             view = pair.first;
-            inflated = pair.second;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
                     tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
             parent.addView(view, 0, layoutParams);
             viewHolder.child = view;
+        } else {
+            childViewRecycler.getAdapter().onShowView(tabSwitcher.getContext(), view, tab, false);
         }
 
         viewHolder.previewImageView.setVisibility(View.GONE);
         viewHolder.previewImageView.setImageBitmap(null);
         viewHolder.borderView.setVisibility(View.GONE);
-
-        if (!inflated) {
-            childViewRecycler.getAdapter().onShowView(tabSwitcher.getContext(), view, tab, false);
-        }
     }
 
     /**
@@ -141,13 +137,16 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         instance of the class {@link TabItem}. The tab item may not be null
      */
     private void renderChildView(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
         TabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.borderView.setVisibility(View.VISIBLE);
-        boolean async = viewHolder.child == null;
-        dataBinder.load(tabItem.getTab(), viewHolder.previewImageView, async, tabItem);
 
-        if (!async) {
-            removeChildView(viewHolder);
+        if (viewHolder.child != null) {
+            childViewRecycler.getAdapter().onRemoveView(viewHolder.child, tab);
+            dataBinder.load(tab, viewHolder.previewImageView, false, tabItem);
+            removeChildView(viewHolder, tab);
+        } else {
+            dataBinder.load(tab, viewHolder.previewImageView, tabItem);
         }
     }
 
@@ -157,13 +156,17 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
      *         class {@link TabViewHolder}. The view holder may not be null
+     * @param tab
+     *         The tab, whose child should be removed, as an instance of the class {@link Tab}. The
+     *         tab may not be null
      */
-    private void removeChildView(@NonNull final TabViewHolder viewHolder) {
+    private void removeChildView(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
         if (viewHolder.childContainer.getChildCount() > 2) {
             viewHolder.childContainer.removeViewAt(0);
         }
 
         viewHolder.child = null;
+        childViewRecycler.remove(tab);
     }
 
     /**
@@ -460,7 +463,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Override
     public final void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
-        removeChildView(viewHolder);
+        removeChildView(viewHolder, tabItem.getTab());
 
         if (!dataBinder.isCached(tabItem.getTab())) {
             Drawable drawable = viewHolder.previewImageView.getDrawable();

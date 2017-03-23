@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -72,10 +73,38 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
      *         The index of the tab, which should be visualized, as an {@link Integer} value
      * @param viewType
      *         The view type of the tab, which should be visualized, as an {@link Integer} value
+     * @param savedInstanceState
+     *         The bundle, which has previously been used to save the state of the view as an
+     *         instance of the class {@link Bundle} or null, if no saved state is available
      */
     public abstract void onShowTab(@NonNull final Context context,
                                    @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
-                                   @NonNull final Tab tab, final int index, final int viewType);
+                                   @NonNull final Tab tab, final int index, final int viewType,
+                                   @Nullable final Bundle savedInstanceState);
+
+    /**
+     * The method, which is invoked, when the view, which is used to visualize a tab, is removed.
+     * The purpose of this method is to save the current state of the tab in a bundle.
+     *
+     * @param view
+     *         The view, which is used to visualize the tab, as an instance of the class {@link
+     *         View}
+     * @param tab
+     *         The tab, whose state should be saved, as an instance of the class {@link Tab}. The
+     *         tab may not be null
+     * @param index
+     *         The index of the tab, whose state should be saved, as an {@link Integer} value
+     * @param viewType
+     *         The view type of the tab, whose state should be saved, as an {@link Integer} value
+     * @param outState
+     *         The bundle, the state of the tab should be saved to, as an instance of the class
+     *         {@link Bundle}. The bundle may not be null
+     */
+    public void onSaveInstanceState(@NonNull final View view, @NonNull final Tab tab,
+                                    final int index, final int viewType,
+                                    @NonNull final Bundle outState) {
+
+    }
 
     /**
      * Returns the view type, which corresponds to a specific tab. For each layout, which is
@@ -150,14 +179,44 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
      *         may not be null
      * @param index
      *         The index of the tab, which should be visualized, as an {@link Integer} value
+     * @param savedInstanceState
+     *         The bundle, which has previously been used to save the state of the view as an
+     *         instance of the class {@link Bundle} or null, if no saved state is available
      */
     public final void applyDecorator(@NonNull final Context context,
                                      @NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final View view, @NonNull final Tab tab,
-                                     final int index) {
+                                     final int index, @Nullable final Bundle savedInstanceState) {
         setCurrentParentView(view);
         int viewType = getViewType(tab, index);
-        onShowTab(context, tabSwitcher, view, tab, index, viewType);
+        onShowTab(context, tabSwitcher, view, tab, index, viewType, savedInstanceState);
+    }
+
+    /**
+     * The method, which is invoked by a {@link TabSwitcher} to save the current state of a tab. It
+     * initializes the view holder pattern, which is provided by the decorator and then delegates
+     * the method call to the decorator's custom implementation of the method
+     * <code>onSaveInstanceState(...):void</code>.
+     *
+     * @param view
+     *         The view, which is used to visualize the tab, as an instance of the class {@link
+     *         View}
+     * @param tab
+     *         The tab, whose state should be saved, as an instance of the class {@link Tab}. The
+     *         tab may not be null
+     * @param index
+     *         The index of the tab, whose state should be saved, as an {@link Integer} value
+     * @return The bundle, which has been used to save the state, as an instance of the class {@link
+     * Bundle}. The bundle may not be null
+     */
+    @NonNull
+    public final Bundle saveInstanceState(@NonNull final View view, @NonNull final Tab tab,
+                                          final int index) {
+        setCurrentParentView(view);
+        int viewType = getViewType(tab, index);
+        Bundle outState = new Bundle();
+        onSaveInstanceState(view, tab, index, viewType, outState);
+        return outState;
     }
 
 }

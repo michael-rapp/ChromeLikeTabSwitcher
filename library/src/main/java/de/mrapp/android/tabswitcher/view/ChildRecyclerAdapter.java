@@ -1,11 +1,15 @@
 package de.mrapp.android.tabswitcher.view;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -23,12 +27,15 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
 
     private final TabSwitcherDecorator decorator;
 
+    private final Map<Tab, Bundle> savedInstanceStates;
+
     public ChildRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(decorator, "The decorator may not be null");
         this.tabSwitcher = tabSwitcher;
         this.decorator = decorator;
+        this.savedInstanceStates = new HashMap<>();
     }
 
     @NonNull
@@ -45,7 +52,15 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
                                  @NonNull final Tab item, final boolean inflated,
                                  @NonNull final Void... params) {
         int index = tabSwitcher.indexOf(item);
-        decorator.applyDecorator(context, tabSwitcher, view, item, index);
+        Bundle savedInstanceState = savedInstanceStates.get(item);
+        decorator.applyDecorator(context, tabSwitcher, view, item, index, savedInstanceState);
+    }
+
+    @Override
+    public final void onRemoveView(@NonNull final View view, @NonNull final Tab item) {
+        int index = tabSwitcher.indexOf(item);
+        Bundle outState = decorator.saveInstanceState(view, item, index);
+        savedInstanceStates.put(item, outState);
     }
 
     @Override
