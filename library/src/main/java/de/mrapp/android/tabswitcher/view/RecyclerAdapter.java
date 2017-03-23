@@ -109,11 +109,13 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         TabViewHolder viewHolder = tabItem.getViewHolder();
         View view = viewHolder.child;
         Tab tab = tabItem.getTab();
+        boolean inflated = false;
 
         if (view == null) {
             ViewGroup parent = viewHolder.childContainer;
-            Pair<View, ?> pair = childViewRecycler.inflate(tab, parent);
+            Pair<View, Boolean> pair = childViewRecycler.inflate(tab, parent);
             view = pair.first;
+            inflated = pair.second;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             layoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
@@ -125,8 +127,10 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         viewHolder.previewImageView.setVisibility(View.GONE);
         viewHolder.previewImageView.setImageBitmap(null);
         viewHolder.borderView.setVisibility(View.GONE);
-        tabSwitcher.getDecorator().applyDecorator(tabSwitcher.getContext(), tabSwitcher, view, tab,
-                tabItem.getIndex());
+
+        if (!inflated) {
+            childViewRecycler.getAdapter().onShowView(tabSwitcher.getContext(), view, tab, false);
+        }
     }
 
     /**
