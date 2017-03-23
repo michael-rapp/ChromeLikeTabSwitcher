@@ -396,4 +396,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         layout.setTabBackgroundColor(color);
     }
 
+    @Override
+    public final int getTabTitleTextColor() {
+        return layout.getTabTitleTextColor();
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@ColorInt final int color) {
+        layout.setTabTitleTextColor(color);
+    }
+
 }

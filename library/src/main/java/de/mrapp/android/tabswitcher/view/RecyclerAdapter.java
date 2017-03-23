@@ -258,7 +258,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     /**
-     * Adapts the color of a tab.
+     * Adapts the background color of a tab.
      *
      * @param view
      *         The view, which is used to visualize the tab, as an instance of the class {@link
@@ -267,18 +267,36 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         The view holder, which stores references to the tab's views, as an instance of the
      *         class {@link TabViewHolder}. The view holder may not be null
      * @param tab
-     *         The icon, whose color should be adapted, as an instance of the class {@link Tab}. The
-     *         tab may not be null
+     *         The tab, whose background color should be adapted, as an instance of the class {@link
+     *         Tab}. The tab may not be null
      */
-    private void adaptColor(@NonNull final View view, @NonNull final TabViewHolder viewHolder,
-                            @NonNull final Tab tab) {
-        int color = tab.getColor();
+    private void adaptBackgroundColor(@NonNull final View view,
+                                      @NonNull final TabViewHolder viewHolder,
+                                      @NonNull final Tab tab) {
+        int color = tab.getBackgroundColor();
         Drawable background = view.getBackground();
         background.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
                 PorterDuff.Mode.MULTIPLY);
         Drawable border = viewHolder.borderView.getBackground();
         border.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
                 PorterDuff.Mode.MULTIPLY);
+    }
+
+    /**
+     * Adapts the text color of a tab's title.
+     *
+     * @param viewHolder
+     *         The view holder, which stores references to the tab's views, as an instance of the
+     *         class {@link TabViewHolder}. The view holder may not be null
+     * @param tab
+     *         The tab, whose text color should be adapted, as an instance of the class {@link Tab}.
+     *         The tab may not be null
+     */
+    private void adaptTitleTextColor(@NonNull final TabViewHolder viewHolder,
+                                     @NonNull final Tab tab) {
+        int color = tab.getTitleTextColor();
+        viewHolder.titleTextView
+                .setTextColor(color != -1 ? color : tabSwitcher.getTabTitleTextColor());
     }
 
     /**
@@ -449,7 +467,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptTitle(viewHolder, tab);
         adaptIcon(viewHolder, tab);
         adaptCloseButton(viewHolder, tab);
-        adaptColor(view, viewHolder, tab);
+        adaptBackgroundColor(view, viewHolder, tab);
+        adaptTitleTextColor(viewHolder, tab);
 
         if (!tabSwitcher.isSwitcherShown()) {
             if (tab == tabSwitcher.getSelectedTab()) {
@@ -511,11 +530,20 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     @Override
-    public final void onColorChanged(@NonNull final Tab tab) {
+    public final void onBackgroundColorChanged(@NonNull final Tab tab) {
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptColor(tabItem.getView(), tabItem.getViewHolder(), tabItem.getTab());
+            adaptBackgroundColor(tabItem.getView(), tabItem.getViewHolder(), tabItem.getTab());
+        }
+    }
+
+    @Override
+    public final void onTitleTextColorChanged(@NonNull final Tab tab) {
+        TabItem tabItem = getTabItem(tab);
+
+        if (tabItem != null) {
+            adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
         }
     }
 

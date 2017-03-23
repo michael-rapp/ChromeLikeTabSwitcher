@@ -223,9 +223,14 @@ public abstract class AbstractTabSwitcherLayout
     private int[] padding;
 
     /**
-     * The background color of tabs;
+     * The background color of a tab;
      */
     private int tabBackgroundColor;
+
+    /**
+     * The text color of a tab's title.
+     */
+    private int tabTitleTextColor;
 
     /**
      * Returns the tab switcher, the layout belongs to.
@@ -531,13 +536,22 @@ public abstract class AbstractTabSwitcherLayout
                                              final int bottom);
 
     /**
-     * The method, which is invoked on implementing subclasses, when the background colors of tabs
+     * The method, which is invoked on implementing subclasses, when the background color of a tab
      * has been changed.
      *
      * @param color
      *         The color, which has been set, as an {@link Integer} value
      */
     protected abstract void onTabBackgroundColorChanged(@ColorInt final int color);
+
+    /**
+     * The method, which is invoked on implementing subclasses, when the text color of a tab's title
+     * has been changed.
+     *
+     * @param color
+     *         The color, which has been set, as an {@link Integer} value
+     */
+    protected abstract void onTabTitleColorChanged(@ColorInt final int color);
 
     /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher}.
@@ -793,6 +807,17 @@ public abstract class AbstractTabSwitcherLayout
     public final void setTabBackgroundColor(@ColorInt final int color) {
         this.tabBackgroundColor = color;
         onTabBackgroundColorChanged(color);
+    }
+
+    @Override
+    public final int getTabTitleTextColor() {
+        return tabTitleTextColor;
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@ColorInt final int color) {
+        this.tabTitleTextColor = color;
+        onTabTitleColorChanged(color);
     }
 
 }

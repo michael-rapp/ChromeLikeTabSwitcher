@@ -450,19 +450,35 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
     int getPaddingEnd();
 
     /**
-     * Returns the background color of tabs.
+     * Returns the background color of a tab.
      *
-     * @return The background color of tabs as an {@link Integer} value
+     * @return The background color of a tab as an {@link Integer} value
      */
     @ColorInt
     int getTabBackgroundColor();
 
     /**
-     * Sets the background color of tabs.
+     * Sets the background color of a tab.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value
      */
     void setTabBackgroundColor(@ColorInt int color);
+
+    /**
+     * Returns the text color of a tab's title.
+     *
+     * @return The text color of a tab's title as an {@link Integer} value
+     */
+    @ColorInt
+    int getTabTitleTextColor();
+
+    /**
+     * Sets the text color of a tab's title.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    void setTabTitleTextColor(@ColorInt int color);
 
 }

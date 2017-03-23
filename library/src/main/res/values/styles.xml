@@ -20,7 +20,7 @@ License.
         <item name="android:ellipsize">marquee</item>
         <item name="android:maxLines">1</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/tab_title_color</item>
+        <item name="android:textColor">@color/tab_title_text_color</item>
     </style>
 
 </resources>

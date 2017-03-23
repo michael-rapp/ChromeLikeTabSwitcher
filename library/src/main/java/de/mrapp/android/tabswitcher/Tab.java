@@ -96,13 +96,22 @@ public class Tab implements Parcelable {
         void onCloseableChanged(@NonNull Tab tab);
 
         /**
-         * The method, which is invoked, when the tab's color has been changed.
+         * The method, which is invoked, when the tab's background color has been changed.
          *
          * @param tab
          *         The observed tab as an instance of the class {@link Tab}. The tab may not be
          *         null
          */
-        void onColorChanged(@NonNull Tab tab);
+        void onBackgroundColorChanged(@NonNull Tab tab);
+
+        /**
+         * The method, which is invoked, when the text color of the tab's title has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
+         */
+        void onTitleTextColorChanged(@NonNull Tab tab);
 
     }
 
@@ -133,9 +142,14 @@ public class Tab implements Parcelable {
     private boolean closeable;
 
     /**
-     * The tab's color.
+     * The background color of the tab.
      */
-    private int color;
+    private int backgroundColor;
+
+    /**
+     * The text color of the tab's title.
+     */
+    private int titleTextColor;
 
     /**
      * Optional parameters, which are associated with the tab.
@@ -170,11 +184,20 @@ public class Tab implements Parcelable {
     }
 
     /**
-     * Notifies all callbacks, that the tab's color has been changed.
+     * Notifies all callbacks, that the background color of the tab has been changed.
      */
-    private void notifyOnColorChanged() {
+    private void notifyOnBackgroundColorChanged() {
         for (Callback callback : callbacks) {
-            callback.onColorChanged(this);
+            callback.onBackgroundColorChanged(this);
+        }
+    }
+
+    /**
+     * Notifies all callbacks, that the text color of the tab has been changed.
+     */
+    private void notifyOnTitleTextColorChanged() {
+        for (Callback callback : callbacks) {
+            callback.onTitleTextColorChanged(this);
         }
     }
 
@@ -190,7 +213,8 @@ public class Tab implements Parcelable {
         this.iconId = source.readInt();
         this.iconBitmap = source.readParcelable(getClass().getClassLoader());
         this.closeable = source.readInt() > 0;
-        this.color = source.readInt();
+        this.backgroundColor = source.readInt();
+        this.titleTextColor = source.readInt();
         this.parameters = source.readBundle(getClass().getClassLoader());
     }
 
@@ -206,7 +230,8 @@ public class Tab implements Parcelable {
         this.closeable = true;
         this.iconId = -1;
         this.iconBitmap = null;
-        this.color = -1;
+        this.backgroundColor = -1;
+        this.titleTextColor = -1;
         this.parameters = null;
     }
 
@@ -328,25 +353,49 @@ public class Tab implements Parcelable {
     }
 
     /**
-     * Returns the tab's color.
+     * Returns the background color of the tab.
      *
-     * @return The tab's color as an {@link Integer} value or -1, if no custom color is set
+     * @return The background color of the tab as an {@link Integer} value or -1, if no custom color
+     * is set
      */
     @ColorInt
-    public final int getColor() {
-        return color;
+    public final int getBackgroundColor() {
+        return backgroundColor;
     }
 
     /**
-     * Sets the tab's color.
+     * Sets the tab's background color.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value or -1, if no custom color
      *         should be set
      */
-    public final void setColor(@ColorInt final int color) {
-        this.color = color;
-        notifyOnColorChanged();
+    public final void setBackgroundColor(@ColorInt final int color) {
+        this.backgroundColor = color;
+        notifyOnBackgroundColorChanged();
+    }
+
+    /**
+     * Returns the text color of the tab's title.
+     *
+     * @return The text color of the tab's title as an {@link Integer} value or -1, if no custom
+     * color is set
+     */
+    @ColorInt
+    public final int getTitleTextColor() {
+        return titleTextColor;
+    }
+
+    /**
+     * Sets the text color of the tab's title.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if no custom color
+     *         should be set
+     */
+    public final void setTitleTextColor(@ColorInt final int color) {
+        this.titleTextColor = color;
+        notifyOnTitleTextColorChanged();
     }
 
     /**
@@ -409,7 +458,8 @@ public class Tab implements Parcelable {
         parcel.writeInt(iconId);
         parcel.writeParcelable(iconBitmap, flags);
         parcel.writeInt(closeable ? 1 : 0);
-        parcel.writeInt(color);
+        parcel.writeInt(backgroundColor);
+        parcel.writeInt(titleTextColor);
         parcel.writeBundle(parameters);
     }
 

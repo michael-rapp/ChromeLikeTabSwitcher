@@ -2307,7 +2307,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Obtains the background color of tabs from a specific typed array.
+     * Obtains the background color of a tab from a specific typed array.
      *
      * @param typedArray
      *         The typed array, the background color should be obtained from, as an instance of the
@@ -2317,6 +2317,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
         setTabBackgroundColor(
                 typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
+    }
+
+    /**
+     * Obtains the text color of a tab's title from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the text color should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabTitleTextColor(@NonNull final TypedArray typedArray) {
+        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_title_text_color);
+        setTabTitleTextColor(
+                typedArray.getColor(R.styleable.TabSwitcher_tabTitleTextColor, defaultValue));
     }
 
     /**
@@ -2393,7 +2406,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     protected final void onTabBackgroundColorChanged(@ColorInt final int color) {
         for (Tab tab : this) {
-            recyclerAdapter.onColorChanged(tab);
+            recyclerAdapter.onBackgroundColorChanged(tab);
+        }
+    }
+
+    @Override
+    protected final void onTabTitleColorChanged(@ColorInt final int color) {
+        for (Tab tab : this) {
+            recyclerAdapter.onTitleTextColorChanged(tab);
         }
     }
 
@@ -2402,6 +2422,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         super.obtainStyledAttributes(typedArray);
         obtainBackground(typedArray);
         obtainTabBackgroundColor(typedArray);
+        obtainTabTitleTextColor(typedArray);
     }
 
     @Override
