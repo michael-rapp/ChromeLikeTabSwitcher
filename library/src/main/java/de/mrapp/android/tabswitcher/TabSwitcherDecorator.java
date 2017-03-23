@@ -15,8 +15,10 @@ package de.mrapp.android.tabswitcher;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,12 @@ import de.mrapp.android.util.view.AbstractViewHolderAdapter;
  * @since 1.0.0
  */
 public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
+
+    /**
+     * The name of the extra, which is used to store the state of a view hierarchy within a bundle.
+     */
+    private static final String VIEW_HIERARCHY_STATE_EXTRA =
+            TabSwitcherDecorator.class.getName() + "::ViewHierarchyState";
 
     /**
      * The method which is invoked, when a view, which is used to visualize a tab, should be
@@ -189,6 +197,16 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
                                      final int index, @Nullable final Bundle savedInstanceState) {
         setCurrentParentView(view);
         int viewType = getViewType(tab, index);
+
+        if (savedInstanceState != null) {
+            SparseArray<Parcelable> viewStates =
+                    savedInstanceState.getSparseParcelableArray(VIEW_HIERARCHY_STATE_EXTRA);
+
+            if (viewStates != null) {
+                view.restoreHierarchyState(viewStates);
+            }
+        }
+
         onShowTab(context, tabSwitcher, view, tab, index, viewType, savedInstanceState);
     }
 
@@ -215,6 +233,9 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
         setCurrentParentView(view);
         int viewType = getViewType(tab, index);
         Bundle outState = new Bundle();
+        SparseArray<Parcelable> viewStates = new SparseArray<>();
+        view.saveHierarchyState(viewStates);
+        outState.putSparseParcelableArray(VIEW_HIERARCHY_STATE_EXTRA, viewStates);
         onSaveInstanceState(view, tab, index, viewType, outState);
         return outState;
     }

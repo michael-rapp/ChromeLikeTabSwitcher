@@ -81,20 +81,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
             if (viewType != 0) {
                 EditText editText = findViewById(android.R.id.edit);
-                editText.setText(
-                        savedInstanceState != null ? savedInstanceState.getCharSequence("text") :
-                                null);
                 editText.requestFocus();
-            }
-        }
-
-        @Override
-        public void onSaveInstanceState(@NonNull final View view, @NonNull final Tab tab,
-                                        final int index, final int viewType,
-                                        @NonNull final Bundle outState) {
-            if (viewType != 0) {
-                EditText editText = findViewById(android.R.id.edit);
-                outState.putCharSequence("text", editText.getText());
             }
         }
 
