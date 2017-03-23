@@ -19,6 +19,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -2307,6 +2308,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Obtains the icon of a tab from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the icon should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainTabIcon(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
+
+        if (resourceId != -1) {
+            setTabIcon(resourceId);
+        } else {
+            setTabIcon(null);
+        }
+    }
+
+    /**
      * Obtains the background color of a tab from a specific typed array.
      *
      * @param typedArray
@@ -2404,6 +2422,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    protected final void onTabIconChanged(@Nullable final Drawable icon) {
+        for (Tab tab : this) {
+            recyclerAdapter.onIconChanged(tab);
+        }
+    }
+
+    @Override
     protected final void onTabBackgroundColorChanged(@ColorInt final int color) {
         for (Tab tab : this) {
             recyclerAdapter.onBackgroundColorChanged(tab);
@@ -2421,6 +2446,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     public final void obtainStyledAttributes(@NonNull final TypedArray typedArray) {
         super.obtainStyledAttributes(typedArray);
         obtainBackground(typedArray);
+        obtainTabIcon(typedArray);
         obtainTabBackgroundColor(typedArray);
         obtainTabTitleTextColor(typedArray);
     }

@@ -239,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     private Tab createTab(final int index) {
         CharSequence title = getString(R.string.tab_title, index + 1);
         Tab tab = new Tab(title);
-        tab.setIcon(R.drawable.ic_file_outline_18dp);
         Bundle parameters = new Bundle();
         parameters.putInt(VIEW_TYPE_EXTRA, index % 2);
         tab.setParameters(parameters);

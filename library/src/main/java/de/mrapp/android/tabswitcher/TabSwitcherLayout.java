@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
@@ -450,15 +451,42 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
     int getPaddingEnd();
 
     /**
-     * Returns the background color of a tab.
+     * Returns the default icon of a tab.
      *
-     * @return The background color of a tab as an {@link Integer} value
+     * @return The default icon of a tab as an instance of the class {@link Drawable} or null, if no
+     * icon is set
+     */
+    @Nullable
+    Drawable getTabIcon();
+
+    /**
+     * Sets the default icon of a tab.
+     *
+     * @param resourceId
+     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid drawable resource
+     */
+    void setTabIcon(@DrawableRes int resourceId);
+
+    /**
+     * Sets the default icon of a tab.
+     *
+     * @param icon
+     *         The icon, which should be set, as an instance of the class {@link Bitmap} or null, if
+     *         no icon should be set
+     */
+    void setTabIcon(@Nullable Bitmap icon);
+
+    /**
+     * Returns the default background color of a tab.
+     *
+     * @return The default background color of a tab as an {@link Integer} value
      */
     @ColorInt
     int getTabBackgroundColor();
 
     /**
-     * Sets the background color of a tab.
+     * Sets the default background color of a tab.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value
@@ -466,15 +494,15 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
     void setTabBackgroundColor(@ColorInt int color);
 
     /**
-     * Returns the text color of a tab's title.
+     * Returns the default text color of a tab's title.
      *
-     * @return The text color of a tab's title as an {@link Integer} value
+     * @return The default text color of a tab's title as an {@link Integer} value
      */
     @ColorInt
     int getTabTitleTextColor();
 
     /**
-     * Sets the text color of a tab's title.
+     * Sets the default text color of a tab's title.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value

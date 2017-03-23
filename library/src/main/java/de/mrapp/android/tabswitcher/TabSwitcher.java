@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
@@ -383,6 +384,22 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     @Override
     public final int getPaddingEnd() {
         return layout.getPaddingEnd();
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getTabIcon() {
+        return layout.getTabIcon();
+    }
+
+    @Override
+    public final void setTabIcon(@DrawableRes final int resourceId) {
+        layout.setTabIcon(resourceId);
+    }
+
+    @Override
+    public final void setTabIcon(@Nullable final Bitmap icon) {
+        layout.setTabIcon(icon);
     }
 
     @ColorInt

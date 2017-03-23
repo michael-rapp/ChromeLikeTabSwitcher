@@ -294,7 +294,8 @@ public class Tab implements Parcelable {
      * @param context
      *         The context, which should be used, as an instance of the class {@link Context}. The
      *         context may not be null
-     * @return The tab's icon as an instance of the class {@link Bitmap} or null, if no icon is set
+     * @return The tab's icon as an instance of the class {@link Drawable} or null, if no custom
+     * icon is set
      */
     @Nullable
     public final Drawable getIcon(@NonNull final Context context) {
@@ -324,7 +325,7 @@ public class Tab implements Parcelable {
      *
      * @param icon
      *         The icon, which should be set, as an instance of the class {@link Bitmap} or null, if
-     *         no icon should be set
+     *         no custom icon should be set
      */
     public final void setIcon(@Nullable final Bitmap icon) {
         this.iconId = -1;

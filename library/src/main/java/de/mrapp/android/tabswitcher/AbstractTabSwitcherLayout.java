@@ -18,6 +18,8 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.CallSuper;
@@ -221,6 +223,16 @@ public abstract class AbstractTabSwitcherLayout
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
      */
     private int[] padding;
+
+    /**
+     * The resource id of a tab's icon.
+     */
+    private int tabIconId;
+
+    /**
+     * The bitmap of a tab's icon.
+     */
+    private Bitmap tabIconBitmap;
 
     /**
      * The background color of a tab;
@@ -536,6 +548,16 @@ public abstract class AbstractTabSwitcherLayout
                                              final int bottom);
 
     /**
+     * The method, which is invoked on implementing subclasses, when the icon of a tab has been
+     * changed.
+     *
+     * @param icon
+     *         The icon, which has been set, as an instance of the class {@link Drawable} or null,
+     *         if no icon has been set
+     */
+    protected abstract void onTabIconChanged(@Nullable final Drawable icon);
+
+    /**
      * The method, which is invoked on implementing subclasses, when the background color of a tab
      * has been changed.
      *
@@ -795,6 +817,31 @@ public abstract class AbstractTabSwitcherLayout
         }
 
         return getPaddingRight();
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getTabIcon() {
+        if (tabIconId != -1) {
+            return ContextCompat.getDrawable(getContext(), tabIconId);
+        } else {
+            return tabIconBitmap != null ?
+                    new BitmapDrawable(getContext().getResources(), tabIconBitmap) : null;
+        }
+    }
+
+    @Override
+    public final void setTabIcon(@DrawableRes final int resourceId) {
+        this.tabIconId = resourceId;
+        this.tabIconBitmap = null;
+        onTabIconChanged(getTabIcon());
+    }
+
+    @Override
+    public final void setTabIcon(@Nullable final Bitmap icon) {
+        this.tabIconId = -1;
+        this.tabIconBitmap = icon;
+        onTabIconChanged(getTabIcon());
     }
 
     @ColorInt

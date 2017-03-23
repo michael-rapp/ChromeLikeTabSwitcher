@@ -194,9 +194,9 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         tab may not be null
      */
     private void adaptIcon(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
-        viewHolder.titleTextView
-                .setCompoundDrawablesWithIntrinsicBounds(tab.getIcon(tabSwitcher.getContext()),
-                        null, null, null);
+        Drawable icon = tab.getIcon(tabSwitcher.getContext());
+        viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(
+                icon != null ? icon : tabSwitcher.getTabIcon(), null, null, null);
     }
 
     /**
