@@ -52,7 +52,13 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         @Override
         public View onInflateView(@NonNull final LayoutInflater inflater,
                                   @Nullable final ViewGroup parent, final int viewType) {
-            View view = inflater.inflate(R.layout.tab, parent, false);
+            View view;
+            if (viewType == 0) {
+                view = inflater.inflate(R.layout.tab_text_view, parent, false);
+            } else {
+                view = inflater.inflate(R.layout.tab_edit_text, parent, false);
+            }
+
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.tab);
             toolbar.setOnMenuItemClickListener(createToolbarMenuListener());
@@ -69,6 +75,16 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             textView.setText(tab.getTitle());
             Toolbar toolbar = findViewById(R.id.toolbar);
             toolbar.setVisibility(tabSwitcher.isSwitcherShown() ? View.GONE : View.VISIBLE);
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getViewType(@NonNull final Tab tab, final int index) {
+            return index % 2;
         }
 
     }
@@ -256,7 +272,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     @Override
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
