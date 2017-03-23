@@ -2135,26 +2135,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         tabItem.getTag().setClosing(true);
-        float dragDistance;
+        float dragDistance = distance;
 
-        if (tabItem.getTab().isCloseable()) {
-            dragDistance = distance;
-            arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                    arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
-            arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
-                    arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
-            float scale = arithmetics.getScale(view, true);
-            float ratio = 1 - (Math.abs(dragDistance) / calculateSwipePosition());
-            float scaledClosedTabScale = swipedTabScale * scale;
-            float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
-            arithmetics.setScale(Axis.DRAGGING_AXIS, view, targetScale);
-            arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
-            view.setAlpha(swipedTabAlpha + ratio * (1 - swipedTabAlpha));
-        } else {
+        if (!tabItem.getTab().isCloseable()) {
             dragDistance = (float) Math.pow(Math.abs(distance), 0.75);
             dragDistance = distance < 0 ? dragDistance * -1 : dragDistance;
         }
 
+        arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                arithmetics.getPivotWhenClosing(Axis.DRAGGING_AXIS, view));
+        arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                arithmetics.getPivotWhenClosing(Axis.ORTHOGONAL_AXIS, view));
+        float scale = arithmetics.getScale(view, true);
+        float ratio = 1 - (Math.abs(dragDistance) / calculateSwipePosition());
+        float scaledClosedTabScale = swipedTabScale * scale;
+        float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
+        arithmetics.setScale(Axis.DRAGGING_AXIS, view, targetScale);
+        arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
+        view.setAlpha(swipedTabAlpha + ratio * (1 - swipedTabAlpha));
         arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
     }
 
