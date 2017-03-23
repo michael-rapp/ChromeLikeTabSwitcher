@@ -16,9 +16,9 @@ License.
 <resources>
 
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">#ffd64937</item>
-        <item name="colorPrimaryDark">#ffbb4030</item>
-        <item name="colorAccent">#ff00bcd4</item>
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="@style/AppTheme"/>

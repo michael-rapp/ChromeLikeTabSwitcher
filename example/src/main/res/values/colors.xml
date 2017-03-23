@@ -15,8 +15,9 @@ License.
 -->
 <resources>
 
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#00BCD4</color>
+    <color name="color_primary">#FF3F51B5</color>
+    <color name="color_primary_dark">#FF303F9F</color>
+    <color name="color_accent">#FF2196F3</color>
+    <color name="snackbar_action_text_color">#FF00BCD4</color>
 
 </resources>
