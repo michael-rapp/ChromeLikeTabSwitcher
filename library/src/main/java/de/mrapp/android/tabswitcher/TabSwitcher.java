@@ -46,13 +46,34 @@ import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A chrome-like tab switcher.
+ * A tab switcher, which allows to switch between multiple tabs. It it is designed similar to the
+ * tab switcher of the Google Chrome Android app.
+ *
+ * In order to specify the appearance of individual tabs, a class, which extends from the abstract
+ * class {@link TabSwitcherDecorator}, must be implemented and set to the tab switcher via the
+ * <code>setDecorator</code>-method.
+ *
+ * The currently selected tab is shown fullscreen by default. When displaying the switcher via the
+ * <code>showSwitcher-method</code>, an overview of all tabs is shown, allowing to select an other
+ * tab by clicking it. By swiping a tab or by clicking its close button, it can be removed,
+ * resulting in the selected tab to be altered automatically. The switcher can programmatically be
+ * hidden by calling the <code>hideSwitcher</code>-method. By calling the
+ * <code>setSelectedTab</code>-method programmatically, a tab is selected and shown fullscreen.
+ *
+ * Individual tabs are represented by instances of the class {@link Tab}. Such tabs can dynamically
+ * be added to the tab switcher by using the <code>addTab</code>-methods. In order to remove them
+ * afterwards, the <code>removeTab</code> can be used. If the switcher is currently shown, calling
+ * these methods results in the tabs being added or removed in an animated manner.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
 
+    /**
+     * The layout, which is used by the tab switcher, depending on whether the device is a
+     * smartphone or tablet and the set layout mode.
+     */
     private AbstractTabSwitcherLayout layout;
 
     /**
@@ -110,21 +131,70 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         }
     }
 
+    /**
+     * Creates a new tab switcher, which allows to switch between multiple tabs.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     */
     public TabSwitcher(@NonNull final Context context) {
         this(context, null);
     }
 
+    /**
+     * Creates a new tab switcher, which allows to switch between multiple tabs.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param attributeSet
+     *         The attribute set, the view's attributes should be obtained from, as an instance of
+     *         the type {@link AttributeSet} or null, if no attributes should be obtained
+     */
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet) {
         super(context, attributeSet);
         initialize(attributeSet, 0, 0);
     }
 
+    /**
+     * Creates a new tab switcher, which allows to switch between multiple tabs.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param attributeSet
+     *         The attribute set, the view's attributes should be obtained from, as an instance of
+     *         the type {@link AttributeSet} or null, if no attributes should be obtained
+     * @param defaultStyle
+     *         The default style to apply to this view. If 0, no style will be applied (beyond what
+     *         is included in the theme). This may either be an attribute resource, whose value will
+     *         be retrieved from the current theme, or an explicit style resource
+     */
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet,
                        @AttrRes final int defaultStyle) {
         super(context, attributeSet, defaultStyle);
         initialize(attributeSet, defaultStyle, 0);
     }
 
+    /**
+     * Creates a new tab switcher, which allows to switch between multiple tabs.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param attributeSet
+     *         The attribute set, the view's attributes should be obtained from, as an instance of
+     *         the type {@link AttributeSet} or null, if no attributes should be obtained
+     * @param defaultStyle
+     *         The default style to apply to this view. If 0, no style will be applied (beyond what
+     *         is included in the theme). This may either be an attribute resource, whose value will
+     *         be retrieved from the current theme, or an explicit style resource
+     * @param defaultStyleResource
+     *         A resource identifier of a style resource that supplies default values for the view,
+     *         used only if the default style is 0 or can not be found in the theme. Can be 0 to not
+     *         look for defaults
+     */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public TabSwitcher(@NonNull final Context context, @Nullable final AttributeSet attributeSet,
                        @AttrRes final int defaultStyle, @StyleRes final int defaultStyleResource) {
@@ -132,6 +202,23 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         initialize(attributeSet, defaultStyle, defaultStyleResource);
     }
 
+    /**
+     * Setups the tab switcher to be associated with those menu items of a specific menu, which use
+     * a {@link TabSwitcherButton} as their action view. The icon of such menu items will
+     * automatically be updated, when the number of tabs, which are contained by the tab switcher,
+     * changes.
+     *
+     * @param tabSwitcher
+     *         The tab switcher, which should become associated with the menu items, as an instance
+     *         of the class {@link TabSwitcher}. The tab switcher may not be null
+     * @param menu
+     *         The menu, whose menu items should become associated with the given tab switcher, as
+     *         an instance of the type {@link Menu}. The menu may not be null
+     * @param listener
+     *         The listener, which should be set to the menu items, which use a {@link
+     *         TabSwitcherButton} as their action view, as an instance of the type {@link
+     *         OnClickListener} or null, if no listener should be set
+     */
     public static void setupWithMenu(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final Menu menu,
                                      @Nullable final OnClickListener listener) {
