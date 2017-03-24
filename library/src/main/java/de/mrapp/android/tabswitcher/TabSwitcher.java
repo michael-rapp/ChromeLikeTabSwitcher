@@ -70,8 +70,13 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
 
     /**
+     * The layout policy, which is used by the tab switcher.
+     */
+    private LayoutPolicy layoutPolicy;
+
+    /**
      * The layout, which is used by the tab switcher, depending on whether the device is a
-     * smartphone or tablet and the set layout mode.
+     * smartphone or tablet and the set layout policy.
      */
     private AbstractTabSwitcherLayout layout;
 
@@ -94,11 +99,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         layout = new PhoneTabSwitcherLayout(this);
-        layout.inflateLayout();
         getViewTreeObserver().addOnGlobalLayoutListener(new LayoutListenerWrapper(this, layout));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
+        layout.inflateLayout();
     }
 
     /**
@@ -124,10 +129,24 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                         defaultStyleResource);
 
         try {
+            obtainLayoutPolicy(typedArray);
             layout.obtainStyledAttributes(typedArray);
         } finally {
             typedArray.recycle();
         }
+    }
+
+    /**
+     * Obtains the layout policy from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the layout policy should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainLayoutPolicy(@NonNull final TypedArray typedArray) {
+        int defaultValue = LayoutPolicy.AUTO.getValue();
+        int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, defaultValue);
+        setLayoutPolicy(LayoutPolicy.fromValue(value));
     }
 
     /**
@@ -235,6 +254,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                 tabSwitcher.addListener(tabSwitcherButton);
             }
         }
+    }
+
+    /**
+     * Returns the layout policy, which is used by the tab switcher.
+     *
+     * @return The layout policy, which is used by the tab switcher, as a value of the enum {@link
+     * LayoutPolicy}. The layout policy may either be {@link LayoutPolicy#AUTO}, {@link
+     * LayoutPolicy#PHONE} or {@link LayoutPolicy#TABLET}
+     */
+    @NonNull
+    public final LayoutPolicy getLayoutPolicy() {
+        return layoutPolicy;
+    }
+
+    /**
+     * Sets the layout policy, which should be used by the tab switcher.
+     *
+     * @param layoutPolicy
+     *         The layout policy, which should be set, as a value of the enum {@link LayoutPolicy}.
+     *         The layout policy may either be {@link LayoutPolicy#AUTO}, {@link LayoutPolicy#PHONE}
+     *         or {@link LayoutPolicy#TABLET}
+     */
+    public final void setLayoutPolicy(@NonNull final LayoutPolicy layoutPolicy) {
+        ensureNotNull(layoutPolicy, "The layout policy may not be null");
+        this.layoutPolicy = layoutPolicy;
     }
 
     @NonNull
