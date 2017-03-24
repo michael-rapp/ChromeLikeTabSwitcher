@@ -34,42 +34,59 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
 
+import static de.mrapp.android.util.Condition.ensureNotNull;
+
 /**
- * A drawable, which allows to show the number of tabs, which are currently contained by a {@link
+ * A drawable, which allows to display the number of tabs, which are currently contained by a {@link
  * TabSwitcher}. It must be registered at a {@link TabSwitcher} instance in order to keep the
- * displayed label up to date.
+ * displayed label up to date. It therefore implements the interface {@link TabSwitcherListener}.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
 public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener {
 
+    /**
+     * The size of the drawable in pixels.
+     */
     private final int size;
 
+    /**
+     * The default text size of the displayed label in pixels.
+     */
     private final int textSizeNormal;
 
+    /**
+     * The text size of the displayed label, which is used when displaying a value greater than 99,
+     * in pixels.
+     */
     private final int textSizeSmall;
 
+    /**
+     * The drawable, which is shown as the background.
+     */
     private final Drawable background;
 
+    /**
+     * The paint, which is used to draw the drawable's label.
+     */
     private final Paint paint;
 
+    /**
+     * The currently displayed label.
+     */
     private String label;
 
-    private void update(final int count) {
-        label = Integer.toString(count);
-
-        if (label.length() > 2) {
-            label = "99+";
-            paint.setTextSize(textSizeSmall);
-        } else {
-            paint.setTextSize(textSizeNormal);
-        }
-
-        invalidateSelf();
-    }
-
+    /**
+     * Creates a new drawable, which allows to display the number of tabs, which are currently
+     * contained by a {@link TabSwitcher}.
+     *
+     * @param context
+     *         The context, which should be used by the drawable, as an instance of the class {@link
+     *         Context}. The context may not be null
+     */
     public TabSwitcherDrawable(@NonNull final Context context) {
+        ensureNotNull(context, "The context may not be null");
         Resources resources = context.getResources();
         size = resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_size);
         textSizeNormal =
@@ -89,8 +106,23 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
         setColorFilter(tint, PorterDuff.Mode.MULTIPLY);
     }
 
+    /**
+     * Updates the drawable to display a specific value.
+     *
+     * @param count
+     *         The value, which should be displayed, as an {@link Integer} value
+     */
     public final void setCount(final int count) {
-        update(count);
+        label = Integer.toString(count);
+
+        if (label.length() > 2) {
+            label = "99+";
+            paint.setTextSize(textSizeSmall);
+        } else {
+            paint.setTextSize(textSizeNormal);
+        }
+
+        invalidateSelf();
     }
 
     @Override
@@ -156,19 +188,19 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
                                  @NonNull final Tab tab) {
-        update(tabSwitcher.getCount());
+        setCount(tabSwitcher.getCount());
     }
 
     @Override
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
                                    @NonNull final Tab tab) {
-        update(tabSwitcher.getCount());
+        setCount(tabSwitcher.getCount());
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
                                        @NonNull final Tab[] tab) {
-        update(tabSwitcher.getCount());
+        setCount(tabSwitcher.getCount());
     }
 
 }
