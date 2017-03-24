@@ -24,7 +24,7 @@ import android.widget.FrameLayout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.model.Layout;
+import de.mrapp.android.tabswitcher.Layout;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;

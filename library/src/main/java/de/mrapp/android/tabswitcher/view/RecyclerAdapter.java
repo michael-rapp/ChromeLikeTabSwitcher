@@ -38,7 +38,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.model.Layout;
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AbstractViewRecycler;

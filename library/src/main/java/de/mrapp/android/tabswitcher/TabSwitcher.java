@@ -40,7 +40,6 @@ import android.widget.FrameLayout;
 import java.util.Iterator;
 
 import de.mrapp.android.tabswitcher.AbstractTabSwitcherLayout.LayoutListenerWrapper;
-import de.mrapp.android.tabswitcher.model.Layout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;

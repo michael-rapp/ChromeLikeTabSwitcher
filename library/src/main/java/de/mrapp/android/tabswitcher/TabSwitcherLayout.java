@@ -29,8 +29,6 @@ import android.view.ViewGroup;
 
 import java.util.NoSuchElementException;
 
-import de.mrapp.android.tabswitcher.model.Layout;
-
 /**
  * Defines the interface, a layout, which implements the functionality of a {@link TabSwitcher},
  * must implement.
