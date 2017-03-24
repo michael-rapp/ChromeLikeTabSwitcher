@@ -99,11 +99,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         layout = new PhoneTabSwitcherLayout(this);
+        layout.inflateLayout();
         getViewTreeObserver().addOnGlobalLayoutListener(new LayoutListenerWrapper(this, layout));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
-        layout.inflateLayout();
     }
 
     /**
