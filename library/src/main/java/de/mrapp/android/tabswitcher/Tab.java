@@ -96,6 +96,15 @@ public class Tab implements Parcelable {
         void onCloseableChanged(@NonNull Tab tab);
 
         /**
+         * The method, which is invoked, when the icon of the tab's close button has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
+         */
+        void onCloseButtonIconChanged(@NonNull Tab tab);
+
+        /**
          * The method, which is invoked, when the tab's background color has been changed.
          *
          * @param tab
@@ -142,6 +151,16 @@ public class Tab implements Parcelable {
     private boolean closeable;
 
     /**
+     * The resource id of the icon of the tab's close button.
+     */
+    private int closeButtonIconId;
+
+    /**
+     * The bitmap of the icon of the tab's close button.
+     */
+    private Bitmap closeButtonIconBitmap;
+
+    /**
      * The background color of the tab.
      */
     private int backgroundColor;
@@ -184,6 +203,15 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Notifies all callbacks, that the icon of the tab's close button has been changed.
+     */
+    private void notifyOnCloseButtonIconChanged() {
+        for (Callback callback : callbacks) {
+            callback.onCloseButtonIconChanged(this);
+        }
+    }
+
+    /**
      * Notifies all callbacks, that the background color of the tab has been changed.
      */
     private void notifyOnBackgroundColorChanged() {
@@ -213,6 +241,8 @@ public class Tab implements Parcelable {
         this.iconId = source.readInt();
         this.iconBitmap = source.readParcelable(getClass().getClassLoader());
         this.closeable = source.readInt() > 0;
+        this.closeButtonIconId = source.readInt();
+        this.closeButtonIconBitmap = source.readParcelable(getClass().getClassLoader());
         this.backgroundColor = source.readInt();
         this.titleTextColor = source.readInt();
         this.parameters = source.readBundle(getClass().getClassLoader());
@@ -228,6 +258,8 @@ public class Tab implements Parcelable {
     public Tab(@NonNull final CharSequence title) {
         setTitle(title);
         this.closeable = true;
+        this.closeButtonIconId = -1;
+        this.closeButtonIconBitmap = null;
         this.iconId = -1;
         this.iconBitmap = null;
         this.backgroundColor = -1;
@@ -299,6 +331,8 @@ public class Tab implements Parcelable {
      */
     @Nullable
     public final Drawable getIcon(@NonNull final Context context) {
+        ensureNotNull(context, "The context may not be null");
+
         if (iconId != -1) {
             return ContextCompat.getDrawable(context, iconId);
         } else {
@@ -351,6 +385,53 @@ public class Tab implements Parcelable {
     public final void setCloseable(final boolean closeable) {
         this.closeable = closeable;
         notifyOnCloseableChanged();
+    }
+
+    /**
+     * Returns the icon of the tab's close button.
+     *
+     * @param context
+     *         The context, which should be used to retrieve the icon, as an instance of the class
+     *         {@link Context}. The context may not be null
+     * @return The icon of the tab's close button as an instance of the class {@link Drawable} or
+     * null, if no custom icon is set
+     */
+    @Nullable
+    public final Drawable getCloseButtonIcon(@NonNull final Context context) {
+        ensureNotNull(context, "The context may not be null");
+
+        if (closeButtonIconId != -1) {
+            return ContextCompat.getDrawable(context, closeButtonIconId);
+        } else {
+            return closeButtonIconBitmap != null ?
+                    new BitmapDrawable(context.getResources(), closeButtonIconBitmap) : null;
+        }
+    }
+
+    /**
+     * Sets the icon of the tab's close button.
+     *
+     * @param resourceId
+     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid drawable resource
+     */
+    public final void setCloseButtonIcon(@DrawableRes final int resourceId) {
+        this.closeButtonIconId = resourceId;
+        this.closeButtonIconBitmap = null;
+        notifyOnCloseButtonIconChanged();
+    }
+
+    /**
+     * Sets the icon of the tab's close button.
+     *
+     * @param icon
+     *         The icon, which should be set, as an instance of the class {@link Bitmap} or null, if
+     *         no custom icon should be set
+     */
+    public final void setCloseButtonIcon(@Nullable final Bitmap icon) {
+        this.closeButtonIconId = -1;
+        this.closeButtonIconBitmap = icon;
+        notifyOnCloseButtonIconChanged();
     }
 
     /**
@@ -459,6 +540,8 @@ public class Tab implements Parcelable {
         parcel.writeInt(iconId);
         parcel.writeParcelable(iconBitmap, flags);
         parcel.writeInt(closeable ? 1 : 0);
+        parcel.writeInt(closeButtonIconId);
+        parcel.writeParcelable(closeButtonIconBitmap, flags);
         parcel.writeInt(backgroundColor);
         parcel.writeInt(titleTextColor);
         parcel.writeBundle(parameters);

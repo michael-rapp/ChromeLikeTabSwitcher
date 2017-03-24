@@ -509,4 +509,30 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
      */
     void setTabTitleTextColor(@ColorInt int color);
 
+    /**
+     * Returns the default icon of a tab's close button.
+     *
+     * @return The default icon of a tab's close button as an instance of the class {@link Drawable}
+     */
+    @NonNull
+    Drawable getTabCloseButtonIcon();
+
+    /**
+     * Sets the default icon of a tab's close button.
+     *
+     * @param resourceId
+     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid drawable resource
+     */
+    void setTabCloseButtonIcon(@DrawableRes int resourceId);
+
+    /**
+     * Sets the default icon of a tab's close button.
+     *
+     * @param icon
+     *         The icon, which should be set, as an instance of the class {@link Bitmap}. The icon
+     *         may not be null
+     */
+    void setTabCloseButtonIcon(@NonNull final Bitmap icon);
+
 }

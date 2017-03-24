@@ -216,6 +216,23 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     /**
+     * Adapts the icon of a tab's close button.
+     *
+     * @param viewHolder
+     *         The view holder, which stores references to the tab's views, as an instance of the
+     *         class {@link TabViewHolder}. The view holder may not be null
+     * @param tab
+     *         The icon, whose icon hould be adapted, as an instance of the class {@link Tab}. The
+     *         tab may not be null
+     */
+    private void adaptCloseButtonIcon(@NonNull final TabViewHolder viewHolder,
+                                      @NonNull final Tab tab) {
+        Drawable icon = tab.getCloseButtonIcon(tabSwitcher.getContext());
+        viewHolder.closeButton
+                .setImageDrawable(icon != null ? icon : tabSwitcher.getTabCloseButtonIcon());
+    }
+
+    /**
      * Creates and returns a listener, which allows to close a specific tab, when its close button
      * is clicked.
      *
@@ -467,6 +484,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptTitle(viewHolder, tab);
         adaptIcon(viewHolder, tab);
         adaptCloseButton(viewHolder, tab);
+        adaptCloseButtonIcon(viewHolder, tab);
         adaptBackgroundColor(view, viewHolder, tab);
         adaptTitleTextColor(viewHolder, tab);
 
@@ -526,6 +544,15 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
         if (tabItem != null) {
             adaptCloseButton(tabItem.getViewHolder(), tabItem.getTab());
+        }
+    }
+
+    @Override
+    public final void onCloseButtonIconChanged(@NonNull final Tab tab) {
+        TabItem tabItem = getTabItem(tab);
+
+        if (tabItem != null) {
+            adaptCloseButtonIcon(tabItem.getViewHolder(), tabItem.getTab());
         }
     }
 

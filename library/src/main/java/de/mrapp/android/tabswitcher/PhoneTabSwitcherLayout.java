@@ -2351,6 +2351,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Obtains the icon of a tab's close button from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the icon should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainTabCloseButtonIcon(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, -1);
+
+        if (resourceId != -1) {
+            setTabCloseButtonIcon(resourceId);
+        } else {
+            setTabCloseButtonIcon(R.drawable.ic_close_tab_18dp);
+        }
+    }
+
+    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on
      * smartphones.
      *
@@ -2443,12 +2460,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    protected final void onTabCloseButtonIconChanged(@NonNull final Drawable icon) {
+        for (Tab tab : this) {
+            recyclerAdapter.onCloseButtonIconChanged(tab);
+        }
+    }
+
+    @Override
     public final void obtainStyledAttributes(@NonNull final TypedArray typedArray) {
         super.obtainStyledAttributes(typedArray);
         obtainBackground(typedArray);
         obtainTabIcon(typedArray);
         obtainTabBackgroundColor(typedArray);
         obtainTabTitleTextColor(typedArray);
+        obtainTabCloseButtonIcon(typedArray);
     }
 
     @Override

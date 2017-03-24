@@ -423,4 +423,20 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
         layout.setTabTitleTextColor(color);
     }
 
+    @NonNull
+    @Override
+    public final Drawable getTabCloseButtonIcon() {
+        return layout.getTabCloseButtonIcon();
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@DrawableRes final int resourceId) {
+        layout.setTabCloseButtonIcon(resourceId);
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@NonNull final Bitmap icon) {
+        layout.setTabCloseButtonIcon(icon);
+    }
+
 }

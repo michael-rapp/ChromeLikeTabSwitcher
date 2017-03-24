@@ -245,6 +245,16 @@ public abstract class AbstractTabSwitcherLayout
     private int tabTitleTextColor;
 
     /**
+     * The resource id of the icon of a tab's close button.
+     */
+    private int tabCloseButtonIconId;
+
+    /**
+     * The bitmap of the icon of a tab's close button.
+     */
+    private Bitmap tabCloseButtonIconBitmap;
+
+    /**
      * Returns the tab switcher, the layout belongs to.
      *
      * @return The tab switcher, the layout belongs to, as an instance of the class {@link
@@ -576,6 +586,16 @@ public abstract class AbstractTabSwitcherLayout
     protected abstract void onTabTitleColorChanged(@ColorInt final int color);
 
     /**
+     * The method, which is invoked on implementing subclasses, when the icon of a tab's close
+     * button has been changed.
+     *
+     * @param icon
+     *         The icon, which has been set, as an instance of the class {@link Drawable}. The icon
+     *         may not be null
+     */
+    protected abstract void onTabCloseButtonIconChanged(@NonNull final Drawable icon);
+
+    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher}.
      *
      * @param tabSwitcher
@@ -865,6 +885,30 @@ public abstract class AbstractTabSwitcherLayout
     public final void setTabTitleTextColor(@ColorInt final int color) {
         this.tabTitleTextColor = color;
         onTabTitleColorChanged(color);
+    }
+
+    @NonNull
+    @Override
+    public final Drawable getTabCloseButtonIcon() {
+        if (tabCloseButtonIconId != -1) {
+            return ContextCompat.getDrawable(getContext(), tabCloseButtonIconId);
+        } else {
+            return new BitmapDrawable(getContext().getResources(), tabCloseButtonIconBitmap);
+        }
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@DrawableRes final int resourceId) {
+        tabCloseButtonIconId = resourceId;
+        tabCloseButtonIconBitmap = null;
+        onTabCloseButtonIconChanged(getTabCloseButtonIcon());
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@NonNull final Bitmap icon) {
+        tabCloseButtonIconId = -1;
+        tabCloseButtonIconBitmap = icon;
+        onTabCloseButtonIconChanged(getTabCloseButtonIcon());
     }
 
 }

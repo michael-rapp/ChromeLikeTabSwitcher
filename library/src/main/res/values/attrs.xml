@@ -20,6 +20,7 @@ License.
         <attr name="tabIcon" format="reference"/>
         <attr name="tabBackgroundColor" format="color"/>
         <attr name="tabTitleTextColor" format="color"/>
+        <attr name="tabCloseButtonIcon" format="reference"/>
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
