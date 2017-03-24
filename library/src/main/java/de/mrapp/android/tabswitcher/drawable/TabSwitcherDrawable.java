@@ -34,6 +34,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -110,9 +111,11 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
      * Updates the drawable to display a specific value.
      *
      * @param count
-     *         The value, which should be displayed, as an {@link Integer} value
+     *         The value, which should be displayed, as an {@link Integer} value. The value must be
+     *         at least 0
      */
     public final void setCount(final int count) {
+        ensureAtLeast(count, 0, "The count must be at least 0");
         label = Integer.toString(count);
 
         if (label.length() > 2) {

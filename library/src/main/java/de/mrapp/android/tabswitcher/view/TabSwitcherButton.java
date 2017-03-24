@@ -13,13 +13,10 @@
  */
 package de.mrapp.android.tabswitcher.view;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StyleRes;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 
@@ -32,17 +29,24 @@ import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
 
 /**
- * A drawable, which allows to show the number of tabs, which are currently contained by a {@link
- * TabSwitcher} by using a {@link TabSwitcherDrawable}. It must be registered at a {@link
- * TabSwitcher} instance in order to keep the displayed count up to date.
+ * An image button, which allows to display the number of tabs, which are currently contained by a
+ * {@link TabSwitcher} by using a {@link TabSwitcherDrawable}. It must be registered at a {@link
+ * TabSwitcher} instance in order to keep the displayed count up to date. It therefore implements
+ * the interface {@link TabSwitcherListener}.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
 public class TabSwitcherButton extends AppCompatImageButton implements TabSwitcherListener {
 
+    /**
+     * The drawable, which is used by the image button.F
+     */
     private TabSwitcherDrawable drawable;
 
+    /**
+     * Initializes the view.
+     */
     private void initialize() {
         drawable = new TabSwitcherDrawable(getContext());
         setImageDrawable(drawable);
@@ -53,23 +57,64 @@ public class TabSwitcherButton extends AppCompatImageButton implements TabSwitch
         setFocusable(true);
     }
 
+    /**
+     * Creates a new image button, which allows to display the number of tabs, which are currently
+     * contained by a {@link TabSwitcher}.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     */
     public TabSwitcherButton(@NonNull final Context context) {
         this(context, null);
     }
 
+    /**
+     * Creates a new image button, which allows to display the number of tabs, which are currently
+     * contained by a {@link TabSwitcher}.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param attributeSet
+     *         The attribute set, the view's attributes should be obtained from, as an instance of
+     *         the type {@link AttributeSet} or null, if no attributes should be obtained
+     */
     public TabSwitcherButton(@NonNull final Context context,
                              @Nullable final AttributeSet attributeSet) {
         super(context, attributeSet);
         initialize();
     }
 
+    /**
+     * Creates a new image button, which allows to display the number of tabs, which are currently
+     * contained by a {@link TabSwitcher}.
+     *
+     * @param context
+     *         The context, which should be used by the view, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param attributeSet
+     *         The attribute set, the view's attributes should be obtained from, as an instance of
+     *         the type {@link AttributeSet} or null, if no attributes should be obtained
+     * @param defaultStyle
+     *         The default style to apply to this view. If 0, no style will be applied (beyond what
+     *         is included in the theme). This may either be an attribute resource, whose value will
+     *         be retrieved from the current theme, or an explicit style resource
+     */
     public TabSwitcherButton(@NonNull final Context context,
                              @Nullable final AttributeSet attributeSet,
-                             @AttrRes final int defaultStyleAttribute) {
-        super(context, attributeSet, defaultStyleAttribute);
+                             @AttrRes final int defaultStyle) {
+        super(context, attributeSet, defaultStyle);
         initialize();
     }
 
+    /**
+     * Updates the image button to display a specific value.
+     *
+     * @param count
+     *         The value, which should be displayed, as an {@link Integer} value. The value must be
+     *         at least 0
+     */
     public final void setCount(final int count) {
         drawable.setCount(count);
     }
