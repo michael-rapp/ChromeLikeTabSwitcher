@@ -558,7 +558,7 @@ public class DragHandler {
                 if (!iterator.hasNext()) {
                     Pair<Float, State> pair =
                             clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
-                                    null);
+                                    (TabItem) null);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
                     notifyOnViewStateChanged(tabItem);
@@ -661,7 +661,7 @@ public class DragHandler {
      *         TabItem}. The tab item may not be null
      * @return The position, which has been calculated, as a {@link Float} value
      */
-    private float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
+    public final float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
                                        @NonNull final TabItem tabItem) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), null);
         int selectedTabIndex = tabSwitcher.getSelectedTabIndex();
@@ -1058,8 +1058,16 @@ public class DragHandler {
     public final Pair<Float, State> clipTabPosition(final int count, final int index,
                                                     final float position,
                                                     @Nullable final TabItem predecessor) {
+        return clipTabPosition(count, index, position,
+                predecessor != null ? predecessor.getTag().getState() : null);
+    }
+
+    // TODO: Comment or remove the other method with same name
+    public final Pair<Float, State> clipTabPosition(final int count, final int index,
+                                                    final float position,
+                                                    @Nullable final State predecessorState) {
         Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(count, index, predecessor);
+                calculatePositionAndStateWhenStackedAtStart(count, index, predecessorState);
         float startPosition = startPair.first;
 
         if (position <= startPosition) {
@@ -1098,15 +1106,24 @@ public class DragHandler {
     public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
                                                                                 final int index,
                                                                                 @Nullable final TabItem predecessor) {
+        return calculatePositionAndStateWhenStackedAtStart(count, index,
+                predecessor != null ? predecessor.getTag().getState() : null);
+    }
+
+    // TODO: Comment or remove method with same name
+    @NonNull
+    public final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                                final int index,
+                                                                                @Nullable final State predecessorState) {
         if ((count - index) <= stackedTabCount) {
             float position = stackedTabSpacing * (count - (index + 1));
             return Pair.create(position,
-                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.STACKED_START);
         } else {
             float position = stackedTabSpacing * stackedTabCount;
             return Pair.create(position,
-                    (predecessor == null || predecessor.getTag().getState() == State.FLOATING) ?
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.HIDDEN);
         }
     }
