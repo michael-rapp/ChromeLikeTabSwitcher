@@ -1642,10 +1642,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         AbstractTabItemIterator.AbstractBuilder builder = factory.create();
         AbstractTabItemIterator iterator;
         TabItem tabItem;
-        int selectedTabIndex = getSelectedTabIndex();
-        TabItem selectedTabItem = TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
-        float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
         float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
         int referenceIndex = removedTabItem.getIndex();
         TabItem currentReferenceTabItem = removedTabItem;
@@ -1664,6 +1661,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float initialReferencePosition = referencePosition;
 
         if (removedTabItem.getIndex() > 0) {
+            int selectedTabIndex = getSelectedTabIndex();
+            TabItem selectedTabItem =
+                    TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
+            float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
             iterator = builder.start(removedTabItem.getIndex() - 1).reverse(true).create();
 
             while ((tabItem = iterator.next()) != null) {
@@ -1727,7 +1728,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             while ((tabItem = iterator.next()) != null && tabItem.getIndex() < getCount() - 1) {
                 float position = dragHandler.calculateNonLinearPosition(previousPosition,
-                        selectedTabIndex == tabItem.getIndex() ? maxTabSpacing : defaultTabSpacing);
+                        dragHandler.calculateMaxTabSpacing(count, tabItem));
                 Pair<Float, State> pair = dragHandler
                         .clipTabPosition(count, tabItem.getIndex() - 1, position,
                                 previousTag.getState());
