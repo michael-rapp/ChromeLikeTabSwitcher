@@ -662,7 +662,7 @@ public class DragHandler {
      * @return The position, which has been calculated, as a {@link Float} value
      */
     public final float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
-                                       @NonNull final TabItem tabItem) {
+                                            @NonNull final TabItem tabItem) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), null);
         int selectedTabIndex = tabSwitcher.getSelectedTabIndex();
 
@@ -745,8 +745,8 @@ public class DragHandler {
             AbstractTabItemIterator iterator = builder.create();
             TabItem lastTabItem = iterator.getItem(tabSwitcher.getCount() - 1);
             TabItem predecessor = iterator.getItem(tabSwitcher.getCount() - 2);
-            return predecessor.getTag().getPosition() >=
-                    calculateMaxTabSpacing(tabSwitcher.getCount(), lastTabItem);
+            return Math.round(predecessor.getTag().getPosition()) >=
+                    Math.round(calculateMaxTabSpacing(tabSwitcher.getCount(), lastTabItem));
         }
     }
 
