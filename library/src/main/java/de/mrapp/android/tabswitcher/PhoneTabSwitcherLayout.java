@@ -1342,9 +1342,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (state == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);
-                } else if (state == State.STACKED_START || state == State.STACKED_START_ATOP) {
+                } else if (state == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(tabItem, true);
-                } else if (state == State.FLOATING) {
+                } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
                     relocateWhenRemovingFloatingTab(tabItem, attachedPosition,
                             previousAttachedPosition != attachedPosition);
                 }
@@ -1721,7 +1721,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        if (attachedPositionChanged) {
+        if (attachedPositionChanged &&
+                removedTabItem.getTag().getState() != State.STACKED_START_ATOP) {
             iterator = builder.start(removedTabItem.getIndex() + 1).reverse(false).create();
             float previousPosition = initialReferencePosition;
             Tag previousTag = removedTabItem.getTag();
