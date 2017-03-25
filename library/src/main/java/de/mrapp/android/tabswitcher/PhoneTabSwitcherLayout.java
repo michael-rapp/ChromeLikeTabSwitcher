@@ -1342,9 +1342,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (state == State.STACKED_END) {
                     relocateWhenRemovingStackedTab(tabItem, false);
-                } else if (state == State.STACKED_START) {
+                } else if (state == State.STACKED_START || state == State.STACKED_START_ATOP) {
                     relocateWhenRemovingStackedTab(tabItem, true);
-                } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
+                } else if (state == State.FLOATING) {
                     relocateWhenRemovingFloatingTab(tabItem, attachedPosition,
                             previousAttachedPosition != attachedPosition);
                 }
