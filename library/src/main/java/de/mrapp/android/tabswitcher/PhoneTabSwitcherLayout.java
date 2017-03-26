@@ -48,6 +48,7 @@ import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
+import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.InitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
@@ -2334,7 +2335,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     public PhoneTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher) {
         super(tabSwitcher);
-        arithmetics = new Arithmetics(tabSwitcher);
+        arithmetics = new PhoneArithmetics(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
         dragThreshold =
                 getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
