@@ -1713,7 +1713,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tag.setState(pair.second);
                 long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
                         relocateAnimationDelay;
-                relocateLegacy(tabItem, tag.getPosition(), tag, startDelay);
+
+                if (!tabItem.isInflated()) {
+                    Pair<Float, State> pair2 = dragHandler
+                            .calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                    tabItem.getTag().setPosition(pair2.first);
+                    tabItem.getTag().setState(pair2.second);
+                }
+
+                relocate(tabItem, tag.getPosition(), tag, startDelay);
 
                 if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
                     break;
@@ -2040,7 +2048,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Relocates a specific tab.
+     * Relocates a specific tab. If its view is now yet inflated, it is inflated first.
      *
      * @param tabItem
      *         The tab item, which corresponds to the tab, which should be relocated, as an instance
