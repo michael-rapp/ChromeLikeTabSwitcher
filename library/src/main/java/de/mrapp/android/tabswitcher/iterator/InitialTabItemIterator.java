@@ -18,7 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import de.mrapp.android.tabswitcher.DragHandler;
+import de.mrapp.android.tabswitcher.layout.DragHandler;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.State;

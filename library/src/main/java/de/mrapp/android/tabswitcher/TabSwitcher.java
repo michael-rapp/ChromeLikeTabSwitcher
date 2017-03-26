@@ -39,7 +39,10 @@ import android.widget.FrameLayout;
 
 import java.util.Iterator;
 
-import de.mrapp.android.tabswitcher.AbstractTabSwitcherLayout.LayoutListenerWrapper;
+import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
+import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;

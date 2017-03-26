@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -28,6 +28,14 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import java.util.NoSuchElementException;
+
+import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Layout;
+import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabCloseListener;
+import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 
 /**
  * Defines the interface, a layout, which implements the functionality of a {@link TabSwitcher},

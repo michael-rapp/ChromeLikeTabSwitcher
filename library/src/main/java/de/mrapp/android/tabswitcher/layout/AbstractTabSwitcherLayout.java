@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -47,6 +47,12 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;

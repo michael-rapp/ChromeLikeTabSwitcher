@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
@@ -23,6 +23,9 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import de.mrapp.android.tabswitcher.Layout;
+import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;

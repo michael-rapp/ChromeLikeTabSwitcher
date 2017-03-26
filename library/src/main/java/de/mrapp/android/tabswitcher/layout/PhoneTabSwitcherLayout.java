@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -44,9 +44,16 @@ import android.widget.FrameLayout;
 
 import java.util.Collections;
 
+import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
+import de.mrapp.android.tabswitcher.Layout;
+import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabCloseListener;
+import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
