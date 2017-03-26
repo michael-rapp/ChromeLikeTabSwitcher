@@ -274,6 +274,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     /**
      * Sets the layout policy, which should be used by the tab switcher.
      *
+     * Changing the layout policy after the view has been laid out does not have any effect.
+     *
      * @param layoutPolicy
      *         The layout policy, which should be set, as a value of the enum {@link LayoutPolicy}.
      *         The layout policy may either be {@link LayoutPolicy#AUTO}, {@link LayoutPolicy#PHONE}
