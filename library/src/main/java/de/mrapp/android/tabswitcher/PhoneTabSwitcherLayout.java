@@ -1969,7 +1969,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                relocateLegacy(tabItem, tag.getPosition(), tag, 0);
+                animateRelocate(tabItem, tag.getPosition(), tag, 0,
+                        createRelocateAnimationListener(tabItem));
             }
 
             if (pair.second == State.HIDDEN) {
