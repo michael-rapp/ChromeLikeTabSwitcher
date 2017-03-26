@@ -21,10 +21,11 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.Layout;
+import de.mrapp.android.tabswitcher.model.DragState;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
@@ -85,6 +86,76 @@ public class Arithmetics {
             return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         } else {
             return axis;
+        }
+    }
+
+    /**
+     * Returns the default pivot of a view on a specific axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getSize(axis, view) / 2f : 0;
+        } else {
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getSize(axis, view) / 2f;
+        }
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when it is swiped.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotWhenSwiping(@NonNull final Axis axis, @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
+            return endOvershootPivot;
+        } else {
+            return getDefaultPivot(axis, view);
+        }
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when overshooting at the start.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotWhenOvershootingAtStart(@NonNull final Axis axis,
+                                                  @NonNull final View view) {
+        return getSize(axis, view) / 2f;
+    }
+
+    /**
+     * Returns the pivot of a view on a specific axis, when overshooting at the end.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param view
+     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The pivot of the given view on the given axis as a {@link Float} value
+     */
+    private float getPivotWhenOvershootingAtEnd(@NonNull final Axis axis,
+                                                @NonNull final View view) {
+        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
+            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getSize(axis, view) / 2f;
+        } else {
+            return getSize(axis, view) / 2f;
         }
     }
 
@@ -363,82 +434,32 @@ public class Arithmetics {
     }
 
     /**
-     * Returns the default pivot of a view on a specific axis.
+     * Returns the pivot of a view on a specific axis, depending on the current drag state.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
      * @param view
      *         The view, whose pivot should be returned, as an instance of the class {@link View}.
      *         The view may not be null
+     * @param dragState
+     *         The current drag state as a value of the enum {@link DragState}. The drag state may
+     *         not be null
      * @return The pivot of the given view on the given axis as a {@link Float} value
      */
-    public final float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getPivot(@NonNull final Axis axis, @NonNull final View view,
+                                @NonNull final DragState dragState) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
+        ensureNotNull(dragState, "The drag state may not be null");
 
-        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getSize(axis, view) / 2f : 0;
-        } else {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getSize(axis, view) / 2f;
-        }
-    }
-
-    /**
-     * Returns the pivot of a view on a specific axis, when it is closed.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
-     */
-    public final float getPivotWhenClosing(@NonNull final Axis axis, @NonNull final View view) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
-
-        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return endOvershootPivot;
+        if (dragState == DragState.SWIPE) {
+            return getPivotWhenSwiping(axis, view);
+        } else if (dragState == DragState.OVERSHOOT_START) {
+            return getPivotWhenOvershootingAtStart(axis, view);
+        } else if (dragState == DragState.OVERSHOOT_END) {
+            return getPivotWhenOvershootingAtEnd(axis, view);
         } else {
             return getDefaultPivot(axis, view);
-        }
-    }
-
-    /**
-     * Returns the pivot of a view on a specific axis, when overshooting at the start.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
-     */
-    public final float getPivotOnOvershootStart(@NonNull final Axis axis,
-                                                @NonNull final View view) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
-        return getSize(axis, view) / 2f;
-    }
-
-    /**
-     * Returns the pivot of a view on a specific axis, when overshooting at the end.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
-     */
-    public final float getPivotOnOvershootEnd(@NonNull final Axis axis, @NonNull final View view) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
-
-        if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getSize(axis, view) / 2f;
-        } else {
-            return getSize(axis, view) / 2f;
         }
     }
 

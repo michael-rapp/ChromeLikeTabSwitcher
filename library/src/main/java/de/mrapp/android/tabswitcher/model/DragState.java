@@ -47,6 +47,11 @@ public enum DragState {
     /**
      * When an overshoot at the end is being performed.
      */
-    OVERSHOOT_END;
+    OVERSHOOT_END,
+
+    /**
+     * When a tab is swiped.
+     */
+    SWIPE
 
 }

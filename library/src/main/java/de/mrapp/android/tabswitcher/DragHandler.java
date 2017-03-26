@@ -1298,16 +1298,16 @@ public class DragHandler {
             dragHelper.update(dragPosition);
             swipeDragHelper.update(orthogonalPosition);
 
-            if (dragState == DragState.NONE && swipedTabItem == null &&
-                    swipeDragHelper.hasThresholdBeenReached()) {
+            if (dragState == DragState.NONE && swipeDragHelper.hasThresholdBeenReached()) {
                 TabItem tabItem = getFocusedTabView(factory, dragHelper.getDragStartPosition());
 
                 if (tabItem != null) {
+                    dragState = DragState.SWIPE;
                     swipedTabItem = tabItem;
                 }
             }
 
-            if (swipedTabItem == null && dragHelper.hasThresholdBeenReached()) {
+            if (dragState != DragState.SWIPE && dragHelper.hasThresholdBeenReached()) {
                 if (dragState == DragState.OVERSHOOT_START) {
                     dragState = DragState.DRAG_TO_END;
                 } else if (dragState == DragState.OVERSHOOT_END) {
@@ -1324,7 +1324,7 @@ public class DragHandler {
                 }
             }
 
-            if (swipedTabItem != null) {
+            if (dragState == DragState.SWIPE) {
                 notifyOnSwipe(swipedTabItem, swipeDragHelper.getDragDistance());
             } else if (dragState != DragState.NONE) {
                 calculatePositions(factory);
@@ -1355,7 +1355,7 @@ public class DragHandler {
                                     @Nullable final MotionEvent event, final int dragThreshold) {
         ensureNotNull(factory, "The factory may not be null");
 
-        if (swipedTabItem != null) {
+        if (dragState == DragState.SWIPE) {
             float swipeVelocity = 0;
 
             if (event != null && velocityTracker != null) {
@@ -1371,7 +1371,6 @@ public class DragHandler {
                                     arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f);
             notifyOnSwipeEnded(swipedTabItem, remove,
                     swipeVelocity > minSwipeVelocity ? swipeVelocity : 0);
-            swipedTabItem = null;
         } else if (dragState == DragState.DRAG_TO_START || dragState == DragState.DRAG_TO_END) {
             if (event != null && velocityTracker != null && dragHelper.hasThresholdBeenReached()) {
                 handleFling(event, dragState);
@@ -1402,12 +1401,19 @@ public class DragHandler {
 
     }
 
+    // TODO: Remove
     public final int getFirstVisibleIndex() {
         return firstVisibleIndex;
     }
 
+    // TODO: Remove
     public final void setFirstVisibleIndex(final int index) {
         this.firstVisibleIndex = index;
+    }
+
+    // TODO: Remove
+    public final DragState getDragState() {
+        return dragState;
     }
 
 }
