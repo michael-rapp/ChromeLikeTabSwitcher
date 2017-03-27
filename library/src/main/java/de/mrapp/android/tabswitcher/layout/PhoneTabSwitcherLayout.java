@@ -1094,7 +1094,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     tag = relocateWhenAddingStackedTab(true, tabItem);
                 } else if (state == State.STACKED_END) {
                     tag = relocateWhenAddingStackedTab(false, tabItem);
-                } else if (state == State.FLOATING) {
+                } else if (state == State.FLOATING ||
+                        (state == State.STACKED_START_ATOP && index > 0)) {
                     tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem,
                             isReferencingPredecessor, attachedPosition,
                             attachedPosition != previousAttachedPosition);
@@ -1881,8 +1882,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
 
             if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
-                pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), referencePosition, predecessor);
+                State predecessorState =
+                        predecessor != null ? predecessor.getTag().getState() : null;
+                pair = dragHandler.clipTabPosition(count, tabItem.getIndex(), referencePosition,
+                        predecessorState == State.STACKED_START_ATOP ? State.FLOATING :
+                                predecessorState);
                 currentReferenceTabItem = tabItem;
                 referencePosition = pair.first;
                 referenceIndex = tabItem.getIndex();
