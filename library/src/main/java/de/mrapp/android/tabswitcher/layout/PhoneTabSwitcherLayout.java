@@ -1921,7 +1921,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                relocateLegacy(tabItem, tag.getPosition(), tag, 0);
+
+                if (!tabItem.isInflated()) {
+                    Pair<Float, State> pair2 = dragHandler
+                            .calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                    tabItem.getTag().setPosition(pair2.first);
+                    tabItem.getTag().setState(pair2.second);
+                }
+
+                relocate(tabItem, tag.getPosition(), tag, 0);
             }
 
             if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
@@ -2029,39 +2037,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         tag.setPosition(pair.first);
         tag.setState(pair.second);
         return tag;
-    }
-
-    /**
-     * Relocates a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be relocated, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
-     * @param relocatePosition
-     *         The position, the tab should be moved to, in pixels as an {@link Float} value
-     * @param tag
-     *         The tag, which should be applied to the tab, once it has been relocated, as an
-     *         instance of the class {@link Tag} or null, if no tag should be applied
-     * @param startDelay
-     *         The start delay of the relocate animation in milliseconds as a {@link Long} value
-     */
-    @Deprecated
-    private void relocateLegacy(@NonNull final TabItem tabItem, final float relocatePosition,
-                                @Nullable final Tag tag, final long startDelay) {
-        if (tabItem.isInflated()) {
-            animateRelocate(tabItem, relocatePosition, tag, startDelay,
-                    createRelocateAnimationListener(tabItem));
-        } else {
-            // TODO: This does only work, if the tab is actually part of the stack, which is located at the end
-            Pair<Float, State> pair =
-                    dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-            tabItem.getTag().setPosition(pair.first);
-            tabItem.getTag().setState(pair.second);
-            inflateAndUpdateView(tabItem,
-                    createRelocateLayoutListener(tabItem, relocatePosition, tag, startDelay,
-                            createRelocateAnimationListener(tabItem)));
-            tabItem.getView().setVisibility(View.INVISIBLE);
-        }
     }
 
     /**
