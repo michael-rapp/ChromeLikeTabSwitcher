@@ -48,7 +48,7 @@ public class Animation {
      * A swipe animation, which moves tabs on the orthogonal axis, while  animating their size and
      * alpha at the same time
      */
-    protected static class SwipeAnimation extends Animation {
+    public static class SwipeAnimation extends Animation {
 
         /**
          * The direction of the swipe animation.
@@ -83,7 +83,7 @@ public class Animation {
     /**
      * A reveal animation, which animates the size of a tab starting at a specific position.
      */
-    protected static class RevealAnimation extends Animation {
+    public static class RevealAnimation extends Animation {
 
         /**
          * The horizontal position, the animation starts at.
