@@ -1076,13 +1076,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 int count = getCount();
-                dragHandler.getAttachedPosition(true, count);
+                float previousAttachedPosition = dragHandler.getAttachedPosition(false, count - 1);
+                float attachedPosition = dragHandler.getAttachedPosition(true, count);
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
                 int index = tabItem.getIndex();
-                boolean referencePredecessor = index > 0;
+                boolean isReferencingPredecessor = index > 0;
                 int referenceIndex =
-                        referencePredecessor ? index - 1 : (index < count - 1 ? index + 1 : -1);
+                        isReferencingPredecessor ? index - 1 : (index < count - 1 ? index + 1 : -1);
                 TabItem referenceTabItem = referenceIndex != -1 ?
                         TabItem.create(getTabSwitcher(), viewRecycler, referenceIndex) : null;
                 State state =
@@ -1095,7 +1096,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     tag = relocateWhenAddingStackedTab(false, tabItem);
                 } else if (state == State.FLOATING) {
                     tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem,
-                            referencePredecessor);
+                            isReferencingPredecessor, attachedPosition,
+                            attachedPosition != previousAttachedPosition);
                 } else {
                     tag = relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
                 }
@@ -1841,16 +1843,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param referenceTabItem
      *         The tab item, which corresponds to the tab, which is used as a reference, as an
      *         instance of the class {@link TabItem}. The tab item may not be null
-     * @param referencePredecessor
+     * @param isReferencingPredecessor
      *         True, if the tab, which is used as a reference, is the predecessor of the added tab,
      *         false if it is the successor
+     * @param attachedPosition
+     *         The current attached position in pixels as a {@link Float} value
+     * @param attachedPositionChanged
+     *         True, if adding the tab caused the attached position to be changed, false otherwise
      * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
      * The tag may not be null
      */
     @NonNull
     private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
                                               @NonNull final TabItem referenceTabItem,
-                                              final boolean referencePredecessor) {
+                                              final boolean isReferencingPredecessor,
+                                              final float attachedPosition,
+                                              final boolean attachedPositionChanged) {
         Tag result = addedTabItem.getTag();
         int count = getTabSwitcher().getCount();
         TabItem tabItem;
@@ -1862,7 +1870,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
         float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
         float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
-        float attachedPosition = dragHandler.getAttachedPosition(false, count);
         TabItem currentReferenceTabItem = referenceTabItem;
         float referencePosition = referenceTabItem.getTag().getPosition();
         int referenceIndex = referenceTabItem.getIndex();
@@ -1873,7 +1880,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             float currentTabSpacing =
                     dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
 
-            if (referencePredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
+            if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
                 pair = dragHandler
                         .clipTabPosition(count, tabItem.getIndex(), referencePosition, predecessor);
                 currentReferenceTabItem = tabItem;
