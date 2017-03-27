@@ -35,15 +35,16 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import java.util.Iterator;
 
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
-import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
+import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -70,7 +71,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
+public class TabSwitcher extends FrameLayout
+        implements TabSwitcherLayout, ViewTreeObserver.OnGlobalLayoutListener {
 
     /**
      * The layout policy, which is used by the tab switcher.
@@ -103,7 +105,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
                             @StyleRes final int defaultStyleResource) {
         layout = new PhoneTabSwitcherLayout(this);
         layout.inflateLayout();
-        getViewTreeObserver().addOnGlobalLayoutListener(new LayoutListenerWrapper(this, layout));
+        getViewTreeObserver().addOnGlobalLayoutListener(this);
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -572,6 +574,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout {
     @Override
     public final void setTabCloseButtonIcon(@NonNull final Bitmap icon) {
         layout.setTabCloseButtonIcon(icon);
+    }
+
+    @Override
+    public final void onGlobalLayout() {
+        ViewUtil.removeOnGlobalLayoutListener(getViewTreeObserver(), this);
+        layout.onGlobalLayout();
     }
 
 }
