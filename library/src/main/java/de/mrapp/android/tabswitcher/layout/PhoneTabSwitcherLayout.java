@@ -1934,6 +1934,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             if (tabItem.getIndex() == addedTabItem.getIndex()) {
+                if (!isReferencingPredecessor && attachedPositionChanged && count > 3) {
+                    TabItem successor = iterator.previous();
+                    float successorPosition = successor.getTag().getPosition();
+                    float position = pair.first - Math.abs(pair.first - successorPosition) / 2f;
+                    pair = dragHandler
+                            .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                    initialReferencePosition = pair.first;
+                }
+
                 result.setPosition(pair.first);
                 result.setState(pair.second);
             } else {
@@ -1957,7 +1966,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        if (attachedPositionChanged) {
+        if (attachedPositionChanged && count > 3) {
             iterator = builder.start(addedTabItem.getIndex() + 1).reverse(false).create();
             float previousPosition = initialReferencePosition;
             Tag previousTag = addedTabItem.getTag();
