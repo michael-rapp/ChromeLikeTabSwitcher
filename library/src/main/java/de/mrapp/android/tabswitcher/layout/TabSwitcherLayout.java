@@ -27,9 +27,12 @@ import android.view.Menu;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+import java.util.Collection;
 import java.util.NoSuchElementException;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
+import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
@@ -160,9 +163,10 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher. By default, the tab is added at the end. If the switcher
-     * is currently shown, the tab is added by using an animation. By default, the animation type
-     * <code>AnimationType.SWIPE_RIGHT</code> is used. If an animation is currently running, the tab
-     * will be added once all previously started animations have been finished.
+     * is currently shown, the tab is added by using an animation. By default, a {@link
+     * SwipeAnimation} with direction {@link SwipeDirection#RIGHT} is used. If an animation is
+     * currently running, the tab will be added once all previously started animations have been
+     * finished.
      *
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
@@ -172,9 +176,9 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher at a specific index. If the switcher is currently shown,
-     * the tab is added by using an animation. By default, the animation type
-     * <code>AnimationType.SWIPE_RIGHT</code> is used. If an animation is currently running, the tab
-     * will be added once all previously started animations have been finished.
+     * the tab is added by using an animation. By default, a {@link SwipeAnimation} with direction
+     * {@link SwipeDirection#RIGHT} is used. If an animation is currently running, the tab will be
+     * added once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
@@ -188,7 +192,7 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher at a specific index. If the switcher is currently shown,
-     * the tab is added by using an animation of a specific type. If an animation is currently
+     * the tab is added by using a specific animation. If an animation is currently
      * running, the tab will be added once all previously started animations have been finished.
      *
      * @param tab
@@ -205,10 +209,109 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
     void addTab(@NonNull Tab tab, int index, @NonNull Animation animation);
 
     /**
-     * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
-     * removed by using an animation. By default, the animation type <code>AnimationType.SWIPE_RIGHT</code>
-     * is used. If an animation is currently running, the tab will be removed once all previously
+     * Adds all tabs, which are contained by a collection, to the tab switcher. By default, the tabs
+     * are added at the end. If the switcher is currently shown, the tabs are added by using an
+     * animation. By default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT}
+     * is used. If an animation is currently running, the tabs will be added once all previously
      * started animations have been finished.
+     *
+     * @param tabs
+     *         A collection, which contains the tabs, which should be added, as an instance of the
+     *         type {@link Collection} or an empty collection, if no tabs should be added
+     */
+    void addAllTabs(@NonNull Collection<? extends Tab> tabs);
+
+    /**
+     * Adds all tabs, which are contained by a collection, to the tab switcher, starting at a
+     * specific index. If the switcher is currently shown, the tabs are added by using an animation.
+     * By default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT} is used. If
+     * an animation is currently running, the tabs will be added once all previously started
+     * animations have been finished.
+     *
+     * @param tabs
+     *         A collection, which contains the tabs, which should be added, as an instance of the
+     *         type {@link Collection} or an empty collection, if no tabs should be added
+     * @param index
+     *         The index, the first tab should be started at, as an {@link Integer} value. The index
+     *         must be at least 0 and at maximum <code>getCount()</code>, otherwise an {@link
+     *         IndexOutOfBoundsException} will be thrown
+     */
+    void addAllTabs(@NonNull Collection<? extends Tab> tabs, int index);
+
+    /**
+     * Adds all tabs, which are contained by a collection, to the tab switcher, starting at a
+     * specific index. If the switcher is currently shown, the tabs are added by using a specific
+     * animation. If an animation is currently running, the tabs will be added once all previously
+     * started animations have been finished.
+     *
+     * @param tabs
+     *         A collection, which contains the tabs, which should be added, as an instance of the
+     *         type {@link Collection} or an empty collection, if no tabs should be added
+     * @param index
+     *         The index, the first tab should be started at, as an {@link Integer} value. The index
+     *         must be at least 0 and at maximum <code>getCount()</code>, otherwise an {@link
+     *         IndexOutOfBoundsException} will be thrown
+     * @param animation
+     *         The animation, which should be used to add the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
+     */
+    void addAllTabs(@NonNull Collection<? extends Tab> tabs, int index,
+                    @NonNull Animation animation);
+
+    /**
+     * Adds all tabs, which are contained by an array, to the tab switcher. By default, the tabs
+     * are added at the end. If the switcher is currently shown, the tabs are added by using an
+     * animation. By default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT}
+     * is used. If an animation is currently running, the tabs will be added once all previously
+     * started animations have been finished.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which should be added, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs should be added
+     */
+    void addAllTabs(@NonNull Tab[] tabs);
+
+    /**
+     * Adds all tabs, which are contained by an array, to the tab switcher, starting at a
+     * specific index. If the switcher is currently shown, the tabs are added by using an animation.
+     * By default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT} is used. If
+     * an animation is currently running, the tabs will be added once all previously started
+     * animations have been finished.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which should be added, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs should be added
+     * @param index
+     *         The index, the first tab should be started at, as an {@link Integer} value. The index
+     *         must be at least 0 and at maximum <code>getCount()</code>, otherwise an {@link
+     *         IndexOutOfBoundsException} will be thrown
+     */
+    void addAllTabs(@NonNull Tab[] tabs, int index);
+
+    /**
+     * Adds all tabs, which are contained by an array, to the tab switcher, starting at a
+     * specific index. If the switcher is currently shown, the tabs are added by using a specific
+     * animation. If an animation is currently running, the tabs will be added once all previously
+     * started animations have been finished.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which should be added, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs should be added
+     * @param index
+     *         The index, the first tab should be started at, as an {@link Integer} value. The index
+     *         must be at least 0 and at maximum <code>getCount()</code>, otherwise an {@link
+     *         IndexOutOfBoundsException} will be thrown
+     * @param animation
+     *         The animation, which should be used to add the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
+     */
+    void addAllTabs(@NonNull Tab[] tabs, int index, @NonNull Animation animation);
+
+    /**
+     * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tab will be removed
+     * once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be removed, as an instance of the class {@link Tab}. The tab
@@ -217,8 +320,8 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
     void removeTab(@NonNull Tab tab);
 
     /**
-     * Removes a specific tybe from the tab switcher. If the switcher is currently shown, the tab is
-     * removed by using an animation of a specific type. If an animation is currently running, the
+     * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
+     * removed by using a specific animation. If an animation is currently running, the
      * tab will be removed once all previously started animations have been finished.
      *
      * @param tab
@@ -232,15 +335,15 @@ public interface TabSwitcherLayout extends Iterable<Tab> {
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
-     * removed by using an animation. By default, the animation type <code>AnimationType.SWIPE_RIGHT</code>
-     * is used. If an animation is currently running, the tabs will be removed once all previously
-     * started animations have been finished.
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will be removed
+     * once all previously started animations have been finished.
      */
     void clear();
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
-     * removed by using an animation of a specific type. If an animation is currently running, the
+     * removed by using a specific animation. If an animation is currently running, the
      * tabs will be removed once all previously started animations have been finished.
      *
      * @param animation

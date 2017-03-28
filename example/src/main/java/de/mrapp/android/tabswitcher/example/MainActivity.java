@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 snackbar.setAction(null, null);
 
                 if (tabSwitcher.isSwitcherShown()) {
-                    tabSwitcher.addTab(tabs[0], index);
+                    tabSwitcher.addAllTabs(tabs, index);
                 }
             }
 

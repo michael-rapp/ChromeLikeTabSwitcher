@@ -39,6 +39,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -716,6 +717,35 @@ public abstract class AbstractTabSwitcherLayout
     @Override
     public final void addTab(@NonNull final Tab tab, final int index) {
         addTab(tab, index, Animation.createSwipeAnimation());
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs) {
+        addAllTabs(tabs, getCount());
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index) {
+        addAllTabs(tabs, index, Animation.createSwipeAnimation());
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index,
+                                 @NonNull final Animation animation) {
+        ensureNotNull(tabs, "The collection may not be null");
+        Tab[] array = new Tab[tabs.size()];
+        tabs.toArray(array);
+        addAllTabs(array, index, animation);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs) {
+        addAllTabs(tabs, getCount());
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs, final int index) {
+        addAllTabs(tabs, index, Animation.createSwipeAnimation());
     }
 
     @Override

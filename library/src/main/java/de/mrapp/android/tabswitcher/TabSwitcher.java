@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
@@ -308,6 +309,38 @@ public class TabSwitcher extends FrameLayout
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final Animation animation) {
         layout.addTab(tab, index, animation);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs) {
+        layout.addAllTabs(tabs);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index) {
+        layout.addAllTabs(tabs, index);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index,
+                                 @NonNull final Animation animation) {
+        layout.addAllTabs(tabs, index, animation);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs) {
+        layout.addAllTabs(tabs);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs, final int index) {
+        layout.addAllTabs(tabs, index);
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs, final int index,
+                                 @NonNull final Animation animation) {
+        layout.addAllTabs(tabs, index, animation);
     }
 
     @Override

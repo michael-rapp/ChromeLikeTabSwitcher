@@ -72,6 +72,7 @@ import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
+import static de.mrapp.android.util.Condition.ensureGreater;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
 import static de.mrapp.android.util.DisplayUtil.getOrientation;
@@ -84,6 +85,54 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  */
 public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         implements DragHandler.Callback {
+
+    /**
+     * A layout listener, which encapsulates another listener, which is notified, when the listener
+     * has been invoked a specific number of times.
+     */
+    private class CompoundLayoutListener implements OnGlobalLayoutListener {
+
+        /**
+         * The number of times, the listener must still be invoked, until the encapsulated listener
+         * is notified.
+         */
+        private int count;
+
+        /**
+         * The encapsulated listener;
+         */
+        private final OnGlobalLayoutListener listener;
+
+        /**
+         * Creates a new layout listener, which encapsulates another listener, which is notified,
+         * when the listener has been invoked a specific number of times.
+         *
+         * @param count
+         *         The number of times, the listener should be invoked until the encapsulated
+         *         listener is notified, as an {@link Integer} value. The count must be greater than
+         *         0
+         * @param listener
+         *         The encapsulated listener, which should be notified, when the listener has been
+         *         notified the given number of times, as an instance of the type {@link
+         *         OnGlobalLayoutListener} or null, if no listener should be notified
+         */
+        public CompoundLayoutListener(final int count,
+                                      @Nullable final OnGlobalLayoutListener listener) {
+            ensureGreater(count, 0, "The count must be greater than 0");
+            this.count = count;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            if (--count == 0) {
+                if (listener != null) {
+                    listener.onGlobalLayout();
+                }
+            }
+        }
+
+    }
 
     /**
      * An animation, which allows to fling the tabs.
@@ -1056,12 +1105,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Creates and returns a layout listener, which allows to start a swipe animation to add a tab,
-     * once its view has been inflated.
+     * Creates and returns a layout listener, which allows to start a swipe animations to add
+     * several tabs, once their views have been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param tabItems
+     *         An array, which contains the tab items, which correspond to the tabs, which should be
+     *         added, as an array of the type {@link TabItem}. The array may not be null
      * @param swipeAnimation
      *         The swipe animation, which should be started, as an instance of the class {@link
      *         SwipeAnimation}. The swipe animation may not be null
@@ -1069,7 +1118,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem[] tabItems,
                                                              @NonNull final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
@@ -1080,6 +1129,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float attachedPosition = dragHandler.getAttachedPosition(true, count);
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
+                TabItem tabItem = tabItems[0];
                 int index = tabItem.getIndex();
                 boolean isReferencingPredecessor = index > 0;
                 int referenceIndex =
@@ -1592,6 +1642,33 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             } else {
                 listener.onGlobalLayout();
             }
+        }
+    }
+
+    /**
+     * Inflates the views, which are used to visualize several tabs.
+     *
+     * @param tabItems
+     *         An array, which contains the tab items, which correspond to the tabs, whose views
+     *         should be inflated, as an array of the type {@link TabItem}. The array may not be
+     *         null
+     * @param listener
+     *         The layout listener, which should be notified, when all views have been inflated, as
+     *         an instance of the type {@link OnGlobalLayoutListener} or null, if no listener should
+     *         be notified
+     * @param params
+     *         An array, which contains optional parameters, which should be passed to the view
+     *         recycler, which is used to inflate the views, as an array of the type {@link
+     *         Integer}. The array may not be null
+     */
+    private void inflateViews(@NonNull final TabItem[] tabItems,
+                              @Nullable final OnGlobalLayoutListener listener,
+                              @NonNull final Integer... params) {
+        OnGlobalLayoutListener compoundListener =
+                new CompoundLayoutListener(tabItems.length, listener);
+
+        for (TabItem tabItem : tabItems) {
+            inflateView(tabItem, compoundListener, params);
         }
     }
 
@@ -2560,7 +2637,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     }
 
                     TabItem tabItem = new TabItem(index, tab);
-                    inflateView(tabItem, createSwipeLayoutListener(tabItem, swipeAnimation));
+                    inflateView(tabItem,
+                            createSwipeLayoutListener(new TabItem[]{tabItem}, swipeAnimation));
                 } else {
                     if (getSelectedTab() == null) {
                         setSelectedTab(tab);
@@ -2572,6 +2650,58 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         if (getSelectedTab() == tab && ViewCompat.isLaidOut(getTabSwitcher())) {
                             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
                             inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
+                        }
+                    }
+                }
+            }
+
+        });
+    }
+
+    @Override
+    public final void addAllTabs(@NonNull final Tab[] tabs, final int index,
+                                 @NonNull final Animation animation) {
+        ensureNotNull(tabs, "The array may not be null");
+        ensureNotNull(animation, "The animation may not be null");
+        ensureTrue(animation instanceof SwipeAnimation,
+                animation.getClass().getSimpleName() + " not supported when using layout " +
+                        getLayout());
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                if (tabs.length > 0) {
+                    for (int i = 0; i < tabs.length; i++) {
+                        Tab tab = tabs[i];
+                        addTabInternal(index + i, tab);
+                        tab.addCallback(recyclerAdapter);
+
+                        if (getSelectedTab() == null) {
+                            setSelectedTab(tab);
+                        }
+                    }
+
+                    if (isSwitcherShown() && ViewCompat.isLaidOut(getTabSwitcher())) {
+                        SwipeAnimation swipeAnimation =
+                                animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
+                                        Animation.createSwipeAnimation();
+                        TabItem[] tabItems = new TabItem[tabs.length];
+
+                        for (int i = 0; i < tabs.length; i++) {
+                            tabItems[i] = new TabItem(index + i, tabs[i]);
+                        }
+
+                        inflateViews(tabItems, createSwipeLayoutListener(tabItems, swipeAnimation));
+                    } else {
+                        if (!isSwitcherShown()) {
+                            toolbar.setAlpha(0);
+
+                            if (getSelectedTab() == tabs[0] &&
+                                    ViewCompat.isLaidOut(getTabSwitcher())) {
+                                TabItem tabItem =
+                                        TabItem.create(getTabSwitcher(), viewRecycler, index);
+                                inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
+                            }
                         }
                     }
                 }
