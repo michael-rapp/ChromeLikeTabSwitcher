@@ -2638,38 +2638,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                              @NonNull final Animation animation) {
         ensureNotNull(tab, "The tab may not be null");
         ensureNotNull(animation, "The animation may not be null");
-        tab.addCallback(recyclerAdapter);
-        addTabInternal(index, tab);
 
         if (animation instanceof RevealAnimation && ViewCompat.isLaidOut(getTabSwitcher())) {
             RevealAnimation revealAnimation = (RevealAnimation) animation;
+            tab.addCallback(recyclerAdapter);
+            addTabInternal(index, tab);
             setSelectedTab(tab);
             setSwitcherShown(false);
             TabItem tabItem = new TabItem(0, tab);
             inflateView(tabItem, createRevealLayoutListener(tabItem, index, revealAnimation));
-        } else if (animation instanceof SwipeAnimation && isSwitcherShown() &&
-                ViewCompat.isLaidOut(getTabSwitcher())) {
-            SwipeAnimation swipeAnimation = (SwipeAnimation) animation;
-
-            if (getSelectedTab() == null) {
-                setSelectedTab(tab);
-            }
-
-            TabItem tabItem = new TabItem(index, tab);
-            inflateView(tabItem, createSwipeLayoutListener(new TabItem[]{tabItem}, swipeAnimation));
         } else {
-            if (getSelectedTab() == null) {
-                setSelectedTab(tab);
-            }
-
-            if (!isSwitcherShown()) {
-                toolbar.setAlpha(0);
-
-                if (getSelectedTab() == tab && ViewCompat.isLaidOut(getTabSwitcher())) {
-                    TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
-                    inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
-                }
-            }
+            addAllTabs(new Tab[]{tab}, index, animation);
         }
     }
 
