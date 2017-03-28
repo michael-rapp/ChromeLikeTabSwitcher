@@ -42,10 +42,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.Animation;
@@ -69,6 +67,19 @@ public abstract class AbstractTabSwitcherLayout
         implements TabSwitcherLayout, OnGlobalLayoutListener {
 
     /**
+     * Defines the interface, a class, which should be notified about the events of a tab switcher
+     * layout, must implement.
+     */
+    public interface Callback {
+
+        /*
+         * The method, which is invoked, when all animations have been ended.
+         */
+        void onAnimationsEnded();
+
+    }
+
+    /**
      * A animation listener, which increases the number of running animations, when the observed
      * animation is started, and decreases the number of accordingly, when the animation is
      * finished. The listener allows to encapsulate another animation listener, which is notified
@@ -87,7 +98,7 @@ public abstract class AbstractTabSwitcherLayout
          */
         private void endAnimation() {
             if (--runningAnimations == 0) {
-                executePendingAction();
+                notifyOnAnimationsEnded();
             }
         }
 
@@ -201,9 +212,9 @@ public abstract class AbstractTabSwitcherLayout
     private final List<Tab> tabs;
 
     /**
-     * A queue, which contains all pending actions.
+     * The callback, which is notified about the layout's events.
      */
-    private final Queue<Runnable> pendingActions;
+    private Callback callback;
 
     /**
      * The number of animations, which are currently running.
@@ -260,6 +271,141 @@ public abstract class AbstractTabSwitcherLayout
      * The bitmap of the icon of a tab's close button.
      */
     private Bitmap tabCloseButtonIconBitmap;
+
+    /**
+     * Obtains the title of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the title should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarTitle(@NonNull final TypedArray typedArray) {
+        CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
+
+        if (!TextUtils.isEmpty(title)) {
+            setToolbarTitle(title);
+        }
+    }
+
+    /**
+     * Obtains the menu of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the menu should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarMenu(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, -1);
+
+        if (resourceId != -1) {
+            inflateToolbarMenu(resourceId, null);
+        }
+    }
+
+    /**
+     * Obtains the navigation icon of the toolbar, which is shown, when the tab switcher is shown,
+     * from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the navigation icon should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
+        Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
+
+        if (icon != null) {
+            setToolbarNavigationIcon(icon, null);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the tab switcher has been shown.
+     */
+    private void notifyOnSwitcherShown() {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSwitcherShown(tabSwitcher);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the tab switcher has been hidden.
+     */
+    private void notifyOnSwitcherHidden() {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSwitcherHidden(tabSwitcher);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the selected tab has been changed.
+     *
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value or -1, if no tab
+     *         is currently selected
+     * @param selectedTab
+     *         The currently selected tab as an instance of the class {@link Tab} or null,  if no
+     *         tab is currently selected
+     */
+    private void notifyOnSelectionChanged(final int selectedTabIndex,
+                                          @Nullable final Tab selectedTab) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSelectionChanged(tabSwitcher, selectedTabIndex, selectedTab);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that a specific tab has been added to the tab switcher.
+     *
+     * @param index
+     *         The index of the tab, which has been added, as an {@link Integer} value
+     * @param tab
+     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
+     *         not be null
+     */
+    private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onTabAdded(tabSwitcher, index, tab);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that a specific tab has been removed from the tab switcher.
+     *
+     * @param index
+     *         The index of the tab, which has been removed, as an {@link Integer} value
+     * @param tab
+     *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
+     *         not be null
+     */
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onTabRemoved(tabSwitcher, index, tab);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that all tabs have been removed from the tab switcher.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs have been removed
+     */
+    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onAllTabsRemoved(tabSwitcher, tabs);
+        }
+    }
+
+    /**
+     * Notifies the callback, that all animations have been ended.
+     */
+    protected final void notifyOnAnimationsEnded() {
+        if (callback != null) {
+            callback.onAnimationsEnded();
+        }
+    }
 
     /**
      * Returns the tab switcher, the layout belongs to.
@@ -380,166 +526,6 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Enqueues a specific action to be executed, when no animation is running.
-     *
-     * @param action
-     *         The action, which should be enqueued as an instance of the type {@link Runnable}. The
-     *         action may not be null
-     */
-    protected final void enqueuePendingAction(@NonNull final Runnable action) {
-        ensureNotNull(action, "The action may not be null");
-        pendingActions.add(action);
-        executePendingAction();
-    }
-
-    /**
-     * Executes the next pending action.
-     */
-    protected final void executePendingAction() {
-        if (!isAnimationRunning()) {
-            final Runnable action = pendingActions.poll();
-
-            if (action != null) {
-                new Runnable() {
-
-                    @Override
-                    public void run() {
-                        action.run();
-                        executePendingAction();
-                    }
-
-                }.run();
-            }
-        }
-    }
-
-    /**
-     * Notifies all listeners, that the tab switcher has been shown.
-     */
-    private void notifyOnSwitcherShown() {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSwitcherShown(tabSwitcher);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that the tab switcher has been hidden.
-     */
-    private void notifyOnSwitcherHidden() {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSwitcherHidden(tabSwitcher);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that the selected tab has been changed.
-     *
-     * @param selectedTabIndex
-     *         The index of the currently selected tab as an {@link Integer} value or -1, if no tab
-     *         is currently selected
-     * @param selectedTab
-     *         The currently selected tab as an instance of the class {@link Tab} or null,  if no
-     *         tab is currently selected
-     */
-    private void notifyOnSelectionChanged(final int selectedTabIndex,
-                                          @Nullable final Tab selectedTab) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSelectionChanged(tabSwitcher, selectedTabIndex, selectedTab);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that a specific tab has been added to the tab switcher.
-     *
-     * @param index
-     *         The index of the tab, which has been added, as an {@link Integer} value
-     * @param tab
-     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     */
-    private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onTabAdded(tabSwitcher, index, tab);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that a specific tab has been removed from the tab switcher.
-     *
-     * @param index
-     *         The index of the tab, which has been removed, as an {@link Integer} value
-     * @param tab
-     *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     */
-    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onTabRemoved(tabSwitcher, index, tab);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that all tabs have been removed from the tab switcher.
-     *
-     * @param tabs
-     *         An array, which contains the tabs, which have been removed, as an array of the type
-     *         {@link Tab} or an empty array, if no tabs have been removed
-     */
-    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onAllTabsRemoved(tabSwitcher, tabs);
-        }
-    }
-
-    /**
-     * Obtains the title of the toolbar, which is shown, when the tab switcher is shown, from a
-     * specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the title should be obtained from, as an instance of the class
-     *         {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainToolbarTitle(@NonNull final TypedArray typedArray) {
-        CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
-
-        if (!TextUtils.isEmpty(title)) {
-            setToolbarTitle(title);
-        }
-    }
-
-    /**
-     * Obtains the menu of the toolbar, which is shown, when the tab switcher is shown, from a
-     * specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the menu should be obtained from, as an instance of the class {@link
-     *         TypedArray}. The typed array may not be null
-     */
-    private void obtainToolbarMenu(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, -1);
-
-        if (resourceId != -1) {
-            inflateToolbarMenu(resourceId, null);
-        }
-    }
-
-    /**
-     * Obtains the navigation icon of the toolbar, which is shown, when the tab switcher is shown,
-     * from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the navigation icon should be obtained from, as an instance of the
-     *         class {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
-        Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
-
-        if (icon != null) {
-            setToolbarNavigationIcon(icon, null);
-        }
-    }
-
-    /**
      * The method, which is invoked on implementing subclasses, when the decorator has been
      * changed.
      *
@@ -613,8 +599,8 @@ public abstract class AbstractTabSwitcherLayout
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
+        this.callback = null;
         this.tabs = new ArrayList<>();
-        this.pendingActions = new LinkedList<>();
         this.runningAnimations = 0;
         this.decorator = null;
         this.switcherShown = false;
@@ -649,6 +635,17 @@ public abstract class AbstractTabSwitcherLayout
         obtainToolbarTitle(typedArray);
         obtainToolbarMenu(typedArray);
         obtainToolbarNavigationIcon(typedArray);
+    }
+
+    /**
+     * Sets the callback, which should be notified about the layout's events.
+     *
+     * @param callback
+     *         The callback, which should be set, as an instance of the type {@link Callback} or
+     *         null, if no callback should be notified
+     */
+    public final void setCallback(@Nullable final Callback callback) {
+        this.callback = callback;
     }
 
     @Override

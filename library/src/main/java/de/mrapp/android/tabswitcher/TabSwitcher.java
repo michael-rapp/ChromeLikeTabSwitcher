@@ -40,6 +40,8 @@ import android.widget.FrameLayout;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
@@ -73,7 +75,13 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public class TabSwitcher extends FrameLayout
-        implements TabSwitcherLayout, ViewTreeObserver.OnGlobalLayoutListener {
+        implements TabSwitcherLayout, ViewTreeObserver.OnGlobalLayoutListener,
+        AbstractTabSwitcherLayout.Callback {
+
+    /**
+     * A queue, which contains all pending actions.
+     */
+    private Queue<Runnable> pendingActions;
 
     /**
      * The layout policy, which is used by the tab switcher.
@@ -104,7 +112,9 @@ public class TabSwitcher extends FrameLayout
     private void initialize(@Nullable final AttributeSet attributeSet,
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
+        pendingActions = new LinkedList<>();
         layout = new PhoneTabSwitcherLayout(this);
+        layout.setCallback(this);
         layout.inflateLayout();
         getViewTreeObserver().addOnGlobalLayoutListener(this);
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
@@ -153,6 +163,40 @@ public class TabSwitcher extends FrameLayout
         int defaultValue = LayoutPolicy.AUTO.getValue();
         int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, defaultValue);
         setLayoutPolicy(LayoutPolicy.fromValue(value));
+    }
+
+    /**
+     * Enqueues a specific action to be executed, when no animation is running.
+     *
+     * @param action
+     *         The action, which should be enqueued as an instance of the type {@link Runnable}. The
+     *         action may not be null
+     */
+    private void enqueuePendingAction(@NonNull final Runnable action) {
+        ensureNotNull(action, "The action may not be null");
+        pendingActions.add(action);
+        executePendingAction();
+    }
+
+    /**
+     * Executes the next pending action.
+     */
+    private void executePendingAction() {
+        if (!isAnimationRunning()) {
+            final Runnable action = pendingActions.poll();
+
+            if (action != null) {
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+                        action.run();
+                        executePendingAction();
+                    }
+
+                }.run();
+            }
+        }
     }
 
     /**
@@ -297,75 +341,173 @@ public class TabSwitcher extends FrameLayout
 
     @Override
     public final void addTab(@NonNull final Tab tab) {
-        layout.addTab(tab);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addTab(tab);
+            }
+
+        });
     }
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index) {
-        layout.addTab(tab, index);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addTab(tab, index);
+            }
+
+        });
     }
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final Animation animation) {
-        layout.addTab(tab, index, animation);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addTab(tab, index, animation);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs) {
-        layout.addAllTabs(tabs);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index) {
-        layout.addAllTabs(tabs, index);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs, index);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index,
                                  @NonNull final Animation animation) {
-        layout.addAllTabs(tabs, index, animation);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs, index, animation);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Tab[] tabs) {
-        layout.addAllTabs(tabs);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Tab[] tabs, final int index) {
-        layout.addAllTabs(tabs, index);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs, index);
+            }
+
+        });
     }
 
     @Override
     public final void addAllTabs(@NonNull final Tab[] tabs, final int index,
                                  @NonNull final Animation animation) {
-        layout.addAllTabs(tabs, index, animation);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.addAllTabs(tabs, index, animation);
+            }
+
+        });
     }
 
     @Override
     public final void removeTab(@NonNull final Tab tab) {
-        layout.removeTab(tab);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.removeTab(tab);
+            }
+
+        });
     }
 
     @Override
     public final void removeTab(@NonNull final Tab tab, @NonNull final Animation animation) {
-        layout.removeTab(tab, animation);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.removeTab(tab, animation);
+            }
+
+        });
     }
 
     @Override
     public final void clear() {
-        layout.clear();
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.clear();
+            }
+
+        });
     }
 
     @Override
     public final void clear(@NonNull final Animation animationType) {
-        layout.clear(animationType);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.clear(animationType);
+            }
+
+        });
     }
 
     @Override
     public final void selectTab(@NonNull final Tab tab) {
-        layout.selectTab(tab);
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.selectTab(tab);
+            }
+
+        });
     }
 
     @Nullable
@@ -412,17 +554,38 @@ public class TabSwitcher extends FrameLayout
 
     @Override
     public final void showSwitcher() {
-        layout.showSwitcher();
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.showSwitcher();
+            }
+
+        });
     }
 
     @Override
     public final void hideSwitcher() {
-        layout.hideSwitcher();
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.hideSwitcher();
+            }
+
+        });
     }
 
     @Override
     public final void toggleSwitcherVisibility() {
-        layout.toggleSwitcherVisibility();
+        enqueuePendingAction(new Runnable() {
+
+            @Override
+            public void run() {
+                layout.toggleSwitcherVisibility();
+            }
+
+        });
     }
 
     @Override
@@ -613,6 +776,11 @@ public class TabSwitcher extends FrameLayout
     public final void onGlobalLayout() {
         ViewUtil.removeOnGlobalLayoutListener(getViewTreeObserver(), this);
         layout.onGlobalLayout();
+    }
+
+    @Override
+    public final void onAnimationsEnded() {
+        executePendingAction();
     }
 
 }
