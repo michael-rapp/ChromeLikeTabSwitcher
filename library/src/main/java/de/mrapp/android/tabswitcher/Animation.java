@@ -137,11 +137,11 @@ public class Animation {
      * animating their size and alpha at the same time. By default, the swipe animation uses the
      * direction <code>SwipeDirection.RIGHT</code>.
      *
-     * @return The animation, which has been created, as an instance of the class {@link Animation}.
-     * The animation may not be null
+     * @return The animation, which has been created, as an instance of the class {@link
+     * SwipeAnimation}. The animation may not be null
      */
     @NonNull
-    public static Animation createSwipeAnimation() {
+    public static SwipeAnimation createSwipeAnimation() {
         return createSwipeAnimation(SwipeDirection.RIGHT);
     }
 
@@ -152,11 +152,11 @@ public class Animation {
      * @param direction
      *         The direction, which should be used by the animation, as a value of the enum {@link
      *         SwipeDirection}. The direction may not be null
-     * @return The animation, which has been created, as an instance of the class {@link Animation}.
-     * The animation may not be null
+     * @return The animation, which has been created, as an instance of the class {@link
+     * SwipeAnimation}. The animation may not be null
      */
     @NonNull
-    public static Animation createSwipeAnimation(@NonNull final SwipeDirection direction) {
+    public static SwipeAnimation createSwipeAnimation(@NonNull final SwipeDirection direction) {
         return new SwipeAnimation(direction);
     }
 
@@ -170,11 +170,11 @@ public class Animation {
      * @param y
      *         The vertical position, the animation should start at, in pixels as a {@link Float}
      *         value
-     * @return The animation, which has been created, as an instance of the class {@link Animation}.
-     * The animation may not be null
+     * @return The animation, which has been created, as an instance of the class {@link
+     * RevealAnimation}. The animation may not be null
      */
     @NonNull
-    public static Animation createRevealAnimation(final float x, final float y) {
+    public static RevealAnimation createRevealAnimation(final float x, final float y) {
         return new RevealAnimation(x, y);
     }
 
