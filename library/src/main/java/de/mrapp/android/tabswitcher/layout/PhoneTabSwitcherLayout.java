@@ -1095,7 +1095,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else if (state == State.STACKED_END) {
                     tag = relocateWhenAddingStackedTab(false, tabItem);
                 } else if (state == State.FLOATING ||
-                        (state == State.STACKED_START_ATOP && index > 0)) {
+                        (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
                     tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem,
                             isReferencingPredecessor, attachedPosition,
                             attachedPosition != previousAttachedPosition);
