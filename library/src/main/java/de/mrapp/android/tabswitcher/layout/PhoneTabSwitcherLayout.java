@@ -1741,7 +1741,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        if (attachedPositionChanged &&
+        if (attachedPositionChanged && count > 2 &&
                 removedTabItem.getTag().getState() != State.STACKED_START_ATOP) {
             iterator = builder.start(removedTabItem.getIndex() + 1).reverse(false).create();
             float previousPosition = initialReferencePosition;
