@@ -27,14 +27,7 @@ import android.view.Menu;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
-
-import de.mrapp.android.tabswitcher.Animation;
-import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
-import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Layout;
-import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
