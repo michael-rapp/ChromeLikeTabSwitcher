@@ -499,6 +499,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     dragHandler.setFirstVisibleIndex(tabItem.getIndex());
                 }
             }
+
+            if (dragHandler.getFirstVisibleIndex() == -1) {
+                dragHandler.setFirstVisibleIndex(selectedTabIndex);
+            }
         }
 
         dragHandler.setCallback(PhoneTabSwitcherLayout.this);
@@ -1126,55 +1130,59 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float attachedPosition = dragHandler.getAttachedPosition(true, count);
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
-                TabItem tabItem = tabItems[0];
-                int index = tabItem.getIndex();
+                TabItem firstAddedTabItem = tabItems[0];
+                int index = firstAddedTabItem.getIndex();
                 boolean isReferencingPredecessor = index > 0;
-                int referenceIndex =
-                        isReferencingPredecessor ? index - 1 : (index < count - 1 ? index + 1 : -1);
+                int referenceIndex = isReferencingPredecessor ? index - 1 :
+                        (index + tabItems.length - 1 < count - 1 ? index + tabItems.length : -1);
                 TabItem referenceTabItem = referenceIndex != -1 ?
                         TabItem.create(getTabSwitcher(), viewRecycler, referenceIndex) : null;
                 State state =
                         referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
-                Tag tag;
+                Tag[] tags;
 
                 if (state == null || state == State.STACKED_START) {
-                    tag = relocateWhenAddingStackedTab(true, tabItem);
+                    tags = relocateWhenAddingStackedTabs(true, tabItems);
                 } else if (state == State.STACKED_END) {
-                    tag = relocateWhenAddingStackedTab(false, tabItem);
+                    tags = relocateWhenAddingStackedTabs(false, tabItems);
                 } else if (state == State.FLOATING ||
                         (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
-                    tag = relocateWhenAddingFloatingTab(tabItem, referenceTabItem,
+                    tags = relocateWhenAddingFloatingTabs(tabItems, referenceTabItem,
                             isReferencingPredecessor, attachedPosition,
                             attachedPosition != previousAttachedPosition);
                 } else {
-                    tag = relocateWhenAddingHiddenTab(tabItem, referenceTabItem);
+                    tags = relocateWhenAddingHiddenTabs(tabItems, referenceTabItem);
                 }
 
-                createBottomMarginLayoutListener(tabItem).onGlobalLayout();
-                tabItem.setTag(tag);
-                View view = tabItem.getView();
-                view.setTag(R.id.tag_properties, tag);
-                view.setAlpha(swipedTabAlpha);
-                float swipePosition = calculateSwipePosition();
-                float scale = arithmetics.getScale(view, true);
-                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                        arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-                arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
-                arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view,
-                        swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
-                                swipePosition);
-                arithmetics.setScale(Axis.DRAGGING_AXIS, view, scale);
-                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-                arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
-                        arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
-                arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-                arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
-                arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
-                animateSwipe(tabItem, false, 0, 0, swipeAnimation,
-                        createSwipeAnimationListener(tabItem));
+                for (int i = 0; i < tags.length; i++) {
+                    Tag tag = tags[i];
+                    TabItem tabItem = tabItems[i];
+                    createBottomMarginLayoutListener(tabItem).onGlobalLayout();
+                    tabItem.setTag(tag);
+                    View view = tabItem.getView();
+                    view.setTag(R.id.tag_properties, tag);
+                    view.setAlpha(swipedTabAlpha);
+                    float swipePosition = calculateSwipePosition();
+                    float scale = arithmetics.getScale(view, true);
+                    arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                            arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                    arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                            arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+                    arithmetics.setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
+                    arithmetics.setPosition(Axis.ORTHOGONAL_AXIS, view,
+                            swipeAnimation.getDirection() == SwipeDirection.LEFT ?
+                                    -1 * swipePosition : swipePosition);
+                    arithmetics.setScale(Axis.DRAGGING_AXIS, view, scale);
+                    arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                    arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
+                            arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
+                    arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
+                            arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
+                    arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
+                    arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
+                    animateSwipe(tabItem, false, 0, 0, swipeAnimation,
+                            createSwipeAnimationListener(tabItem));
+                }
             }
 
         };
@@ -1737,8 +1745,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Relocates all previous tabs, when a floating tab has been removed and more than five tabs are
-     * contained by the tab switcher.
+     * Relocates all previous tabs, when a floating tab has been removed from the tab switcher.
      *
      * @param removedTabItem
      *         The tab item, which corresponds to the tab, which has been removed, as an instance of
@@ -1881,7 +1888,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Relocates all neighboring tabs, when a stacked tab has been removed.
+     * Relocates all neighboring tabs, when a stacked tab has been removed from the tab switcher.
      *
      * @param removedTabItem
      *         The tab item, which corresponds to the tab, which has been removed, as an instance of
@@ -1941,12 +1948,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Relocates all previous tabs, when a floating tab has been added and more than four tabs are
-     * contained by the tab switcher.
+     * Relocates all previous tabs, when floating tabs have been added to the tab switcher.
      *
-     * @param addedTabItem
-     *         The tab item, which corresponds to the tab, which has been added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param addedTabItems
+     *         An array, which contains the tab items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link TabItem}. The array may not be null
      * @param referenceTabItem
      *         The tab item, which corresponds to the tab, which is used as a reference, as an
      *         instance of the class {@link TabItem}. The tab item may not be null
@@ -1957,27 +1963,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The current attached position in pixels as a {@link Float} value
      * @param attachedPositionChanged
      *         True, if adding the tab caused the attached position to be changed, false otherwise
-     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
-     * The tag may not be null
+     * @return An array, which contains the tags of the tabs, which have been added, as an array of
+     * the type {@link Tag}. The array may not be null
      */
     @NonNull
-    private Tag relocateWhenAddingFloatingTab(@NonNull final TabItem addedTabItem,
-                                              @NonNull final TabItem referenceTabItem,
-                                              final boolean isReferencingPredecessor,
-                                              final float attachedPosition,
-                                              final boolean attachedPositionChanged) {
-        Tag result = addedTabItem.getTag();
+    private Tag[] relocateWhenAddingFloatingTabs(@NonNull final TabItem[] addedTabItems,
+                                                 @NonNull final TabItem referenceTabItem,
+                                                 final boolean isReferencingPredecessor,
+                                                 final float attachedPosition,
+                                                 final boolean attachedPositionChanged) {
+        Tag[] tags = new Tag[addedTabItems.length];
         int count = getTabSwitcher().getCount();
-        AbstractTabItemIterator.AbstractBuilder builder =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
-        AbstractTabItemIterator iterator =
-                builder.start(addedTabItem.getIndex()).reverse(true).create();
-        TabItem tabItem;
+        TabItem firstAddedTabItem = addedTabItems[0];
+        TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
+
         float referencePosition = referenceTabItem.getTag().getPosition();
 
         if (isReferencingPredecessor && attachedPositionChanged &&
-                addedTabItem.getIndex() < count - 1) {
-            int neighboringIndex = addedTabItem.getIndex() + 1;
+                lastAddedTabItem.getIndex() < count - 1) {
+            int neighboringIndex = lastAddedTabItem.getIndex() + 1;
             referencePosition -= Math.abs(referencePosition -
                     TabItem.create(getTabSwitcher(), viewRecycler, neighboringIndex).getTag()
                             .getPosition()) / 2f;
@@ -1985,95 +1989,117 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         float initialReferencePosition = referencePosition;
         int selectedTabIndex = getSelectedTabIndex();
-        TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
+        TabItem selectedTabItem = TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
         float defaultTabSpacing = dragHandler.calculateMaxTabSpacing(count, null);
         float maxTabSpacing = dragHandler.calculateMaxTabSpacing(count, selectedTabItem);
         float minTabSpacing = dragHandler.calculateMinTabSpacing(count);
         TabItem currentReferenceTabItem = referenceTabItem;
         int referenceIndex = referenceTabItem.getIndex();
 
-        while ((tabItem = iterator.next()) != null) {
-            TabItem predecessor = iterator.peek();
-            Pair<Float, State> pair;
-            float currentTabSpacing =
-                    dragHandler.calculateMaxTabSpacing(count, currentReferenceTabItem);
+        AbstractTabItemIterator.AbstractBuilder builder =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
 
-            if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
-                State predecessorState =
-                        predecessor != null ? predecessor.getTag().getState() : null;
-                pair = dragHandler.clipTabPosition(count, tabItem.getIndex(), referencePosition,
-                        predecessorState == State.STACKED_START_ATOP ? State.FLOATING :
-                                predecessorState);
-                currentReferenceTabItem = tabItem;
-                referencePosition = pair.first;
-                referenceIndex = tabItem.getIndex();
-            } else if (referencePosition >= attachedPosition - currentTabSpacing) {
-                float position;
+        for (TabItem addedTabItem : addedTabItems) {
+            int iterationReferenceIndex = referenceIndex;
+            float iterationReferencePosition = referencePosition;
+            TabItem iterationReferenceTabItem = currentReferenceTabItem;
+            AbstractTabItemIterator iterator =
+                    builder.start(addedTabItem.getIndex()).reverse(true).create();
+            TabItem tabItem;
 
-                if (selectedTabIndex > tabItem.getIndex() && selectedTabIndex <= referenceIndex) {
-                    position = referencePosition + maxTabSpacing +
-                            ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
-                } else {
-                    position = referencePosition +
-                            ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
-                }
+            while ((tabItem = iterator.next()) != null) {
+                TabItem predecessor = iterator.peek();
+                Pair<Float, State> pair;
+                float currentTabSpacing =
+                        dragHandler.calculateMaxTabSpacing(count, iterationReferenceTabItem);
 
-                pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-            } else {
-                TabItem successor = iterator.previous();
-                float successorPosition = successor.getTag().getPosition();
-                float position = (attachedPosition * (successorPosition + minTabSpacing)) /
-                        (minTabSpacing + attachedPosition - currentTabSpacing);
-                pair = dragHandler
-                        .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
+                    State predecessorState =
+                            predecessor != null ? predecessor.getTag().getState() : null;
+                    pair = dragHandler
+                            .clipTabPosition(count, tabItem.getIndex(), iterationReferencePosition,
+                                    predecessorState == State.STACKED_START_ATOP ? State.FLOATING :
+                                            predecessorState);
+                    currentReferenceTabItem = iterationReferenceTabItem = tabItem;
+                    initialReferencePosition =
+                            referencePosition = iterationReferencePosition = pair.first;
+                    referenceIndex = iterationReferenceIndex = tabItem.getIndex();
+                } else if (iterationReferencePosition >= attachedPosition - currentTabSpacing) {
+                    float position;
 
-                if (pair.first >= attachedPosition - currentTabSpacing) {
-                    currentReferenceTabItem = tabItem;
-                    referencePosition = pair.first;
-                    referenceIndex = tabItem.getIndex();
-                }
-            }
+                    if (selectedTabIndex > tabItem.getIndex() &&
+                            selectedTabIndex <= iterationReferenceIndex) {
+                        position = iterationReferencePosition + maxTabSpacing +
+                                ((iterationReferenceIndex - tabItem.getIndex() - 1) *
+                                        defaultTabSpacing);
+                    } else {
+                        position = iterationReferencePosition +
+                                ((iterationReferenceIndex - tabItem.getIndex()) *
+                                        defaultTabSpacing);
+                    }
 
-            if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                if (!isReferencingPredecessor && attachedPositionChanged && count > 3) {
-                    TabItem successor = iterator.previous();
-                    float successorPosition = successor.getTag().getPosition();
-                    float position = pair.first - Math.abs(pair.first - successorPosition) / 2f;
                     pair = dragHandler
                             .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
-                    initialReferencePosition = pair.first;
+                } else {
+                    TabItem successor = iterator.previous();
+                    float successorPosition = successor.getTag().getPosition();
+                    float position = (attachedPosition * (successorPosition + minTabSpacing)) /
+                            (minTabSpacing + attachedPosition - currentTabSpacing);
+                    pair = dragHandler
+                            .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+
+                    if (pair.first >= attachedPosition - currentTabSpacing) {
+                        iterationReferenceTabItem = tabItem;
+                        iterationReferencePosition = pair.first;
+                        iterationReferenceIndex = tabItem.getIndex();
+                    }
                 }
 
-                result.setPosition(pair.first);
-                result.setState(pair.second);
-            } else {
-                Tag tag = tabItem.getTag().clone();
-                tag.setPosition(pair.first);
-                tag.setState(pair.second);
+                if (tabItem.getIndex() >= firstAddedTabItem.getIndex() &&
+                        tabItem.getIndex() <= lastAddedTabItem.getIndex()) {
+                    if (!isReferencingPredecessor && attachedPositionChanged && count > 3) {
+                        TabItem successor = iterator.previous();
+                        float successorPosition = successor.getTag().getPosition();
+                        float position = pair.first - Math.abs(pair.first - successorPosition) / 2f;
+                        pair = dragHandler
+                                .clipTabPosition(count, tabItem.getIndex(), position, predecessor);
+                        initialReferencePosition = pair.first;
+                    }
 
-                if (!tabItem.isInflated()) {
-                    Pair<Float, State> pair2 = dragHandler
-                            .calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-                    tabItem.getTag().setPosition(pair2.first);
-                    tabItem.getTag().setState(pair2.second);
+                    Tag tag = tabItem.getTag();
+                    tag.setPosition(pair.first);
+                    tag.setState(pair.second);
+                    tags[tabItem.getIndex() - firstAddedTabItem.getIndex()] = tag;
+                } else {
+                    Tag tag = tabItem.getTag().clone();
+                    tag.setPosition(pair.first);
+                    tag.setState(pair.second);
+
+                    if (!tabItem.isInflated()) {
+                        Pair<Float, State> pair2 = dragHandler
+                                .calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                        tabItem.getTag().setPosition(pair2.first);
+                        tabItem.getTag().setState(pair2.second);
+                    }
+
+                    relocate(tabItem, tag.getPosition(), tag, 0);
                 }
 
-                relocate(tabItem, tag.getPosition(), tag, 0);
-            }
-
-            if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
-                dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
-                break;
+                if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
+                    dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+                    break;
+                }
             }
         }
 
         if (attachedPositionChanged && count > 3) {
-            iterator = builder.start(addedTabItem.getIndex() + 1).reverse(false).create();
+            AbstractTabItemIterator iterator =
+                    builder.start(lastAddedTabItem.getIndex() + 1).reverse(false).create();
+            TabItem tabItem;
             float previousPosition = initialReferencePosition;
-            Tag previousTag = addedTabItem.getTag();
+            Tag previousTag = lastAddedTabItem.getTag();
 
-            while ((tabItem = iterator.next()) != null && tabItem.getIndex() < getCount() - 1) {
+            while ((tabItem = iterator.next()) != null && tabItem.getIndex() < count - 1) {
                 float position = dragHandler.calculateNonLinearPosition(previousPosition,
                         dragHandler.calculateMaxTabSpacing(count, tabItem));
                 Pair<Float, State> pair = dragHandler
@@ -2085,8 +2111,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 if (!tabItem.isInflated()) {
                     Pair<Float, State> pair2 = dragHandler
-                            .calculatePositionAndStateWhenStackedAtStart(getCount(),
-                                    tabItem.getIndex(), iterator.previous());
+                            .calculatePositionAndStateWhenStackedAtStart(count, tabItem.getIndex(),
+                                    iterator.previous());
                     tabItem.getTag().setPosition(pair2.first);
                     tabItem.getTag().setState(pair2.second);
                 }
@@ -2101,30 +2127,38 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        return result;
+        return tags;
     }
 
     /**
-     * Relocates all neighboring tabs, when a stacked tab has been added.
+     * Relocates all neighboring tabs, when stacked tabs have been added to the tab switcher.
      *
      * @param start
      *         True, if the added tab was part of the stack, which is located at the start, false,
      *         if it was part of the stack, which is located at the end
-     * @param addedTabItem
-     *         The tab item, which corresponds to the tab, which has been added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
-     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
-     * The tag may not be null
+     * @param addedTabItems
+     *         An array, which contains the tab items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link TabItem}. The array may not be null
+     * @return An array, which contains the tags of the tabs, which have been added, as an array of
+     * the type {@link Tag}. The array may not be null
      */
     @NonNull
-    private Tag relocateWhenAddingStackedTab(final boolean start,
-                                             @NonNull final TabItem addedTabItem) {
-        dragHandler.setFirstVisibleIndex(dragHandler.getFirstVisibleIndex() + 1);
+    private Tag[] relocateWhenAddingStackedTabs(final boolean start,
+                                                @NonNull final TabItem[] addedTabItems) {
+        Tag[] tags = new Tag[addedTabItems.length];
+
+        if (!start) {
+            dragHandler.setFirstVisibleIndex(
+                    dragHandler.getFirstVisibleIndex() + addedTabItems.length);
+        }
+
         int count = getTabSwitcher().getCount();
-        Tag result = addedTabItem.getTag();
+        TabItem firstAddedTabItem = addedTabItems[0];
+        TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
         AbstractTabItemIterator iterator =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
-                        .start(addedTabItem.getIndex()).reverse(start).create();
+                        .start(start ? lastAddedTabItem.getIndex() : firstAddedTabItem.getIndex())
+                        .reverse(start).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null &&
@@ -2132,7 +2166,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         tabItem.getTag().getState() == State.STACKED_START_ATOP ||
                         tabItem.getTag().getState() == State.STACKED_END ||
                         tabItem.getTag().getState() == State.HIDDEN)) {
-            TabItem predecessor = iterator.peek();
+            TabItem predecessor = start ? iterator.peek() : iterator.previous();
             Pair<Float, State> pair = start ? dragHandler
                     .calculatePositionAndStateWhenStackedAtStart(count, tabItem.getIndex(),
                             predecessor) :
@@ -2149,57 +2183,66 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            if (tabItem.getIndex() == addedTabItem.getIndex()) {
-                result.setPosition(pair.first);
-                result.setState(pair.second);
-            } else {
+            if (tabItem.getIndex() >= firstAddedTabItem.getIndex() &&
+                    tabItem.getIndex() <= lastAddedTabItem.getIndex()) {
+                Tag tag = tabItem.getTag();
+                tag.setPosition(pair.first);
+                tag.setState(pair.second);
+                tags[tabItem.getIndex() - firstAddedTabItem.getIndex()] = tag;
+            } else if (tabItem.isInflated()) {
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
                 animateRelocate(tabItem, tag.getPosition(), tag, 0,
                         createRelocateAnimationListener(tabItem));
-            }
-
-            if (pair.second == State.HIDDEN) {
+            } else {
                 break;
             }
         }
 
-        return result;
+        return tags;
     }
 
     /**
-     * Calculates the position and state of a hidden tab, which has been added.
+     * Calculates the position and state of hidden tabs, which have been added to the tab switcher.
      *
-     * @param addedTabItem
-     *         The tab item, which corresponds to the tab, which has been added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param addedTabItems
+     *         An array, which contains the tab items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link TabItem}. The array may not be null
      * @param referenceTabItem
      *         The tab item, which corresponds to the tab, which is used as a reference, as an
      *         instance of the class {@link TabItem}. The tab item may not be null
-     * @return The tag of the tab, which has been added, as an instance of the class {@link Tag}.
-     * The tag may not be null
+     * @return An array, which contains the tags of the tabs, which have been added, as an array of
+     * the type {@link Tag}. The array may not be null
      */
     @NonNull
-    private Tag relocateWhenAddingHiddenTab(@NonNull final TabItem addedTabItem,
-                                            @NonNull final TabItem referenceTabItem) {
-        int addedTabItemIndex = addedTabItem.getIndex();
-        Pair<Float, State> pair;
+    private Tag[] relocateWhenAddingHiddenTabs(@NonNull final TabItem[] addedTabItems,
+                                               @NonNull final TabItem referenceTabItem) {
+        Tag[] tags = new Tag[addedTabItems.length];
+        boolean stackedAtStart = isStackedAtStart(referenceTabItem.getIndex());
 
-        if (isStackedAtStart(referenceTabItem.getIndex())) {
-            TabItem predecessor = addedTabItemIndex > 0 ?
-                    TabItem.create(getTabSwitcher(), viewRecycler, addedTabItemIndex - 1) : null;
-            pair = dragHandler
-                    .calculatePositionAndStateWhenStackedAtStart(getCount(), addedTabItemIndex,
-                            predecessor);
-        } else {
-            pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(addedTabItemIndex);
+        for (int i = 0; i < tags.length; i++) {
+            TabItem tabItem = addedTabItems[i];
+            Pair<Float, State> pair;
+
+            if (stackedAtStart) {
+                TabItem predecessor = tabItem.getIndex() > 0 ?
+                        TabItem.create(getTabSwitcher(), viewRecycler, tabItem.getIndex() - 1) :
+                        null;
+                pair = dragHandler
+                        .calculatePositionAndStateWhenStackedAtStart(getCount(), tabItem.getIndex(),
+                                predecessor);
+            } else {
+                pair = dragHandler.calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+            }
+
+            Tag tag = tabItem.getTag();
+            tag.setPosition(pair.first);
+            tag.setState(pair.second);
+            tags[i] = tag;
         }
 
-        Tag tag = addedTabItem.getTag();
-        tag.setPosition(pair.first);
-        tag.setState(pair.second);
-        return tag;
+        return tags;
     }
 
     /**
@@ -2657,7 +2700,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                  @NonNull final Animation animation) {
         ensureNotNull(tabs, "The array may not be null");
         ensureNotNull(animation, "The animation may not be null");
-        ensureTrue(animation instanceof SwipeAnimation,
+        ensureTrue(animation instanceof SwipeAnimation || !ViewCompat.isLaidOut(getTabSwitcher()),
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
 
