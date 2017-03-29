@@ -1109,7 +1109,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Creates and returns a layout listener, which allows to start a swipe animations to add
      * several tabs, once their views have been inflated.
      *
-     * @param tabItems
+     * @param addedTabItems
      *         An array, which contains the tab items, which correspond to the tabs, which should be
      *         added, as an array of the type {@link TabItem}. The array may not be null
      * @param swipeAnimation
@@ -1119,7 +1119,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem[] tabItems,
+    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem[] addedTabItems,
                                                              @NonNull final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
@@ -1130,35 +1130,39 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float attachedPosition = dragHandler.getAttachedPosition(true, count);
                 float maxTabSpacing = calculateMaxTabSpacing(count);
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
-                TabItem firstAddedTabItem = tabItems[0];
-                int index = firstAddedTabItem.getIndex();
-                boolean isReferencingPredecessor = index > 0;
-                int referenceIndex = isReferencingPredecessor ? index - 1 :
-                        (index + tabItems.length - 1 < count - 1 ? index + tabItems.length : -1);
-                TabItem referenceTabItem = referenceIndex != -1 ?
-                        TabItem.create(getTabSwitcher(), viewRecycler, referenceIndex) : null;
-                State state =
-                        referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
-                Tag[] tags;
+                TabItem[] tabItems;
 
-                if (state == null || state == State.STACKED_START) {
-                    tags = relocateWhenAddingStackedTabs(true, tabItems);
-                } else if (state == State.STACKED_END) {
-                    tags = relocateWhenAddingStackedTabs(false, tabItems);
-                } else if (state == State.FLOATING ||
-                        (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
-                    tags = relocateWhenAddingFloatingTabs(tabItems, referenceTabItem,
-                            isReferencingPredecessor, attachedPosition,
-                            attachedPosition != previousAttachedPosition);
+                if (count - addedTabItems.length == 0) {
+                    tabItems = calculateInitialTabItems();
                 } else {
-                    tags = relocateWhenAddingHiddenTabs(tabItems, referenceTabItem);
+                    TabItem firstAddedTabItem = addedTabItems[0];
+                    int index = firstAddedTabItem.getIndex();
+                    boolean isReferencingPredecessor = index > 0;
+                    int referenceIndex = isReferencingPredecessor ? index - 1 :
+                            (index + addedTabItems.length - 1 < count - 1 ?
+                                    index + addedTabItems.length : -1);
+                    TabItem referenceTabItem = referenceIndex != -1 ?
+                            TabItem.create(getTabSwitcher(), viewRecycler, referenceIndex) : null;
+                    State state =
+                            referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
+
+                    if (state == null || state == State.STACKED_START) {
+                        tabItems = relocateWhenAddingStackedTabs(true, addedTabItems);
+                    } else if (state == State.STACKED_END) {
+                        tabItems = relocateWhenAddingStackedTabs(false, addedTabItems);
+                    } else if (state == State.FLOATING ||
+                            (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
+                        tabItems = relocateWhenAddingFloatingTabs(addedTabItems, referenceTabItem,
+                                isReferencingPredecessor, attachedPosition,
+                                attachedPosition != previousAttachedPosition);
+                    } else {
+                        tabItems = relocateWhenAddingHiddenTabs(addedTabItems, referenceTabItem);
+                    }
                 }
 
-                for (int i = 0; i < tags.length; i++) {
-                    Tag tag = tags[i];
-                    TabItem tabItem = tabItems[i];
+                for (TabItem tabItem : tabItems) {
+                    Tag tag = tabItem.getTag();
                     createBottomMarginLayoutListener(tabItem).onGlobalLayout();
-                    tabItem.setTag(tag);
                     View view = tabItem.getView();
                     view.setTag(R.id.tag_properties, tag);
                     view.setAlpha(swipedTabAlpha);
@@ -1963,16 +1967,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The current attached position in pixels as a {@link Float} value
      * @param attachedPositionChanged
      *         True, if adding the tab caused the attached position to be changed, false otherwise
-     * @return An array, which contains the tags of the tabs, which have been added, as an array of
-     * the type {@link Tag}. The array may not be null
+     * @return An array, which contains the tab items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link TabItem}. The array may not be null
      */
     @NonNull
-    private Tag[] relocateWhenAddingFloatingTabs(@NonNull final TabItem[] addedTabItems,
-                                                 @NonNull final TabItem referenceTabItem,
-                                                 final boolean isReferencingPredecessor,
-                                                 final float attachedPosition,
-                                                 final boolean attachedPositionChanged) {
-        Tag[] tags = new Tag[addedTabItems.length];
+    private TabItem[] relocateWhenAddingFloatingTabs(@NonNull final TabItem[] addedTabItems,
+                                                     @NonNull final TabItem referenceTabItem,
+                                                     final boolean isReferencingPredecessor,
+                                                     final float attachedPosition,
+                                                     final boolean attachedPositionChanged) {
         int count = getTabSwitcher().getCount();
         TabItem firstAddedTabItem = addedTabItems[0];
         TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
@@ -2066,10 +2069,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         initialReferencePosition = pair.first;
                     }
 
-                    Tag tag = tabItem.getTag();
+                    Tag tag = addedTabItems[tabItem.getIndex() - firstAddedTabItem.getIndex()]
+                            .getTag();
                     tag.setPosition(pair.first);
                     tag.setState(pair.second);
-                    tags[tabItem.getIndex() - firstAddedTabItem.getIndex()] = tag;
                 } else {
                     Tag tag = tabItem.getTag().clone();
                     tag.setPosition(pair.first);
@@ -2127,7 +2130,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        return tags;
+        return addedTabItems;
     }
 
     /**
@@ -2139,14 +2142,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param addedTabItems
      *         An array, which contains the tab items, which correspond to the tabs, which have been
      *         added, as an array of the type {@link TabItem}. The array may not be null
-     * @return An array, which contains the tags of the tabs, which have been added, as an array of
-     * the type {@link Tag}. The array may not be null
+     * @return An array, which contains the tab items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link TabItem}. The array may not be null
      */
     @NonNull
-    private Tag[] relocateWhenAddingStackedTabs(final boolean start,
-                                                @NonNull final TabItem[] addedTabItems) {
-        Tag[] tags = new Tag[addedTabItems.length];
-
+    private TabItem[] relocateWhenAddingStackedTabs(final boolean start,
+                                                    @NonNull final TabItem[] addedTabItems) {
         if (!start) {
             dragHandler.setFirstVisibleIndex(
                     dragHandler.getFirstVisibleIndex() + addedTabItems.length);
@@ -2185,10 +2186,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             if (tabItem.getIndex() >= firstAddedTabItem.getIndex() &&
                     tabItem.getIndex() <= lastAddedTabItem.getIndex()) {
-                Tag tag = tabItem.getTag();
+                Tag tag = addedTabItems[tabItem.getIndex() - firstAddedTabItem.getIndex()].getTag();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                tags[tabItem.getIndex() - firstAddedTabItem.getIndex()] = tag;
             } else if (tabItem.isInflated()) {
                 Tag tag = tabItem.getTag().clone();
                 tag.setPosition(pair.first);
@@ -2200,7 +2200,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        return tags;
+        return addedTabItems;
     }
 
     /**
@@ -2212,17 +2212,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param referenceTabItem
      *         The tab item, which corresponds to the tab, which is used as a reference, as an
      *         instance of the class {@link TabItem}. The tab item may not be null
-     * @return An array, which contains the tags of the tabs, which have been added, as an array of
-     * the type {@link Tag}. The array may not be null
+     * @return An array, which contains the tab items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link TabItem}. The array may not be null
      */
     @NonNull
-    private Tag[] relocateWhenAddingHiddenTabs(@NonNull final TabItem[] addedTabItems,
-                                               @NonNull final TabItem referenceTabItem) {
-        Tag[] tags = new Tag[addedTabItems.length];
+    private TabItem[] relocateWhenAddingHiddenTabs(@NonNull final TabItem[] addedTabItems,
+                                                   @NonNull final TabItem referenceTabItem) {
         boolean stackedAtStart = isStackedAtStart(referenceTabItem.getIndex());
 
-        for (int i = 0; i < tags.length; i++) {
-            TabItem tabItem = addedTabItems[i];
+        for (TabItem tabItem : addedTabItems) {
             Pair<Float, State> pair;
 
             if (stackedAtStart) {
@@ -2239,10 +2237,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             Tag tag = tabItem.getTag();
             tag.setPosition(pair.first);
             tag.setState(pair.second);
-            tags[i] = tag;
         }
 
-        return tags;
+        return addedTabItems;
     }
 
     /**
