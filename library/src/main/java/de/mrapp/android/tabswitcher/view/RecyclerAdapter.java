@@ -34,11 +34,11 @@ import android.widget.TextView;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AbstractViewRecycler;
@@ -211,8 +211,9 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void adaptCloseButton(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
-        viewHolder.closeButton
-                .setOnClickListener(tab.isCloseable() ? createCloseButtonClickListener(tab) : null);
+        viewHolder.closeButton.setOnClickListener(
+                tab.isCloseable() ? createCloseButtonClickListener(viewHolder.closeButton, tab) :
+                        null);
     }
 
     /**
@@ -236,6 +237,9 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      * Creates and returns a listener, which allows to close a specific tab, when its close button
      * is clicked.
      *
+     * @param closeButton
+     *         The tab's close button as an instance of the class {@link ImageButton}. The button
+     *         may not be null
      * @param tab
      *         The tab, which should be closed, as an instance of the class {@link Tab}. The tab may
      *         not be null
@@ -243,12 +247,14 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      * View.OnClickListener}. The listener may not be null
      */
     @NonNull
-    private View.OnClickListener createCloseButtonClickListener(@NonNull final Tab tab) {
+    private View.OnClickListener createCloseButtonClickListener(
+            @NonNull final ImageButton closeButton, @NonNull final Tab tab) {
         return new View.OnClickListener() {
 
             @Override
             public void onClick(final View v) {
                 if (notifyOnCloseTab(tab)) {
+                    closeButton.setOnClickListener(null);
                     tabSwitcher.removeTab(tab);
                 }
             }
