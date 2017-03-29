@@ -107,14 +107,6 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         child.draw(canvas);
-
-        // TODO: This is only for debugging purposes
-        Paint paint = new Paint();
-        paint.setTextSize(48);
-        paint.setTypeface(Typeface.DEFAULT_BOLD);
-        paint.setColor(Color.RED);
-        canvas.drawText(Integer.toString(params[0].getIndex()), 50, 50, paint);
-
         return bitmap;
     }
 
