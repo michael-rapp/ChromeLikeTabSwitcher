@@ -139,6 +139,27 @@ public class TabItem {
                                  @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
                                  final int index) {
         Tab tab = tabSwitcher.getTab(index);
+        return create(viewRecycler, index, tab);
+    }
+
+    /**
+     * Creates a new item, which contains information about a specific tab. By default, the item is
+     * neither associated with a view, nor with a view holder.
+     *
+     * @param viewRecycler
+     *         The view recycler, which is used to reuse the views, which are used to visualize
+     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may
+     *         not be null
+     * @param index
+     *         The index of the tab as an {@link Integer} value. The index must be at least 0
+     * @param tab
+     *         The tab as an instance of the class {@link Tab}. The tab may not be null
+     * @return The item, which has been created, as an instance of the class {@link TabItem}. The
+     * item may not be null
+     */
+    @NonNull
+    public static TabItem create(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
+                                 final int index, @NonNull final Tab tab) {
         TabItem tabItem = new TabItem(index, tab);
         View view = viewRecycler.getView(tabItem);
 
