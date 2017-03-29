@@ -29,7 +29,7 @@ import static de.mrapp.android.util.Condition.ensureEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An iterator, which allows to iterate the tab items, which corresponds to the tabs of a {@link
+ * An iterator, which allows to iterate the tab items, which correspond to the tabs of a {@link
  * TabSwitcher}. When a tab item is referenced for the first time, its initial position and state is
  * calculated and the tab item is stored in a backing array. When the tab item is iterated again, it
  * is retrieved from the backing array.
