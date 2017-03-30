@@ -58,7 +58,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
         @NonNull
         @Override
         public ArrayTabItemIterator create() {
-            return new ArrayTabItemIterator(viewRecycler, array);
+            return new ArrayTabItemIterator(viewRecycler, array, reverse, start);
         }
 
     }
@@ -127,13 +127,20 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
      * @param array
      *         The array, which contains the tabs, which should be iterated by the iterator, as an
      *         array of the type {@link Tab}. The array may not be null
+     * @param reverse
+     *         True, if the tabs should be iterated in reverse order, false otherwise
+     * @param start
+     *         The index of the first tab, which should be iterated, as an {@link Integer} value or
+     *         -1, if all tabs should be iterated
      */
     public ArrayTabItemIterator(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                                @NonNull final Tab[] array) {
+                                @NonNull final Tab[] array, final boolean reverse,
+                                final int start) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(array, "The array may not be null");
         this.viewRecycler = viewRecycler;
         this.array = array;
+        initialize(reverse, start);
     }
 
     @Override
