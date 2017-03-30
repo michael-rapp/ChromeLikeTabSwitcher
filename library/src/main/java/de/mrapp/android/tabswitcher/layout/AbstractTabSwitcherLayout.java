@@ -363,10 +363,14 @@ public abstract class AbstractTabSwitcherLayout
      * @param tab
      *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param animation
+     *         The animation, which has been used to add the tab, as an instance of the class {@link
+     *         Animation}. The animation may not be null
      */
-    private void notifyOnTabAdded(final int index, @NonNull final Tab tab) {
+    private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
+                                  @NonNull final Animation animation) {
         for (TabSwitcherListener listener : listeners) {
-            listener.onTabAdded(tabSwitcher, index, tab);
+            listener.onTabAdded(tabSwitcher, index, tab, animation);
         }
     }
 
@@ -378,10 +382,14 @@ public abstract class AbstractTabSwitcherLayout
      * @param tab
      *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param animation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab) {
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
+                                    @NonNull final Animation animation) {
         for (TabSwitcherListener listener : listeners) {
-            listener.onTabRemoved(tabSwitcher, index, tab);
+            listener.onTabRemoved(tabSwitcher, index, tab, animation);
         }
     }
 
@@ -391,10 +399,14 @@ public abstract class AbstractTabSwitcherLayout
      * @param tabs
      *         An array, which contains the tabs, which have been removed, as an array of the type
      *         {@link Tab} or an empty array, if no tabs have been removed
+     * @param animation
+     *         The animation, which has been used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs) {
+    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs,
+                                        @NonNull final Animation animation) {
         for (TabSwitcherListener listener : listeners) {
-            listener.onAllTabsRemoved(tabSwitcher, tabs);
+            listener.onAllTabsRemoved(tabSwitcher, tabs, animation);
         }
     }
 
@@ -437,11 +449,15 @@ public abstract class AbstractTabSwitcherLayout
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param animation
+     *         The animation, which has been used to add the tab, as an instance of the class {@link
+     *         Animation}. The animation may not be null
      */
-    protected final void addTabInternal(final int index, @NonNull final Tab tab) {
+    protected final void addTabInternal(final int index, @NonNull final Tab tab,
+                                        @NonNull final Animation animation) {
         ensureNotNull(tab, "The tab may not be null");
         tabs.add(index, tab);
-        notifyOnTabAdded(index, tab);
+        notifyOnTabAdded(index, tab, animation);
     }
 
     /**
@@ -450,26 +466,32 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param index
      *         The index of the tab, which should be removed, as an {@link Integer} value
+     * @param animation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      * @return The tab, which has been removed, as an instance of the class {@link Tab}
      */
-    protected final Tab removeTabInternal(final int index) {
+    protected final Tab removeTabInternal(final int index, @NonNull final Animation animation) {
         Tab tab = tabs.remove(index);
-        notifyOnTabRemoved(index, tab);
+        notifyOnTabRemoved(index, tab, animation);
         return tab;
     }
 
     /**
-     * Removes all tabs from the list, which contains the tabs,w hich are contained by the tab
+     * Removes all tabs from the list, which contains the tabs, which are contained by the tab
      * switcher.
      *
+     * @param animation
+     *         The animation, which has been used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      * @return An array, which contains the tabs, which have been removed, as an array of the type
      * {@link Tab} or an empty array, if no tabs have been removed
      */
-    protected final Tab[] clearTabsInternal() {
+    protected final Tab[] clearTabsInternal(@NonNull final Animation animation) {
         Tab[] result = new Tab[tabs.size()];
         tabs.toArray(result);
         tabs.clear();
-        notifyOnAllTabsRemoved(result);
+        notifyOnAllTabsRemoved(result, animation);
         return result;
     }
 

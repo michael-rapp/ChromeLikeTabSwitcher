@@ -57,6 +57,7 @@ import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.InitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
@@ -1333,13 +1334,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-
-                for (Tab tab : clearTabsInternal()) {
-                    tab.removeCallback(recyclerAdapter);
-                }
-
                 viewRecycler.removeAll();
-                setSelectedTab(null);
                 animateToolbarVisibility(isToolbarShown(), 0);
             }
 
@@ -1394,6 +1389,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 super.onAnimationStart(animation);
                 int count = getCount() - 1;
 
+                // TODO: Must be selected before animation is started
                 if (count == 0) {
                     setSelectedTab(null);
                     animateToolbarVisibility(isToolbarShown(), 0);
@@ -1426,7 +1422,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 super.onAnimationEnd(animation);
                 int index = tabItem.getIndex();
                 viewRecycler.remove(tabItem);
-                Tab tab = removeTabInternal(index);
+                // TODO: Must be removed before animation is started
+                Tab tab = removeTabInternal(index, null);
                 tab.removeCallback(recyclerAdapter);
             }
 
@@ -2682,7 +2679,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (animation instanceof RevealAnimation && ViewCompat.isLaidOut(getTabSwitcher())) {
             RevealAnimation revealAnimation = (RevealAnimation) animation;
             tab.addCallback(recyclerAdapter);
-            addTabInternal(index, tab);
+            addTabInternal(index, tab, animation);
             setSelectedTab(tab);
             setSwitcherShown(false);
             TabItem tabItem = new TabItem(0, tab);
@@ -2704,7 +2701,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (tabs.length > 0) {
             for (int i = 0; i < tabs.length; i++) {
                 Tab tab = tabs[i];
-                addTabInternal(index + i, tab);
+                addTabInternal(index + i, tab, animation);
                 tab.addCallback(recyclerAdapter);
 
                 if (getSelectedTab() == null) {
@@ -2744,11 +2741,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
         int index = indexOfOrThrowException(tab);
-        TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
+        TabItem removedTabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
 
         if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
-            viewRecycler.remove(tabItem);
-            Tab removedTab = removeTabInternal(index);
+            viewRecycler.remove(removedTabItem);
+            Tab removedTab = removeTabInternal(index, animation);
             removedTab.removeCallback(recyclerAdapter);
 
             if (isEmpty()) {
@@ -2769,13 +2766,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
         } else {
-            adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
-            tabItem.getTag().setClosing(true);
+            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex() + 1);
+            removedTabItem.getTag().setClosing(true);
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
 
-            if (tabItem.isInflated()) {
-                animateRemove(tabItem, swipeAnimation);
+            if (removedTabItem.isInflated()) {
+                animateRemove(removedTabItem, swipeAnimation);
             } else {
                 boolean start = isStackedAtStart(index);
                 TabItem predecessor = TabItem.create(getTabSwitcher(), viewRecycler, index - 1);
@@ -2783,9 +2780,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         .calculatePositionAndStateWhenStackedAtStart(getCount(), index,
                                 predecessor) :
                         dragHandler.calculatePositionAndStateWhenStackedAtEnd(index);
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
-                inflateAndUpdateView(tabItem, createRemoveLayoutListener(tabItem, swipeAnimation));
+                removedTabItem.getTag().setPosition(pair.first);
+                removedTabItem.getTag().setState(pair.second);
+                inflateAndUpdateView(removedTabItem,
+                        createRemoveLayoutListener(removedTabItem, swipeAnimation));
             }
         }
     }
@@ -2796,17 +2794,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
-        if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
-            for (Tab tab : clearTabsInternal()) {
-                tab.removeCallback(recyclerAdapter);
-            }
+        Tab[] removedTabs = clearTabsInternal(animation);
+        setSelectedTab(null);
 
+        for (Tab tab : removedTabs) {
+            tab.removeCallback(recyclerAdapter);
+        }
+
+        if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
             viewRecycler.removeAll();
-            setSelectedTab(null);
             toolbar.setAlpha(isToolbarShown() ? 1 : 0);
         } else {
-            TabItemIterator iterator = new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).
-                    reverse(true).create();
+            SwipeAnimation swipeAnimation =
+                    animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
+            AbstractTabItemIterator iterator =
+                    new ArrayTabItemIterator.Builder(viewRecycler, removedTabs).reverse(true)
+                            .create();
             TabItem tabItem;
             int startDelay = 0;
 
@@ -2819,8 +2822,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 if (tabItem.isInflated()) {
-                    SwipeAnimation swipeAnimation =
-                            animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
                     animateSwipe(tabItem, true, 0, startDelay, swipeAnimation,
                             !iterator.hasNext() ? createClearAnimationListener() : null);
                 }

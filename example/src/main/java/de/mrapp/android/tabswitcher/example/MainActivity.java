@@ -266,20 +266,21 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                 @NonNull final Tab tab) {
+                                 @NonNull final Tab tab, @NonNull final Animation animation) {
 
     }
 
     @Override
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                   @NonNull final Tab tab) {
+                                   @NonNull final Tab tab, @NonNull final Animation animation) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         showUndoSnackbar(text, index, tab);
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
-                                       @NonNull final Tab[] tabs) {
+                                       @NonNull final Tab[] tabs,
+                                       @NonNull final Animation animation) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         showUndoSnackbar(text, 0, tabs);
     }

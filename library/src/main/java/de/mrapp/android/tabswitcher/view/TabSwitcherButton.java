@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
 
+import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -138,20 +139,21 @@ public class TabSwitcherButton extends AppCompatImageButton implements TabSwitch
 
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                 @NonNull final Tab tab) {
-        drawable.onTabAdded(tabSwitcher, index, tab);
+                                 @NonNull final Tab tab, @NonNull final Animation animation) {
+        drawable.onTabAdded(tabSwitcher, index, tab, animation);
     }
 
     @Override
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                   @NonNull final Tab tab) {
-        drawable.onTabRemoved(tabSwitcher, index, tab);
+                                   @NonNull final Tab tab, @NonNull final Animation animation) {
+        drawable.onTabRemoved(tabSwitcher, index, tab, animation);
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
-                                       @NonNull final Tab[] tabs) {
-        drawable.onAllTabsRemoved(tabSwitcher, tabs);
+                                       @NonNull final Tab[] tabs,
+                                       @NonNull final Animation animation) {
+        drawable.onAllTabsRemoved(tabSwitcher, tabs, animation);
     }
 
 }

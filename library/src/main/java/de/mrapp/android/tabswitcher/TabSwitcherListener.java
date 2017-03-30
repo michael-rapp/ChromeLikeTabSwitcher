@@ -32,7 +32,7 @@ public interface TabSwitcherListener {
      *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The tab
      *         switcher may not be null
      */
-    void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher);
+    void onSwitcherShown(@NonNull TabSwitcher tabSwitcher);
 
     /**
      * The method, which is invoked, when the tab switcher has been hidden.
@@ -41,7 +41,7 @@ public interface TabSwitcherListener {
      *         The observed tab switcher as an instance of the class {@link TabSwitcher}. The tab
      *         switcher may not be null
      */
-    void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher);
+    void onSwitcherHidden(@NonNull TabSwitcher tabSwitcher);
 
     /**
      * The method, which is invoked, when the currently selected tab has been changed.
@@ -56,7 +56,7 @@ public interface TabSwitcherListener {
      *         The currently selected tab as an instance of the class {@link Tab} or null, if the
      *         tab switcher does not contain any tabs
      */
-    void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher, int selectedTabIndex,
+    void onSelectionChanged(@NonNull TabSwitcher tabSwitcher, int selectedTabIndex,
                             @Nullable Tab selectedTab);
 
     /**
@@ -70,8 +70,12 @@ public interface TabSwitcherListener {
      * @param tab
      *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param animation
+     *         The animation, which has been used to add the tab, as an instance of the class {@link
+     *         Animation}. The animation may not be null
      */
-    void onTabAdded(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
+    void onTabAdded(@NonNull TabSwitcher tabSwitcher, int index, @NonNull Tab tab,
+                    @NonNull Animation animation);
 
     /**
      * The method, which is invoked, when a tab has been removed from the tab switcher.
@@ -84,8 +88,12 @@ public interface TabSwitcherListener {
      * @param tab
      *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param animation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, int index, @NonNull Tab tab);
+    void onTabRemoved(@NonNull TabSwitcher tabSwitcher, int index, @NonNull Tab tab,
+                      @NonNull Animation animation);
 
     /**
      * The method, which is invoked, when all tabs have been removed from the tab switcher.
@@ -96,7 +104,11 @@ public interface TabSwitcherListener {
      * @param tabs
      *         An array, which contains the tabs, which have been removed, as an array of the type
      *         {@link Tab} or an empty array, if no tabs have been removed
+     * @param animation
+     *         The animation, which has been used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
      */
-    void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher, @NonNull Tab[] tabs);
+    void onAllTabsRemoved(@NonNull TabSwitcher tabSwitcher, @NonNull Tab[] tabs,
+                          @NonNull Animation animation);
 
 }

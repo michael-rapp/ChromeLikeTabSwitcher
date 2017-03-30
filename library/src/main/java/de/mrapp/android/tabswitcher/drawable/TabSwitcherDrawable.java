@@ -28,6 +28,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
+import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -190,19 +191,20 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
 
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                 @NonNull final Tab tab) {
+                                 @NonNull final Tab tab, @NonNull final Animation animation) {
         setCount(tabSwitcher.getCount());
     }
 
     @Override
     public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
-                                   @NonNull final Tab tab) {
+                                   @NonNull final Tab tab, @NonNull final Animation animation) {
         setCount(tabSwitcher.getCount());
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
-                                       @NonNull final Tab[] tab) {
+                                       @NonNull final Tab[] tab,
+                                       @NonNull final Animation animation) {
         setCount(tabSwitcher.getCount());
     }
 
