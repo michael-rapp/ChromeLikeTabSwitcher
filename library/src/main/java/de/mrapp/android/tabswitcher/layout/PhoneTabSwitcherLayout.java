@@ -706,21 +706,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * Animates the removal of a specific tab item.
      *
-     * @param tabItem
+     * @param removedTabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
      * @param swipeAnimation
      *         The animation, which should be used, as an instance of the class {@link
      *         SwipeAnimation} or null, if no specific animation should be used
      */
-    private void animateRemove(@NonNull final TabItem tabItem,
+    private void animateRemove(@NonNull final TabItem removedTabItem,
                                @Nullable final SwipeAnimation swipeAnimation) {
-        View view = tabItem.getView();
+        View view = removedTabItem.getView();
         arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                 arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-        animateSwipe(tabItem, true, 0, 0, swipeAnimation, createRemoveAnimationListener(tabItem));
+        animateSwipe(removedTabItem, true, 0, 0, swipeAnimation,
+                createRemoveAnimationListener(removedTabItem));
     }
 
     /**
@@ -1374,45 +1375,36 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Creates and returns a listener, which allows to relocate all previous tabs, when a tab has
      * been removed.
      *
-     * @param tabItem
+     * @param removedTabItem
      *         The tab item, which corresponds to the tab, which has been removed, as an instance of
      *         the class {@link TabItem}. The tab item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRemoveAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createRemoveAnimationListener(@NonNull final TabItem removedTabItem) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
-                int count = getCount() - 1;
 
-                // TODO: Must be selected before animation is started
-                if (count == 0) {
-                    setSelectedTab(null);
+                if (isEmpty()) {
                     animateToolbarVisibility(isToolbarShown(), 0);
-                } else if (getSelectedTab() == tabItem.getTab()) {
-                    if (tabItem.getIndex() > 0) {
-                        setSelectedTab(getTab(tabItem.getIndex() - 1));
-                    } else {
-                        setSelectedTab(getTab(1));
-                    }
                 }
 
-                float previousAttachedPosition = dragHandler.getAttachedPosition(false, getCount());
-                float attachedPosition = dragHandler.getAttachedPosition(true, count);
-                float maxTabSpacing = calculateMaxTabSpacing(count);
+                float previousAttachedPosition = dragHandler.getAttachedPosition(false, -1);
+                float attachedPosition = dragHandler.getAttachedPosition(true, getCount());
+                float maxTabSpacing = calculateMaxTabSpacing(getCount());
                 dragHandler.setMaxTabSpacing(maxTabSpacing);
-                State state = tabItem.getTag().getState();
+                State state = removedTabItem.getTag().getState();
 
                 if (state == State.STACKED_END) {
-                    relocateWhenRemovingStackedTab(tabItem, false);
+                    relocateWhenRemovingStackedTab(removedTabItem, false);
                 } else if (state == State.STACKED_START) {
-                    relocateWhenRemovingStackedTab(tabItem, true);
+                    relocateWhenRemovingStackedTab(removedTabItem, true);
                 } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
-                    relocateWhenRemovingFloatingTab(tabItem, attachedPosition,
+                    relocateWhenRemovingFloatingTab(removedTabItem, attachedPosition,
                             previousAttachedPosition != attachedPosition);
                 }
             }
@@ -1420,11 +1412,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                int index = tabItem.getIndex();
-                viewRecycler.remove(tabItem);
-                // TODO: Must be removed before animation is started
-                Tab tab = removeTabInternal(index, null);
-                tab.removeCallback(recyclerAdapter);
+                viewRecycler.remove(removedTabItem);
             }
 
         };
@@ -1900,12 +1888,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void relocateWhenRemovingStackedTab(@NonNull final TabItem removedTabItem,
                                                 final boolean start) {
-        int startIndex = removedTabItem.getIndex() + (start ? -1 : 1);
+        int startIndex = removedTabItem.getIndex() + (start ? -1 : 0);
         TabItemIterator iterator =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(start)
-                        .start(removedTabItem.getIndex()).create();
+                        .start(startIndex).create();
         TabItem tabItem;
-        Float previousProjectedPosition = null;
+        float previousProjectedPosition = removedTabItem.getTag().getPosition();
 
         while ((tabItem = iterator.next()) != null &&
                 (tabItem.getTag().getState() == State.HIDDEN ||
@@ -1914,34 +1902,27 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         tabItem.getTag().getState() == State.STACKED_END)) {
             float projectedPosition = tabItem.getTag().getPosition();
 
-            if (previousProjectedPosition != null) {
-                if (tabItem.getTag().getState() == State.HIDDEN) {
-                    TabItem previous = iterator.previous();
-                    tabItem.getTag().setState(previous.getTag().getState());
+            if (tabItem.getTag().getState() == State.HIDDEN) {
+                TabItem previous = iterator.previous();
+                tabItem.getTag().setState(previous.getTag().getState());
 
-                    if (start) {
-                        tabItem.getTag().setPosition(previousProjectedPosition);
-                    }
-
-                    if (tabItem.isVisible()) {
-                        Pair<Float, State> pair = start ? dragHandler
-                                .calculatePositionAndStateWhenStackedAtStart(
-                                        getTabSwitcher().getCount(), previous.getIndex(), tabItem) :
-                                dragHandler.calculatePositionAndStateWhenStackedAtEnd(
-                                        previous.getIndex());
-                        tabItem.getTag().setPosition(pair.first);
-                        tabItem.getTag().setState(pair.second);
-                        inflateAndUpdateView(tabItem, null);
-                    }
-
-                    break;
-                } else {
-                    tabItem.getTag().setPosition(previousProjectedPosition);
-                    long startDelay = (start ? (startIndex + 1 - tabItem.getIndex()) :
-                            (tabItem.getIndex() - startIndex)) * relocateAnimationDelay;
-                    animateRelocate(tabItem, previousProjectedPosition, null, startDelay,
-                            createRelocateAnimationListener(tabItem));
+                if (tabItem.isVisible()) {
+                    Pair<Float, State> pair = start ? dragHandler
+                            .calculatePositionAndStateWhenStackedAtStart(
+                                    getTabSwitcher().getCount(), tabItem.getIndex(), tabItem) :
+                            dragHandler
+                                    .calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
+                    inflateAndUpdateView(tabItem, null);
                 }
+
+                break;
+            } else {
+                tabItem.getTag().setPosition(previousProjectedPosition);
+                long startDelay = Math.abs(startIndex - tabItem.getIndex());
+                animateRelocate(tabItem, previousProjectedPosition, null, startDelay,
+                        createRelocateAnimationListener(tabItem));
             }
 
             previousProjectedPosition = projectedPosition;
@@ -2741,28 +2722,30 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
         int index = indexOfOrThrowException(tab);
-        TabItem removedTabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
+        removeTabInternal(index, animation);
+        tab.removeCallback(recyclerAdapter);
+        TabItem removedTabItem = TabItem.create(viewRecycler, index, tab);
+        int newSelectedTabIndex = -1;
+
+        if (isEmpty()) {
+            setSelectedTab(null);
+        } else if (getSelectedTab() == tab) {
+            if (index > 0) {
+                newSelectedTabIndex = setSelectedTab(getTab(index - 1));
+            } else {
+                newSelectedTabIndex = setSelectedTab(getTab(0));
+            }
+        }
 
         if (!isSwitcherShown() || !ViewCompat.isLaidOut(getTabSwitcher())) {
             viewRecycler.remove(removedTabItem);
-            Tab removedTab = removeTabInternal(index, animation);
-            removedTab.removeCallback(recyclerAdapter);
 
             if (isEmpty()) {
-                setSelectedTab(null);
                 toolbar.setAlpha(isToolbarShown() ? 1 : 0);
-            } else if (getSelectedTab() == removedTab) {
-                int selectedTabIndex;
-
-                if (index > 0) {
-                    selectedTabIndex = setSelectedTab(getTab(index - 1));
-                } else {
-                    selectedTabIndex = setSelectedTab(getTab(0));
-                }
-
+            } else if (newSelectedTabIndex != -1) {
                 if (ViewCompat.isLaidOut(getTabSwitcher())) {
                     viewRecycler.inflate(
-                            TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex));
+                            TabItem.create(getTabSwitcher(), viewRecycler, newSelectedTabIndex));
                 }
             }
         } else {
