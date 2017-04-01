@@ -1920,7 +1920,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 break;
             } else {
                 tabItem.getTag().setPosition(previousProjectedPosition);
-                long startDelay = Math.abs(startIndex - tabItem.getIndex());
+                long startDelay =
+                        (Math.abs(startIndex - tabItem.getIndex()) + 1) * relocateAnimationDelay;
                 animateRelocate(tabItem, previousProjectedPosition, null, startDelay,
                         createRelocateAnimationListener(tabItem));
             }
