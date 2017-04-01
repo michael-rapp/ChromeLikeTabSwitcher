@@ -2757,7 +2757,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
         } else {
-            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex() + 1);
+            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex());
             removedTabItem.getTag().setClosing(true);
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
