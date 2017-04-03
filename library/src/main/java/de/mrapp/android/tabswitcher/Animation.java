@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher;
 
 import android.support.annotation.NonNull;
 
+import static de.mrapp.android.util.Condition.ensureGreater;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -23,7 +24,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class Animation {
+public abstract class Animation {
 
     /**
      * Contains all possible directions of a swipe animation.
@@ -133,6 +134,11 @@ public class Animation {
     }
 
     /**
+     * The duration of the animation in milliseconds.
+     */
+    private long duration;
+
+    /**
      * Creates and returns a swipe animation, which moves tabs on the orthogonal axis, while
      * animating their size and alpha at the same time. By default, the swipe animation uses the
      * direction <code>SwipeDirection.RIGHT</code>.
@@ -176,6 +182,27 @@ public class Animation {
     @NonNull
     public static RevealAnimation createRevealAnimation(final float x, final float y) {
         return new RevealAnimation(x, y);
+    }
+
+    /**
+     * Returns the duration of the animation.
+     *
+     * @return The duration of the animation in milliseconds as a {@link Long} value
+     */
+    public final long getDuration() {
+        return duration;
+    }
+
+    /**
+     * Sets the duration of the animation.
+     *
+     * @param duration
+     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
+     *         duration must be greater than 0
+     */
+    public final void setDuration(final long duration) {
+        ensureGreater(duration, 0, "The duration must be greater than 0");
+        this.duration = duration;
     }
 
 }
