@@ -65,13 +65,15 @@ public class TabItem {
             int index1 = tabSwitcher.indexOf(tab1);
             int index2 = tabSwitcher.indexOf(tab2);
 
-            if (index1 == -1) {
-                throw new RuntimeException("Tab not contained by tab switcher");
-            } else if (index2 == -1) {
-                return -1;
+            if (index2 == -1) {
+                index2 = o2.getIndex();
             }
 
-            return index1 <= index2 ? -1 : 1;
+            if (index1 == -1 || index2 == -1) {
+                throw new RuntimeException("Tab not contained by tab switcher");
+            }
+
+            return index1 < index2 ? -1 : 1;
         }
 
     }
