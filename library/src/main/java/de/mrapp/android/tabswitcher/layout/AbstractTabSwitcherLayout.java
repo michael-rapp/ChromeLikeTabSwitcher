@@ -38,20 +38,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-
-import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
-import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.TabSwitcherListener;
+import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -64,7 +54,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public abstract class AbstractTabSwitcherLayout
-        implements TabSwitcherLayout, OnGlobalLayoutListener {
+        implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -80,81 +70,11 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * A animation listener, which increases the number of running animations, when the observed
-     * animation is started, and decreases the number of accordingly, when the animation is
-     * finished. The listener allows to encapsulate another animation listener, which is notified
-     * when the animation has been started, canceled or ended.
-     */
-    protected class AnimationListenerWrapper extends AnimatorListenerAdapter {
-
-        /**
-         * The encapsulated listener.
-         */
-        private final AnimatorListener listener;
-
-        /**
-         * Decreases the number of running animations and executes the next pending action, if no
-         * running animations remain.
-         */
-        private void endAnimation() {
-            if (--runningAnimations == 0) {
-                notifyOnAnimationsEnded();
-            }
-        }
-
-        /**
-         * Creates a new animation listener, which increases the number of running animations, when
-         * the observed animation is started, and decreases the number of accordingly, when the
-         * animation is finished.
-         *
-         * @param listener
-         *         The listener, which should be encapsulated, as an instance of the type {@link
-         *         AnimatorListener} or null, if no listener should be encapsulated
-         */
-        public AnimationListenerWrapper(@Nullable final AnimatorListener listener) {
-            this.listener = listener;
-        }
-
-        @Override
-        public void onAnimationStart(final Animator animation) {
-            super.onAnimationStart(animation);
-            runningAnimations++;
-
-            if (listener != null) {
-                listener.onAnimationStart(animation);
-            }
-        }
-
-        @Override
-        public void onAnimationEnd(final Animator animation) {
-            super.onAnimationEnd(animation);
-
-            if (listener != null) {
-                listener.onAnimationEnd(animation);
-            }
-
-            endAnimation();
-        }
-
-        @Override
-        public void onAnimationCancel(final Animator animation) {
-            super.onAnimationCancel(animation);
-
-            if (listener != null) {
-                listener.onAnimationCancel(animation);
-            }
-
-            endAnimation();
-        }
-
-    }
-
-    /**
      * A layout listener, which unregisters itself from the observed view, when invoked. The
      * listener allows to encapsulate another listener, which is notified, when the listener is
      * invoked.
      */
-    protected static class LayoutListenerWrapper implements OnGlobalLayoutListener {
+    public static class LayoutListenerWrapper implements OnGlobalLayoutListener {
 
         /**
          * The observed view.
@@ -196,20 +116,84 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * A animation listener, which increases the number of running animations, when the observed
+     * animation is started, and decreases the number of accordingly, when the animation is
+     * finished. The listener allows to encapsulate another animation listener, which is notified
+     * when the animation has been started, canceled or ended.
+     */
+    protected class AnimationListenerWrapper extends AnimatorListenerAdapter {
+
+        /**
+         * The encapsulated listener.
+         */
+        private final AnimatorListener listener;
+
+        /**
+         * Decreases the number of running animations and executes the next pending action, if no
+         * running animations remain.
+         */
+        private void endAnimation() {
+            if (--runningAnimations == 0) {
+                notifyOnAnimationsEnded();
+            }
+        }
+
+        /**
+         * Creates a new animation listener, which increases the number of running animations, when
+         * the observed animation is started, and decreases the number of accordingly, when the
+         * animation is finished.
+         *
+         * @param listener
+         *         The listener, which should be encapsulated, as an instance of the type {@link
+         *         AnimatorListener} or null, if no listener should be encapsulated
+         */
+        AnimationListenerWrapper(@Nullable final AnimatorListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        public void onAnimationStart(final Animator animation) {
+            super.onAnimationStart(animation);
+            runningAnimations++;
+
+            if (listener != null) {
+                listener.onAnimationStart(animation);
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(final Animator animation) {
+            super.onAnimationEnd(animation);
+
+            if (listener != null) {
+                listener.onAnimationEnd(animation);
+            }
+
+            endAnimation();
+        }
+
+        @Override
+        public void onAnimationCancel(final Animator animation) {
+            super.onAnimationCancel(animation);
+
+            if (listener != null) {
+                listener.onAnimationCancel(animation);
+            }
+
+            endAnimation();
+        }
+
+    }
+
+    /**
      * The tab switcher, the layout belongs to.
      */
     private final TabSwitcher tabSwitcher;
 
     /**
-     * A set, which contains the listeners, which should be notified about the tab switcher's
-     * events.
+     * The model of the tab switcher, the layout belongs to.
      */
-    private final Set<TabSwitcherListener> listeners;
-
-    /**
-     * A list, which contains the tabs, which are contained by the tab switcher.
-     */
-    private final List<Tab> tabs;
+    private final Model model;
 
     /**
      * The callback, which is notified about the layout's events.
@@ -226,16 +210,6 @@ public abstract class AbstractTabSwitcherLayout
      * tabs.
      */
     private TabSwitcherDecorator decorator;
-
-    /**
-     * True, if the tab switcher is currently shown, false otherwise.
-     */
-    private boolean switcherShown;
-
-    /**
-     * The currently selected tab.
-     */
-    private Tab selectedTab;
 
     /**
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
@@ -321,96 +295,6 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Notifies all listeners, that the tab switcher has been shown.
-     */
-    private void notifyOnSwitcherShown() {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSwitcherShown(tabSwitcher);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that the tab switcher has been hidden.
-     */
-    private void notifyOnSwitcherHidden() {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSwitcherHidden(tabSwitcher);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that the selected tab has been changed.
-     *
-     * @param selectedTabIndex
-     *         The index of the currently selected tab as an {@link Integer} value or -1, if no tab
-     *         is currently selected
-     * @param selectedTab
-     *         The currently selected tab as an instance of the class {@link Tab} or null,  if no
-     *         tab is currently selected
-     */
-    private void notifyOnSelectionChanged(final int selectedTabIndex,
-                                          @Nullable final Tab selectedTab) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onSelectionChanged(tabSwitcher, selectedTabIndex, selectedTab);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that a specific tab has been added to the tab switcher.
-     *
-     * @param index
-     *         The index of the tab, which has been added, as an {@link Integer} value
-     * @param tab
-     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     * @param animation
-     *         The animation, which has been used to add the tab, as an instance of the class {@link
-     *         Animation}. The animation may not be null
-     */
-    private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
-                                  @NonNull final Animation animation) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onTabAdded(tabSwitcher, index, tab, animation);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that a specific tab has been removed from the tab switcher.
-     *
-     * @param index
-     *         The index of the tab, which has been removed, as an {@link Integer} value
-     * @param tab
-     *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     * @param animation
-     *         The animation, which has been used to remove the tab, as an instance of the class
-     *         {@link Animation}. The animation may not be null
-     */
-    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
-                                    @NonNull final Animation animation) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onTabRemoved(tabSwitcher, index, tab, animation);
-        }
-    }
-
-    /**
-     * Notifies all listeners, that all tabs have been removed from the tab switcher.
-     *
-     * @param tabs
-     *         An array, which contains the tabs, which have been removed, as an array of the type
-     *         {@link Tab} or an empty array, if no tabs have been removed
-     * @param animation
-     *         The animation, which has been used to remove the tabs, as an instance of the class
-     *         {@link Animation}. The animation may not be null
-     */
-    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs,
-                                        @NonNull final Animation animation) {
-        for (TabSwitcherListener listener : listeners) {
-            listener.onAllTabsRemoved(tabSwitcher, tabs, animation);
-        }
-    }
-
-    /**
      * Notifies the callback, that all animations have been ended.
      */
     protected final void notifyOnAnimationsEnded() {
@@ -431,6 +315,17 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns the model of the tab switcher, the layout belongs to.
+     *
+     * @return The model of the tab switcher, the layout belongs to, as an instance of the type
+     * {@link Model}. The model may not be null
+     */
+    @NonNull
+    protected final Model getModel() {
+        return model;
+    }
+
+    /**
      * Returns the context, which is used by the layout.
      *
      * @return The context, which is used by the layout, as an instance of the class {@link
@@ -439,112 +334,6 @@ public abstract class AbstractTabSwitcherLayout
     @NonNull
     protected final Context getContext() {
         return tabSwitcher.getContext();
-    }
-
-    /**
-     * Adds a tab to the list, which contains the tabs, which are contained by the tab switcher.
-     *
-     * @param index
-     *         The index, the tab should be added at, as an {@link Integer} value
-     * @param tab
-     *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
-     *         not be null
-     * @param animation
-     *         The animation, which has been used to add the tab, as an instance of the class {@link
-     *         Animation}. The animation may not be null
-     */
-    protected final void addTabInternal(final int index, @NonNull final Tab tab,
-                                        @NonNull final Animation animation) {
-        ensureNotNull(tab, "The tab may not be null");
-        tabs.add(index, tab);
-        notifyOnTabAdded(index, tab, animation);
-    }
-
-    /**
-     * Removes a tab from the list, which contains the tabs, which are contained by the tab
-     * switcher.
-     *
-     * @param index
-     *         The index of the tab, which should be removed, as an {@link Integer} value
-     * @param animation
-     *         The animation, which has been used to remove the tab, as an instance of the class
-     *         {@link Animation}. The animation may not be null
-     * @return The tab, which has been removed, as an instance of the class {@link Tab}
-     */
-    protected final Tab removeTabInternal(final int index, @NonNull final Animation animation) {
-        Tab tab = tabs.remove(index);
-        notifyOnTabRemoved(index, tab, animation);
-        return tab;
-    }
-
-    /**
-     * Removes all tabs from the list, which contains the tabs, which are contained by the tab
-     * switcher.
-     *
-     * @param animation
-     *         The animation, which has been used to remove the tabs, as an instance of the class
-     *         {@link Animation}. The animation may not be null
-     * @return An array, which contains the tabs, which have been removed, as an array of the type
-     * {@link Tab} or an empty array, if no tabs have been removed
-     */
-    protected final Tab[] clearTabsInternal(@NonNull final Animation animation) {
-        Tab[] result = new Tab[tabs.size()];
-        tabs.toArray(result);
-        tabs.clear();
-        notifyOnAllTabsRemoved(result, animation);
-        return result;
-    }
-
-    /**
-     * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the tab
-     * switcher does not contain the given tab.
-     *
-     * @param tab
-     *         The tab, whose index should be returned, as an instance of the class {@link Tab}. The
-     *         tab may not be null
-     * @return The index of the given tab as an {@link Integer} value
-     */
-    protected final int indexOfOrThrowException(@NonNull final Tab tab) {
-        int index = indexOf(tab);
-
-        if (index == -1) {
-            throw new NoSuchElementException("No such tab: " + tab);
-        }
-
-        return index;
-    }
-
-    /**
-     * Sets, whether the tab switcher is currently shown, or not.
-     *
-     * @param shown
-     *         True, if the tab switcher is currently shown, false otherwise
-     */
-    protected final void setSwitcherShown(final boolean shown) {
-        this.switcherShown = shown;
-
-        if (shown) {
-            notifyOnSwitcherShown();
-        } else {
-            notifyOnSwitcherHidden();
-        }
-    }
-
-    /**
-     * Sets the currently selected tab. If the tab is not contained by the tab switcher, a {@link
-     * NoSuchElementException} is thrown.
-     *
-     * @param tab
-     *         The tab, which should be set, as an instance of the class {@link Tab} or null, if no
-     *         tab should be selected
-     * @return The index of the selected tab as an {@link Integer} value or -1, if no tab is
-     * selected
-     */
-    protected final int setSelectedTab(@Nullable final Tab tab) {
-        int index = tab != null ? indexOfOrThrowException(tab) : -1;
-        this.selectedTab = tab;
-        notifyOnSelectionChanged(index, tab);
-        return index;
     }
 
     /**
@@ -616,17 +405,19 @@ public abstract class AbstractTabSwitcherLayout
      * @param tabSwitcher
      *         The tab switcher, the layout belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
+     * @param model
+     *         The model of the tab switcher, the layout belongs to, as an instance of the type
+     *         {@link Model}. The model may not be null
      */
-    public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher) {
+    public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
+                                     @NonNull final Model model) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureNotNull(model, "The model may not be null");
         this.tabSwitcher = tabSwitcher;
-        this.listeners = new LinkedHashSet<>();
+        this.model = model;
         this.callback = null;
-        this.tabs = new ArrayList<>();
         this.runningAnimations = 0;
         this.decorator = null;
-        this.switcherShown = false;
-        this.selectedTab = null;
         this.padding = new int[]{0, 0, 0, 0};
     }
 
@@ -683,123 +474,10 @@ public abstract class AbstractTabSwitcherLayout
         return decorator;
     }
 
-    @Override
-    public final void addListener(@NonNull final TabSwitcherListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
-        this.listeners.add(listener);
-    }
-
-    @Override
-    public final void removeListener(@NonNull final TabSwitcherListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
-        this.listeners.remove(listener);
-    }
-
     @CallSuper
     @Override
     public boolean isAnimationRunning() {
         return runningAnimations > 0;
-    }
-
-    @Override
-    public final Iterator<Tab> iterator() {
-        return tabs.iterator();
-    }
-
-    @Override
-    public final boolean isEmpty() {
-        return getCount() == 0;
-    }
-
-    @Override
-    public final int getCount() {
-        return tabs.size();
-    }
-
-    @NonNull
-    @Override
-    public final Tab getTab(final int index) {
-        return tabs.get(index);
-    }
-
-    @Override
-    public final int indexOf(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
-        return tabs.indexOf(tab);
-    }
-
-    @Override
-    public final void addTab(@NonNull final Tab tab) {
-        addTab(tab, getCount());
-    }
-
-    @Override
-    public final void addTab(@NonNull final Tab tab, final int index) {
-        addTab(tab, index, Animation.createSwipeAnimation());
-    }
-
-    @Override
-    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs) {
-        addAllTabs(tabs, getCount());
-    }
-
-    @Override
-    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index) {
-        addAllTabs(tabs, index, Animation.createSwipeAnimation());
-    }
-
-    @Override
-    public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index,
-                                 @NonNull final Animation animation) {
-        ensureNotNull(tabs, "The collection may not be null");
-        Tab[] array = new Tab[tabs.size()];
-        tabs.toArray(array);
-        addAllTabs(array, index, animation);
-    }
-
-    @Override
-    public final void addAllTabs(@NonNull final Tab[] tabs) {
-        addAllTabs(tabs, getCount());
-    }
-
-    @Override
-    public final void addAllTabs(@NonNull final Tab[] tabs, final int index) {
-        addAllTabs(tabs, index, Animation.createSwipeAnimation());
-    }
-
-    @Override
-    public final void removeTab(@NonNull final Tab tab) {
-        removeTab(tab, Animation.createSwipeAnimation());
-    }
-
-    @Override
-    public final void clear() {
-        clear(Animation.createSwipeAnimation());
-    }
-
-    @Override
-    public final boolean isSwitcherShown() {
-        return switcherShown;
-    }
-
-    @Override
-    public final void toggleSwitcherVisibility() {
-        if (isSwitcherShown()) {
-            hideSwitcher();
-        } else {
-            showSwitcher();
-        }
-    }
-
-    @Nullable
-    @Override
-    public final Tab getSelectedTab() {
-        return selectedTab;
-    }
-
-    @Override
-    public final int getSelectedTabIndex() {
-        return selectedTab != null ? indexOf(selectedTab) : -1;
     }
 
     @Override

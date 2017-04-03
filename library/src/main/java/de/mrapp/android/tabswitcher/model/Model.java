@@ -51,14 +51,20 @@ public interface Model extends Iterable<Tab> {
         /**
          * The method, which is invoked, when the currently selected tab has been changed.
          *
-         * @param selectedTabIndex
+         * @param previousIndex
+         *         The index of the previously selected tab as an {@link Integer} value or -1, if no
+         *         tab was previously selected
+         * @param index
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
          * @param selectedTab
          *         The currently selected tab as an instance of the class {@link Tab} or null, if
          *         the tab switcher does not contain any tabs
+         * @param switcherHidden
+         *         True, if selecting the tab caused the tab switcher to be hidden, false otherwise
          */
-        void onSelectionChanged(int selectedTabIndex, @Nullable Tab selectedTab);
+        void onSelectionChanged(int previousIndex, int index, @Nullable Tab selectedTab,
+                                boolean switcherHidden);
 
         /**
          * The method, which is invoked, when a tab has been added to the model.
@@ -68,11 +74,20 @@ public interface Model extends Iterable<Tab> {
          * @param tab
          *         The tab, which has been added, as an instance of the class {@link Tab}. The tab
          *         may not be null
+         * @param previousSelectedTabIndex
+         *         The index of the previously selected tab as an {@link Integer} value or -1, if no
+         *         tab was selected
+         * @param selectedTabIndex
+         *         The index of the currently selected tab as an {@link Integer} value or -1, if the
+         *         tab switcher does not contain any tabs
+         * @param switcherHidden
+         *         True, if adding the tab caused the tab switcher to be hidden, false otherwise
          * @param animation
          *         The animation, which has been used to add the tab, as an instance of the class
          *         {@link Animation}. The animation may not be null
          */
-        void onTabAdded(int index, @NonNull Tab tab, @NonNull Animation animation);
+        void onTabAdded(int index, @NonNull Tab tab, int previousSelectedTabIndex,
+                        int selectedTabIndex, boolean switcherHidden, @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when multiple tabs have been added to the model.
@@ -82,11 +97,18 @@ public interface Model extends Iterable<Tab> {
          * @param tabs
          *         An array, which contains the tabs, which have been added, as an array of the type
          *         {@link Tab} or an empty array, if no tabs have been added
+         * @param previousSelectedTabIndex
+         *         The index of the previously selected tab as an {@link Integer} value or -1, if no
+         *         tab was selected
+         * @param selectedTabIndex
+         *         The index of the currently selected tab as an {@link Integer} value or -1, if the
+         *         tab switcher does not contain any tabs
          * @param animation
          *         The animation, which has been used to add the tabs, as an instance of the class
          *         {@link Animation}. The animation may not be null
          */
-        void onAllTabsAdded(int index, @NonNull Tab[] tabs, @NonNull Animation animation);
+        void onAllTabsAdded(int index, @NonNull Tab[] tabs, int previousSelectedTabIndex,
+                            int selectedTabIndex, @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when a tab has been removed from the model.
@@ -96,11 +118,18 @@ public interface Model extends Iterable<Tab> {
          * @param tab
          *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab
          *         may not be null
+         * @param previousSelectedTabIndex
+         *         The index of the previously selected tab as an {@link Integer} value or -1, if no
+         *         tab was selected
+         * @param selectedTabIndex
+         *         The index of the currently selected tab as an {@link Integer} value or -1, if the
+         *         tab switcher does not contain any tabs
          * @param animation
          *         The animation, which has been used to remove the tab, as an instance of the class
          *         {@link Animation}. The animation may not be null
          */
-        void onTabRemoved(int index, @NonNull Tab tab, @NonNull Animation animation);
+        void onTabRemoved(int index, @NonNull Tab tab, int previousSelectedTabIndex,
+                          int selectedTabIndex, @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when all tabs have been removed from the tab switcher.

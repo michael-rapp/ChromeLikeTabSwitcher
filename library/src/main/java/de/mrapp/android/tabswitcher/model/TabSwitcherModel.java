@@ -19,10 +19,13 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
@@ -38,6 +41,11 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model {
 
     /**
+     * A set, which contains the callbacks, which are notified about the model's events.
+     */
+    private final Set<Callback> callbacks;
+
+    /**
      * A list, which contains the tabs, which are contained by the tab switcher.
      */
     private final List<Tab> tabs;
@@ -51,11 +59,6 @@ public class TabSwitcherModel implements Model {
      * The currently selected tab.
      */
     private Tab selectedTab;
-
-    /**
-     * The callback, which is notified about the model's events.
-     */
-    private Callback callback;
 
     /**
      * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the model
@@ -77,37 +80,22 @@ public class TabSwitcherModel implements Model {
      *
      * @param shown
      *         True, if the tab switcher is currently shown, false otherwise
+     * @return True, if the visibility of the tab switcher has been changed, false otherwise
      */
-    private void setSwitcherShown(final boolean shown) {
+    private boolean setSwitcherShown(final boolean shown) {
         if (switcherShown != shown) {
             switcherShown = shown;
-
-            if (shown) {
-                notifyOnSwitcherShown();
-            } else {
-                notifyOnSwitcherHidden();
-            }
+            return true;
         }
-    }
 
-    /**
-     * Sets the currently selected tab.
-     *
-     * @param tab
-     *         The currently selected tab as an instance of the class {@link Tab} or null, if no tab
-     *         is currently selected
-     */
-    private void setSelectedTab(@Nullable final Tab tab) {
-        int index = tab != null ? indexOfOrThrowException(tab) : -1;
-        selectedTab = tab;
-        notifyOnSelectionChanged(index, tab);
+        return false;
     }
 
     /**
      * Notifies the callback, that the tab switcher has been shown.
      */
     private void notifyOnSwitcherShown() {
-        if (callback != null) {
+        for (Callback callback : callbacks) {
             callback.onSwitcherShown();
         }
     }
@@ -116,7 +104,7 @@ public class TabSwitcherModel implements Model {
      * Notifies the callback, that the tab switcher has been shown.
      */
     private void notifyOnSwitcherHidden() {
-        if (callback != null) {
+        for (Callback callback : callbacks) {
             callback.onSwitcherHidden();
         }
     }
@@ -124,16 +112,22 @@ public class TabSwitcherModel implements Model {
     /**
      * Notifies the callback, that the currently selected tab has been changed.
      *
+     * @param previousIndex
+     *         The index of the previously selected tab as an {@link Integer} value or -1, if no tab
+     *         was selected
      * @param index
      *         The index of the tab, which has been selected, as an {@link Integer} value or -1, if
      *         no tab has been selected
      * @param tab
      *         The tab, which has been selected, as an instance of the class {@link Tab} or null, if
      *         no tab has been selected
+     * @param switcherHidden
+     *         True, if selecting the tab caused the tab switcher to be hidden, false otherwise
      */
-    private void notifyOnSelectionChanged(final int index, @Nullable final Tab tab) {
-        if (callback != null) {
-            callback.onSelectionChanged(index, tab);
+    private void notifyOnSelectionChanged(final int previousIndex, final int index,
+                                          @Nullable final Tab tab, final boolean switcherHidden) {
+        for (Callback callback : callbacks) {
+            callback.onSelectionChanged(previousIndex, index, tab, switcherHidden);
         }
     }
 
@@ -145,14 +139,25 @@ public class TabSwitcherModel implements Model {
      * @param tab
      *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param previousSelectedTabIndex
+     *         The index of the previously selected tab as an {@link Integer} value or -1, if no tab
+     *         was selected
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
+     *         switcher does not contain any tabs
+     * @param switcherHidden
+     *         True, if adding the tab caused the tab switcher to be hidden, false otherwise
      * @param animation
      *         The animation, which has been used to add the tab, as an instance of the class {@link
      *         Animation}. The animation may not be null
      */
     private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
+                                  final int previousSelectedTabIndex, final int selectedTabIndex,
+                                  final boolean switcherHidden,
                                   @NonNull final Animation animation) {
-        if (callback != null) {
-            callback.onTabAdded(index, tab, animation);
+        for (Callback callback : callbacks) {
+            callback.onTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
+                    switcherHidden, animation);
         }
     }
 
@@ -164,14 +169,23 @@ public class TabSwitcherModel implements Model {
      * @param tabs
      *         An array, which contains the tabs, which have been added, as an array of the type
      *         {@link Tab}. The array may not be null
+     * @param previousSelectedTabIndex
+     *         The index of the previously selected tab as an {@link Integer} value or -1, if no tab
+     *         was selected
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
+     *         switcher does not contain any tabs
      * @param animation
      *         The animation, which has been used to add the tabs, as an instance of the class
      *         {@link Animation}. The animation may not be null
      */
     private void notifyOnAllTabsAdded(final int index, @NonNull final Tab[] tabs,
+                                      final int previousSelectedTabIndex,
+                                      final int selectedTabIndex,
                                       @NonNull final Animation animation) {
-        if (callback != null) {
-            callback.onAllTabsAdded(index, tabs, animation);
+        for (Callback callback : callbacks) {
+            callback.onAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
+                    animation);
         }
     }
 
@@ -183,14 +197,22 @@ public class TabSwitcherModel implements Model {
      * @param tab
      *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
      *         not be null
+     * @param previousSelectedTabIndex
+     *         The index of the previously selected tab as an {@link Integer} value or -1, if no tab
+     *         was selected
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
+     *         switcher does not contain any tabs
      * @param animation
      *         The animation, which has been used to remove the tab, as an instance of the class
      *         {@link Animation}. The animation may not be null
      */
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
+                                    final int previousSelectedTabIndex, final int selectedTabIndex,
                                     @NonNull final Animation animation) {
-        if (callback != null) {
-            callback.onTabRemoved(index, tab, animation);
+        for (Callback callback : callbacks) {
+            callback.onTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex,
+                    animation);
         }
     }
 
@@ -206,7 +228,7 @@ public class TabSwitcherModel implements Model {
      */
     private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs,
                                         @NonNull final Animation animation) {
-        if (callback != null) {
+        for (Callback callback : callbacks) {
             callback.onAllTabsRemoved(tabs, animation);
         }
     }
@@ -215,21 +237,34 @@ public class TabSwitcherModel implements Model {
      * Creates a new model of a {@link TabSwitcher}.
      */
     public TabSwitcherModel() {
+        this.callbacks = new LinkedHashSet<>();
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
-        this.callback = null;
     }
 
     /**
-     * Sets the callback, which should be notified about the model's events.
+     * Adds a new callback, which should be notified about the model's events.
      *
      * @param callback
-     *         The callback, which should be set, as an instance of the type {@link Callback} or
-     *         null, if no callback should be notified
+     *         The callback, which should be added, as an instance of the type {@link Callback}. The
+     *         callback may not be null
      */
-    public final void setCallback(@Nullable final Callback callback) {
-        this.callback = callback;
+    public final void addCallback(@NonNull final Callback callback) {
+        ensureNotNull(callback, "The callback may not be null");
+        callbacks.add(callback);
+    }
+
+    /**
+     * Removes a specific callback, which should not be notified about the model's events, anymore.
+     *
+     * @param callback
+     *         The callback, which should be removed, as an instance of the type {@link Callback}.
+     *         The callback may not be null
+     */
+    public final void removeCallback(@NonNull final Callback callback) {
+        ensureNotNull(callback, "The callback may not be null");
+        callbacks.remove(callback);
     }
 
     @Override
@@ -270,7 +305,23 @@ public class TabSwitcherModel implements Model {
         ensureNotNull(tab, "The tab may not be null");
         ensureNotNull(animation, "The animation may not be null");
         tabs.add(index, tab);
-        notifyOnTabAdded(index, tab, animation);
+        int previousSelectedTabIndex = getSelectedTabIndex();
+        int selectedTabIndex = previousSelectedTabIndex;
+        boolean switcherHidden = false;
+
+        if (previousSelectedTabIndex == -1) {
+            selectedTab = tab;
+            selectedTabIndex = index;
+        }
+
+        if (animation instanceof RevealAnimation) {
+            selectedTab = tab;
+            selectedTabIndex = index;
+            switcherHidden = setSwitcherShown(false);
+        }
+
+        notifyOnTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex, switcherHidden,
+                animation);
     }
 
     @Override
@@ -309,16 +360,21 @@ public class TabSwitcherModel implements Model {
         ensureNotNull(animation, "The animation may not be null");
 
         if (tabs.length > 0) {
+            int previousSelectedTabIndex = getSelectedTabIndex();
+            int selectedTabIndex = previousSelectedTabIndex;
+
             for (int i = 0; i < tabs.length; i++) {
                 Tab tab = tabs[i];
                 this.tabs.add(index + i, tab);
             }
 
-            notifyOnAllTabsAdded(index, tabs, animation);
-
-            if (getSelectedTab() == null) {
-                setSelectedTab(tabs[0]);
+            if (previousSelectedTabIndex == -1) {
+                selectedTabIndex = 0;
+                selectedTab = tabs[selectedTabIndex];
             }
+
+            notifyOnAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
+                    animation);
         }
     }
 
@@ -332,22 +388,23 @@ public class TabSwitcherModel implements Model {
         ensureNotNull(tab, "The tab may not be null");
         ensureNotNull(animation, "The animation may not be null");
         int index = indexOfOrThrowException(tab);
+        int previousSelectedTabIndex = getSelectedTabIndex();
+        int selectedTabIndex = previousSelectedTabIndex;
         tabs.remove(index);
-        notifyOnTabRemoved(index, tab, animation);
 
         if (isEmpty()) {
-            setSelectedTab(null);
-        } else {
-            int selectedTabIndex = getSelectedTabIndex();
-
-            if (index == selectedTabIndex) {
-                if (index > 0) {
-                    setSelectedTab(getTab(index - 1));
-                } else {
-                    setSelectedTab(getTab(1));
-                }
+            selectedTabIndex = -1;
+            selectedTab = null;
+        } else if (index == previousSelectedTabIndex) {
+            if (index > 0) {
+                selectedTabIndex = index - 1;
             }
+
+            selectedTab = getTab(selectedTabIndex);
         }
+
+        notifyOnTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex, animation);
+
     }
 
     @Override
@@ -362,7 +419,7 @@ public class TabSwitcherModel implements Model {
         tabs.toArray(result);
         tabs.clear();
         notifyOnAllTabsRemoved(result, animation);
-        setSelectedTab(null);
+        selectedTab = null;
     }
 
     @Override
@@ -373,11 +430,13 @@ public class TabSwitcherModel implements Model {
     @Override
     public final void showSwitcher() {
         setSwitcherShown(true);
+        notifyOnSwitcherShown();
     }
 
     @Override
     public final void hideSwitcher() {
         setSwitcherShown(false);
+        notifyOnSwitcherHidden();
     }
 
     @Override
@@ -403,7 +462,11 @@ public class TabSwitcherModel implements Model {
     @Override
     public final void selectTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
-        setSelectedTab(tab);
+        int previousIndex = getSelectedTabIndex();
+        int index = indexOfOrThrowException(tab);
+        selectedTab = tab;
+        boolean switcherHidden = setSwitcherShown(false);
+        notifyOnSelectionChanged(previousIndex, index, tab, switcherHidden);
     }
 
     @Override

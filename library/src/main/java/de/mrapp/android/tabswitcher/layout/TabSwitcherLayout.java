@@ -32,7 +32,6 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
-import de.mrapp.android.tabswitcher.model.Model;
 
 /**
  * Defines the interface, a layout, which implements the functionality of a {@link TabSwitcher},
@@ -41,7 +40,7 @@ import de.mrapp.android.tabswitcher.model.Model;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public interface TabSwitcherLayout extends Model {
+public interface TabSwitcherLayout {
 
     /**
      * Sets the decorator, which allows to inflate the views, which correspond to the tabs of the
@@ -61,25 +60,6 @@ public interface TabSwitcherLayout extends Model {
      * decorator has been set
      */
     TabSwitcherDecorator getDecorator();
-
-    /**
-     * Adds a listener, which should be notified about the tab switcher's events.
-     *
-     * @param listener
-     *         The listener, which should be added, as an instance of the type {@link
-     *         TabSwitcherListener}. The listener may not be null
-     */
-    void addListener(@NonNull TabSwitcherListener listener);
-
-    /**
-     * Removes a specific listener, which should not be notified about the tab switcher's events,
-     * anymore.
-     *
-     * @param listener
-     *         The listener, which should be removed, as an instance of the type {@link
-     *         TabSwitcherListener}. The listener may not be null
-     */
-    void removeListener(@NonNull TabSwitcherListener listener);
 
     /**
      * Adds a new listener, which should be notified, when a tab is about to be closed by clicking

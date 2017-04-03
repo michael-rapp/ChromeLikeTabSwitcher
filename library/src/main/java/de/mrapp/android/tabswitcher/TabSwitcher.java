@@ -35,19 +35,23 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.FrameLayout;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
+import de.mrapp.android.tabswitcher.model.Model;
+import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
-import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -74,9 +78,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabSwitcher extends FrameLayout
-        implements TabSwitcherLayout, ViewTreeObserver.OnGlobalLayoutListener,
-        AbstractTabSwitcherLayout.Callback {
+public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model {
 
     /**
      * A queue, which contains all pending actions.
@@ -84,9 +86,20 @@ public class TabSwitcher extends FrameLayout
     private Queue<Runnable> pendingActions;
 
     /**
+     * A set, which contains the listeners, which should be notified about the tab switcher's
+     * events.
+     */
+    private Set<TabSwitcherListener> listeners;
+
+    /**
      * The layout policy, which is used by the tab switcher.
      */
     private LayoutPolicy layoutPolicy;
+
+    /**
+     * The model, which is used by the tab switcher.
+     */
+    private TabSwitcherModel model;
 
     /**
      * The layout, which is used by the tab switcher, depending on whether the device is a
@@ -113,10 +126,14 @@ public class TabSwitcher extends FrameLayout
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         pendingActions = new LinkedList<>();
-        layout = new PhoneTabSwitcherLayout(this);
-        layout.setCallback(this);
+        listeners = new LinkedHashSet<>();
+        model = new TabSwitcherModel();
+        model.addCallback(createModelCallback());
+        layout = new PhoneTabSwitcherLayout(this, model);
+        layout.setCallback(createLayoutCallback());
         layout.inflateLayout();
-        getViewTreeObserver().addOnGlobalLayoutListener(this);
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new LayoutListenerWrapper(this, createGlobalLayoutListener()));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -196,6 +213,221 @@ public class TabSwitcher extends FrameLayout
 
                 }.run();
             }
+        }
+    }
+
+    /**
+     * Creates and returns a callback, which allows to observe, when the tab switcher's model is
+     * modified.
+     *
+     * @return The callback, which has been created, as an instance of the type {@link
+     * Model.Callback}. The callback may not be null
+     */
+    @NonNull
+    private Model.Callback createModelCallback() {
+        return new Model.Callback() {
+
+            @Override
+            public void onSwitcherShown() {
+                notifyOnSwitcherShown();
+            }
+
+            @Override
+            public void onSwitcherHidden() {
+                notifyOnSwitcherHidden();
+            }
+
+            @Override
+            public void onSelectionChanged(final int previousIndex, final int index,
+                                           @Nullable final Tab selectedTab,
+                                           final boolean switcherHidden) {
+                notifyOnSelectionChanged(index, selectedTab);
+
+                if (switcherHidden) {
+                    notifyOnSwitcherHidden();
+                }
+            }
+
+            @Override
+            public void onTabAdded(final int index, @NonNull final Tab tab,
+                                   final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean switcherHidden,
+                                   @NonNull final Animation animation) {
+                notifyOnTabAdded(index, tab, animation);
+
+                if (previousSelectedTabIndex != selectedTabIndex) {
+                    notifyOnSelectionChanged(selectedTabIndex,
+                            selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
+                }
+
+                if (switcherHidden) {
+                    notifyOnSwitcherHidden();
+                }
+            }
+
+            @Override
+            public void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
+                                       final int previousSelectedTabIndex,
+                                       final int selectedTabIndex,
+                                       @NonNull final Animation animation) {
+                for (Tab tab : tabs) {
+                    notifyOnTabAdded(index, tab, animation);
+                }
+
+                if (previousSelectedTabIndex != selectedTabIndex) {
+                    notifyOnSelectionChanged(selectedTabIndex,
+                            selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
+                }
+            }
+
+            @Override
+            public void onTabRemoved(final int index, @NonNull final Tab tab,
+                                     final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     @NonNull final Animation animation) {
+                notifyOnTabRemoved(index, tab, animation);
+
+                if (previousSelectedTabIndex != selectedTabIndex) {
+                    notifyOnSelectionChanged(selectedTabIndex,
+                            selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
+                }
+            }
+
+            @Override
+            public void onAllTabsRemoved(@NonNull final Tab[] tabs,
+                                         @NonNull final Animation animation) {
+                notifyOnAllTabsRemoved(tabs, animation);
+                notifyOnSelectionChanged(-1, null);
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a callback, which allows to observe, when all pending animations of a
+     * layout have been ended.
+     *
+     * @return The callback, which has been created, as an instance of the type {@link
+     * AbstractTabSwitcherLayout.Callback}. The callback may not be null
+     */
+    @NonNull
+    private AbstractTabSwitcherLayout.Callback createLayoutCallback() {
+        return new AbstractTabSwitcherLayout.Callback() {
+
+            @Override
+            public void onAnimationsEnded() {
+                executePendingAction();
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a listener, which allows to inflate the view's layout once the view is
+     * laid out.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createGlobalLayoutListener() {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                model.addCallback(layout);
+                layout.onGlobalLayout();
+            }
+
+        };
+    }
+
+    /**
+     * Notifies all listeners, that the tab switcher has been shown.
+     */
+    private void notifyOnSwitcherShown() {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSwitcherShown(this);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the tab switcher has been hidden.
+     */
+    private void notifyOnSwitcherHidden() {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSwitcherHidden(this);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that the selected tab has been changed.
+     *
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value or -1, if no tab
+     *         is currently selected
+     * @param selectedTab
+     *         The currently selected tab as an instance of the class {@link Tab} or null,  if no
+     *         tab is currently selected
+     */
+    private void notifyOnSelectionChanged(final int selectedTabIndex,
+                                          @Nullable final Tab selectedTab) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onSelectionChanged(this, selectedTabIndex, selectedTab);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that a specific tab has been added to the tab switcher.
+     *
+     * @param index
+     *         The index of the tab, which has been added, as an {@link Integer} value
+     * @param tab
+     *         The tab, which has been added, as an instance of the class {@link Tab}. The tab may
+     *         not be null
+     * @param animation
+     *         The animation, which has been used to add the tab, as an instance of the class {@link
+     *         Animation}. The animation may not be null
+     */
+    private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
+                                  @NonNull final Animation animation) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onTabAdded(this, index, tab, animation);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that a specific tab has been removed from the tab switcher.
+     *
+     * @param index
+     *         The index of the tab, which has been removed, as an {@link Integer} value
+     * @param tab
+     *         The tab, which has been removed, as an instance of the class {@link Tab}. The tab may
+     *         not be null
+     * @param animation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link Animation}. The animation may not be null
+     */
+    private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
+                                    @NonNull final Animation animation) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onTabRemoved(this, index, tab, animation);
+        }
+    }
+
+    /**
+     * Notifies all listeners, that all tabs have been removed from the tab switcher.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab} or an empty array, if no tabs have been removed
+     * @param animation
+     *         The animation, which has been used to remove the tabs, as an instance of the class
+     *         {@link Animation}. The animation may not be null
+     */
+    private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs,
+                                        @NonNull final Animation animation) {
+        for (TabSwitcherListener listener : listeners) {
+            listener.onAllTabsRemoved(this, tabs, animation);
         }
     }
 
@@ -307,6 +539,31 @@ public class TabSwitcher extends FrameLayout
     }
 
     /**
+     * Adds a listener, which should be notified about the tab switcher's events.
+     *
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link
+     *         TabSwitcherListener}. The listener may not be null
+     */
+    public final void addListener(@NonNull final TabSwitcherListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        this.listeners.add(listener);
+    }
+
+    /**
+     * Removes a specific listener, which should not be notified about the tab switcher's events,
+     * anymore.
+     *
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link
+     *         TabSwitcherListener}. The listener may not be null
+     */
+    public final void removeListener(@NonNull final TabSwitcherListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        this.listeners.remove(listener);
+    }
+
+    /**
      * Returns the layout policy, which is used by the tab switcher.
      *
      * @return The layout policy, which is used by the tab switcher, as a value of the enum {@link
@@ -345,7 +602,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addTab(tab);
+                model.addTab(tab);
             }
 
         });
@@ -357,7 +614,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addTab(tab, index);
+                model.addTab(tab, index);
             }
 
         });
@@ -370,7 +627,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addTab(tab, index, animation);
+                model.addTab(tab, index, animation);
             }
 
         });
@@ -382,7 +639,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs);
+                model.addAllTabs(tabs);
             }
 
         });
@@ -394,7 +651,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs, index);
+                model.addAllTabs(tabs, index);
             }
 
         });
@@ -407,7 +664,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs, index, animation);
+                model.addAllTabs(tabs, index, animation);
             }
 
         });
@@ -419,7 +676,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs);
+                model.addAllTabs(tabs);
             }
 
         });
@@ -431,7 +688,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs, index);
+                model.addAllTabs(tabs, index);
             }
 
         });
@@ -444,7 +701,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.addAllTabs(tabs, index, animation);
+                model.addAllTabs(tabs, index, animation);
             }
 
         });
@@ -456,7 +713,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.removeTab(tab);
+                model.removeTab(tab);
             }
 
         });
@@ -468,7 +725,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.removeTab(tab, animation);
+                model.removeTab(tab, animation);
             }
 
         });
@@ -480,7 +737,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.clear();
+                model.clear();
             }
 
         });
@@ -492,7 +749,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.clear(animationType);
+                model.clear(animationType);
             }
 
         });
@@ -504,7 +761,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.selectTab(tab);
+                model.selectTab(tab);
             }
 
         });
@@ -513,43 +770,43 @@ public class TabSwitcher extends FrameLayout
     @Nullable
     @Override
     public final Tab getSelectedTab() {
-        return layout.getSelectedTab();
+        return model.getSelectedTab();
     }
 
     @Override
     public final int getSelectedTabIndex() {
-        return layout.getSelectedTabIndex();
+        return model.getSelectedTabIndex();
     }
 
     @Override
     public final Iterator<Tab> iterator() {
-        return layout.iterator();
+        return model.iterator();
     }
 
     @Override
     public final boolean isEmpty() {
-        return layout.isEmpty();
+        return model.isEmpty();
     }
 
     @Override
     public final int getCount() {
-        return layout.getCount();
+        return model.getCount();
     }
 
     @NonNull
     @Override
     public final Tab getTab(final int index) {
-        return layout.getTab(index);
+        return model.getTab(index);
     }
 
     @Override
     public final int indexOf(@NonNull final Tab tab) {
-        return layout.indexOf(tab);
+        return model.indexOf(tab);
     }
 
     @Override
     public final boolean isSwitcherShown() {
-        return layout.isSwitcherShown();
+        return model.isSwitcherShown();
     }
 
     @Override
@@ -558,7 +815,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.showSwitcher();
+                model.showSwitcher();
             }
 
         });
@@ -570,7 +827,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.hideSwitcher();
+                model.hideSwitcher();
             }
 
         });
@@ -582,7 +839,7 @@ public class TabSwitcher extends FrameLayout
 
             @Override
             public void run() {
-                layout.toggleSwitcherVisibility();
+                model.toggleSwitcherVisibility();
             }
 
         });
@@ -606,16 +863,6 @@ public class TabSwitcher extends FrameLayout
     @Override
     public final TabSwitcherDecorator getDecorator() {
         return layout.getDecorator();
-    }
-
-    @Override
-    public final void addListener(@NonNull final TabSwitcherListener listener) {
-        layout.addListener(listener);
-    }
-
-    @Override
-    public final void removeListener(@NonNull final TabSwitcherListener listener) {
-        layout.removeListener(listener);
     }
 
     @Override
@@ -770,17 +1017,6 @@ public class TabSwitcher extends FrameLayout
     @Override
     public final void setTabCloseButtonIcon(@NonNull final Bitmap icon) {
         layout.setTabCloseButtonIcon(icon);
-    }
-
-    @Override
-    public final void onGlobalLayout() {
-        ViewUtil.removeOnGlobalLayoutListener(getViewTreeObserver(), this);
-        layout.onGlobalLayout();
-    }
-
-    @Override
-    public final void onAnimationsEnded() {
-        executePendingAction();
     }
 
 }
