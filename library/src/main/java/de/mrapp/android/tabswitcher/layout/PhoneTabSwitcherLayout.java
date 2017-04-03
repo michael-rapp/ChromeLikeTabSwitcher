@@ -2928,7 +2928,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ? SwipeDirection.LEFT :
                             SwipeDirection.RIGHT;
             // TODO: Set correct duration to the animation
-            Animation animation = new SwipeAnimation.Builder().create();
+            Animation animation = new SwipeAnimation.Builder().setDirection(direction).create();
             getModel().removeTab(tabItem.getTab(), animation);
         } else {
             animateSwipe(tabItem, false, velocity, 0, null, createSwipeAnimationListener(tabItem));
