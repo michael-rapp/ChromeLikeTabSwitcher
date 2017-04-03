@@ -37,7 +37,6 @@ import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
-import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
@@ -154,10 +153,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 switch (item.getItemId()) {
                     case R.id.add_tab_menu_item:
                         int index = tabSwitcher.getCount();
-                        Animation animation =
-                                tabSwitcher.isSwitcherShown() ? createRevealAnimation() :
-                                        new SwipeAnimation.Builder().create();
-                        tabSwitcher.addTab(createTab(index), 0, animation);
+                        Tab tab = createTab(index);
+
+                        if (tabSwitcher.isSwitcherShown()) {
+                            tabSwitcher.addTab(tab, 0, createRevealAnimation());
+                        } else {
+                            tabSwitcher.addTab(tab, 0);
+                            tabSwitcher.selectTab(tab);
+                        }
+
                         return true;
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
