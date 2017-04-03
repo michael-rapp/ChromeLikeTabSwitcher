@@ -328,15 +328,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Calculates and returns the position of a tab, when it is swiped.
-     *
-     * @return The position, which has been calculated, in pixels as an {@link Float} value
-     */
-    private float calculateSwipePosition() {
-        return arithmetics.getSize(Axis.ORTHOGONAL_AXIS, tabContainer);
-    }
-
-    /**
      * Animates the bottom margin of a specific view.
      *
      * @param view
@@ -695,9 +686,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The tab item may not be null
      * @param remove
      *         True, if the tab should be removed after the animation has finished, false otherwise
-     * @param velocity
-     *         The velocity of the drag gesture, which triggered the animation, as a {@link Float}
-     *         value or 0, if the animation was not triggered by a drag gesture
      * @param delay
      *         The delay after which the animation should be started in milliseconds as a {@link
      *         Long} value
@@ -710,27 +698,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         notified
      */
     private void animateSwipe(@NonNull final TabItem tabItem, final boolean remove,
-                              final float velocity, final long delay,
-                              @NonNull final SwipeAnimation swipeAnimation,
+                              final long delay, @NonNull final SwipeAnimation swipeAnimation,
                               @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
         float currentScale = arithmetics.getScale(view, true);
-        float swipePosition = calculateSwipePosition();
+        float swipePosition = dragHandler.calculateSwipePosition();
         float targetPosition = remove ?
                 (swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
                         swipePosition) : 0;
         float currentPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view);
         float distance = Math.abs(targetPosition - currentPosition);
-        long animationDuration;
-
-        if (velocity > 0) {
-            animationDuration = Math.round((distance / velocity) * 1000);
-        } else {
-            animationDuration = Math.round(
-                    (swipeAnimation.getDuration() != -1 ? swipeAnimation.getDuration() :
-                            swipeAnimationDuration) * (distance / swipePosition));
-        }
-
+        long animationDuration = swipeAnimation.getDuration() != -1 ? swipeAnimation.getDuration() :
+                Math.round(swipeAnimationDuration * (distance / swipePosition));
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(
                 swipeAnimation.getInterpolator() != null ? swipeAnimation.getInterpolator() :
@@ -764,7 +743,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-        animateSwipe(removedTabItem, true, 0, 0, swipeAnimation,
+        animateSwipe(removedTabItem, true, 0, swipeAnimation,
                 createRemoveAnimationListener(removedTabItem));
     }
 
@@ -1214,7 +1193,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     View view = tabItem.getView();
                     view.setTag(R.id.tag_properties, tag);
                     view.setAlpha(swipedTabAlpha);
-                    float swipePosition = calculateSwipePosition();
+                    float swipePosition = dragHandler.calculateSwipePosition();
                     float scale = arithmetics.getScale(view, true);
                     arithmetics.setPivot(Axis.DRAGGING_AXIS, view,
                             arithmetics.getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
@@ -1232,7 +1211,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
                     arithmetics.setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
                     arithmetics.setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
-                    animateSwipe(tabItem, false, 0, 0, swipeAnimation,
+                    animateSwipe(tabItem, false, 0, swipeAnimation,
                             createSwipeAnimationListener(tabItem));
                 }
             }
@@ -2336,7 +2315,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.setPivot(Axis.ORTHOGONAL_AXIS, view,
                 arithmetics.getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
         float scale = arithmetics.getScale(view, true);
-        float ratio = 1 - (Math.abs(dragDistance) / calculateSwipePosition());
+        float ratio = 1 - (Math.abs(dragDistance) / dragHandler.calculateSwipePosition());
         float scaledClosedTabScale = swipedTabScale * scale;
         float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
         arithmetics.setScale(Axis.DRAGGING_AXIS, view, targetScale);
@@ -2851,7 +2830,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 if (tabItem.isInflated()) {
-                    animateSwipe(tabItem, true, 0, startDelay, swipeAnimation,
+                    animateSwipe(tabItem, true, startDelay, swipeAnimation,
                             !iterator.hasNext() ? createClearAnimationListener() : null);
                 }
             }
@@ -2932,17 +2911,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void onSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
-                                   final float velocity) {
+                                   final long animationDuration) {
         if (remove) {
             View view = tabItem.getView();
             SwipeDirection direction =
                     arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ? SwipeDirection.LEFT :
                             SwipeDirection.RIGHT;
-            // TODO: Set correct duration to the animation
-            Animation animation = new SwipeAnimation.Builder().setDirection(direction).create();
+            Animation animation = new SwipeAnimation.Builder().setDirection(direction)
+                    .setDuration(animationDuration).create();
             getModel().removeTab(tabItem.getTab(), animation);
         } else {
-            animateSwipe(tabItem, false, velocity, 0, new SwipeAnimation.Builder().create(),
+            animateSwipe(tabItem, false, 0, new SwipeAnimation.Builder().create(),
                     createSwipeAnimationListener(tabItem));
         }
     }

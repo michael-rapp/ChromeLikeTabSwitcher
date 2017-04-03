@@ -139,10 +139,11 @@ public class DragHandler {
          *         {@link TabItem}. The tab item may not be null
          * @param remove
          *         True, if the tab should be removed, false otherwise
-         * @param velocity
-         *         The velocity of the swipe gesture as a {@link Float} value
+         * @param animationDuration
+         *         The duration of the animation, which should be used to swipe the tab, in
+         *         milliseconds as a {@link Long} value
          */
-        void onSwipeEnded(@NonNull TabItem tabItem, boolean remove, float velocity);
+        void onSwipeEnded(@NonNull TabItem tabItem, boolean remove, long animationDuration);
 
         /**
          * The method, which is invoked, when the position or state of a tab has been changed.
@@ -682,6 +683,15 @@ public class DragHandler {
     }
 
     /**
+     * Calculates and returns the position of a tab, when it is swiped.
+     *
+     * @return The position, which has been calculated, in pixels as an {@link Float} value
+     */
+    public final float calculateSwipePosition() {
+        return arithmetics.getSize(Axis.ORTHOGONAL_AXIS, tabSwitcher.getTabContainer());
+    }
+
+    /**
      * Checks if a drag gesture resulted in overshooting.
      *
      * @param factory
@@ -939,13 +949,14 @@ public class DragHandler {
      *         TabItem}. The tab item may not be null
      * @param remove
      *         True, if the tab should be removed, false otherwise
-     * @param velocity
-     *         The velocity of the swipe gesture as a {@link Float} value
+     * @param animationDuration
+     *         The duration of the animation, which should be used to swipe the tab, as a {@link
+     *         Long} value
      */
     private void notifyOnSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
-                                    final float velocity) {
+                                    final long animationDuration) {
         if (callback != null) {
-            callback.onSwipeEnded(tabItem, remove, velocity);
+            callback.onSwipeEnded(tabItem, remove, animationDuration);
         }
     }
 
@@ -1371,8 +1382,8 @@ public class DragHandler {
                     (swipeVelocity >= minSwipeVelocity ||
                             Math.abs(arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view)) >
                                     arithmetics.getSize(Axis.ORTHOGONAL_AXIS, view) / 4f);
-            notifyOnSwipeEnded(swipedTabItem, remove,
-                    swipeVelocity > minSwipeVelocity ? swipeVelocity : 0);
+            notifyOnSwipeEnded(swipedTabItem, remove, swipeVelocity > minSwipeVelocity ?
+                    Math.round((calculateSwipePosition() / swipeVelocity) * 1000) : -1);
         } else if (dragState == DragState.DRAG_TO_START || dragState == DragState.DRAG_TO_END) {
             if (event != null && velocityTracker != null && dragHelper.hasThresholdBeenReached()) {
                 handleFling(event, dragState);
