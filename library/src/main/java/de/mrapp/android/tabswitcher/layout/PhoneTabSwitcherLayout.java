@@ -1553,16 +1553,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param successorIndex
      *         The index of the tab, which is located after the swiped tab, as an {@link Integer}
      *         value
+     * @param count
+     *         The number of tabs, which are contained by the tab switcher, excluding the swiped
+     *         tab, as an {@link Integer} value
      */
-    private void adaptStackOnSwipe(@NonNull final TabItem swipedTabItem, final int successorIndex) {
+    private void adaptStackOnSwipe(@NonNull final TabItem swipedTabItem, final int successorIndex,
+                                   final int count) {
         if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
                 successorIndex < getCount()) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, successorIndex);
             State state = tabItem.getTag().getState();
 
             if (state == State.HIDDEN || state == State.STACKED_START) {
-                Pair<Float, State> pair = dragHandler.calculatePositionAndStateWhenStackedAtStart(
-                        getTabSwitcher().getCount() - 1, swipedTabItem.getIndex(), (TabItem) null);
+                Pair<Float, State> pair = dragHandler
+                        .calculatePositionAndStateWhenStackedAtStart(count,
+                                swipedTabItem.getIndex(), (TabItem) null);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateOrRemoveView(tabItem);
@@ -2268,7 +2273,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         View view = tabItem.getView();
 
         if (!tabItem.getTag().isClosing()) {
-            adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1);
+            adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1, getCount() - 1);
         }
 
         tabItem.getTag().setClosing(true);
@@ -2757,7 +2762,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
         } else {
-            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex());
+            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex(), getCount());
             removedTabItem.getTag().setClosing(true);
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation : null;
