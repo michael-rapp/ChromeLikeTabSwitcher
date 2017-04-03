@@ -475,7 +475,7 @@ public class DragHandler {
             if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
-                float thresholdPosition = calculateEndPosition(factory, tabItem);
+                float thresholdPosition = calculateEndPosition(factory, tabItem.getIndex());
                 float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
                 Pair<Float, State> pair =
                         clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), newPosition,
@@ -486,7 +486,7 @@ public class DragHandler {
                 return true;
             }
         } else {
-            float thresholdPosition = calculateEndPosition(factory, tabItem);
+            float thresholdPosition = calculateEndPosition(factory, tabItem.getIndex());
             float newPosition =
                     Math.min(calculateNonLinearPosition(tabItem, predecessor), thresholdPosition);
             Pair<Float, State> pair =
@@ -653,33 +653,32 @@ public class DragHandler {
     }
 
     /**
-     * Calculates and returns the position of a specific tab item, when located at the end.
+     * Calculates and returns the position of a specific tab, when located at the end.
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
      *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
      *         The factory may not be null
-     * @param tabItem
-     *         The tab item, whose position should be calculated, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
+     * @param index
+     *         The index of the tab, whose position should be calculated, as an {@link Integer}
+     *         value
      * @return The position, which has been calculated, as a {@link Float} value
      */
     public final float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
-                                            @NonNull final TabItem tabItem) {
+                                            final int index) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(tabSwitcher.getCount(), null);
         int selectedTabIndex = tabSwitcher.getSelectedTabIndex();
 
-        if (selectedTabIndex > tabItem.getIndex()) {
+        if (selectedTabIndex > index) {
             AbstractTabItemIterator.AbstractBuilder builder = factory.create();
             AbstractTabItemIterator iterator = builder.create();
             TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
             float selectedTabSpacing =
                     calculateMaxTabSpacing(tabSwitcher.getCount(), selectedTabItem);
-            return (tabSwitcher.getCount() - 2 - tabItem.getIndex()) * defaultMaxTabSpacing +
-                    selectedTabSpacing;
+            return (tabSwitcher.getCount() - 2 - index) * defaultMaxTabSpacing + selectedTabSpacing;
         }
 
-        return (tabSwitcher.getCount() - 1 - tabItem.getIndex()) * defaultMaxTabSpacing;
+        return (tabSwitcher.getCount() - 1 - index) * defaultMaxTabSpacing;
     }
 
     /**
