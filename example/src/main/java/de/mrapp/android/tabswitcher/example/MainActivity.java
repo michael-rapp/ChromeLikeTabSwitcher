@@ -36,6 +36,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.RevealAnimation;
+import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                         int index = tabSwitcher.getCount();
                         Animation animation =
                                 tabSwitcher.isSwitcherShown() ? createRevealAnimation() :
-                                        Animation.createSwipeAnimation();
+                                        new SwipeAnimation.Builder().create();
                         tabSwitcher.addTab(createTab(index), 0, animation);
                         return true;
                     case R.id.clear_tabs_menu_item:
@@ -217,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             y = location[1] + (view.getHeight() / 2f);
         }
 
-        return Animation.createRevealAnimation(x, y);
+        return new RevealAnimation.Builder().setX(x).setY(y).create();
     }
 
     @Nullable

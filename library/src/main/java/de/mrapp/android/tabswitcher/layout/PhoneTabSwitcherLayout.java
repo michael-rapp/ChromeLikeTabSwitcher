@@ -45,11 +45,11 @@ import android.widget.FrameLayout;
 import java.util.Collections;
 
 import de.mrapp.android.tabswitcher.Animation;
-import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
-import de.mrapp.android.tabswitcher.Animation.SwipeAnimation;
-import de.mrapp.android.tabswitcher.Animation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.RevealAnimation;
+import de.mrapp.android.tabswitcher.SwipeAnimation;
+import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -552,7 +552,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             if (getModel().isSwitcherShown()) {
                 SwipeAnimation swipeAnimation =
                         animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
-                                Animation.createSwipeAnimation();
+                                new SwipeAnimation.Builder().create();
                 TabItem[] tabItems = new TabItem[tabs.length];
 
                 for (int i = 0; i < tabs.length; i++) {
@@ -2750,7 +2750,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             TabItem tabItem = new TabItem(0, tab);
             RevealAnimation revealAnimation =
                     animation instanceof RevealAnimation ? (RevealAnimation) animation :
-                            Animation.createRevealAnimation(0, 0);
+                            new RevealAnimation.Builder().create();
             inflateView(tabItem, createRevealLayoutListener(tabItem, revealAnimation));
         } else {
             addAllTabs(index, new Tab[]{tab}, animation);
@@ -2928,7 +2928,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ? SwipeDirection.LEFT :
                             SwipeDirection.RIGHT;
             // TODO: Set correct duration to the animation
-            Animation animation = Animation.createSwipeAnimation(direction);
+            Animation animation = new SwipeAnimation.Builder().create();
             getModel().removeTab(tabItem.getTab(), animation);
         } else {
             animateSwipe(tabItem, false, velocity, 0, null, createSwipeAnimationListener(tabItem));

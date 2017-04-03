@@ -25,7 +25,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.Animation;
-import de.mrapp.android.tabswitcher.Animation.RevealAnimation;
+import de.mrapp.android.tabswitcher.RevealAnimation;
+import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
@@ -296,7 +297,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public final void addTab(@NonNull final Tab tab, final int index) {
-        addTab(tab, index, Animation.createSwipeAnimation());
+        addTab(tab, index, new SwipeAnimation.Builder().create());
     }
 
     @Override
@@ -331,7 +332,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index) {
-        addAllTabs(tabs, index, Animation.createSwipeAnimation());
+        addAllTabs(tabs, index, new SwipeAnimation.Builder().create());
     }
 
     @Override
@@ -350,7 +351,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public final void addAllTabs(@NonNull final Tab[] tabs, final int index) {
-        addAllTabs(tabs, index, Animation.createSwipeAnimation());
+        addAllTabs(tabs, index, new SwipeAnimation.Builder().create());
     }
 
     @Override
@@ -380,7 +381,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public final void removeTab(@NonNull final Tab tab) {
-        removeTab(tab, Animation.createSwipeAnimation());
+        removeTab(tab, new SwipeAnimation.Builder().create());
     }
 
     @Override
@@ -409,7 +410,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public final void clear() {
-        clear(Animation.createSwipeAnimation());
+        clear(new SwipeAnimation.Builder().create());
     }
 
     @Override

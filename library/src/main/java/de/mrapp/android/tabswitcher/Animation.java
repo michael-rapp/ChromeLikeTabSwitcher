@@ -14,9 +14,10 @@
 package de.mrapp.android.tabswitcher;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.animation.Interpolator;
 
-import static de.mrapp.android.util.Condition.ensureGreater;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 
 /**
  * An animation, which can be used to add or remove tabs to/from a {@link TabSwitcher}.
@@ -27,108 +28,86 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public abstract class Animation {
 
     /**
-     * Contains all possible directions of a swipe animation.
+     * An abstract base class for all builders, which allow to configure and create instances of the
+     * class {@link Animation}.
+     *
+     * @param <AnimationType>
+     *         The type of the animations, which are created by the builder
+     * @param <BuilderType>
+     *         The type of the builder
      */
-    public enum SwipeDirection {
+    protected static abstract class Builder<AnimationType, BuilderType> {
 
         /**
-         * When the tab should be swiped in/out from/to the left, respectively the top, when
-         * dragging horizontally.
+         * The duration of the animations, which are created by the builder.
          */
-        LEFT,
+        protected long duration;
 
         /**
-         * When the tab should be swiped in/out from/to the right, respectively the bottom, when
-         * dragging horizontally.
+         * The interpolator, which is used by the animations, which are created by the builder.
          */
-        RIGHT
-
-    }
-
-    /**
-     * A swipe animation, which moves tabs on the orthogonal axis, while  animating their size and
-     * alpha at the same time
-     */
-    public static class SwipeAnimation extends Animation {
+        protected Interpolator interpolator;
 
         /**
-         * The direction of the swipe animation.
-         */
-        private final SwipeDirection direction;
-
-        /**
-         * Creates a new swipe animation.
+         * Returns a reference to the builder.
          *
-         * @param direction
-         *         The direction of the swipe animation as a value of the enum {@link
-         *         SwipeDirection}. The direction may not be null
-         */
-        public SwipeAnimation(@NonNull final SwipeDirection direction) {
-            ensureNotNull(direction, "The direction may not be null");
-            this.direction = direction;
-        }
-
-        /**
-         * Returns the direction of the swipe animation.
-         *
-         * @return The direction of the swipe animation as a value of the enum {@link
-         * SwipeDirection}. The direction may not be null
+         * @return A reference to the builder, casted to the generic type BuilderType. The reference
+         * may not be null
          */
         @NonNull
-        public final SwipeDirection getDirection() {
-            return direction;
-        }
-
-    }
-
-    /**
-     * A reveal animation, which animates the size of a tab starting at a specific position.
-     */
-    public static class RevealAnimation extends Animation {
-
-        /**
-         * The horizontal position, the animation starts at.
-         */
-        private final float x;
-
-        /**
-         * The vertical position, the animation starts at.
-         */
-        private final float y;
-
-        /**
-         * Creates a new reveal animation.
-         *
-         * @param x
-         *         The horizontal position, the animation should start at, in pixels as a {@link
-         *         Float} value
-         * @param y
-         *         The vertical position, the animation should start at, in pixels as a {@link
-         *         Float} value
-         */
-        public RevealAnimation(final float x, final float y) {
-            this.x = x;
-            this.y = y;
+        @SuppressWarnings("unchecked")
+        protected final BuilderType self() {
+            return (BuilderType) this;
         }
 
         /**
-         * Returns the horizontal position, the animation starts at.
-         *
-         * @return The horizontal position, the animation starts at, in pixels as a {@link Float}
-         * value
+         * Creates a new builder, which allows to configure and create instances of the class {@link
+         * Animation}.
          */
-        public final float getX() {
-            return x;
+        public Builder() {
+            setDuration(-1);
+            setInterpolator(null);
         }
 
         /**
-         * Returns the vertical position, the animation starts at.
+         * Creates and returns the animation.
          *
-         * @return The vertical position, the animation starts at, in pixels as a {@link Float}
-         * value
+         * @return The animation, which has been created, as an instance of the generic type
+         * AnimationType. The animation may not be null
          */
-        public final float getY() {
-            return y;
+        @NonNull
+        public abstract AnimationType create();
+
+        /**
+         * Sets the duration of the animations, which are created by the builder.
+         *
+         * @param duration
+         *         The duration, which should be set, in milliseconds as a {@link Long} value or -1,
+         *         if the default duration should be used
+         * @return The builder, this method has be called upon, as an instance of the generic type
+         * BuilderType. The builder may not be null
+         */
+        @NonNull
+        public final BuilderType setDuration(final long duration) {
+            ensureAtLeast(duration, -1, "The duration must be at least -1");
+            this.duration = duration;
+            return self();
+        }
+
+        /**
+         * Sets the interpolator, which should be used by the animations, which are created by the
+         * builder.
+         *
+         * @param interpolator
+         *         The interpolator, which should be set, as an instance of the type {@link
+         *         Interpolator} or null, if the default interpolator should be used
+         * @return The builder, this method has be called upon, as an instance of the generic type
+         * BuilderType. The builder may not be null
+         */
+        @NonNull
+        public final BuilderType setInterpolator(@Nullable final Interpolator interpolator) {
+            this.interpolator = interpolator;
+            return self();
         }
 
     }
@@ -136,73 +115,48 @@ public abstract class Animation {
     /**
      * The duration of the animation in milliseconds.
      */
-    private long duration;
+    private final long duration;
 
     /**
-     * Creates and returns a swipe animation, which moves tabs on the orthogonal axis, while
-     * animating their size and alpha at the same time. By default, the swipe animation uses the
-     * direction <code>SwipeDirection.RIGHT</code>.
-     *
-     * @return The animation, which has been created, as an instance of the class {@link
-     * SwipeAnimation}. The animation may not be null
+     * The interpolator, which is used by the animation.
      */
-    @NonNull
-    public static SwipeAnimation createSwipeAnimation() {
-        return createSwipeAnimation(SwipeDirection.RIGHT);
-    }
+    private final Interpolator interpolator;
 
     /**
-     * Creates and returns a swipe animation, which moves tabs on the orthogonal axis by using a
-     * specific direction, while animating their size and alpha at the same time.
+     * Creates a new animation.
      *
-     * @param direction
-     *         The direction, which should be used by the animation, as a value of the enum {@link
-     *         SwipeDirection}. The direction may not be null
-     * @return The animation, which has been created, as an instance of the class {@link
-     * SwipeAnimation}. The animation may not be null
+     * @param duration
+     *         The duration of the animation in milliseconds as a {@link Long} value or -1, if the
+     *         default duration should be used
+     * @param interpolator
+     *         The interpolator, which should be used by the animation, as an instance of the type
+     *         {@link Interpolator} or null, if the default interpolator should be used
      */
-    @NonNull
-    public static SwipeAnimation createSwipeAnimation(@NonNull final SwipeDirection direction) {
-        return new SwipeAnimation(direction);
-    }
-
-    /**
-     * Creates and returns a reveal animation, which animates the size of a tab starting at a
-     * specific position.
-     *
-     * @param x
-     *         The horizontal position, the animation should start at, in pixels as a {@link Float}
-     *         value
-     * @param y
-     *         The vertical position, the animation should start at, in pixels as a {@link Float}
-     *         value
-     * @return The animation, which has been created, as an instance of the class {@link
-     * RevealAnimation}. The animation may not be null
-     */
-    @NonNull
-    public static RevealAnimation createRevealAnimation(final float x, final float y) {
-        return new RevealAnimation(x, y);
+    protected Animation(final long duration, @Nullable final Interpolator interpolator) {
+        ensureAtLeast(duration, -1, "The duration must be at least -1");
+        this.duration = duration;
+        this.interpolator = interpolator;
     }
 
     /**
      * Returns the duration of the animation.
      *
-     * @return The duration of the animation in milliseconds as a {@link Long} value
+     * @return The duration of the animation in milliseconds as a {@link Long} value or -1, if the
+     * default duration is used
      */
     public final long getDuration() {
         return duration;
     }
 
     /**
-     * Sets the duration of the animation.
+     * Returns the interpolator, which is used by the animation.
      *
-     * @param duration
-     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
-     *         duration must be greater than 0
+     * @return The interpolator, which is used by the animation, as an instance of the type {@link
+     * Interpolator} or null, if the default interpolator is used
      */
-    public final void setDuration(final long duration) {
-        ensureGreater(duration, 0, "The duration must be greater than 0");
-        this.duration = duration;
+    @Nullable
+    public final Interpolator getInterpolator() {
+        return interpolator;
     }
 
 }
