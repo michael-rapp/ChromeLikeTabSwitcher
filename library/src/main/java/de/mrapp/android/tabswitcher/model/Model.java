@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.SwipeAnimation;
+import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
@@ -187,7 +189,7 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds a new tab to the tab switcher. By default, the tab is added at the end. If the switcher
      * is currently shown, the tab is added by using an animation. By default, a {@link
-     * Animation.SwipeAnimation} with direction {@link Animation.SwipeDirection#RIGHT} is used. If
+     * SwipeAnimation} with direction {@link SwipeDirection#RIGHT} is used. If
      * an animation is currently running, the tab will be added once all previously started
      * animations have been finished.
      *
@@ -199,8 +201,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher at a specific index. If the switcher is currently shown,
-     * the tab is added by using an animation. By default, a {@link Animation.SwipeAnimation} with
-     * direction {@link Animation.SwipeDirection#RIGHT} is used. If an animation is currently
+     * the tab is added by using an animation. By default, a {@link SwipeAnimation} with
+     * direction {@link SwipeDirection#RIGHT} is used. If an animation is currently
      * running, the tab will be added once all previously started animations have been finished.
      *
      * @param tab
@@ -234,8 +236,8 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by a collection, to the tab switcher. By default, the tabs
      * are added at the end. If the switcher is currently shown, the tabs are added by using an
-     * animation. By default, a {@link Animation.SwipeAnimation} with direction {@link
-     * Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
+     * animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
      * be added once all previously started animations have been finished.
      *
      * @param tabs
@@ -247,8 +249,8 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by a collection, to the tab switcher, starting at a
      * specific index. If the switcher is currently shown, the tabs are added by using an animation.
-     * By default, a {@link Animation.SwipeAnimation} with direction {@link
-     * Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
+     * By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
      * be added once all previously started animations have been finished.
      *
      * @param tabs
@@ -284,8 +286,8 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by an array, to the tab switcher. By default, the tabs are
      * added at the end. If the switcher is currently shown, the tabs are added by using an
-     * animation. By default, a {@link Animation.SwipeAnimation} with direction {@link
-     * Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
+     * animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
      * be added once all previously started animations have been finished.
      *
      * @param tabs
@@ -297,8 +299,8 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by an array, to the tab switcher, starting at a specific
      * index. If the switcher is currently shown, the tabs are added by using an animation. By
-     * default, a {@link Animation.SwipeAnimation} with direction {@link
-     * Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
+     * default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT} is used. If an animation is currently running, the tabs will
      * be added once all previously started animations have been finished.
      *
      * @param tabs
@@ -332,8 +334,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
-     * removed by using an animation. By default, a {@link Animation.SwipeAnimation} with direction
-     * {@link Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the tab
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction
+     * {@link SwipeDirection#RIGHT} is used. If an animation is currently running, the tab
      * will be removed once all previously started animations have been finished.
      *
      * @param tab
@@ -358,8 +360,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
-     * removed by using an animation. By default, a {@link Animation.SwipeAnimation} with direction
-     * {@link Animation.SwipeDirection#RIGHT} is used. If an animation is currently running, the
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction
+     * {@link SwipeDirection#RIGHT} is used. If an animation is currently running, the
      * tabs will be removed once all previously started animations have been finished.
      */
     void clear();
