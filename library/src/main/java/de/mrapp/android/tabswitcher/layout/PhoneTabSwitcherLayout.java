@@ -17,10 +17,10 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -62,9 +62,9 @@ import de.mrapp.android.tabswitcher.iterator.InitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
-import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
+import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.view.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
@@ -2536,11 +2536,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The tab switcher, the layout belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
      * @param model
-     *         The model of the tab switcher, the layout belongs to, as an instance of the type
-     *         {@link Model}. The model may not be null
+     *         The model of the tab switcher, the layout belongs to, as an instance of the class
+     *         {@link TabSwitcherModel}. The model may not be null
      */
     public PhoneTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
-                                  @NonNull final Model model) {
+                                  @NonNull final TabSwitcherModel model) {
         super(tabSwitcher, model);
         arithmetics = new PhoneArithmetics(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
@@ -2611,14 +2611,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final void onTabBackgroundColorChanged(@ColorInt final int color) {
+    protected final void onTabBackgroundColorChanged(
+            @Nullable final ColorStateList colorStateList) {
         for (Tab tab : getModel()) {
             recyclerAdapter.onBackgroundColorChanged(tab);
         }
     }
 
     @Override
-    protected final void onTabTitleColorChanged(@ColorInt final int color) {
+    protected final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
         for (Tab tab : getModel()) {
             recyclerAdapter.onTitleTextColorChanged(tab);
         }
@@ -2652,6 +2653,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
+        getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);

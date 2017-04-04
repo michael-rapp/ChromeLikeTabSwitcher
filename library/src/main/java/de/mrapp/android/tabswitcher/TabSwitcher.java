@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -982,9 +983,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         layout.setTabIcon(icon);
     }
 
-    @ColorInt
+    @Nullable
     @Override
-    public final int getTabBackgroundColor() {
+    public final ColorStateList getTabBackgroundColor() {
         return layout.getTabBackgroundColor();
     }
 
@@ -994,13 +995,24 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     @Override
-    public final int getTabTitleTextColor() {
+    public final void setTabBackgroundColor(@NonNull final ColorStateList colorStateList) {
+        layout.setTabBackgroundColor(colorStateList);
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getTabTitleTextColor() {
         return layout.getTabTitleTextColor();
     }
 
     @Override
     public final void setTabTitleTextColor(@ColorInt final int color) {
         layout.setTabTitleTextColor(color);
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@Nullable final ColorStateList colorStateList) {
+        layout.setTabTitleTextColor(colorStateList);
     }
 
     @NonNull

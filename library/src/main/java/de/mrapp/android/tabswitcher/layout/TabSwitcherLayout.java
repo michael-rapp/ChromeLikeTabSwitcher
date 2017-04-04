@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.layout;
 
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
@@ -291,34 +292,56 @@ public interface TabSwitcherLayout {
     /**
      * Returns the default background color of a tab.
      *
-     * @return The default background color of a tab as an {@link Integer} value
+     * @return The default background color of a tab as an instance of the class {@link
+     * ColorStateList} or null, if the default color is used
      */
-    @ColorInt
-    int getTabBackgroundColor();
+    @Nullable
+    ColorStateList getTabBackgroundColor();
 
     /**
      * Sets the default background color of a tab.
      *
      * @param color
-     *         The color, which should be set, as an {@link Integer} value
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
      */
     void setTabBackgroundColor(@ColorInt int color);
 
     /**
+     * Sets the default background color of a tab.
+     *
+     * @param colorStateList
+     *         The color, which should be set, as an instance of the class {@link ColorStateList} or
+     *         null, if the default color should be used
+     */
+    void setTabBackgroundColor(@Nullable ColorStateList colorStateList);
+
+    /**
      * Returns the default text color of a tab's title.
      *
-     * @return The default text color of a tab's title as an {@link Integer} value
+     * @return The default text color of a tab's title as an instance of the class {@link
+     * ColorStateList} or null, if the default color is used
      */
-    @ColorInt
-    int getTabTitleTextColor();
+    @Nullable
+    ColorStateList getTabTitleTextColor();
 
     /**
      * Sets the default text color of a tab's title.
      *
      * @param color
-     *         The color, which should be set, as an {@link Integer} value
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
      */
     void setTabTitleTextColor(@ColorInt int color);
+
+    /**
+     * Sets the default text color of a tab's title.
+     *
+     * @param colorStateList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the default color should be used
+     */
+    void setTabTitleTextColor(@Nullable ColorStateList colorStateList);
 
     /**
      * Returns the default icon of a tab's close button.

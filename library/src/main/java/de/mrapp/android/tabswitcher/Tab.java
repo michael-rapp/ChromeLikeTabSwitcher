@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -163,12 +164,12 @@ public class Tab implements Parcelable {
     /**
      * The background color of the tab.
      */
-    private int backgroundColor;
+    private ColorStateList backgroundColor;
 
     /**
      * The text color of the tab's title.
      */
-    private int titleTextColor;
+    private ColorStateList titleTextColor;
 
     /**
      * Optional parameters, which are associated with the tab.
@@ -243,8 +244,8 @@ public class Tab implements Parcelable {
         this.closeable = source.readInt() > 0;
         this.closeButtonIconId = source.readInt();
         this.closeButtonIconBitmap = source.readParcelable(getClass().getClassLoader());
-        this.backgroundColor = source.readInt();
-        this.titleTextColor = source.readInt();
+        this.backgroundColor = source.readParcelable(getClass().getClassLoader());
+        this.titleTextColor = source.readParcelable(getClass().getClassLoader());
         this.parameters = source.readBundle(getClass().getClassLoader());
     }
 
@@ -262,8 +263,8 @@ public class Tab implements Parcelable {
         this.closeButtonIconBitmap = null;
         this.iconId = -1;
         this.iconBitmap = null;
-        this.backgroundColor = -1;
-        this.titleTextColor = -1;
+        this.backgroundColor = null;
+        this.titleTextColor = null;
         this.parameters = null;
     }
 
@@ -437,11 +438,11 @@ public class Tab implements Parcelable {
     /**
      * Returns the background color of the tab.
      *
-     * @return The background color of the tab as an {@link Integer} value or -1, if no custom color
-     * is set
+     * @return The background color of the tab as an instance of the class {@link ColorStateList} or
+     * -1, if no custom color is set
      */
-    @ColorInt
-    public final int getBackgroundColor() {
+    @Nullable
+    public final ColorStateList getBackgroundColor() {
         return backgroundColor;
     }
 
@@ -453,18 +454,29 @@ public class Tab implements Parcelable {
      *         should be set
      */
     public final void setBackgroundColor(@ColorInt final int color) {
-        this.backgroundColor = color;
+        setBackgroundColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    /**
+     * Sets the tab's background color.
+     *
+     * @param colorStateList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if no custom color should be set
+     */
+    public final void setBackgroundColor(@Nullable final ColorStateList colorStateList) {
+        this.backgroundColor = colorStateList;
         notifyOnBackgroundColorChanged();
     }
 
     /**
      * Returns the text color of the tab's title.
      *
-     * @return The text color of the tab's title as an {@link Integer} value or -1, if no custom
-     * color is set
+     * @return The text color of the tab's title as an instance of the class {@link ColorStateList}
+     * or null, if no custom color is set
      */
-    @ColorInt
-    public final int getTitleTextColor() {
+    @Nullable
+    public final ColorStateList getTitleTextColor() {
         return titleTextColor;
     }
 
@@ -476,7 +488,18 @@ public class Tab implements Parcelable {
      *         should be set
      */
     public final void setTitleTextColor(@ColorInt final int color) {
-        this.titleTextColor = color;
+        setTitleTextColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    /**
+     * Sets the text color of the tab's title.
+     *
+     * @param colorStateList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if no custom color should be set
+     */
+    public final void setTitleTextColor(@Nullable final ColorStateList colorStateList) {
+        this.titleTextColor = colorStateList;
         notifyOnTitleTextColorChanged();
     }
 
@@ -542,8 +565,8 @@ public class Tab implements Parcelable {
         parcel.writeInt(closeable ? 1 : 0);
         parcel.writeInt(closeButtonIconId);
         parcel.writeParcelable(closeButtonIconBitmap, flags);
-        parcel.writeInt(backgroundColor);
-        parcel.writeInt(titleTextColor);
+        parcel.writeParcelable(backgroundColor, flags);
+        parcel.writeParcelable(titleTextColor, flags);
         parcel.writeBundle(parameters);
     }
 

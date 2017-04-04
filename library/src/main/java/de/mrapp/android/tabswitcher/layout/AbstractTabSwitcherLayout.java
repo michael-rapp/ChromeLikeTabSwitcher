@@ -17,6 +17,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -43,6 +44,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.model.Model;
+import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -194,7 +196,7 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * The model of the tab switcher, the layout belongs to.
      */
-    private final Model model;
+    private final TabSwitcherModel model;
 
     /**
      * The callback, which is notified about the layout's events.
@@ -230,12 +232,12 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * The background color of a tab;
      */
-    private int tabBackgroundColor;
+    private ColorStateList tabBackgroundColor;
 
     /**
      * The text color of a tab's title.
      */
-    private int tabTitleTextColor;
+    private ColorStateList tabTitleTextColor;
 
     /**
      * The resource id of the icon of a tab's close button.
@@ -318,11 +320,11 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * Returns the model of the tab switcher, the layout belongs to.
      *
-     * @return The model of the tab switcher, the layout belongs to, as an instance of the type
-     * {@link Model}. The model may not be null
+     * @return The model of the tab switcher, the layout belongs to, as an instance of the class
+     * {@link TabSwitcherModel}. The model may not be null
      */
     @NonNull
-    protected final Model getModel() {
+    protected final TabSwitcherModel getModel() {
         return model;
     }
 
@@ -376,19 +378,22 @@ public abstract class AbstractTabSwitcherLayout
      * The method, which is invoked on implementing subclasses, when the background color of a tab
      * has been changed.
      *
-     * @param color
-     *         The color, which has been set, as an {@link Integer} value
+     * @param colorStateList
+     *         The color state list, which has been set, as an instance of the class {@link
+     *         ColorStateList} or null, if the default color should be used
      */
-    protected abstract void onTabBackgroundColorChanged(@ColorInt final int color);
+    protected abstract void onTabBackgroundColorChanged(
+            @Nullable final ColorStateList colorStateList);
 
     /**
      * The method, which is invoked on implementing subclasses, when the text color of a tab's title
      * has been changed.
      *
-     * @param color
-     *         The color, which has been set, as an {@link Integer} value
+     * @param colorStateList
+     *         The color state list, which has been set, as an instance of the class {@link
+     *         ColorStateList} or null, if the default color should be used
      */
-    protected abstract void onTabTitleColorChanged(@ColorInt final int color);
+    protected abstract void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList);
 
     /**
      * The method, which is invoked on implementing subclasses, when the icon of a tab's close
@@ -407,11 +412,11 @@ public abstract class AbstractTabSwitcherLayout
      *         The tab switcher, the layout belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
      * @param model
-     *         The model of the tab switcher, the layout belongs to, as an instance of the type
-     *         {@link Model}. The model may not be null
+     *         The model of the tab switcher, the layout belongs to, as an instance of the class
+     *         {@link TabSwitcherModel}. The model may not be null
      */
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
-                                     @NonNull final Model model) {
+                                     @NonNull final TabSwitcherModel model) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         this.tabSwitcher = tabSwitcher;
@@ -605,27 +610,38 @@ public abstract class AbstractTabSwitcherLayout
         onTabIconChanged(getTabIcon());
     }
 
-    @ColorInt
+    @Nullable
     @Override
-    public final int getTabBackgroundColor() {
+    public final ColorStateList getTabBackgroundColor() {
         return tabBackgroundColor;
     }
 
     @Override
     public final void setTabBackgroundColor(@ColorInt final int color) {
-        this.tabBackgroundColor = color;
-        onTabBackgroundColorChanged(color);
+        setTabBackgroundColor(color != -1 ? ColorStateList.valueOf(color) : null);
     }
 
     @Override
-    public final int getTabTitleTextColor() {
+    public final void setTabBackgroundColor(@Nullable final ColorStateList colorStateList) {
+        this.tabBackgroundColor = colorStateList;
+        onTabBackgroundColorChanged(colorStateList);
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getTabTitleTextColor() {
         return tabTitleTextColor;
     }
 
     @Override
     public final void setTabTitleTextColor(@ColorInt final int color) {
-        this.tabTitleTextColor = color;
-        onTabTitleColorChanged(color);
+        setTabTitleTextColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@Nullable final ColorStateList colorStateList) {
+        this.tabTitleTextColor = colorStateList;
+        onTabTitleColorChanged(colorStateList);
     }
 
     @NonNull

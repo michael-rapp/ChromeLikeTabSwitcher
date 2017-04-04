@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher.view;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -34,11 +35,15 @@ import android.widget.TextView;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AbstractViewRecycler;
@@ -55,7 +60,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integer>
-        implements Tab.Callback {
+        implements Tab.Callback, Model.Listener {
 
     /**
      * The tab switcher, the tabs belong to.
@@ -92,6 +97,16 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      * The height of the view group, which contains a tab's title and close button, in pixels.
      */
     private final int tabTitleContainerHeight;
+
+    /**
+     * The default background color of tabs.
+     */
+    private final int tabBackgroundColor;
+
+    /**
+     * The default text color of a tab's title.
+     */
+    private final int tabTitleTextColor;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -296,13 +311,22 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private void adaptBackgroundColor(@NonNull final View view,
                                       @NonNull final TabViewHolder viewHolder,
                                       @NonNull final Tab tab) {
-        int color = tab.getBackgroundColor();
+        ColorStateList colorStateList =
+                tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
+                        tabSwitcher.getTabBackgroundColor();
+        int color = tabBackgroundColor;
+
+        if (colorStateList != null) {
+            int[] stateSet =
+                    tabSwitcher.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
+                            new int[]{};
+            color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
+        }
+
         Drawable background = view.getBackground();
-        background.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
-                PorterDuff.Mode.MULTIPLY);
+        background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         Drawable border = viewHolder.borderView.getBackground();
-        border.setColorFilter(color != -1 ? color : tabSwitcher.getTabBackgroundColor(),
-                PorterDuff.Mode.MULTIPLY);
+        border.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 
     /**
@@ -317,9 +341,50 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void adaptTitleTextColor(@NonNull final TabViewHolder viewHolder,
                                      @NonNull final Tab tab) {
-        int color = tab.getTitleTextColor();
-        viewHolder.titleTextView
-                .setTextColor(color != -1 ? color : tabSwitcher.getTabTitleTextColor());
+        ColorStateList colorStateList = tab.getTitleTextColor() != null ? tab.getTitleTextColor() :
+                tabSwitcher.getTabTitleTextColor();
+
+        if (colorStateList != null) {
+            viewHolder.titleTextView.setTextColor(colorStateList);
+        } else {
+            viewHolder.titleTextView.setTextColor(tabTitleTextColor);
+        }
+    }
+
+    /**
+     * Adapts the selection state of a tab's views.
+     *
+     * @param viewHolder
+     *         The view holder, which stores references to the tab's views, as an instance of the
+     *         class {@link TabViewHolder}. The view holder may not be null
+     * @param tab
+     *         The tab, whose selection state should be adapted, as an instance of the class {@link
+     *         Tab}. The tab may not be null
+     */
+    private void adaptSelectionState(@NonNull final TabViewHolder viewHolder,
+                                     @NonNull final Tab tab) {
+        boolean selected = tabSwitcher.getSelectedTab() == tab;
+        viewHolder.titleTextView.setSelected(selected);
+        viewHolder.closeButton.setSelected(selected);
+    }
+
+    /**
+     * Adapts the appearance of all currently inflated tabs, depending on whether they are currently
+     * selected, or not.
+     */
+    private void adaptAllSelectionStates() {
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                Tab tab = tabItem.getTab();
+                TabViewHolder viewHolder = tabItem.getViewHolder();
+                adaptSelectionState(viewHolder, tab);
+                adaptBackgroundColor(tabItem.getView(), viewHolder, tab);
+            }
+        }
     }
 
     /**
@@ -364,6 +429,10 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
+        this.tabBackgroundColor =
+                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
+        this.tabTitleTextColor =
+                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color);
         this.viewRecycler = null;
     }
 
@@ -494,6 +563,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptCloseButtonIcon(viewHolder, tab);
         adaptBackgroundColor(view, viewHolder, tab);
         adaptTitleTextColor(viewHolder, tab);
+        adaptSelectionState(viewHolder, tab);
 
         if (!tabSwitcher.isSwitcherShown()) {
             if (tab == tabSwitcher.getSelectedTab()) {
@@ -581,6 +651,56 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         if (tabItem != null) {
             adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
         }
+    }
+
+    @Override
+    public final void onSwitcherShown() {
+
+    }
+
+    @Override
+    public final void onSwitcherHidden() {
+
+    }
+
+    @Override
+    public final void onSelectionChanged(final int previousIndex, final int index,
+                                         @Nullable final Tab selectedTab,
+                                         final boolean switcherHidden) {
+        adaptAllSelectionStates();
+    }
+
+    @Override
+    public final void onTabAdded(final int index, @NonNull final Tab tab,
+                                 final int previousSelectedTabIndex, final int selectedTabIndex,
+                                 final boolean switcherHidden, @NonNull final Animation animation) {
+        if (previousSelectedTabIndex != selectedTabIndex) {
+            adaptAllSelectionStates();
+        }
+    }
+
+    @Override
+    public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
+                                     final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     @NonNull final Animation animation) {
+        if (previousSelectedTabIndex != selectedTabIndex) {
+            adaptAllSelectionStates();
+        }
+    }
+
+    @Override
+    public final void onTabRemoved(final int index, @NonNull final Tab tab,
+                                   final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   @NonNull final Animation animation) {
+        if (previousSelectedTabIndex != selectedTabIndex) {
+            adaptAllSelectionStates();
+        }
+    }
+
+    @Override
+    public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
+                                       @NonNull final Animation animation) {
+
     }
 
 }
