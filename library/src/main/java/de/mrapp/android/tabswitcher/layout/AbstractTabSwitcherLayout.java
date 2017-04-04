@@ -54,7 +54,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public abstract class AbstractTabSwitcherLayout
-        implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Callback {
+        implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher

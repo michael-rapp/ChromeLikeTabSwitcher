@@ -36,7 +36,7 @@ public interface Model extends Iterable<Tab> {
      * Defines the interface, a class, which should be notified about the model's events, must
      * implement.
      */
-    interface Callback {
+    interface Listener {
 
         /**
          * The method, which is invoked, when the tab switcher has been shown.

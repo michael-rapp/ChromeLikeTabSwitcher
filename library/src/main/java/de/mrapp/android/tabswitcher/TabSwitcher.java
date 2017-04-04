@@ -128,7 +128,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         pendingActions = new LinkedList<>();
         listeners = new LinkedHashSet<>();
         model = new TabSwitcherModel();
-        model.addCallback(createModelCallback());
+        model.addListener(createModelListener());
         layout = new PhoneTabSwitcherLayout(this, model);
         layout.setCallback(createLayoutCallback());
         layout.inflateLayout();
@@ -217,15 +217,15 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
-     * Creates and returns a callback, which allows to observe, when the tab switcher's model is
+     * Creates and returns a listener, which allows to observe, when the tab switcher's model is
      * modified.
      *
-     * @return The callback, which has been created, as an instance of the type {@link
-     * Model.Callback}. The callback may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * Model.Listener}. The listener may not be null
      */
     @NonNull
-    private Model.Callback createModelCallback() {
-        return new Model.Callback() {
+    private Model.Listener createModelListener() {
+        return new Model.Listener() {
 
             @Override
             public void onSwitcherShown() {
@@ -334,7 +334,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
             @Override
             public void onGlobalLayout() {
-                model.addCallback(layout);
+                model.addListener(layout);
                 layout.onGlobalLayout();
             }
 

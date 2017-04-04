@@ -42,9 +42,9 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model {
 
     /**
-     * A set, which contains the callbacks, which are notified about the model's events.
+     * A set, which contains the listeners, which are notified about the model's events.
      */
-    private final Set<Callback> callbacks;
+    private final Set<Listener> listeners;
 
     /**
      * A list, which contains the tabs, which are contained by the tab switcher.
@@ -93,25 +93,25 @@ public class TabSwitcherModel implements Model {
     }
 
     /**
-     * Notifies the callback, that the tab switcher has been shown.
+     * Notifies the listeners, that the tab switcher has been shown.
      */
     private void notifyOnSwitcherShown() {
-        for (Callback callback : callbacks) {
-            callback.onSwitcherShown();
+        for (Listener listener : listeners) {
+            listener.onSwitcherShown();
         }
     }
 
     /**
-     * Notifies the callback, that the tab switcher has been shown.
+     * Notifies the listeners, that the tab switcher has been shown.
      */
     private void notifyOnSwitcherHidden() {
-        for (Callback callback : callbacks) {
-            callback.onSwitcherHidden();
+        for (Listener listener : listeners) {
+            listener.onSwitcherHidden();
         }
     }
 
     /**
-     * Notifies the callback, that the currently selected tab has been changed.
+     * Notifies the listeners, that the currently selected tab has been changed.
      *
      * @param previousIndex
      *         The index of the previously selected tab as an {@link Integer} value or -1, if no tab
@@ -127,13 +127,13 @@ public class TabSwitcherModel implements Model {
      */
     private void notifyOnSelectionChanged(final int previousIndex, final int index,
                                           @Nullable final Tab tab, final boolean switcherHidden) {
-        for (Callback callback : callbacks) {
-            callback.onSelectionChanged(previousIndex, index, tab, switcherHidden);
+        for (Listener listener : listeners) {
+            listener.onSelectionChanged(previousIndex, index, tab, switcherHidden);
         }
     }
 
     /**
-     * Notifies the callback, that a specific tab has been added to the model.
+     * Notifies the listeners, that a specific tab has been added to the model.
      *
      * @param index
      *         The index, the tab has been added at, as an {@link Integer} value
@@ -156,14 +156,14 @@ public class TabSwitcherModel implements Model {
                                   final int previousSelectedTabIndex, final int selectedTabIndex,
                                   final boolean switcherHidden,
                                   @NonNull final Animation animation) {
-        for (Callback callback : callbacks) {
-            callback.onTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
+        for (Listener listener : listeners) {
+            listener.onTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
                     switcherHidden, animation);
         }
     }
 
     /**
-     * Notifies the callback, that multiple tabs have been added to the model.
+     * Notifies the listeners, that multiple tabs have been added to the model.
      *
      * @param index
      *         The index of the tab, which has been added, as an {@link Integer} value
@@ -184,14 +184,14 @@ public class TabSwitcherModel implements Model {
                                       final int previousSelectedTabIndex,
                                       final int selectedTabIndex,
                                       @NonNull final Animation animation) {
-        for (Callback callback : callbacks) {
-            callback.onAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
+        for (Listener listener : listeners) {
+            listener.onAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
                     animation);
         }
     }
 
     /**
-     * Notifies the callback, that a tab has been removed from the model.
+     * Notifies the listeners, that a tab has been removed from the model.
      *
      * @param index
      *         The index of the tab, which has been removed, as an {@link Integer} value
@@ -211,14 +211,14 @@ public class TabSwitcherModel implements Model {
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
                                     final int previousSelectedTabIndex, final int selectedTabIndex,
                                     @NonNull final Animation animation) {
-        for (Callback callback : callbacks) {
-            callback.onTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex,
+        for (Listener listener : listeners) {
+            listener.onTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex,
                     animation);
         }
     }
 
     /**
-     * Notifies the callback, that all tabs have been removed.
+     * Notifies the listeners, that all tabs have been removed.
      *
      * @param tabs
      *         An array, which contains the tabs, which have been removed, as an array of the type
@@ -229,8 +229,8 @@ public class TabSwitcherModel implements Model {
      */
     private void notifyOnAllTabsRemoved(@NonNull final Tab[] tabs,
                                         @NonNull final Animation animation) {
-        for (Callback callback : callbacks) {
-            callback.onAllTabsRemoved(tabs, animation);
+        for (Listener listener : listeners) {
+            listener.onAllTabsRemoved(tabs, animation);
         }
     }
 
@@ -238,34 +238,34 @@ public class TabSwitcherModel implements Model {
      * Creates a new model of a {@link TabSwitcher}.
      */
     public TabSwitcherModel() {
-        this.callbacks = new LinkedHashSet<>();
+        this.listeners = new LinkedHashSet<>();
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
     }
 
     /**
-     * Adds a new callback, which should be notified about the model's events.
+     * Adds a new listener, which should be notified about the model's events.
      *
-     * @param callback
-     *         The callback, which should be added, as an instance of the type {@link Callback}. The
-     *         callback may not be null
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link Listener}. The
+     *         listener may not be null
      */
-    public final void addCallback(@NonNull final Callback callback) {
-        ensureNotNull(callback, "The callback may not be null");
-        callbacks.add(callback);
+    public final void addListener(@NonNull final Listener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        listeners.add(listener);
     }
 
     /**
-     * Removes a specific callback, which should not be notified about the model's events, anymore.
+     * Removes a specific listener, which should not be notified about the model's events, anymore.
      *
-     * @param callback
-     *         The callback, which should be removed, as an instance of the type {@link Callback}.
-     *         The callback may not be null
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link Listener}.
+     *         The listener may not be null
      */
-    public final void removeCallback(@NonNull final Callback callback) {
-        ensureNotNull(callback, "The callback may not be null");
-        callbacks.remove(callback);
+    public final void removeListener(@NonNull final Listener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        listeners.remove(listener);
     }
 
     @Override
