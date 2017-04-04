@@ -31,7 +31,6 @@ import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.TabSwitcherListener;
 
 /**
  * Defines the interface, a layout, which implements the functionality of a {@link TabSwitcher},
@@ -106,31 +105,35 @@ public interface TabSwitcherLayout {
     ViewGroup getTabContainer();
 
     /**
-     * Returns the toolbar, which is shown, when the tab switcher is shown.
+     * Returns the toolbars, which are shown, when the tab switcher is shown. When using the
+     * smartphone layout, only one toolbar is shown. When using the tablet layout, a primary and
+     * secondary toolbar is shown. In such case, the first index of the returned array corresponds
+     * to the primary toolbar.
      *
-     * @return The toolbar, which is shown, when the tab switcher is shown, as an instance of the
-     * class {@link Toolbar}. The toolbar may not be null
+     * @return An array, which contains the toolbars, which are shown, when the tab switcher is
+     * shown, as an array of the type {@link Toolbar}. The array may not be null
      */
     @NonNull
-    Toolbar getToolbar();
+    Toolbar[] getToolbars();
 
     /**
-     * Sets, whether the toolbar should be shown, when the tab switcher is shown, or not.
+     * Sets, whether the toolbars should be shown, when the tab switcher is shown, or not.
      *
      * @param show
-     *         True, if the toolbar should be shown, false otherwise
+     *         True, if the toolbars should be shown, false otherwise
      */
-    void showToolbar(boolean show);
+    void showToolbars(boolean show);
 
     /**
-     * Returns, whether the toolbar is shown, when the tab switcher is shown, or not.
+     * Returns, whether the toolbars are shown, when the tab switcher is shown, or not.
      *
-     * @return True, if the toolbar is shown, false otherwise
+     * @return True, if the toolbars are shown, false otherwise
      */
-    boolean isToolbarShown();
+    boolean areToolbarsShown();
 
     /**
-     * Sets the title of the toolbar, which is shown, when the tab switcher is shown.
+     * Sets the title of the toolbar, which is shown, when the tab switcher is shown. When using the
+     * tablet layout, the title is set to the primary toolbar.
      *
      * @param title
      *         The title, which should be set, as an instance of the type {@link CharSequence} or
@@ -139,7 +142,8 @@ public interface TabSwitcherLayout {
     void setToolbarTitle(@Nullable CharSequence title);
 
     /**
-     * Sets the title of the toolbar, which is shown, when the tab switcher is shown.
+     * Sets the title of the toolbar, which is shown, when the tab switcher is shown. When using the
+     * tablet layout, the title is set to the primary toolbar.
      *
      * @param resourceId
      *         The resource id of the title, which should be set, as an {@link Integer} value. The
@@ -148,7 +152,8 @@ public interface TabSwitcherLayout {
     void setToolbarTitle(@StringRes int resourceId);
 
     /**
-     * Inflates the menu of the toolbar, which is shown, when the tab switcher is shown.
+     * Inflates the menu of the toolbar, which is shown, when the tab switcher is shown. When using
+     * the tablet layout, the menu is inflated into the secondary toolbar.
      *
      * @param resourceId
      *         The resource id of the menu, which should be inflated, as an {@link Integer} value.
@@ -161,7 +166,8 @@ public interface TabSwitcherLayout {
     void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
 
     /**
-     * Returns the menu of the toolbar, which is shown, when the tab switcher is shown.
+     * Returns the menu of the toolbar, which is shown, when the tab switcher is shown. When using
+     * the tablet layout, the menu corresponds to the secondary toolbar.
      *
      * @return The menu of the toolbar as an instance of the type {@link Menu}. The menu may not be
      * null
@@ -170,7 +176,8 @@ public interface TabSwitcherLayout {
     Menu getToolbarMenu();
 
     /**
-     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown.
+     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown. When
+     * using the tablet layout, the icon is set to the primary toolbar.
      *
      * @param icon
      *         The icon, which should be set, as an instance of the class {@link Drawable} or null,
@@ -183,7 +190,8 @@ public interface TabSwitcherLayout {
     void setToolbarNavigationIcon(@Nullable Drawable icon, @Nullable OnClickListener listener);
 
     /**
-     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown.
+     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown. When
+     * using the tablet layout, the icon is set to the primary toolbar.
      *
      * @param resourceId
      *         The resource id of the icon, which should be set, as an {@link Integer} value. The

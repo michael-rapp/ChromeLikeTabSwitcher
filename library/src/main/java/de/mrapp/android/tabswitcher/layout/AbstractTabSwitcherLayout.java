@@ -30,6 +30,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -481,18 +482,20 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void showToolbar(final boolean show) {
-        getToolbar().setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    public final void showToolbars(final boolean show) {
+        for (Toolbar toolbar : getToolbars()) {
+            toolbar.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        }
     }
 
     @Override
-    public final boolean isToolbarShown() {
-        return getToolbar().getVisibility() == View.VISIBLE;
+    public final boolean areToolbarsShown() {
+        return getToolbars()[0].getVisibility() == View.VISIBLE;
     }
 
     @Override
     public final void setToolbarTitle(@Nullable final CharSequence title) {
-        getToolbar().setTitle(title);
+        getToolbars()[0].setTitle(title);
     }
 
     @Override
@@ -503,21 +506,26 @@ public abstract class AbstractTabSwitcherLayout
     @Override
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
-        getToolbar().inflateMenu(resourceId);
-        getToolbar().setOnMenuItemClickListener(listener);
+        Toolbar[] toolbars = getToolbars();
+        Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
+        toolbar.inflateMenu(resourceId);
+        toolbar.setOnMenuItemClickListener(listener);
     }
 
     @NonNull
     @Override
     public final Menu getToolbarMenu() {
-        return getToolbar().getMenu();
+        Toolbar[] toolbars = getToolbars();
+        Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
+        return toolbar.getMenu();
     }
 
     @Override
     public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
                                                @Nullable final OnClickListener listener) {
-        getToolbar().setNavigationIcon(icon);
-        getToolbar().setNavigationOnClickListener(listener);
+        Toolbar toolbar = getToolbars()[0];
+        toolbar.setNavigationIcon(icon);
+        toolbar.setNavigationOnClickListener(listener);
     }
 
     @Override

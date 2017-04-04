@@ -320,7 +320,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private int calculateBottomMargin(@NonNull final View view) {
         float tabHeight = (view.getHeight() - 2 * tabInset) * arithmetics.getScale(view, true);
         float containerHeight = arithmetics.getSize(Axis.Y_AXIS, tabContainer);
-        int toolbarHeight = isToolbarShown() ? toolbar.getHeight() - tabInset : 0;
+        int toolbarHeight = areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
         int stackHeight =
                 getLayout() == Layout.PHONE_LANDSCAPE ? 0 : stackedTabCount * stackedTabSpacing;
         return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
@@ -511,7 +511,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private float calculateMaxTabSpacing(final int count) {
         float totalSpace = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (getLayout() == Layout.PHONE_PORTRAIT && isToolbarShown() ?
+                (getLayout() == Layout.PHONE_PORTRAIT && areToolbarsShown() ?
                         toolbar.getHeight() + tabInset : 0);
 
         if (count <= 2) {
@@ -609,7 +609,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
         animation.setStartDelay(0);
         animation.start();
-        animateToolbarVisibility(isToolbarShown(), toolbarVisibilityAnimationDelay);
+        animateToolbarVisibility(areToolbarsShown(), toolbarVisibilityAnimationDelay);
     }
 
     /**
@@ -667,7 +667,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         animation.setStartDelay(0);
         animation.start();
-        animateToolbarVisibility(isToolbarShown() && getModel().isEmpty(), 0);
+        animateToolbarVisibility(areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -941,7 +941,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, 1);
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         animation.start();
-        animateToolbarVisibility(isToolbarShown() && getModel().isEmpty(), 0);
+        animateToolbarVisibility(areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -1356,7 +1356,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 viewRecycler.removeAll();
-                animateToolbarVisibility(isToolbarShown(), 0);
+                animateToolbarVisibility(areToolbarsShown(), 0);
             }
 
         };
@@ -1410,7 +1410,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 super.onAnimationStart(animation);
 
                 if (getModel().isEmpty()) {
-                    animateToolbarVisibility(isToolbarShown(), 0);
+                    animateToolbarVisibility(areToolbarsShown(), 0);
                 }
 
                 float previousAttachedPosition = dragHandler.getAttachedPosition(false, -1);
@@ -2696,8 +2696,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @NonNull
     @Override
-    public final Toolbar getToolbar() {
-        return toolbar;
+    public final Toolbar[] getToolbars() {
+        return new Toolbar[]{toolbar};
     }
 
     @Override
@@ -2760,7 +2760,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             viewRecycler.remove(removedTabItem);
 
             if (getModel().isEmpty()) {
-                toolbar.setAlpha(isToolbarShown() ? 1 : 0);
+                toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
             } else if (selectedTabIndex != previousSelectedTabIndex) {
                 viewRecycler
                         .inflate(TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex));
@@ -2798,7 +2798,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.removeAll();
-            toolbar.setAlpha(isToolbarShown() ? 1 : 0);
+            toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
         } else {
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
@@ -2839,7 +2839,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            toolbar.setAlpha(isToolbarShown() ? 1 : 0);
+            toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
         } else if (getModel().getSelectedTab() != null) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler,
                     getModel().getSelectedTabIndex());

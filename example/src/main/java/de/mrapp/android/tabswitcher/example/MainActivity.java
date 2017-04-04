@@ -228,7 +228,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
     @Nullable
     private View getNavigationMenuItem() {
-        Toolbar toolbar = tabSwitcher.getToolbar();
+        Toolbar[] toolbars = tabSwitcher.getToolbars();
+        Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
         int size = toolbar.getChildCount();
 
         for (int i = 0; i < size; i++) {
@@ -299,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
-        tabSwitcher.showToolbar(true);
+        tabSwitcher.showToolbars(true);
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
         tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());

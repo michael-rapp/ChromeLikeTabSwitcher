@@ -198,8 +198,8 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getY() - (tabSwitcher.isToolbarShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbar().getHeight() - tabInset : 0) -
+            return view.getY() - (tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
+                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) -
                     getPadding(axis, Gravity.START, tabSwitcher);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -219,8 +219,8 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setY((tabSwitcher.isToolbarShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbar().getHeight() - tabInset : 0) +
+            view.setY((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
+                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) +
                     getPadding(axis, Gravity.START, tabSwitcher) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -243,8 +243,8 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            animator.y((tabSwitcher.isToolbarShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbar().getHeight() - tabInset : 0) +
+            animator.y((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
+                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) +
                     (includePadding ? getPadding(axis, Gravity.START, tabSwitcher) : 0) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =

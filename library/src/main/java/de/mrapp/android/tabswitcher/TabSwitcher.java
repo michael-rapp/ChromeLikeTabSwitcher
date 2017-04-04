@@ -883,18 +883,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @NonNull
     @Override
-    public final Toolbar getToolbar() {
-        return layout.getToolbar();
+    public final Toolbar[] getToolbars() {
+        return layout.getToolbars();
     }
 
     @Override
-    public final void showToolbar(final boolean show) {
-        layout.showToolbar(show);
+    public final void showToolbars(final boolean show) {
+        layout.showToolbars(show);
     }
 
     @Override
-    public final boolean isToolbarShown() {
-        return layout.isToolbarShown();
+    public final boolean areToolbarsShown() {
+        return layout.areToolbarsShown();
     }
 
     @Override

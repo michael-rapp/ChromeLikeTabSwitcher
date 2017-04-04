@@ -786,9 +786,9 @@ public class DragHandler {
             if (tabItem.getTag().getState() == State.FLOATING ||
                     tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 View view = tabItem.getView();
-                float toolbarHeight = tabSwitcher.isToolbarShown() &&
+                float toolbarHeight = tabSwitcher.areToolbarsShown() &&
                         tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
-                        tabSwitcher.getToolbar().getHeight() - tabInset : 0;
+                        tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0;
                 float viewPosition =
                         arithmetics.getPosition(Axis.DRAGGING_AXIS, view) + toolbarHeight +
                                 arithmetics
@@ -1036,8 +1036,8 @@ public class DragHandler {
             float totalSpace =
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer()) -
                             (tabSwitcher.getLayout() == Layout.PHONE_PORTRAIT &&
-                                    tabSwitcher.isToolbarShown() ?
-                                    tabSwitcher.getToolbar().getHeight() + tabInset : 0);
+                                    tabSwitcher.areToolbarsShown() ?
+                                    tabSwitcher.getToolbars()[0].getHeight() + tabInset : 0);
 
             if (count == 3) {
                 attachedPosition = totalSpace * 0.66f;
@@ -1153,9 +1153,9 @@ public class DragHandler {
     @NonNull
     public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float size = arithmetics.getSize(Axis.DRAGGING_AXIS, tabSwitcher.getTabContainer());
-        int toolbarHeight =
-                tabSwitcher.isToolbarShown() && tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
-                        tabSwitcher.getToolbar().getHeight() - tabInset : 0;
+        int toolbarHeight = tabSwitcher.areToolbarsShown() &&
+                tabSwitcher.getLayout() != Layout.PHONE_LANDSCAPE ?
+                tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0;
         int padding = arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.START, tabSwitcher) +
                 arithmetics.getPadding(Axis.DRAGGING_AXIS, Gravity.END, tabSwitcher);
         int offset = tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
