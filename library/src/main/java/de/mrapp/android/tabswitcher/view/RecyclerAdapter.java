@@ -487,6 +487,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         layoutParams.bottomMargin = bottomMargin;
         view.setLayoutParams(layoutParams);
         Tab tab = tabItem.getTab();
+        tab.addCallback(this);
         adaptTitle(viewHolder, tab);
         adaptIcon(viewHolder, tab);
         adaptCloseButton(viewHolder, tab);
@@ -506,9 +507,11 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Override
     public final void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
         TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
-        removeChildView(viewHolder, tabItem.getTab());
+        Tab tab = tabItem.getTab();
+        tab.removeCallback(this);
+        removeChildView(viewHolder, tab);
 
-        if (!dataBinder.isCached(tabItem.getTab())) {
+        if (!dataBinder.isCached(tab)) {
             Drawable drawable = viewHolder.previewImageView.getDrawable();
             viewHolder.previewImageView.setImageBitmap(null);
 

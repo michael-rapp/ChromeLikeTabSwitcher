@@ -548,23 +548,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
                 for (int i = 0; i < tabs.length; i++) {
                     Tab tab = tabs[i];
-                    tab.addCallback(recyclerAdapter);
                     tabItems[i] = new TabItem(index + i, tab);
                 }
 
                 inflateViews(tabItems, createSwipeLayoutListener(tabItems, swipeAnimation));
-            } else {
-                for (Tab tab : tabs) {
-                    tab.addCallback(recyclerAdapter);
-                }
+            } else if (!getModel().isSwitcherShown()) {
+                toolbar.setAlpha(0);
 
-                if (!getModel().isSwitcherShown()) {
-                    toolbar.setAlpha(0);
-
-                    if (getModel().getSelectedTab() == tabs[0]) {
-                        TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
-                        inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
-                    }
+                if (getModel().getSelectedTab() == tabs[0]) {
+                    TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler, index);
+                    inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
                 }
             }
         }
@@ -2734,7 +2727,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
                                  final boolean switcherHidden, @NonNull final Animation animation) {
         if (switcherHidden) {
-            tab.addCallback(recyclerAdapter);
             TabItem tabItem = new TabItem(0, tab);
             RevealAnimation revealAnimation =
                     animation instanceof RevealAnimation ? (RevealAnimation) animation :
@@ -2762,7 +2754,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
-        tab.removeCallback(recyclerAdapter);
         TabItem removedTabItem = TabItem.create(viewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
@@ -2804,10 +2795,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
                         getLayout());
-
-        for (Tab tab : tabs) {
-            tab.removeCallback(recyclerAdapter);
-        }
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.removeAll();
