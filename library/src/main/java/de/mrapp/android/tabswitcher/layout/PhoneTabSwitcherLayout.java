@@ -78,7 +78,7 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * @since 1.0.0
  */
 public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
-        implements DragHandler.Callback {
+        implements PhoneDragHandler.Callback {
 
     /**
      * A layout listener, which encapsulates another listener, which is notified, when the listener
@@ -258,6 +258,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final long revealAnimationDuration;
 
     /**
+     * The maximum angle, tabs can be rotated by, when overshooting at the start, in degrees.
+     */
+    private final float maxStartOvershootAngle;
+
+    /**
+     * The maximum angle, tabs can be rotated by, when overshooting at the end, in degrees.
+     */
+    private final float maxEndOvershootAngle;
+
+    /**
      * The view recycler, which allows to recycler the child views of tabs.
      */
     private ViewRecycler<Tab, Void> childViewRecycler;
@@ -275,7 +285,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The drag handler, which is used to calculate the positions of tabs.
      */
-    private DragHandler dragHandler;
+    private PhoneDragHandler dragHandler;
 
     /**
      * The view group, which contains the tab switcher's tabs.
@@ -794,12 +804,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     /**
      * Animates reverting an overshoot at the start.
-     *
-     * @param maxAngle
-     *         The maximum angle, the tabs can be rotated by, in degrees as a {@link Float} value
      */
-    private void animateRevertStartOvershoot(final float maxAngle) {
-        boolean tilted = animateTilt(new AccelerateInterpolator(), maxAngle,
+    private void animateRevertStartOvershoot() {
+        boolean tilted = animateTilt(new AccelerateInterpolator(), maxStartOvershootAngle,
                 createRevertStartOvershootAnimationListener());
 
         if (!tilted) {
@@ -860,12 +867,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     /**
      * Animates reverting an overshoot at the end.
-     *
-     * @param maxAngle
-     *         The maximum angle, the tabs can be rotated by, in degrees as a {@link Float} value
      */
-    private void animateRevertEndOvershoot(final float maxAngle) {
-        animateTilt(new AccelerateDecelerateInterpolator(), maxAngle, null);
+    private void animateRevertEndOvershoot() {
+        animateTilt(new AccelerateDecelerateInterpolator(), maxEndOvershootAngle, null);
     }
 
     /**
@@ -2507,6 +2511,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         revertOvershootAnimationDuration =
                 resources.getInteger(R.integer.revert_overshoot_animation_duration);
         revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
+        maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
+        maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
         tabViewBottomMargin = -1;
         toolbarAnimation = null;
         flingAnimation = null;
@@ -2529,7 +2535,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
-        dragHandler = new DragHandler(getTabSwitcher(), arithmetics);
+        dragHandler = new PhoneDragHandler(getTabSwitcher(), arithmetics);
         adaptDecorator();
         adaptToolbarMargin();
     }
@@ -2759,13 +2765,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void onRevertStartOvershoot(final float maxAngle) {
-        animateRevertStartOvershoot(maxAngle);
+    public final void onRevertStartOvershoot() {
+        animateRevertStartOvershoot();
     }
 
     @Override
-    public final void onRevertEndOvershoot(final float maxAngle) {
-        animateRevertEndOvershoot(maxAngle);
+    public final void onRevertEndOvershoot() {
+        animateRevertEndOvershoot();
     }
 
     public final void onStartOvershoot(final float position) {
@@ -2789,12 +2795,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void onSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
-                                   final long animationDuration) {
+                                   final float velocity) {
         if (remove) {
             View view = tabItem.getView();
             SwipeDirection direction =
                     arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ? SwipeDirection.LEFT :
                             SwipeDirection.RIGHT;
+            long animationDuration = velocity > 0 ?
+                    Math.round((dragHandler.calculateSwipePosition() / velocity) * 1000) : -1;
             Animation animation = new SwipeAnimation.Builder().setDirection(direction)
                     .setDuration(animationDuration).create();
             getModel().removeTab(tabItem.getTab(), animation);

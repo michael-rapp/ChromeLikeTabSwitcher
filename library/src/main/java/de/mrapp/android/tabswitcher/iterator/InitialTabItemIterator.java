@@ -20,7 +20,7 @@ import android.support.v4.util.Pair;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.layout.DragHandler;
+import de.mrapp.android.tabswitcher.layout.PhoneDragHandler;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -61,7 +61,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         /**
          * The drag handler, which is used to calculate the initial position and state of tabs.
          */
-        private final DragHandler dragHandler;
+        private final PhoneDragHandler dragHandler;
 
         /**
          * The backing array, which is used to store tab items, once their initial position and
@@ -84,7 +84,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         be null
          * @param dragHandler
          *         The drag handler, which should be used to calculate the initial position and
-         *         state of tabs, as an instance of the class {@link DragHandler}. The drag handler
+         *         state of tabs, as an instance of the class {@link PhoneDragHandler}. The drag handler
          *         may not be null
          * @param array
          *         The backing array, which should be used to store tab items, once their initial
@@ -94,7 +94,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          */
         public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                       @NonNull final DragHandler dragHandler, @NonNull final TabItem[] array) {
+                       @NonNull final PhoneDragHandler dragHandler, @NonNull final TabItem[] array) {
             ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(dragHandler, "The drag handler may not be null");
@@ -134,7 +134,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         /**
          * The drag handler, which is used by the builders, which are created by the factory.
          */
-        private final DragHandler dragHandler;
+        private final PhoneDragHandler dragHandler;
 
         /**
          * The backing array, which is used by the builders, which are created by the factory.
@@ -153,7 +153,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         recycler may not be null
          * @param dragHandler
          *         The drag handler, which should be used by the builders, which are created by the
-         *         factory, as an instance of the class {@link DragHandler}. The drag handler may
+         *         factory, as an instance of the class {@link PhoneDragHandler}. The drag handler may
          *         not be null
          * @param array
          *         The backing array, which should be used by the builders, which are created by the
@@ -163,7 +163,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          */
         public Factory(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                       @NonNull final DragHandler dragHandler, @NonNull final TabItem[] array) {
+                       @NonNull final PhoneDragHandler dragHandler, @NonNull final TabItem[] array) {
             ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(dragHandler, "The drag handler may not be null");
@@ -198,7 +198,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     /**
      * The drag handler, which is used to calculate the initial position and state of tab items.
      */
-    private final DragHandler dragHandler;
+    private final PhoneDragHandler dragHandler;
 
     /**
      * The backing array, which is used to store tab items, once their initial position and state
@@ -280,7 +280,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
      */
     private InitialTabItemIterator(@NonNull final Model model,
                                    @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                                   @NonNull final DragHandler dragHandler,
+                                   @NonNull final PhoneDragHandler dragHandler,
                                    @NonNull final TabItem[] array, final boolean reverse,
                                    final int start) {
         ensureNotNull(model, "The model may not be null");
