@@ -18,9 +18,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import de.mrapp.android.tabswitcher.layout.DragHandler;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.layout.DragHandler;
+import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -46,10 +47,10 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     public static class Builder extends AbstractBuilder<Builder, InitialTabItemIterator> {
 
         /**
-         * The tab switcher, whose tabs should be iterated by the iterator, which is created by the
-         * builder.
+         * The model, which belongs to the tab switcher, whose tabs should be iterated by the
+         * iterator, which is created by the builder.
          */
-        private final TabSwitcher tabSwitcher;
+        private final Model model;
 
         /**
          * The view recycler, which allows to inflate the views, which are used to visualize the
@@ -72,10 +73,10 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          * Creates a new builder, which allows to configure and create instances of the class {@link
          * InitialTabItemIterator}.
          *
-         * @param tabSwitcher
-         *         The tab switcher, whose tabs should be iterated by the iterator, which is created
-         *         by the builder, as an instance of the class {@link TabSwitcher}. The tab switcher
-         *         may not be null
+         * @param model
+         *         The model, which belongs to the tab switcher, whose tabs should be iterated by
+         *         the iterator, which is created by the builder, as an instance of the type {@link
+         *         Model}. The model may not be null
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
          *         the tabs, which are iterated by the iterator, which is created by the builder, as
@@ -91,16 +92,16 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         The array may not be null and the array's length must be equal to the number of
          *         tabs, which are contained by the given tab switcher
          */
-        public Builder(@NonNull final TabSwitcher tabSwitcher,
+        public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
                        @NonNull final DragHandler dragHandler, @NonNull final TabItem[] array) {
-            ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+            ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(dragHandler, "The drag handler may not be null");
             ensureNotNull(array, "The array may not be null");
-            ensureEqual(array.length, tabSwitcher.getCount(),
-                    "The array's length must be " + tabSwitcher.getCount());
-            this.tabSwitcher = tabSwitcher;
+            ensureEqual(array.length, model.getCount(),
+                    "The array's length must be " + model.getCount());
+            this.model = model;
             this.viewRecycler = viewRecycler;
             this.dragHandler = dragHandler;
             this.array = array;
@@ -109,8 +110,8 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         @NonNull
         @Override
         public InitialTabItemIterator create() {
-            return new InitialTabItemIterator(tabSwitcher, viewRecycler, dragHandler, array,
-                    reverse, start);
+            return new InitialTabItemIterator(model, viewRecycler, dragHandler, array, reverse,
+                    start);
         }
 
     }
@@ -121,9 +122,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     public static class Factory implements AbstractTabItemIterator.Factory {
 
         /**
-         * Tha tab switcher, which is used by the builders, which are created by the factory.
+         * The model, which is used by the builders, which are created by the factory.
          */
-        private final TabSwitcher tabSwitcher;
+        private final Model model;
 
         /**
          * The view recycler, which is used by the builders, which are created by the factory.
@@ -143,10 +144,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         /**
          * Creates a new factory, which allows to create instances of the class {@link Builder}.
          *
-         * @param tabSwitcher
-         *         The tab swticher, which should be used by the builders, which are created by the
-         *         factory, as an instance of the class {@link TabSwitcher}. The tab switcher may
-         *         not be null
+         * @param model
+         *         The model, which should be used by the builders, which are created by the
+         *         factory, as an instance of the type {@link Model}. The model may not be null
          * @param viewRecycler
          *         The view recycler, which should be used by the builders, which are created by the
          *         factory, as an instance of the class {@link AttachedViewRecycler}. The view
@@ -161,16 +161,16 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         the array's length must be equal to the number of tabs, which are contained by
          *         the given tab switcher
          */
-        public Factory(@NonNull final TabSwitcher tabSwitcher,
+        public Factory(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
                        @NonNull final DragHandler dragHandler, @NonNull final TabItem[] array) {
-            ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+            ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(dragHandler, "The drag handler may not be null");
             ensureNotNull(array, "The array may not be null");
-            ensureEqual(array.length, tabSwitcher.getCount(),
-                    "The array's length must be " + tabSwitcher.getCount());
-            this.tabSwitcher = tabSwitcher;
+            ensureEqual(array.length, model.getCount(),
+                    "The array's length must be " + model.getCount());
+            this.model = model;
             this.viewRecycler = viewRecycler;
             this.dragHandler = dragHandler;
             this.array = array;
@@ -179,15 +179,15 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         @NonNull
         @Override
         public AbstractBuilder<?, ?> create() {
-            return new Builder(tabSwitcher, viewRecycler, dragHandler, array);
+            return new Builder(model, viewRecycler, dragHandler, array);
         }
 
     }
 
     /**
-     * The tab switcher, whose tabs are iterated.
+     * The model, which belongs to the tab switcher, whose tabs are iterated.
      */
-    private final TabSwitcher tabSwitcher;
+    private final Model model;
 
     /**
      * The view recycler, which allows to inflated the views, which are used to visualize the
@@ -230,7 +230,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
                                                @Nullable final TabItem predecessor) {
         float position = calculateStartPosition(tabItem);
         Pair<Float, State> pair = dragHandler
-                .clipTabPosition(tabSwitcher.getCount(), tabItem.getIndex(), position, predecessor);
+                .clipTabPosition(model.getCount(), tabItem.getIndex(), position, predecessor);
         tabItem.getTag().setPosition(pair.first);
         tabItem.getTag().setState(pair.second);
     }
@@ -257,9 +257,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
      * Creates a new iterator, which allows to iterate the tab items, which corresponds to the tabs
      * of a {@link TabSwitcher}.
      *
-     * @param tabSwitcher
-     *         The tab switcher, whose tabs should be iterated, as an instance of the class {@link
-     *         TabSwitcher}. The tab switcher may not be null
+     * @param model
+     *         The model, which belongs to the tab switcher, whose tabs should be iterated, as an
+     *         instance of the type {@link Model}. The model may not be null
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
      *         iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view
@@ -278,22 +278,22 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
      *         The index of the first tab, which should be iterated, as an {@link Integer} value or
      *         -1, if all tabs should be iterated
      */
-    private InitialTabItemIterator(@NonNull final TabSwitcher tabSwitcher,
+    private InitialTabItemIterator(@NonNull final Model model,
                                    @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
                                    @NonNull final DragHandler dragHandler,
                                    @NonNull final TabItem[] array, final boolean reverse,
                                    final int start) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureNotNull(model, "The model may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(dragHandler, "The drag handler may not be null");
         ensureNotNull(array, "The array may not be null");
-        ensureEqual(array.length, tabSwitcher.getCount(),
-                "The array's length must be " + tabSwitcher.getCount());
-        this.tabSwitcher = tabSwitcher;
+        ensureEqual(array.length, model.getCount(),
+                "The array's length must be " + model.getCount());
+        this.model = model;
         this.viewRecycler = viewRecycler;
         this.dragHandler = dragHandler;
         this.array = array;
-        Resources resources = tabSwitcher.getResources();
+        Resources resources = viewRecycler.getContext().getResources();
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         initialize(reverse, start);
@@ -310,7 +310,7 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         TabItem tabItem = array[index];
 
         if (tabItem == null) {
-            tabItem = TabItem.create(tabSwitcher, viewRecycler, index);
+            tabItem = TabItem.create(model, viewRecycler, index);
             calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
             array[index] = tabItem;
         }

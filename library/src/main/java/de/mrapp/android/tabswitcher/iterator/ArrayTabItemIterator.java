@@ -146,9 +146,9 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
      *         The index of the first tab, which should be iterated, as an {@link Integer} value or
      *         -1, if all tabs should be iterated
      */
-    public ArrayTabItemIterator(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                                @NonNull final Tab[] array, final boolean reverse,
-                                final int start) {
+    private ArrayTabItemIterator(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
+                                 @NonNull final Tab[] array, final boolean reverse,
+                                 final int start) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(array, "The array may not be null");
         this.viewRecycler = viewRecycler;
