@@ -13,25 +13,12 @@
  */
 package de.mrapp.android.tabswitcher.layout;
 
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.Menu;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import de.mrapp.android.tabswitcher.Layout;
-import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 
 /**
  * Defines the interface, a layout, which implements the functionality of a {@link TabSwitcher},
@@ -41,53 +28,6 @@ import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
  * @since 1.0.0
  */
 public interface TabSwitcherLayout {
-
-    /**
-     * Sets the decorator, which allows to inflate the views, which correspond to the tabs of the
-     * tab switcher.
-     *
-     * @param decorator
-     *         The decorator, which should be set, as an instance of the class {@link
-     *         TabSwitcherDecorator}. The decorator may not be null
-     */
-    void setDecorator(@NonNull TabSwitcherDecorator decorator);
-
-    /**
-     * Returns the decorator, which allows to inflate the views, which correspond to the tabs of the
-     * tab switcher.
-     *
-     * @return The decorator as an instance of the class {@link TabSwitcherDecorator} or null, if no
-     * decorator has been set
-     */
-    TabSwitcherDecorator getDecorator();
-
-    /**
-     * Adds a new listener, which should be notified, when a tab is about to be closed by clicking
-     * its close button.
-     *
-     * @param listener
-     *         The listener, which should be added, as an instance of the type {@link
-     *         TabCloseListener}. The listener may not be null
-     */
-    void addCloseTabListener(@NonNull TabCloseListener listener);
-
-    /**
-     * Removes a specific listener, which should not be notified, when a tab is about to be closed
-     * by clicking its close button, anymore.
-     *
-     * @param listener
-     *         The listener, which should be removed, as an instance of the type {@link
-     *         TabCloseListener}. The listener may not be null
-     */
-    void removeCloseTabListener(@NonNull TabCloseListener listener);
-
-    /**
-     * Returns the layout of the tab switcher.
-     *
-     * @return The layout of the tab switcher as a value of the enum {@link Layout}
-     */
-    @NonNull
-    Layout getLayout();
 
     /**
      * Returns, whether an animation is currently running, or not.
@@ -100,9 +40,9 @@ public interface TabSwitcherLayout {
      * Returns the view group, which contains the tab switcher's tabs.
      *
      * @return The view group, which contains the tab switcher's tabs, as an instance of the class
-     * {@link ViewGroup}. The view group may not be null
+     * {@link ViewGroup} or null, if the view has not been laid out yet
      */
-    @NonNull
+    @Nullable
     ViewGroup getTabContainer();
 
     /**
@@ -112,261 +52,20 @@ public interface TabSwitcherLayout {
      * to the primary toolbar.
      *
      * @return An array, which contains the toolbars, which are shown, when the tab switcher is
-     * shown, as an array of the type {@link Toolbar}. The array may not be null
+     * shown, as an array of the type {@link Toolbar} or null, if the view has not been laid out
+     * yet
      */
-    @NonNull
+    @Nullable
     Toolbar[] getToolbars();
-
-    /**
-     * Sets, whether the toolbars should be shown, when the tab switcher is shown, or not.
-     *
-     * @param show
-     *         True, if the toolbars should be shown, false otherwise
-     */
-    void showToolbars(boolean show);
-
-    /**
-     * Returns, whether the toolbars are shown, when the tab switcher is shown, or not.
-     *
-     * @return True, if the toolbars are shown, false otherwise
-     */
-    boolean areToolbarsShown();
-
-    /**
-     * Sets the title of the toolbar, which is shown, when the tab switcher is shown. When using the
-     * tablet layout, the title is set to the primary toolbar.
-     *
-     * @param title
-     *         The title, which should be set, as an instance of the type {@link CharSequence} or
-     *         null, if no title should be set
-     */
-    void setToolbarTitle(@Nullable CharSequence title);
-
-    /**
-     * Sets the title of the toolbar, which is shown, when the tab switcher is shown. When using the
-     * tablet layout, the title is set to the primary toolbar.
-     *
-     * @param resourceId
-     *         The resource id of the title, which should be set, as an {@link Integer} value. The
-     *         resource id must correspond to a valid string resource
-     */
-    void setToolbarTitle(@StringRes int resourceId);
-
-    /**
-     * Inflates the menu of the toolbar, which is shown, when the tab switcher is shown. When using
-     * the tablet layout, the menu is inflated into the secondary toolbar.
-     *
-     * @param resourceId
-     *         The resource id of the menu, which should be inflated, as an {@link Integer} value.
-     *         The resource id must correspond to a valid menu resource
-     * @param listener
-     *         The listener, which should be notified, when an menu item has been clicked, as an
-     *         instance of the type {@link OnMenuItemClickListener} or null, if no listener should
-     *         be notified
-     */
-    void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
 
     /**
      * Returns the menu of the toolbar, which is shown, when the tab switcher is shown. When using
      * the tablet layout, the menu corresponds to the secondary toolbar.
      *
-     * @return The menu of the toolbar as an instance of the type {@link Menu}. The menu may not be
-     * null
+     * @return The menu of the toolbar as an instance of the type {@link Menu} or null, if the view
+     * has not been laid out yet
      */
-    @NonNull
+    @Nullable
     Menu getToolbarMenu();
-
-    /**
-     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown. When
-     * using the tablet layout, the icon is set to the primary toolbar.
-     *
-     * @param icon
-     *         The icon, which should be set, as an instance of the class {@link Drawable} or null,
-     *         if no icon should be set
-     * @param listener
-     *         The listener, which should be notified, when the navigation item has been clicked, as
-     *         an instance of the type {@link OnClickListener} or null, if no listener should be
-     *         notified
-     */
-    void setToolbarNavigationIcon(@Nullable Drawable icon, @Nullable OnClickListener listener);
-
-    /**
-     * Sets the navigation icon of the toolbar, which is shown, when the tab switcher is shown. When
-     * using the tablet layout, the icon is set to the primary toolbar.
-     *
-     * @param resourceId
-     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
-     *         resource id must correspond to a valid drawable resource
-     * @param listener
-     *         The listener, which should be notified, when the navigation item has been clicked, as
-     *         an instance of the type {@link OnClickListener} or null, if no listener should be
-     *         notified
-     */
-    void setToolbarNavigationIcon(@DrawableRes int resourceId, @Nullable OnClickListener listener);
-
-    /**
-     * Sets the padding of the tab switcher.
-     *
-     * @param left
-     *         The left padding, which should be set, as an {@link Integer} value
-     * @param top
-     *         The top padding, which should be set, as an {@link Integer} value
-     * @param right
-     *         The right padding, which should be set, as an {@link Integer} value
-     * @param bottom
-     *         The bottom padding, which should be set, as an {@link Integer} value
-     */
-    void setPadding(int left, int top, int right, int bottom);
-
-    /**
-     * Returns the left padding of the tab switcher.
-     *
-     * @return The left padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingLeft();
-
-    /**
-     * Returns the top padding of the tab switcher.
-     *
-     * @return The top padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingTop();
-
-    /**
-     * Returns the right padding of the tab switcher.
-     *
-     * @return The right padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingRight();
-
-    /**
-     * Returns the bottom padding of the tab switcher.
-     *
-     * @return The bottom padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingBottom();
-
-    /**
-     * Returns the start padding of the tab switcher. This corresponds to the right padding, if a
-     * right-to-left layout is used, or to the left padding otherwise.
-     *
-     * @return The start padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingStart();
-
-    /**
-     * Returns the end padding of the tab switcher. This corresponds ot the left padding, if a
-     * right-to-left layout is used, or to the right padding otherwise.
-     *
-     * @return The end padding of the tab switcher as an {@link Integer} value
-     */
-    int getPaddingEnd();
-
-    /**
-     * Returns the default icon of a tab.
-     *
-     * @return The default icon of a tab as an instance of the class {@link Drawable} or null, if no
-     * icon is set
-     */
-    @Nullable
-    Drawable getTabIcon();
-
-    /**
-     * Sets the default icon of a tab.
-     *
-     * @param resourceId
-     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
-     *         resource id must correspond to a valid drawable resource
-     */
-    void setTabIcon(@DrawableRes int resourceId);
-
-    /**
-     * Sets the default icon of a tab.
-     *
-     * @param icon
-     *         The icon, which should be set, as an instance of the class {@link Bitmap} or null, if
-     *         no icon should be set
-     */
-    void setTabIcon(@Nullable Bitmap icon);
-
-    /**
-     * Returns the default background color of a tab.
-     *
-     * @return The default background color of a tab as an instance of the class {@link
-     * ColorStateList} or null, if the default color is used
-     */
-    @Nullable
-    ColorStateList getTabBackgroundColor();
-
-    /**
-     * Sets the default background color of a tab.
-     *
-     * @param color
-     *         The color, which should be set, as an {@link Integer} value or -1, if the default
-     *         color should be used
-     */
-    void setTabBackgroundColor(@ColorInt int color);
-
-    /**
-     * Sets the default background color of a tab.
-     *
-     * @param colorStateList
-     *         The color, which should be set, as an instance of the class {@link ColorStateList} or
-     *         null, if the default color should be used
-     */
-    void setTabBackgroundColor(@Nullable ColorStateList colorStateList);
-
-    /**
-     * Returns the default text color of a tab's title.
-     *
-     * @return The default text color of a tab's title as an instance of the class {@link
-     * ColorStateList} or null, if the default color is used
-     */
-    @Nullable
-    ColorStateList getTabTitleTextColor();
-
-    /**
-     * Sets the default text color of a tab's title.
-     *
-     * @param color
-     *         The color, which should be set, as an {@link Integer} value or -1, if the default
-     *         color should be used
-     */
-    void setTabTitleTextColor(@ColorInt int color);
-
-    /**
-     * Sets the default text color of a tab's title.
-     *
-     * @param colorStateList
-     *         The color state list, which should be set, as an instance of the class {@link
-     *         ColorStateList} or null, if the default color should be used
-     */
-    void setTabTitleTextColor(@Nullable ColorStateList colorStateList);
-
-    /**
-     * Returns the default icon of a tab's close button.
-     *
-     * @return The default icon of a tab's close button as an instance of the class {@link Drawable}
-     */
-    @NonNull
-    Drawable getTabCloseButtonIcon();
-
-    /**
-     * Sets the default icon of a tab's close button.
-     *
-     * @param resourceId
-     *         The resource id of the icon, which should be set, as an {@link Integer} value. The
-     *         resource id must correspond to a valid drawable resource
-     */
-    void setTabCloseButtonIcon(@DrawableRes int resourceId);
-
-    /**
-     * Sets the default icon of a tab's close button.
-     *
-     * @param icon
-     *         The icon, which should be set, as an instance of the class {@link Bitmap}. The icon
-     *         may not be null
-     */
-    void setTabCloseButtonIcon(@NonNull final Bitmap icon);
 
 }

@@ -28,8 +28,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,8 +55,13 @@ import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
+import de.mrapp.android.util.DisplayUtil.DeviceType;
+import de.mrapp.android.util.DisplayUtil.Orientation;
+import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
+import static de.mrapp.android.util.DisplayUtil.getDeviceType;
+import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
  * A tab switcher, which allows to switch between multiple tabs. It it is designed similar to the
@@ -128,11 +135,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                             @StyleRes final int defaultStyleResource) {
         pendingActions = new LinkedList<>();
         listeners = new LinkedHashSet<>();
-        model = new TabSwitcherModel();
+        model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
-        layout = new PhoneTabSwitcherLayout(this, model);
-        layout.setCallback(createLayoutCallback());
-        layout.inflateLayout();
         getViewTreeObserver().addOnGlobalLayoutListener(
                 new LayoutListenerWrapper(this, createGlobalLayoutListener()));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
@@ -164,7 +168,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
         try {
             obtainLayoutPolicy(typedArray);
-            layout.obtainStyledAttributes(typedArray);
+            obtainBackground(typedArray);
+            obtainTabIcon(typedArray);
+            obtainTabBackgroundColor(typedArray);
+            obtainTabTitleTextColor(typedArray);
+            obtainTabCloseButtonIcon(typedArray);
+            obtainToolbarTitle(typedArray);
+            obtainToolbarNavigationIcon(typedArray);
+            obtainToolbarMenu(typedArray);
         } finally {
             typedArray.recycle();
         }
@@ -181,6 +192,137 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         int defaultValue = LayoutPolicy.AUTO.getValue();
         int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, defaultValue);
         setLayoutPolicy(LayoutPolicy.fromValue(value));
+    }
+
+    /**
+     * Obtains the view's background from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainBackground(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
+
+        if (resourceId != 0) {
+            ViewUtil.setBackground(this, ContextCompat.getDrawable(getContext(), resourceId));
+        } else {
+            int defaultValue =
+                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
+            int color =
+                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
+            setBackgroundColor(color);
+        }
+    }
+
+    /**
+     * Obtains the icon of a tab from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the icon should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainTabIcon(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
+
+        if (resourceId != -1) {
+            setTabIcon(resourceId);
+        }
+    }
+
+    /**
+     * Obtains the background color of a tab from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background color should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
+        // TODO: Obtain color state list
+        int color = typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, -1);
+
+        if (color != -1) {
+            setTabBackgroundColor(color);
+        }
+    }
+
+    /**
+     * Obtains the text color of a tab's title from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the text color should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabTitleTextColor(@NonNull final TypedArray typedArray) {
+        // TODO: Obtain color state list
+        int color = typedArray.getColor(R.styleable.TabSwitcher_tabTitleTextColor, -1);
+
+        if (color != -1) {
+            setTabTitleTextColor(color);
+        }
+    }
+
+    /**
+     * Obtains the icon of a tab's close button from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the icon should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainTabCloseButtonIcon(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, -1);
+
+        if (resourceId != -1) {
+            setTabCloseButtonIcon(resourceId);
+        }
+    }
+
+    /**
+     * Obtains the title of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the title should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarTitle(@NonNull final TypedArray typedArray) {
+        CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
+
+        if (!TextUtils.isEmpty(title)) {
+            setToolbarTitle(title);
+        }
+    }
+
+    /**
+     * Obtains the navigation icon of the toolbar, which is shown, when the tab switcher is shown,
+     * from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the navigation icon should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
+        Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
+
+        if (icon != null) {
+            setToolbarNavigationIcon(icon, null);
+        }
+    }
+
+    /**
+     * Obtains the menu of the toolbar, which is shown, when the tab switcher is shown, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the menu should be obtained from, as an instance of the class {@link
+     *         TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarMenu(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, -1);
+
+        if (resourceId != -1) {
+            inflateToolbarMenu(resourceId, null);
+        }
     }
 
     /**
@@ -227,6 +369,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @NonNull
     private Model.Listener createModelListener() {
         return new Model.Listener() {
+
+            @Override
+            public void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+
+            }
 
             @Override
             public void onSwitcherShown() {
@@ -300,6 +447,54 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 notifyOnSelectionChanged(-1, null);
             }
 
+            @Override
+            public void onPaddingChanged(final int left, final int top, final int right,
+                                         final int bottom) {
+
+            }
+
+            @Override
+            public void onTabIconChanged(@Nullable final Drawable icon) {
+
+            }
+
+            @Override
+            public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+
+            }
+
+            @Override
+            public void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
+
+            }
+
+            @Override
+            public void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+
+            }
+
+            @Override
+            public void onToolbarVisibilityChanged(final boolean visible) {
+
+            }
+
+            @Override
+            public void onToolbarTitleChanged(@Nullable final CharSequence title) {
+
+            }
+
+            @Override
+            public void onToolbarNavigationIconChanged(@Nullable final Drawable icon,
+                                                       @Nullable final OnClickListener listener) {
+
+            }
+
+            @Override
+            public void onToolbarMenuInflated(@MenuRes final int resourceId,
+                                              @Nullable final OnMenuItemClickListener listener) {
+
+            }
+
         };
     }
 
@@ -335,7 +530,20 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
             @Override
             public void onGlobalLayout() {
+                ensureNotNull(getDecorator(), "No decorator has been set",
+                        IllegalStateException.class);
+                Layout layoutType = getLayout();
+
+                if (layoutType == Layout.TABLET) {
+                    // TODO: Use tablet layout once implemented
+                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model);
+                } else {
+                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model);
+                }
+
+                layout.setCallback(createLayoutCallback());
                 model.addListener(layout);
+                layout.inflateLayout();
                 layout.onGlobalLayout();
             }
 
@@ -591,10 +799,21 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         this.layoutPolicy = layoutPolicy;
     }
 
+    /**
+     * Returns the layout of the tab switcher.
+     *
+     * @return The layout of the tab switcher as a value of the enum {@link Layout}. The layout may
+     * either be {@link Layout#PHONE_PORTRAIT}, {@link Layout#PHONE_LANDSCAPE} or {@link
+     * Layout#TABLET}
+     */
     @NonNull
-    @Override
     public final Layout getLayout() {
-        return layout.getLayout();
+        if (getDeviceType(getContext()) == DeviceType.TABLET) {
+            return Layout.TABLET;
+        } else {
+            return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
+                    Layout.PHONE_PORTRAIT;
+        }
     }
 
     @Override
@@ -847,188 +1066,202 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     @Override
-    public final boolean onTouchEvent(final MotionEvent event) {
-        return layout.handleTouchEvent(event) || super.onTouchEvent(event);
-    }
-
-    @Override
-    public final boolean isAnimationRunning() {
-        return layout.isAnimationRunning();
-    }
-
-    @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
-        layout.setDecorator(decorator);
+        model.setDecorator(decorator);
     }
 
     @Override
     public final TabSwitcherDecorator getDecorator() {
-        return layout.getDecorator();
-    }
-
-    @Override
-    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
-        layout.addCloseTabListener(listener);
-    }
-
-    @Override
-    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
-        layout.removeCloseTabListener(listener);
-    }
-
-    @NonNull
-    @Override
-    public final ViewGroup getTabContainer() {
-        return layout.getTabContainer();
-    }
-
-    @NonNull
-    @Override
-    public final Toolbar[] getToolbars() {
-        return layout.getToolbars();
-    }
-
-    @Override
-    public final void showToolbars(final boolean show) {
-        layout.showToolbars(show);
-    }
-
-    @Override
-    public final boolean areToolbarsShown() {
-        return layout.areToolbarsShown();
-    }
-
-    @Override
-    public final void setToolbarTitle(@Nullable final CharSequence title) {
-        layout.setToolbarTitle(title);
-    }
-
-    @Override
-    public final void setToolbarTitle(@StringRes final int resourceId) {
-        layout.setToolbarTitle(resourceId);
-    }
-
-    @Override
-    public final void inflateToolbarMenu(@MenuRes final int resourceId,
-                                         @Nullable final OnMenuItemClickListener listener) {
-        layout.inflateToolbarMenu(resourceId, listener);
-    }
-
-    @NonNull
-    @Override
-    public final Menu getToolbarMenu() {
-        return layout.getToolbarMenu();
-    }
-
-    @Override
-    public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
-                                               @Nullable final OnClickListener listener) {
-        layout.setToolbarNavigationIcon(icon, listener);
-    }
-
-    @Override
-    public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
-                                               @Nullable final OnClickListener listener) {
-        layout.setToolbarNavigationIcon(resourceId, listener);
+        return model.getDecorator();
     }
 
     @Override
     public final void setPadding(final int left, final int top, final int right, final int bottom) {
-        layout.setPadding(left, top, right, bottom);
+        model.setPadding(left, top, right, bottom);
     }
 
     @Override
     public final int getPaddingLeft() {
-        return layout.getPaddingLeft();
+        return model.getPaddingLeft();
     }
 
     @Override
     public final int getPaddingTop() {
-        return layout.getPaddingTop();
+        return model.getPaddingTop();
     }
 
     @Override
     public final int getPaddingRight() {
-        return layout.getPaddingRight();
+        return model.getPaddingRight();
     }
 
     @Override
     public final int getPaddingBottom() {
-        return layout.getPaddingBottom();
+        return model.getPaddingBottom();
     }
 
     @Override
     public final int getPaddingStart() {
-        return layout.getPaddingStart();
+        return model.getPaddingStart();
     }
 
     @Override
     public final int getPaddingEnd() {
-        return layout.getPaddingEnd();
+        return model.getPaddingEnd();
     }
 
     @Nullable
     @Override
     public final Drawable getTabIcon() {
-        return layout.getTabIcon();
+        return model.getTabIcon();
     }
 
     @Override
     public final void setTabIcon(@DrawableRes final int resourceId) {
-        layout.setTabIcon(resourceId);
+        model.setTabIcon(resourceId);
     }
 
     @Override
     public final void setTabIcon(@Nullable final Bitmap icon) {
-        layout.setTabIcon(icon);
+        model.setTabIcon(icon);
     }
 
     @Nullable
     @Override
     public final ColorStateList getTabBackgroundColor() {
-        return layout.getTabBackgroundColor();
+        return model.getTabBackgroundColor();
     }
 
     @Override
     public final void setTabBackgroundColor(@ColorInt final int color) {
-        layout.setTabBackgroundColor(color);
+        model.setTabBackgroundColor(color);
     }
 
     @Override
-    public final void setTabBackgroundColor(@NonNull final ColorStateList colorStateList) {
-        layout.setTabBackgroundColor(colorStateList);
+    public final void setTabBackgroundColor(@Nullable final ColorStateList colorStateList) {
+        model.setTabBackgroundColor(colorStateList);
     }
 
     @Nullable
     @Override
     public final ColorStateList getTabTitleTextColor() {
-        return layout.getTabTitleTextColor();
+        return model.getTabTitleTextColor();
     }
 
     @Override
     public final void setTabTitleTextColor(@ColorInt final int color) {
-        layout.setTabTitleTextColor(color);
+        model.setTabTitleTextColor(color);
     }
 
     @Override
     public final void setTabTitleTextColor(@Nullable final ColorStateList colorStateList) {
-        layout.setTabTitleTextColor(colorStateList);
+        model.setTabTitleTextColor(colorStateList);
     }
 
-    @NonNull
+    @Nullable
     @Override
     public final Drawable getTabCloseButtonIcon() {
-        return layout.getTabCloseButtonIcon();
+        return model.getTabCloseButtonIcon();
     }
 
     @Override
     public final void setTabCloseButtonIcon(@DrawableRes final int resourceId) {
-        layout.setTabCloseButtonIcon(resourceId);
+        model.setTabCloseButtonIcon(resourceId);
     }
 
     @Override
-    public final void setTabCloseButtonIcon(@NonNull final Bitmap icon) {
-        layout.setTabCloseButtonIcon(icon);
+    public final void setTabCloseButtonIcon(@Nullable final Bitmap icon) {
+        model.setTabCloseButtonIcon(icon);
+    }
+
+    @Override
+    public final boolean areToolbarsShown() {
+        return model.areToolbarsShown();
+    }
+
+    @Override
+    public final void showToolbars(final boolean show) {
+        model.showToolbars(show);
+    }
+
+    @Nullable
+    @Override
+    public final CharSequence getToolbarTitle() {
+        Toolbar[] toolbars = getToolbars();
+        return toolbars != null ? toolbars[0].getTitle() : model.getToolbarTitle();
+    }
+
+    @Override
+    public final void setToolbarTitle(@StringRes final int resourceId) {
+        model.setToolbarTitle(resourceId);
+    }
+
+    @Override
+    public final void setToolbarTitle(@Nullable final CharSequence title) {
+        model.setToolbarTitle(title);
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getToolbarNavigationIcon() {
+        Toolbar[] toolbars = getToolbars();
+        return toolbars != null ? toolbars[0].getNavigationIcon() :
+                model.getToolbarNavigationIcon();
+    }
+
+    @Override
+    public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
+                                               @Nullable final OnClickListener listener) {
+        model.setToolbarNavigationIcon(icon, listener);
+    }
+
+    @Override
+    public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
+                                               @Nullable final OnClickListener listener) {
+        model.setToolbarNavigationIcon(resourceId, listener);
+    }
+
+    @Override
+    public final void inflateToolbarMenu(@MenuRes final int resourceId,
+                                         @Nullable final OnMenuItemClickListener listener) {
+        model.inflateToolbarMenu(resourceId, listener);
+    }
+
+    @Override
+    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
+        model.addCloseTabListener(listener);
+    }
+
+    @Override
+    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
+        model.removeCloseTabListener(listener);
+    }
+
+    @Override
+    public final boolean isAnimationRunning() {
+        return layout != null && layout.isAnimationRunning();
+    }
+
+    @Nullable
+    @Override
+    public final ViewGroup getTabContainer() {
+        return layout != null ? layout.getTabContainer() : null;
+    }
+
+    @Override
+    public final Toolbar[] getToolbars() {
+        return layout != null ? layout.getToolbars() : null;
+    }
+
+    @Nullable
+    @Override
+    public final Menu getToolbarMenu() {
+        return layout != null ? layout.getToolbarMenu() : null;
+    }
+
+    @Override
+    public final boolean onTouchEvent(final MotionEvent event) {
+        return (layout != null && layout.handleTouchEvent(event)) || super.onTouchEvent(event);
     }
 
 }

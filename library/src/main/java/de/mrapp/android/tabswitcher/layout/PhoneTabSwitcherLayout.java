@@ -19,11 +19,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -51,7 +49,6 @@ import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
-import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
@@ -68,15 +65,11 @@ import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.view.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
-import de.mrapp.android.tabswitcher.view.TabViewHolder;
-import de.mrapp.android.util.DisplayUtil.Orientation;
-import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureGreater;
 import static de.mrapp.android.util.Condition.ensureTrue;
-import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
  * A layout, which implements the functionality of a {@link TabSwitcher} on smartphones.
@@ -310,6 +303,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private android.view.animation.Animation flingAnimation;
 
     /**
+     * Adapts the decorator.
+     */
+    private void adaptDecorator() {
+        childViewRecycler
+                .setAdapter(new ChildRecyclerAdapter(getTabSwitcher(), getModel().getDecorator()));
+        recyclerAdapter.clearCachedPreviews();
+    }
+
+    /**
+     * Adapts the margin of the toolbar, which is shown, when the tab switcher is shown.
+     */
+    private void adaptToolbarMargin() {
+        FrameLayout.LayoutParams layoutParams =
+                (FrameLayout.LayoutParams) toolbar.getLayoutParams();
+        layoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
+                getModel().getPaddingRight(), 0);
+    }
+
+    /**
      * Calculates and returns the bottom margin of a view, which visualizes a tab.
      *
      * @param view
@@ -320,11 +332,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private int calculateBottomMargin(@NonNull final View view) {
         float tabHeight = (view.getHeight() - 2 * tabInset) * arithmetics.getScale(view, true);
         float containerHeight = arithmetics.getSize(Axis.Y_AXIS, tabContainer);
-        int toolbarHeight = areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
-        int stackHeight =
-                getLayout() == Layout.PHONE_LANDSCAPE ? 0 : stackedTabCount * stackedTabSpacing;
+        int toolbarHeight = getModel().areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
+        int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
+                stackedTabCount * stackedTabSpacing;
         return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
-                (containerHeight - getPaddingTop() - getPaddingBottom()));
+                (containerHeight - getModel().getPaddingTop() - getModel().getPaddingBottom()));
     }
 
     /**
@@ -511,8 +523,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private float calculateMaxTabSpacing(final int count) {
         float totalSpace = arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (getLayout() == Layout.PHONE_PORTRAIT && areToolbarsShown() ?
-                        toolbar.getHeight() + tabInset : 0);
+                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
+                        getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
 
         if (count <= 2) {
             return totalSpace * 0.66f;
@@ -589,7 +601,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     arithmetics.getSize(Axis.DRAGGING_AXIS, tabContainer));
         } else if (tabItem.getIndex() > selectedTabIndex) {
             arithmetics.setPosition(Axis.DRAGGING_AXIS, view,
-                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
+                            layoutParams.topMargin);
         }
 
         if (tabViewBottomMargin == -1) {
@@ -609,7 +622,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
         animation.setStartDelay(0);
         animation.start();
-        animateToolbarVisibility(areToolbarsShown(), toolbarVisibilityAnimationDelay);
+        animateToolbarVisibility(getModel().areToolbarsShown(), toolbarVisibilityAnimationDelay);
     }
 
     /**
@@ -652,22 +665,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         arithmetics.animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
-                getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0, false);
+                getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0,
+                false);
 
         if (tabItem.getIndex() < selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     arithmetics.getSize(Axis.DRAGGING_AXIS, getTabSwitcher()), false);
         } else if (tabItem.getIndex() > selectedTabIndex) {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin, false);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
+                            layoutParams.topMargin, false);
         } else {
             arithmetics.animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    getLayout() == Layout.PHONE_LANDSCAPE ? 0 : layoutParams.topMargin, false);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
+                            layoutParams.topMargin, false);
         }
 
         animation.setStartDelay(0);
         animation.start();
-        animateToolbarVisibility(areToolbarsShown() && getModel().isEmpty(), 0);
+        animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -941,7 +957,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         arithmetics.animateScale(Axis.DRAGGING_AXIS, animation, 1);
         arithmetics.animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         animation.start();
-        animateToolbarVisibility(areToolbarsShown() && getModel().isEmpty(), 0);
+        animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -1356,7 +1372,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 viewRecycler.removeAll();
-                animateToolbarVisibility(areToolbarsShown(), 0);
+                animateToolbarVisibility(getModel().areToolbarsShown(), 0);
             }
 
         };
@@ -1410,7 +1426,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 super.onAnimationStart(animation);
 
                 if (getModel().isEmpty()) {
-                    animateToolbarVisibility(areToolbarsShown(), 0);
+                    animateToolbarVisibility(getModel().areToolbarsShown(), 0);
                 }
 
                 float previousAttachedPosition = dragHandler.getAttachedPosition(false, -1);
@@ -2447,88 +2463,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Obtains the view's background from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the background should be obtained from, as an instance of the class
-     *         {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainBackground(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
-
-        if (resourceId != 0) {
-            ViewUtil.setBackground(getTabSwitcher(),
-                    ContextCompat.getDrawable(getContext(), resourceId));
-        } else {
-            int defaultValue =
-                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
-            int color =
-                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
-            getTabSwitcher().setBackgroundColor(color);
-        }
-    }
-
-    /**
-     * Obtains the icon of a tab from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the icon should be obtained from, as an instance of the class {@link
-     *         TypedArray}. The typed array may not be null
-     */
-    private void obtainTabIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
-
-        if (resourceId != -1) {
-            setTabIcon(resourceId);
-        } else {
-            setTabIcon(null);
-        }
-    }
-
-    /**
-     * Obtains the background color of a tab from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the background color should be obtained from, as an instance of the
-     *         class {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
-        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_background_color);
-        setTabBackgroundColor(
-                typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, defaultValue));
-    }
-
-    /**
-     * Obtains the text color of a tab's title from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the text color should be obtained from, as an instance of the class
-     *         {@link TypedArray}. The typed array may not be null
-     */
-    private void obtainTabTitleTextColor(@NonNull final TypedArray typedArray) {
-        int defaultValue = ContextCompat.getColor(getContext(), R.color.tab_title_text_color);
-        setTabTitleTextColor(
-                typedArray.getColor(R.styleable.TabSwitcher_tabTitleTextColor, defaultValue));
-    }
-
-    /**
-     * Obtains the icon of a tab's close button from a specific typed array.
-     *
-     * @param typedArray
-     *         The typed array, the icon should be obtained from, as an instance of the class {@link
-     *         TypedArray}. The typed array may not be null
-     */
-    private void obtainTabCloseButtonIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, -1);
-
-        if (resourceId != -1) {
-            setTabCloseButtonIcon(resourceId);
-        } else {
-            setTabCloseButtonIcon(R.drawable.ic_close_tab_18dp);
-        }
-    }
-
-    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on
      * smartphones.
      *
@@ -2579,86 +2513,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
-        childViewRecycler.setAdapter(new ChildRecyclerAdapter(getTabSwitcher(), decorator));
-        recyclerAdapter.clearCachedPreviews();
-    }
-
-    @Override
-    protected final void onPaddingChanged(final int left, final int top, final int right,
-                                          final int bottom) {
-        FrameLayout.LayoutParams toolbarLayoutParams =
-                (FrameLayout.LayoutParams) toolbar.getLayoutParams();
-        toolbarLayoutParams.setMargins(left, top, right, 0);
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-        TabItem tabItem;
-
-        while ((tabItem = iterator.next()) != null) {
-            TabViewHolder viewHolder = tabItem.getViewHolder();
-
-            if (viewHolder != null) {
-                recyclerAdapter.adaptPadding(viewHolder);
-            }
-        }
-    }
-
-    @Override
-    protected final void onTabIconChanged(@Nullable final Drawable icon) {
-        for (Tab tab : getModel()) {
-            recyclerAdapter.onIconChanged(tab);
-        }
-    }
-
-    @Override
-    protected final void onTabBackgroundColorChanged(
-            @Nullable final ColorStateList colorStateList) {
-        for (Tab tab : getModel()) {
-            recyclerAdapter.onBackgroundColorChanged(tab);
-        }
-    }
-
-    @Override
-    protected final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
-        for (Tab tab : getModel()) {
-            recyclerAdapter.onTitleTextColorChanged(tab);
-        }
-    }
-
-    @Override
-    protected final void onTabCloseButtonIconChanged(@NonNull final Drawable icon) {
-        for (Tab tab : getModel()) {
-            recyclerAdapter.onCloseButtonIconChanged(tab);
-        }
-    }
-
-    @Override
-    public final void obtainStyledAttributes(@NonNull final TypedArray typedArray) {
-        super.obtainStyledAttributes(typedArray);
-        obtainBackground(typedArray);
-        obtainTabIcon(typedArray);
-        obtainTabBackgroundColor(typedArray);
-        obtainTabTitleTextColor(typedArray);
-        obtainTabCloseButtonIcon(typedArray);
-    }
-
-    @Override
-    public final void inflateLayout() {
+    protected final void onInflateLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar =
                 (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, getTabSwitcher(), false);
+        toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
         getTabSwitcher().addView(toolbar);
         tabContainer = new FrameLayout(getContext());
         getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), childViewRecycler);
+        recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), getModel(), childViewRecycler);
         getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new DragHandler(getTabSwitcher(), arithmetics);
+        adaptDecorator();
+        adaptToolbarMargin();
     }
 
     @Override
@@ -2669,34 +2542,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
-        recyclerAdapter.addCloseTabListener(listener);
-    }
-
-    @Override
-    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
-        recyclerAdapter.removeCloseTabListener(listener);
-    }
-
-    @NonNull
-    @Override
-    public final Layout getLayout() {
-        return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
-                Layout.PHONE_PORTRAIT;
-    }
-
-    @Override
     public final boolean isAnimationRunning() {
         return super.isAnimationRunning() || flingAnimation != null;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public final ViewGroup getTabContainer() {
         return tabContainer;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public final Toolbar[] getToolbars() {
         return new Toolbar[]{toolbar};
@@ -2710,6 +2566,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onSwitcherHidden() {
         animateHideSwitcher();
+    }
+
+    @Override
+    public final void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+        adaptDecorator();
+        // TODO: detachLayout();
+        // TODO: inflateLayout();
     }
 
     @Override
@@ -2745,7 +2608,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                      @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getLayout());
+                        getTabSwitcher().getLayout());
         addAllTabs(index, tabs, animation);
     }
 
@@ -2755,14 +2618,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                    @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getLayout());
+                        getTabSwitcher().getLayout());
         TabItem removedTabItem = TabItem.create(viewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.remove(removedTabItem);
 
             if (getModel().isEmpty()) {
-                toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
+                toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
             } else if (selectedTabIndex != previousSelectedTabIndex) {
                 viewRecycler
                         .inflate(TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex));
@@ -2796,11 +2659,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                        @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getLayout());
+                        getTabSwitcher().getLayout());
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.removeAll();
-            toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
+            toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
         } else {
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
@@ -2827,6 +2690,32 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void onPaddingChanged(final int left, final int top, final int right,
+                                       final int bottom) {
+        adaptToolbarMargin();
+    }
+
+    @Override
+    public final void onTabIconChanged(@Nullable final Drawable icon) {
+
+    }
+
+    @Override
+    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
+    public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
+    public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+
+    }
+
+    @Override
     public final void onGlobalLayout() {
         if (getModel().isSwitcherShown()) {
             TabItem[] tabItems = calculateInitialTabItems();
@@ -2841,7 +2730,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            toolbar.setAlpha(areToolbarsShown() ? 1 : 0);
+            toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
         } else if (getModel().getSelectedTab() != null) {
             TabItem tabItem = TabItem.create(getTabSwitcher(), viewRecycler,
                     getModel().getSelectedTabIndex());

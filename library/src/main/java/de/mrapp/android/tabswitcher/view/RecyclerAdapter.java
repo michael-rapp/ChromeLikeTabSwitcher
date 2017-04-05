@@ -20,20 +20,20 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
@@ -41,10 +41,12 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
+import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -68,6 +70,11 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private final TabSwitcher tabSwitcher;
 
     /**
+     * The model, which belongs to the tab switcher.
+     */
+    private final TabSwitcherModel model;
+
+    /**
      * The view recycler, which allows to inflate the child views of tabs.
      */
     private final ViewRecycler<Tab, Void> childViewRecycler;
@@ -76,12 +83,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      * The data binder, which allows to render previews of tabs.
      */
     private final PreviewDataBinder dataBinder;
-
-    /**
-     * A set, which contains the listeners, which should be notified, when a tab is about to be
-     * closed by clicking its close button.
-     */
-    private final Set<TabCloseListener> tabCloseListeners;
 
     /**
      * The inset of tabs in pixels.
@@ -244,8 +245,16 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private void adaptCloseButtonIcon(@NonNull final TabViewHolder viewHolder,
                                       @NonNull final Tab tab) {
         Drawable icon = tab.getCloseButtonIcon(tabSwitcher.getContext());
-        viewHolder.closeButton
-                .setImageDrawable(icon != null ? icon : tabSwitcher.getTabCloseButtonIcon());
+
+        if (icon == null) {
+            icon = tabSwitcher.getTabCloseButtonIcon();
+        }
+
+        if (icon != null) {
+            viewHolder.closeButton.setImageDrawable(icon);
+        } else {
+            viewHolder.closeButton.setImageResource(R.drawable.ic_close_tab_18dp);
+        }
     }
 
     /**
@@ -259,12 +268,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         The tab, which should be closed, as an instance of the class {@link Tab}. The tab may
      *         not be null
      * @return The listener, which has been created, as an instance of the class {@link
-     * View.OnClickListener}. The listener may not be null
+     * OnClickListener}. The listener may not be null
      */
     @NonNull
-    private View.OnClickListener createCloseButtonClickListener(
-            @NonNull final ImageButton closeButton, @NonNull final Tab tab) {
-        return new View.OnClickListener() {
+    private OnClickListener createCloseButtonClickListener(@NonNull final ImageButton closeButton,
+                                                           @NonNull final Tab tab) {
+        return new OnClickListener() {
 
             @Override
             public void onClick(final View v) {
@@ -288,7 +297,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private boolean notifyOnCloseTab(@NonNull final Tab tab) {
         boolean result = true;
 
-        for (TabCloseListener listener : tabCloseListeners) {
+        for (TabCloseListener listener : model.getTabCloseListeners()) {
             result &= listener.onCloseTab(tabSwitcher, tab);
         }
 
@@ -388,6 +397,26 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     /**
+     * Adapts the padding of a tab.
+     *
+     * @param viewHolder
+     *         The view holder, which stores references to the tab's views, as an instance of the
+     *         class {@link TabViewHolder}. The view holder may not be null
+     */
+    private void adaptPadding(@NonNull final TabViewHolder viewHolder) {
+        if (viewHolder.child != null) {
+            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
+            childLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
+                    tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
+        }
+
+        LayoutParams previewLayoutParams =
+                (LayoutParams) viewHolder.previewImageView.getLayoutParams();
+        previewLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
+                tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
+    }
+
+    /**
      * Returns the tab item, which corresponds to a specific tab.
      *
      * @param tab
@@ -415,15 +444,27 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     /**
      * Creates a new adapter, which allows to inflate the views, which are used to visualize the
      * tabs of a {@link TabSwitcher}.
+     *
+     * @param tabSwitcher
+     *         The tab switcher as an instance of the class {@link TabSwitcher}. The tab switcher
+     *         may not be null
+     * @param model
+     *         The model, which belongs to the tab switcher, as an instance of the class {@link
+     *         TabSwitcherModel}. The model may not be null
+     * @param childViewRecycler
+     *         The view recycler, which allows to inflate the child views of tabs, as an instance of
+     *         the class {@link ViewRecycler}. The view recycler may not be null
      */
     public RecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                           @NonNull final TabSwitcherModel model,
                            @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureNotNull(model, "The model may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
         this.tabSwitcher = tabSwitcher;
+        this.model = model;
         this.childViewRecycler = childViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, childViewRecycler);
-        this.tabCloseListeners = new LinkedHashSet<>();
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
@@ -437,32 +478,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     /**
-     * Adds a new listener, which should be notified, when a tab is about to be closed by clicking
-     * its close button.
-     *
-     * @param listener
-     *         The listener, which should be added, as an instance of the type {@link
-     *         TabCloseListener}. The listener may not be null
-     */
-    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
-        tabCloseListeners.add(listener);
-    }
-
-    /**
-     * Removes a specific listener, which should not be notified, when a tab is about to be closed
-     * by clicking its close button, anymore.
-     *
-     * @param listener
-     *         The listener, which should be removed, as an instance of the type {@link
-     *         TabCloseListener}. The listener may not be null
-     */
-    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
-        tabCloseListeners.remove(listener);
-    }
-
-    /**
      * Sets the view recycler, which allows to inflate the views, which are used to visualize tabs.
      *
      * @param viewRecycler
@@ -473,26 +488,6 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
             @NonNull final AttachedViewRecycler<TabItem, Integer> viewRecycler) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
-    }
-
-    /**
-     * Adapts the padding of a tab.
-     *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
-     */
-    public final void adaptPadding(@NonNull final TabViewHolder viewHolder) {
-        if (viewHolder.child != null) {
-            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-            childLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
-                    tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
-        }
-
-        LayoutParams previewLayoutParams =
-                (LayoutParams) viewHolder.previewImageView.getLayoutParams();
-        previewLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
-                tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
     }
 
     /**
@@ -654,6 +649,11 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     @Override
+    public final void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+
+    }
+
+    @Override
     public final void onSwitcherShown() {
 
     }
@@ -700,6 +700,89 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Override
     public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
                                        @NonNull final Animation animation) {
+
+    }
+
+    @Override
+    public final void onPaddingChanged(final int left, final int top, final int right,
+                                       final int bottom) {
+        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptPadding(tabItem.getViewHolder());
+            }
+        }
+    }
+
+    @Override
+    public final void onTabIconChanged(@Nullable final Drawable icon) {
+        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptIcon(tabItem.getViewHolder(), tabItem.getTab());
+            }
+        }
+    }
+
+    @Override
+    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptBackgroundColor(tabItem.getView(), tabItem.getViewHolder(), tabItem.getTab());
+            }
+        }
+    }
+
+    @Override
+    public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
+        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
+            }
+        }
+    }
+
+    @Override
+    public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptCloseButtonIcon(tabItem.getViewHolder(), tabItem.getTab());
+            }
+        }
+    }
+
+    @Override
+    public final void onToolbarVisibilityChanged(final boolean visible) {
+
+    }
+
+    @Override
+    public final void onToolbarTitleChanged(@Nullable final CharSequence title) {
+
+    }
+
+    @Override
+    public final void onToolbarNavigationIconChanged(@Nullable final Drawable icon,
+                                                     @Nullable final OnClickListener listener) {
+
+    }
+
+    @Override
+    public final void onToolbarMenuInflated(@MenuRes final int resourceId,
+                                            @Nullable final OnMenuItemClickListener listener) {
 
     }
 

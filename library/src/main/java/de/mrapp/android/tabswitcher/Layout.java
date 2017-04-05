@@ -13,8 +13,6 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import de.mrapp.android.tabswitcher.TabSwitcher;
-
 /**
  * Contains all possible layouts of a {@link TabSwitcher}.
  *
@@ -31,6 +29,11 @@ public enum Layout {
     /**
      * The layout, which is used on smartphones and phablet devices, when in landscape mode.
      */
-    PHONE_LANDSCAPE
+    PHONE_LANDSCAPE,
+
+    /**
+     * The layout, which is used on tablets.
+     */
+    TABLET
 
 }

@@ -13,8 +13,21 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +41,9 @@ import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -40,6 +55,11 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public class TabSwitcherModel implements Model {
+
+    /**
+     * The tab switcher, the model belongs to.
+     */
+    private final TabSwitcher tabSwitcher;
 
     /**
      * A set, which contains the listeners, which are notified about the model's events.
@@ -60,6 +80,85 @@ public class TabSwitcherModel implements Model {
      * The currently selected tab.
      */
     private Tab selectedTab;
+
+    /**
+     * The decorator, which allows to inflate the views, which correspond to the tab switcher's
+     * tabs.
+     */
+    private TabSwitcherDecorator decorator;
+
+    /**
+     * An array, which contains the left, top, right and bottom padding of the tab switcher.
+     */
+    private int[] padding;
+
+    /**
+     * The resource id of a tab's icon.
+     */
+    private int tabIconId;
+
+    /**
+     * The bitmap of a tab's icon.
+     */
+    private Bitmap tabIconBitmap;
+
+    /**
+     * The background color of a tab;
+     */
+    private ColorStateList tabBackgroundColor;
+
+    /**
+     * The text color of a tab's title.
+     */
+    private ColorStateList tabTitleTextColor;
+
+    /**
+     * The resource id of the icon of a tab's close button.
+     */
+    private int tabCloseButtonIconId;
+
+    /**
+     * The bitmap of the icon of a tab's close button.
+     */
+    private Bitmap tabCloseButtonIconBitmap;
+
+    /**
+     * True, if the toolbars should be shown, when the tab switcher is shown, false otherwise.
+     */
+    private boolean showToolbars;
+
+    /**
+     * The title of the toolbar, which is shown, when the tab switcher is shown.
+     */
+    private CharSequence toolbarTitle;
+
+    /**
+     * The navigation icon of the toolbar, which is shown, when the tab switcher is shown.
+     */
+    private Drawable toolbarNavigationIcon;
+
+    /**
+     * The listener, which is notified, when the navigation icon of the toolbar, which is shown,
+     * when the tab switcher is shown, has been clicked.
+     */
+    private OnClickListener toolbarNavigationIconListener;
+
+    /**
+     * The resource id of the menu of the toolbar, which is shown, when the tab switcher is shown.
+     */
+    private int toolbarMenuId;
+
+    /**
+     * The listener, which is notified, when an item of the menu of the toolbar, which is shown,
+     * when the tab switcher is shown, is clicked.
+     */
+    private OnMenuItemClickListener toolbarMenuItemListener;
+
+    /**
+     * A set, which contains the listeners, which should be notified, when a tab is about to be
+     * closed by clicking its close button.
+     */
+    private final Set<TabCloseListener> tabCloseListeners;
 
     /**
      * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the model
@@ -90,6 +189,19 @@ public class TabSwitcherModel implements Model {
         }
 
         return false;
+    }
+
+    /**
+     * Notifies the listeners, that the decorator has been changed.
+     *
+     * @param decorator
+     *         The decorator, which has been set, as an instance of the class {@link
+     *         TabSwitcherDecorator}. The decorator may not be null
+     */
+    private void notifyOnDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+        for (Listener listener : listeners) {
+            listener.onDecoratorChanged(decorator);
+        }
     }
 
     /**
@@ -235,13 +347,171 @@ public class TabSwitcherModel implements Model {
     }
 
     /**
-     * Creates a new model of a {@link TabSwitcher}.
+     * Notifies the listeners, that the padding has been changed.
+     *
+     * @param left
+     *         The left padding, which has been set, in pixels as an {@link Integer} value
+     * @param top
+     *         The top padding, which has been set, in pixels as an {@link Integer} value
+     * @param right
+     *         The right padding, which has been set, in pixels as an {@link Integer} value
+     * @param bottom
+     *         The bottom padding, which has been set, in pixels as an {@link Integer} value
      */
-    public TabSwitcherModel() {
+    private void notifyOnPaddingChanged(final int left, final int top, final int right,
+                                        final int bottom) {
+        for (Listener listener : listeners) {
+            listener.onPaddingChanged(left, top, right, bottom);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the default icon of a tab has been changed.
+     *
+     * @param icon
+     *         The icon, which has been set, as an instance of the class {@link Drawable} or null,
+     *         if no icon is set
+     */
+    private void notifyOnTabIconChanged(@Nullable final Drawable icon) {
+        for (Listener listener : listeners) {
+            listener.onTabIconChanged(icon);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the default background color of a tab has been changed.
+     *
+     * @param colorStateList
+     *         The color state list, which has been set, as an instance of the class {@link
+     *         ColorStateList} or null, if the default color should be used
+     */
+    private void notifyOnTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+        for (Listener listener : listeners) {
+            listener.onTabBackgroundColorChanged(colorStateList);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the default text color of a tab's title has been changed.
+     *
+     * @param colorStateList
+     *         The color state list, which has been set, as an instance of the class {@link
+     *         ColorStateList} or null, if the default color should be used
+     */
+    private void notifyOnTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
+        for (Listener listener : listeners) {
+            listener.onTabTitleColorChanged(colorStateList);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the icon of a tab's close button has been changed.
+     *
+     * @param icon
+     *         The icon, which has been set, as an instance of the class {@link Drawable} or null,
+     *         if the default icon should be used
+     */
+    private void notifyOnTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+        for (Listener listener : listeners) {
+            listener.onTabCloseButtonIconChanged(icon);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that it has been changed, whether the toolbars should be shown, when
+     * the tab switcher is shown, or not.
+     *
+     * @param visible
+     *         True, if the toolbars should be shown, when the tab switcher is shown, false
+     *         otherwise
+     */
+    private void notifyOnToolbarVisibilityChanged(final boolean visible) {
+        for (Listener listener : listeners) {
+            listener.onToolbarVisibilityChanged(visible);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the title of the toolbar, which is shown, when the tab switcher
+     * is shown, has been changed.
+     *
+     * @param title
+     *         The title, which has been set, as an instance of the type {@link CharSequence} or
+     *         null, if no title is set
+     */
+    private void notifyOnToolbarTitleChanged(@Nullable final CharSequence title) {
+        for (Listener listener : listeners) {
+            listener.onToolbarTitleChanged(title);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the menu of the toolbar, which is shown, when the tab switcher
+     * is shown, has been inflated.
+     *
+     * @param resourceId
+     *         The resource id of the menu, which has been inflated, as an {@link Integer} value.
+     *         The resource id must correspond to a valid menu resource
+     * @param menuItemClickListener
+     *         The listener, which has been registered to be notified, when an item of the menu has
+     *         been clicked, as an instance of the type {@link OnMenuItemClickListener} or null, if
+     *         no listener should be notified
+     */
+    private void notifyOnToolbarMenuInflated(@MenuRes final int resourceId,
+                                             @Nullable final OnMenuItemClickListener menuItemClickListener) {
+        for (Listener listener : listeners) {
+            listener.onToolbarMenuInflated(resourceId, menuItemClickListener);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the navigation icon of the toolbar, which is shown, when the tab
+     * switcher is shown, has been changed.
+     *
+     * @param icon
+     *         The navigation icon, which has been set, as an instance of the class {@link Drawable}
+     *         or null, if no navigation icon is set
+     * @param clickListener
+     *         The listener, which should be notified, when the navigation item has been clicked, as
+     *         an instance of the type {@link OnClickListener} or null, if no listener should be
+     *         notified
+     */
+    private void notifyOnToolbarNavigationIconChanged(@Nullable final Drawable icon,
+                                                      @Nullable final OnClickListener clickListener) {
+        for (Listener listener : listeners) {
+            listener.onToolbarNavigationIconChanged(icon, clickListener);
+        }
+    }
+
+    /**
+     * Creates a new model of a {@link TabSwitcher}.
+     *
+     * @param tabSwitcher
+     *         The tab switcher, the model belongs to, as an instance of the class {@link
+     *         TabSwitcher}. The tab switcher may not be null
+     */
+    public TabSwitcherModel(@NonNull final TabSwitcher tabSwitcher) {
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
+        this.decorator = null;
+        this.padding = new int[]{0, 0, 0, 0};
+        this.tabIconId = -1;
+        this.tabIconBitmap = null;
+        this.tabBackgroundColor = null;
+        this.tabTitleTextColor = null;
+        this.tabCloseButtonIconId = -1;
+        this.tabCloseButtonIconBitmap = null;
+        this.showToolbars = false;
+        this.toolbarTitle = null;
+        this.toolbarNavigationIcon = null;
+        this.toolbarNavigationIconListener = null;
+        this.toolbarMenuId = -1;
+        this.toolbarMenuItemListener = null;
+        this.tabCloseListeners = new LinkedHashSet<>();
     }
 
     /**
@@ -266,6 +536,69 @@ public class TabSwitcherModel implements Model {
     public final void removeListener(@NonNull final Listener listener) {
         ensureNotNull(listener, "The listener may not be null");
         listeners.remove(listener);
+    }
+
+    /**
+     * Returns the listener, which is notified, when the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown, has been clicked.
+     *
+     * @return The listener, which is notified, when the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown, has been clicked as an instance of the type {@link
+     * OnClickListener} or null, if no listener should be notified
+     */
+    @Nullable
+    public final OnClickListener getToolbarNavigationIconListener() {
+        return toolbarNavigationIconListener;
+    }
+
+    /**
+     * Returns the resource id of the menu of the toolbar, which is shown, when the tab switcher is
+     * shown.
+     *
+     * @return The resource id of the menu of the toolbar, which is shown, when the tab switcher is
+     * shown, as an {@link Integer} value. The resource id must correspond to a valid menu resource
+     */
+    @MenuRes
+    public final int getToolbarMenuId() {
+        return toolbarMenuId;
+    }
+
+    /**
+     * Returns the listener, which is notified, when an item of the menu of the toolbar, which is
+     * shown, when the tab switcher is shown, has been clicked.
+     *
+     * @return The listener, which is notified, when an item of the menu of the toolbar, which is
+     * shown, when the tab switcher is shown, has been clicked as an instance of the type {@link
+     * OnMenuItemClickListener} or null, if no listener should be notified
+     */
+    @Nullable
+    public final OnMenuItemClickListener getToolbarMenuItemListener() {
+        return toolbarMenuItemListener;
+    }
+
+    /**
+     * Returns the listeners, which should be notified, when a tab is about to be closed by clicking
+     * its close button.
+     *
+     * @return A set, which contains the listeners, which should be notified, when a tab is about to
+     * be closed by clicking its close button, as an instance of the type {@link Set} or an empty
+     * set, if no listeners should be notified
+     */
+    @NonNull
+    public final Set<TabCloseListener> getTabCloseListeners() {
+        return tabCloseListeners;
+    }
+
+    @Override
+    public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
+        ensureNotNull(decorator, "The decorator may not be null");
+        this.decorator = decorator;
+        notifyOnDecoratorChanged(decorator);
+    }
+
+    @Override
+    public final TabSwitcherDecorator getDecorator() {
+        return decorator;
     }
 
     @Override
@@ -473,6 +806,205 @@ public class TabSwitcherModel implements Model {
     @Override
     public final Iterator<Tab> iterator() {
         return tabs.iterator();
+    }
+
+    @Override
+    public final void setPadding(final int left, final int top, final int right, final int bottom) {
+        padding = new int[]{left, top, right, bottom};
+        notifyOnPaddingChanged(left, top, right, bottom);
+    }
+
+    @Override
+    public final int getPaddingLeft() {
+        return padding[0];
+    }
+
+    @Override
+    public final int getPaddingTop() {
+        return padding[1];
+    }
+
+    @Override
+    public final int getPaddingRight() {
+        return padding[2];
+    }
+
+    @Override
+    public final int getPaddingBottom() {
+        return padding[3];
+    }
+
+    @Override
+    public final int getPaddingStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
+                    getPaddingRight() : getPaddingLeft();
+        }
+
+        return getPaddingLeft();
+    }
+
+    @Override
+    public final int getPaddingEnd() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
+                    getPaddingLeft() : getPaddingRight();
+        }
+
+        return getPaddingRight();
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getTabIcon() {
+        if (tabIconId != -1) {
+            return ContextCompat.getDrawable(tabSwitcher.getContext(), tabIconId);
+        } else {
+            return tabIconBitmap != null ?
+                    new BitmapDrawable(tabSwitcher.getResources(), tabIconBitmap) : null;
+        }
+    }
+
+    @Override
+    public final void setTabIcon(@DrawableRes final int resourceId) {
+        this.tabIconId = resourceId;
+        this.tabIconBitmap = null;
+        notifyOnTabIconChanged(getTabIcon());
+    }
+
+    @Override
+    public final void setTabIcon(@Nullable final Bitmap icon) {
+        this.tabIconId = -1;
+        this.tabIconBitmap = icon;
+        notifyOnTabIconChanged(getTabIcon());
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getTabBackgroundColor() {
+        return tabBackgroundColor;
+    }
+
+    @Override
+    public final void setTabBackgroundColor(@ColorInt final int color) {
+        setTabBackgroundColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    @Override
+    public final void setTabBackgroundColor(@Nullable final ColorStateList colorStateList) {
+        this.tabBackgroundColor = colorStateList;
+        notifyOnTabBackgroundColorChanged(colorStateList);
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getTabTitleTextColor() {
+        return tabTitleTextColor;
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@ColorInt final int color) {
+        setTabTitleTextColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    @Override
+    public final void setTabTitleTextColor(@Nullable final ColorStateList colorStateList) {
+        this.tabTitleTextColor = colorStateList;
+        notifyOnTabTitleColorChanged(colorStateList);
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getTabCloseButtonIcon() {
+        if (tabCloseButtonIconId != -1) {
+            return ContextCompat.getDrawable(tabSwitcher.getContext(), tabCloseButtonIconId);
+        } else {
+            return tabCloseButtonIconBitmap != null ?
+                    new BitmapDrawable(tabSwitcher.getResources(), tabCloseButtonIconBitmap) : null;
+        }
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@DrawableRes final int resourceId) {
+        tabCloseButtonIconId = resourceId;
+        tabCloseButtonIconBitmap = null;
+        notifyOnTabCloseButtonIconChanged(getTabCloseButtonIcon());
+    }
+
+    @Override
+    public final void setTabCloseButtonIcon(@Nullable final Bitmap icon) {
+        tabCloseButtonIconId = -1;
+        tabCloseButtonIconBitmap = icon;
+        notifyOnTabCloseButtonIconChanged(getTabCloseButtonIcon());
+    }
+
+    @Override
+    public final boolean areToolbarsShown() {
+        return showToolbars;
+    }
+
+    @Override
+    public final void showToolbars(final boolean show) {
+        this.showToolbars = show;
+        notifyOnToolbarVisibilityChanged(show);
+    }
+
+    @Nullable
+    @Override
+    public final CharSequence getToolbarTitle() {
+        return toolbarTitle;
+    }
+
+    @Override
+    public void setToolbarTitle(@StringRes final int resourceId) {
+        setToolbarTitle(tabSwitcher.getContext().getText(resourceId));
+    }
+
+    @Override
+    public final void setToolbarTitle(@Nullable final CharSequence title) {
+        this.toolbarTitle = title;
+        notifyOnToolbarTitleChanged(title);
+    }
+
+    @Nullable
+    @Override
+    public final Drawable getToolbarNavigationIcon() {
+        return toolbarNavigationIcon;
+    }
+
+    @Override
+    public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
+                                               @Nullable final OnClickListener listener) {
+        setToolbarNavigationIcon(ContextCompat.getDrawable(tabSwitcher.getContext(), resourceId),
+                listener);
+    }
+
+    @Override
+    public final void setToolbarNavigationIcon(@Nullable final Drawable icon,
+                                               @Nullable final OnClickListener listener) {
+        this.toolbarNavigationIcon = icon;
+        this.toolbarNavigationIconListener = listener;
+        notifyOnToolbarNavigationIconChanged(icon, listener);
+    }
+
+    @Override
+    public final void inflateToolbarMenu(@MenuRes final int resourceId,
+                                         @Nullable final OnMenuItemClickListener listener) {
+        this.toolbarMenuId = resourceId;
+        this.toolbarMenuItemListener = listener;
+        notifyOnToolbarMenuInflated(resourceId, listener);
+    }
+
+    @Override
+    public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabCloseListeners.add(listener);
+    }
+
+    @Override
+    public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabCloseListeners.remove(listener);
     }
 
 }

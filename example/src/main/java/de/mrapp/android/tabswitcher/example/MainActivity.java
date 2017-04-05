@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -41,6 +42,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
+import de.mrapp.android.util.ViewUtil;
 
 /**
  * The example app's main activity.
@@ -174,6 +176,22 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    private OnGlobalLayoutListener createTabSwitcherLayoutListener() {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                ViewUtil.removeOnGlobalLayoutListener(tabSwitcher.getViewTreeObserver(), this);
+                Menu menu = tabSwitcher.getToolbarMenu();
+
+                if (menu != null) {
+                    TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
+                }
+            }
+
+        };
+    }
+
     private OnClickListener createTabSwitcherButtonListener() {
         return new OnClickListener() {
 
@@ -229,14 +247,17 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     @Nullable
     private View getNavigationMenuItem() {
         Toolbar[] toolbars = tabSwitcher.getToolbars();
-        Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
-        int size = toolbar.getChildCount();
 
-        for (int i = 0; i < size; i++) {
-            View child = toolbar.getChildAt(i);
+        if (toolbars != null) {
+            Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
+            int size = toolbar.getChildCount();
 
-            if (child instanceof ImageButton) {
-                return child;
+            for (int i = 0; i < size; i++) {
+                View child = toolbar.getChildAt(i);
+
+                if (child instanceof ImageButton) {
+                    return child;
+                }
             }
         }
 
@@ -304,8 +325,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
         tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
-        Menu menu = tabSwitcher.getToolbarMenu();
-        TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
+        tabSwitcher.getViewTreeObserver()
+                .addOnGlobalLayoutListener(createTabSwitcherLayoutListener());
 
         for (int i = 0; i < TAB_COUNT; i++) {
             tabSwitcher.addTab(createTab(i));
