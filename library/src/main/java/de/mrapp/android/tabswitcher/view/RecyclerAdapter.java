@@ -135,12 +135,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
             view = pair.first;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
-                    tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
+            layoutParams.setMargins(model.getPaddingLeft(), model.getPaddingTop(),
+                    model.getPaddingRight(), model.getPaddingBottom());
             parent.addView(view, 0, layoutParams);
             viewHolder.child = view;
         } else {
-            childViewRecycler.getAdapter().onShowView(tabSwitcher.getContext(), view, tab, false);
+            childViewRecycler.getAdapter().onShowView(model.getContext(), view, tab, false);
         }
 
         viewHolder.previewImageView.setVisibility(View.GONE);
@@ -213,9 +213,10 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         tab may not be null
      */
     private void adaptIcon(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
-        Drawable icon = tab.getIcon(tabSwitcher.getContext());
-        viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(
-                icon != null ? icon : tabSwitcher.getTabIcon(), null, null, null);
+        Drawable icon = tab.getIcon(model.getContext());
+        viewHolder.titleTextView
+                .setCompoundDrawablesWithIntrinsicBounds(icon != null ? icon : model.getTabIcon(),
+                        null, null, null);
     }
 
     /**
@@ -247,10 +248,10 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void adaptCloseButtonIcon(@NonNull final TabViewHolder viewHolder,
                                       @NonNull final Tab tab) {
-        Drawable icon = tab.getCloseButtonIcon(tabSwitcher.getContext());
+        Drawable icon = tab.getCloseButtonIcon(model.getContext());
 
         if (icon == null) {
-            icon = tabSwitcher.getTabCloseButtonIcon();
+            icon = model.getTabCloseButtonIcon();
         }
 
         if (icon != null) {
@@ -325,12 +326,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
                                       @NonNull final Tab tab) {
         ColorStateList colorStateList =
                 tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
-                        tabSwitcher.getTabBackgroundColor();
+                        model.getTabBackgroundColor();
         int color = tabBackgroundColor;
 
         if (colorStateList != null) {
             int[] stateSet =
-                    tabSwitcher.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
+                    model.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
                             new int[]{};
             color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         }
@@ -354,7 +355,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private void adaptTitleTextColor(@NonNull final TabViewHolder viewHolder,
                                      @NonNull final Tab tab) {
         ColorStateList colorStateList = tab.getTitleTextColor() != null ? tab.getTitleTextColor() :
-                tabSwitcher.getTabTitleTextColor();
+                model.getTabTitleTextColor();
 
         if (colorStateList != null) {
             viewHolder.titleTextView.setTextColor(colorStateList);
@@ -375,7 +376,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void adaptSelectionState(@NonNull final TabViewHolder viewHolder,
                                      @NonNull final Tab tab) {
-        boolean selected = tabSwitcher.getSelectedTab() == tab;
+        boolean selected = model.getSelectedTab() == tab;
         viewHolder.titleTextView.setSelected(selected);
         viewHolder.closeButton.setSelected(selected);
     }
@@ -386,7 +387,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void adaptAllSelectionStates() {
         AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+                new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -409,14 +410,15 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     private void adaptPadding(@NonNull final TabViewHolder viewHolder) {
         if (viewHolder.child != null) {
             LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-            childLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
-                    tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
+            childLayoutParams.setMargins(model.getPaddingLeft(), model.getPaddingTop(),
+                    model.getPaddingRight(), model.getPaddingBottom());
         }
 
         LayoutParams previewLayoutParams =
                 (LayoutParams) viewHolder.previewImageView.getLayoutParams();
-        previewLayoutParams.setMargins(tabSwitcher.getPaddingLeft(), tabSwitcher.getPaddingTop(),
-                tabSwitcher.getPaddingRight(), tabSwitcher.getPaddingBottom());
+        previewLayoutParams
+                .setMargins(model.getPaddingLeft(), model.getPaddingTop(), model.getPaddingRight(),
+                        model.getPaddingBottom());
     }
 
     /**
@@ -431,10 +433,10 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Nullable
     private TabItem getTabItem(@NonNull final Tab tab) {
         ensureNotNull(viewRecycler, "No view recycler has been set", IllegalStateException.class);
-        int index = tabSwitcher.indexOf(tab);
+        int index = model.indexOf(tab);
 
         if (index != -1) {
-            TabItem tabItem = TabItem.create(tabSwitcher, viewRecycler, index);
+            TabItem tabItem = TabItem.create(model, viewRecycler, index);
 
             if (tabItem.isInflated()) {
                 return tabItem;
@@ -512,7 +514,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
                 tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.tab_view_horizontally :
                         R.layout.tab_view, tabSwitcher.getTabContainer(), false);
         Drawable backgroundDrawable =
-                ContextCompat.getDrawable(tabSwitcher.getContext(), R.drawable.tab_background);
+                ContextCompat.getDrawable(model.getContext(), R.drawable.tab_background);
         ViewUtil.setBackground(view, backgroundDrawable);
         int padding = tabInset + tabBorderWidth;
         view.setPadding(padding, tabInset, padding, padding);
@@ -524,7 +526,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptPadding(viewHolder);
         viewHolder.borderView = view.findViewById(R.id.border_view);
         Drawable borderDrawable =
-                ContextCompat.getDrawable(tabSwitcher.getContext(), R.drawable.tab_border);
+                ContextCompat.getDrawable(model.getContext(), R.drawable.tab_border);
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         view.setTag(R.id.tag_view_holder, viewHolder);
         tabItem.setView(view);
@@ -564,8 +566,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         adaptTitleTextColor(viewHolder, tab);
         adaptSelectionState(viewHolder, tab);
 
-        if (!tabSwitcher.isSwitcherShown()) {
-            if (tab == tabSwitcher.getSelectedTab()) {
+        if (!model.isSwitcherShown()) {
+            if (tab == model.getSelectedTab()) {
                 addChildView(tabItem);
             }
         } else {
@@ -710,7 +712,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Override
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
-        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItemIterator iterator = new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -722,7 +724,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onTabIconChanged(@Nullable final Drawable icon) {
-        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItemIterator iterator = new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -734,7 +736,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
-        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItemIterator iterator = new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -746,7 +748,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
-        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItemIterator iterator = new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -758,7 +760,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
-        TabItemIterator iterator = new TabItemIterator.Builder(tabSwitcher, viewRecycler).create();
+        TabItemIterator iterator = new TabItemIterator.Builder(model, viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
