@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher.arithmetic;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -198,8 +199,9 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getY() - (tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) -
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            return view.getY() - (tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
+                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) -
                     getPadding(axis, Gravity.START, tabSwitcher);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -219,8 +221,9 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            view.setY((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) +
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            view.setY((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
+                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) +
                     getPadding(axis, Gravity.START, tabSwitcher) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -243,8 +246,9 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            animator.y((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() ?
-                    tabSwitcher.getToolbars()[0].getHeight() - tabInset : 0) +
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            animator.y((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
+                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) +
                     (includePadding ? getPadding(axis, Gravity.START, tabSwitcher) : 0) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
