@@ -33,6 +33,7 @@ import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
+import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 
@@ -850,5 +851,25 @@ public interface Model extends Iterable<Tab> {
      *         TabCloseListener}. The listener may not be null
      */
     void removeCloseTabListener(@NonNull TabCloseListener listener);
+
+    /**
+     * Adds a new listener, which should be notified, when the preview of a tab is about to be
+     * loaded. Previews are only loaded when using the smartphone layout.
+     *
+     * @param listener
+     *         The listener, which should be added, as an instance of the type {@link
+     *         TabPreviewListener}. The listener may not be null
+     */
+    void addTabPreviewListener(@NonNull TabPreviewListener listener);
+
+    /**
+     * Removes a specific listener, which should not be notified, when the preview of a tab is about
+     * to be loaded.
+     *
+     * @param listener
+     *         The listener, which should be removed, as an instance of the type {@link
+     *         TabPreviewListener}. The listener may not be null
+     */
+    void removeTabPreviewListener(@NonNull TabPreviewListener listener);
 
 }

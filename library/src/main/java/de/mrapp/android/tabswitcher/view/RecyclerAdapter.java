@@ -40,6 +40,7 @@ import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
+import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
@@ -48,6 +49,7 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
@@ -62,7 +64,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integer>
-        implements Tab.Callback, Model.Listener {
+        implements Tab.Callback, Model.Listener,
+        AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
 
     /**
      * The tab switcher, the tabs belong to.
@@ -82,7 +85,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     /**
      * The data binder, which allows to render previews of tabs.
      */
-    private final PreviewDataBinder dataBinder;
+    private final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder;
 
     /**
      * The inset of tabs in pixels.
@@ -465,6 +468,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         this.model = model;
         this.childViewRecycler = childViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, childViewRecycler);
+        this.dataBinder.addListener(this);
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
@@ -783,6 +787,33 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     @Override
     public final void onToolbarMenuInflated(@MenuRes final int resourceId,
                                             @Nullable final OnMenuItemClickListener listener) {
+
+    }
+
+    @Override
+    public final boolean onLoadData(
+            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder,
+            @NonNull final Tab key, @NonNull final TabItem... params) {
+        boolean result = true;
+
+        for (TabPreviewListener listener : model.getTabPreviewListeners()) {
+            result &= listener.onLoadTabPreview(key);
+        }
+
+        return result;
+    }
+
+    @Override
+    public final void onFinished(
+            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder,
+            @NonNull final Tab key, @Nullable final Bitmap data, @NonNull final ImageView view,
+            @NonNull final TabItem... params) {
+
+    }
+
+    @Override
+    public final void onCanceled(
+            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder) {
 
     }
 

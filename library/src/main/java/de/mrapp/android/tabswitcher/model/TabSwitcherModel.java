@@ -42,6 +42,7 @@ import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
+import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 
@@ -159,6 +160,12 @@ public class TabSwitcherModel implements Model {
      * closed by clicking its close button.
      */
     private final Set<TabCloseListener> tabCloseListeners;
+
+    /**
+     * A set, which contains the listeners, which should be notified, when the previews of tabs are
+     * about to be loaded.
+     */
+    private final Set<TabPreviewListener> tabPreviewListeners;
 
     /**
      * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the model
@@ -512,6 +519,7 @@ public class TabSwitcherModel implements Model {
         this.toolbarMenuId = -1;
         this.toolbarMenuItemListener = null;
         this.tabCloseListeners = new LinkedHashSet<>();
+        this.tabPreviewListeners = new LinkedHashSet<>();
     }
 
     /**
@@ -587,6 +595,19 @@ public class TabSwitcherModel implements Model {
     @NonNull
     public final Set<TabCloseListener> getTabCloseListeners() {
         return tabCloseListeners;
+    }
+
+    /**
+     * Returns the listeners, which should be notified, when the previews of tabs are about to be
+     * loaded.
+     *
+     * @return A set, which contains the listeners, which should be notified, when the previews of
+     * tabs are about to be loaded, as an instance of the type {@link Set} or an empty set, if no
+     * listeners should be notified
+     */
+    @NonNull
+    public final Set<TabPreviewListener> getTabPreviewListeners() {
+        return tabPreviewListeners;
     }
 
     @Override
@@ -1005,6 +1026,18 @@ public class TabSwitcherModel implements Model {
     public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         tabCloseListeners.remove(listener);
+    }
+
+    @Override
+    public final void addTabPreviewListener(@NonNull final TabPreviewListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabPreviewListeners.add(listener);
+    }
+
+    @Override
+    public final void removeTabPreviewListener(@NonNull final TabPreviewListener listener) {
+        ensureNotNull(listener, "The listener may not be null");
+        tabPreviewListeners.remove(listener);
     }
 
 }

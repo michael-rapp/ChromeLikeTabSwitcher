@@ -1238,6 +1238,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     @Override
+    public final void addTabPreviewListener(@NonNull final TabPreviewListener listener) {
+        model.addTabPreviewListener(listener);
+    }
+
+    @Override
+    public final void removeTabPreviewListener(@NonNull final TabPreviewListener listener) {
+        model.removeTabPreviewListener(listener);
+    }
+
+    @Override
     public final boolean isAnimationRunning() {
         return layout != null && layout.isAnimationRunning();
     }
