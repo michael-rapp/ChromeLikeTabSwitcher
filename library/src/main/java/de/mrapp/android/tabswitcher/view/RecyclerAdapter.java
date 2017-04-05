@@ -799,7 +799,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         boolean result = true;
 
         for (TabPreviewListener listener : model.getTabPreviewListeners()) {
-            result &= listener.onLoadTabPreview(key);
+            result &= listener.onLoadTabPreview(tabSwitcher, key);
         }
 
         return result;
