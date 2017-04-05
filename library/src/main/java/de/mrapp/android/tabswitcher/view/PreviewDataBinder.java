@@ -21,10 +21,10 @@ import android.support.v4.util.LruCache;
 import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import de.mrapp.android.tabswitcher.Tab;
-import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.ViewRecycler;
@@ -41,9 +41,9 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> {
 
     /**
-     * The tab switcher, the tabs belong to.
+     * The parent view of the tab switcher, the tabs belong to.
      */
-    private final TabSwitcher tabSwitcher;
+    private final ViewGroup parent;
 
     /**
      * The view recycler, which is used to inflate child views.
@@ -54,19 +54,19 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
      * display them afterwards.
      *
-     * @param tabSwitcher
-     *         The tab switcher, the tabs belong to, as an instance of the class {@link
-     *         TabSwitcher}. The tab switcher may not be null
+     * @param parent
+     *         The parent view of the tab switcher, the tabs belong to, as an instance of the class
+     *         {@link ViewGroup}. The parent may not be null
      * @param childViewRecycler
      *         The view recycler, which should be used to inflate child views, as an instance of the
      *         class {@link ViewRecycler}. The view recycler may not be null
      */
-    public PreviewDataBinder(@NonNull final TabSwitcher tabSwitcher,
+    public PreviewDataBinder(@NonNull final ViewGroup parent,
                              @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
-        super(tabSwitcher.getContext(), new LruCache<Tab, Bitmap>(7));
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        super(parent.getContext(), new LruCache<Tab, Bitmap>(7));
+        ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
-        this.tabSwitcher = tabSwitcher;
+        this.parent = parent;
         this.childViewRecycler = childViewRecycler;
     }
 
@@ -96,8 +96,8 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         TabViewHolder viewHolder = tabItem.getViewHolder();
         View child = viewHolder.child;
         viewHolder.child = null;
-        int width = tabSwitcher.getWidth();
-        int height = tabSwitcher.getHeight();
+        int width = parent.getWidth();
+        int height = parent.getHeight();
         child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
         child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
