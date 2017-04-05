@@ -1,3 +1,16 @@
+/*
+ * Copyright 2016 - 2017 Michael Rapp
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package de.mrapp.android.tabswitcher.view;
 
 import android.content.Context;
@@ -19,16 +32,43 @@ import de.mrapp.android.util.view.AbstractViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
+ * A view recycler adapter, which allows to inflate the views, which are used to visualize the child
+ * views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
+ *
  * @author Michael Rapp
+ * @since 1.0.0
  */
 public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void> {
 
+    /**
+     * The tab switcher, which contains the tabs, the child views, which are inflated by the
+     * adapter, correspond to.
+     */
     private final TabSwitcher tabSwitcher;
 
+    /**
+     * The decorator, which is used to inflate the child views.
+     */
     private final TabSwitcherDecorator decorator;
 
+    /**
+     * A map, which manages the saved instance states of previously removed child views.
+     */
     private final Map<Tab, Bundle> savedInstanceStates;
 
+    /**
+     * Creates a new view recycler adapter, which allows to inflate the views, which are used to
+     * visualize the child views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link
+     * TabSwitcherDecorator}.
+     *
+     * @param tabSwitcher
+     *         The tab switcher, which contains the tabs, the child views, which are inflated by the
+     *         adapter, correspond to, as an instance of the class {@link TabSwitcher}. The tab
+     *         switcher may not be null
+     * @param decorator
+     *         The decorator, which should be used to inflate the child views, as an instance of the
+     *         class {@link TabSwitcherDecorator}. The decorator may not be null
+     */
     public ChildRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
