@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -28,6 +29,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +60,9 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model {
 
     /**
-     * The tab switcher, the model belongs to.
+     * The parent view of the tab switcher, the model belongs to.
      */
-    private final TabSwitcher tabSwitcher;
+    private final ViewGroup parent;
 
     /**
      * A set, which contains the listeners, which are notified about the model's events.
@@ -493,13 +495,13 @@ public class TabSwitcherModel implements Model {
     /**
      * Creates a new model of a {@link TabSwitcher}.
      *
-     * @param tabSwitcher
-     *         The tab switcher, the model belongs to, as an instance of the class {@link
-     *         TabSwitcher}. The tab switcher may not be null
+     * @param parent
+     *         The parent view of the tab switcher, the model belongs to, as an instance of the
+     *         class {@link ViewGroup}. The parent may not be null
      */
-    public TabSwitcherModel(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        this.tabSwitcher = tabSwitcher;
+    public TabSwitcherModel(@NonNull final ViewGroup parent) {
+        ensureNotNull(parent, "The parent may not be null");
+        this.parent = parent;
         this.listeners = new LinkedHashSet<>();
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
@@ -608,6 +610,12 @@ public class TabSwitcherModel implements Model {
     @NonNull
     public final Set<TabPreviewListener> getTabPreviewListeners() {
         return tabPreviewListeners;
+    }
+
+    @NonNull
+    @Override
+    public final Context getContext() {
+        return parent.getContext();
     }
 
     @Override
@@ -858,8 +866,8 @@ public class TabSwitcherModel implements Model {
     @Override
     public final int getPaddingStart() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
-                    getPaddingRight() : getPaddingLeft();
+            return parent.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? getPaddingRight() :
+                    getPaddingLeft();
         }
 
         return getPaddingLeft();
@@ -868,8 +876,8 @@ public class TabSwitcherModel implements Model {
     @Override
     public final int getPaddingEnd() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
-                    getPaddingLeft() : getPaddingRight();
+            return parent.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? getPaddingLeft() :
+                    getPaddingRight();
         }
 
         return getPaddingRight();
@@ -879,10 +887,10 @@ public class TabSwitcherModel implements Model {
     @Override
     public final Drawable getTabIcon() {
         if (tabIconId != -1) {
-            return ContextCompat.getDrawable(tabSwitcher.getContext(), tabIconId);
+            return ContextCompat.getDrawable(getContext(), tabIconId);
         } else {
             return tabIconBitmap != null ?
-                    new BitmapDrawable(tabSwitcher.getResources(), tabIconBitmap) : null;
+                    new BitmapDrawable(getContext().getResources(), tabIconBitmap) : null;
         }
     }
 
@@ -938,10 +946,11 @@ public class TabSwitcherModel implements Model {
     @Override
     public final Drawable getTabCloseButtonIcon() {
         if (tabCloseButtonIconId != -1) {
-            return ContextCompat.getDrawable(tabSwitcher.getContext(), tabCloseButtonIconId);
+            return ContextCompat.getDrawable(getContext(), tabCloseButtonIconId);
         } else {
             return tabCloseButtonIconBitmap != null ?
-                    new BitmapDrawable(tabSwitcher.getResources(), tabCloseButtonIconBitmap) : null;
+                    new BitmapDrawable(getContext().getResources(), tabCloseButtonIconBitmap) :
+                    null;
         }
     }
 
@@ -978,7 +987,7 @@ public class TabSwitcherModel implements Model {
 
     @Override
     public void setToolbarTitle(@StringRes final int resourceId) {
-        setToolbarTitle(tabSwitcher.getContext().getText(resourceId));
+        setToolbarTitle(getContext().getText(resourceId));
     }
 
     @Override
@@ -996,8 +1005,7 @@ public class TabSwitcherModel implements Model {
     @Override
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
-        setToolbarNavigationIcon(ContextCompat.getDrawable(tabSwitcher.getContext(), resourceId),
-                listener);
+        setToolbarNavigationIcon(ContextCompat.getDrawable(getContext(), resourceId), listener);
     }
 
     @Override

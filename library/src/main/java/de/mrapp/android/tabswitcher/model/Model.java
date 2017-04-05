@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -267,6 +268,15 @@ public interface Model extends Iterable<Tab> {
                                    @Nullable OnMenuItemClickListener listener);
 
     }
+
+    /**
+     * Returns the context, which is used by the tab switcher.
+     *
+     * @return The context, which is used by the tab switcher, as an instance of the class {@link
+     * Context}. The context may not be null
+     */
+    @NonNull
+    Context getContext();
 
     /**
      * Sets the decorator, which allows to inflate the views, which correspond to the tabs of the
