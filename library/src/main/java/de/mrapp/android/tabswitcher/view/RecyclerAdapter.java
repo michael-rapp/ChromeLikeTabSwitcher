@@ -57,8 +57,8 @@ import de.mrapp.android.util.view.ViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An adapter, which allows to inflate the views, which are used to visualize the tabs of a {@link
- * TabSwitcher}.
+ * A view recycler adapter, which allows to inflate the views, which are used to visualize the tabs
+ * of a {@link TabSwitcher}.
  *
  * @author Michael Rapp
  * @since 1.0.0
@@ -445,8 +445,8 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     }
 
     /**
-     * Creates a new adapter, which allows to inflate the views, which are used to visualize the
-     * tabs of a {@link TabSwitcher}.
+     * Creates a new view recycler adapter, which allows to inflate the views, which are used to
+     * visualize the tabs of a {@link TabSwitcher}.
      *
      * @param tabSwitcher
      *         The tab switcher as an instance of the class {@link TabSwitcher}. The tab switcher
