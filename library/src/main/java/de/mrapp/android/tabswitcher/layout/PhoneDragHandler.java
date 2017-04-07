@@ -564,8 +564,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
     public final float getAttachedPosition(final boolean recalculate, final int count) {
         if (recalculate || attachedPosition == -1) {
             Toolbar[] toolbars = getTabSwitcher().getToolbars();
-            float totalSpace = getArithmetics()
-                    .getSize(Axis.DRAGGING_AXIS, getTabSwitcher().getTabContainer()) -
+            float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
                     (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
                             getTabSwitcher().areToolbarsShown() && toolbars != null ?
                             toolbars[0].getHeight() + tabInset : 0);
@@ -683,8 +682,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      */
     @NonNull
     public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float size =
-                getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher().getTabContainer());
+        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
         Toolbar[] toolbars = getTabSwitcher().getToolbars();
         int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                 getTabSwitcher().areToolbarsShown() && toolbars != null ?
