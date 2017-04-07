@@ -17,6 +17,7 @@ import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 
@@ -425,7 +426,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
     public final float calculateSwipePosition() {
-        return getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, getTabSwitcher().getTabContainer());
+        return getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, getTabSwitcher());
     }
 
     /**
@@ -562,11 +563,12 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      */
     public final float getAttachedPosition(final boolean recalculate, final int count) {
         if (recalculate || attachedPosition == -1) {
+            Toolbar[] toolbars = getTabSwitcher().getToolbars();
             float totalSpace = getArithmetics()
                     .getSize(Axis.DRAGGING_AXIS, getTabSwitcher().getTabContainer()) -
                     (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                            getTabSwitcher().areToolbarsShown() ?
-                            getTabSwitcher().getToolbars()[0].getHeight() + tabInset : 0);
+                            getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                            toolbars[0].getHeight() + tabInset : 0);
 
             if (count == 3) {
                 attachedPosition = totalSpace * 0.66f;
@@ -683,9 +685,10 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
     public final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float size =
                 getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher().getTabContainer());
-        int toolbarHeight = getTabSwitcher().areToolbarsShown() &&
-                getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE ?
-                getTabSwitcher().getToolbars()[0].getHeight() - tabInset : 0;
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
+        int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
+                getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                toolbars[0].getHeight() - tabInset : 0;
         int padding =
                 getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START, getTabSwitcher()) +
                         getArithmetics()
@@ -727,9 +730,10 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
             if (tabItem.getTag().getState() == State.FLOATING ||
                     tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 View view = tabItem.getView();
-                float toolbarHeight = getTabSwitcher().areToolbarsShown() &&
-                        getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE ?
-                        getTabSwitcher().getToolbars()[0].getHeight() - tabInset : 0;
+                Toolbar[] toolbars = getTabSwitcher().getToolbars();
+                float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
+                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                        toolbars[0].getHeight() - tabInset : 0;
                 float viewPosition =
                         getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) + toolbarHeight +
                                 getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
