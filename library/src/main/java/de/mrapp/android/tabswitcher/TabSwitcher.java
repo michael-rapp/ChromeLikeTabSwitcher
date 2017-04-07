@@ -48,6 +48,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
@@ -536,9 +537,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
                 if (layoutType == Layout.TABLET) {
                     // TODO: Use tablet layout once implemented
-                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model);
+                    PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
+                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
                 } else {
-                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model);
+                    PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
+                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
                 }
 
                 layout.setCallback(createLayoutCallback());

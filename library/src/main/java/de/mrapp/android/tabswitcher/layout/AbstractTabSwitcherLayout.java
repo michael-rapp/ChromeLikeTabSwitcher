@@ -31,7 +31,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.Model;
+import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
 
@@ -41,11 +43,14 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * An abstract base class for all layouts, which implement the functionality of a {@link
  * TabSwitcher}.
  *
+ * @param <DragHandlerType>
+ *         The type of the drag handler, which is used by the layout
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractTabSwitcherLayout
-        implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener {
+public abstract class AbstractTabSwitcherLayout<DragHandlerType extends AbstractDragHandler<? extends AbstractDragHandler.Callback>>
+        implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
+        AbstractDragHandler.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -187,6 +192,16 @@ public abstract class AbstractTabSwitcherLayout
     private final TabSwitcherModel model;
 
     /**
+     * The arithmetics, which are used by the layout.
+     */
+    private final Arithmetics arithmetics;
+
+    /**
+     * The drag handler, which is used by the layout.
+     */
+    private final DragHandlerType dragHandler;
+
+    /**
      * The callback, which is notified about the layout's events.
      */
     private Callback callback;
@@ -280,6 +295,28 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns the arithmetics, which are used by the layout.
+     *
+     * @return The arithmetics, which are used by the layout, as an instance of the type {@link
+     * Arithmetics}. The arithmetics may not be null
+     */
+    @NonNull
+    protected final Arithmetics getArithmetics() {
+        return arithmetics;
+    }
+
+    /**
+     * Returns the drag handler, which is used by the layout.
+     *
+     * @return The drag handler, which is used by the layout, as an instance of the generic type
+     * DragHandlerType. The drag handler may not be null
+     */
+    @NonNull
+    protected final DragHandlerType getDragHandler() {
+        return dragHandler;
+    }
+
+    /**
      * Returns the context, which is used by the layout.
      *
      * @return The context, which is used by the layout, as an instance of the class {@link
@@ -299,13 +336,25 @@ public abstract class AbstractTabSwitcherLayout
      * @param model
      *         The model of the tab switcher, the layout belongs to, as an instance of the class
      *         {@link TabSwitcherModel}. The model may not be null
+     * @param arithmetics
+     *         The arithmetics, which should be used by the layout, as an instance of the type
+     *         {@link Arithmetics}. The arithmetics may not be null
+     * @param dragHandler
+     *         The drag handler, which should be used by the layout, as an instance of the generic
+     *         type DragHandlerType. The drag handler may not be null
      */
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
-                                     @NonNull final TabSwitcherModel model) {
+                                     @NonNull final TabSwitcherModel model,
+                                     @NonNull final Arithmetics arithmetics,
+                                     @NonNull final DragHandlerType dragHandler) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
+        ensureNotNull(arithmetics, "The arithmetics may not be null");
+        ensureNotNull(dragHandler, "The drag handler may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
+        this.arithmetics = arithmetics;
+        this.dragHandler = dragHandler;
         this.callback = null;
         this.runningAnimations = 0;
     }
@@ -386,6 +435,37 @@ public abstract class AbstractTabSwitcherLayout
     public final void onToolbarMenuInflated(@MenuRes final int resourceId,
                                             @Nullable final OnMenuItemClickListener listener) {
         inflateToolbarMenu();
+    }
+
+    @Override
+    public void onFling(final float distance, final long duration) {
+        // TODO: Implement and make method final
+    }
+
+    @Override
+    public void onCancelFling() {
+        // TODO: Implement and make method final
+    }
+
+    @Override
+    public void onRevertStartOvershoot() {
+
+    }
+
+    @Override
+    public void onRevertEndOvershoot() {
+
+    }
+
+    @Override
+    public void onSwipe(@NonNull final TabItem tabItem, final float distance) {
+
+    }
+
+    @Override
+    public void onSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
+                             final float velocity) {
+
     }
 
 }
