@@ -69,7 +69,6 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureGreater;
-import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureTrue;
 
 /**
@@ -319,11 +318,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The animation, which is used to fling the tabs.
      */
     private android.view.animation.Animation flingAnimation;
-
-    /**
-     * The maximum space between neighboring tabs in pixels.
-     */
-    private float maxTabSpacing;
 
     /**
      * The index of the first visible tab.
@@ -651,8 +645,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Float} value
      */
     private float calculateMaxTabSpacing(final int count, @Nullable final TabItem tabItem) {
-        ensureNotEqual(maxTabSpacing, -1, "No maximum tab spacing has been set",
-                IllegalStateException.class);
+        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
+                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
+                        getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
+        float maxTabSpacing;
+
+        if (count <= 2) {
+            maxTabSpacing = totalSpace * 0.66f;
+        } else if (count == 3) {
+            maxTabSpacing = totalSpace * 0.33f;
+        } else if (count == 4) {
+            maxTabSpacing = totalSpace * 0.3f;
+        } else {
+            maxTabSpacing = totalSpace * 0.25f;
+        }
+
         return count > 4 && tabItem != null &&
                 tabItem.getTab() == getTabSwitcher().getSelectedTab() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
@@ -985,7 +992,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         int count = getTabSwitcher().getCount();
         dragHandler.reset(dragThreshold);
         firstVisibleIndex = -1;
-        maxTabSpacing = calculateMaxTabSpacing(count);
         TabItem[] tabItems = new TabItem[count];
 
         if (!getModel().isEmpty()) {
@@ -1058,31 +1064,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         dragHandler.setCallback(this);
         return tabItems;
-    }
-
-    /**
-     * Calculates and returns the maximum space between two neighboring tabs, depending on the
-     * number of tabs, which are contained by the tab switcher.
-     *
-     * @param count
-     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
-     *         Integer} value
-     * @return The maximum space, which has been calculated, in pixels as a {@link Float} value
-     */
-    private float calculateMaxTabSpacing(final int count) {
-        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                        getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
-
-        if (count <= 2) {
-            return totalSpace * 0.66f;
-        } else if (count == 3) {
-            return totalSpace * 0.33f;
-        } else if (count == 4) {
-            return totalSpace * 0.3f;
-        } else {
-            return totalSpace * 0.25f;
-        }
     }
 
     /**
@@ -1708,7 +1689,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 int count = getModel().getCount();
                 float previousAttachedPosition = calculateAttachedPosition(count - 1);
                 float attachedPosition = calculateAttachedPosition(count);
-                maxTabSpacing = calculateMaxTabSpacing(count);
                 TabItem[] tabItems;
 
                 if (count - addedTabItems.length == 0) {
@@ -1975,7 +1955,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 float previousAttachedPosition =
                         calculateAttachedPosition(getModel().getCount() + 1);
                 float attachedPosition = calculateAttachedPosition(getModel().getCount());
-                maxTabSpacing = calculateMaxTabSpacing(getModel().getCount());
                 State state = removedTabItem.getTag().getState();
 
                 if (state == State.STACKED_END) {
@@ -3044,7 +3023,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         tabViewBottomMargin = -1;
         toolbarAnimation = null;
         flingAnimation = null;
-        maxTabSpacing = -1;
     }
 
     @Override
