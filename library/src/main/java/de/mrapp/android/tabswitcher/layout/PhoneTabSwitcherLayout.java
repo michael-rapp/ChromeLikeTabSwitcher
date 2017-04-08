@@ -35,10 +35,8 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 
 import java.util.Collections;
@@ -226,35 +224,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * An animation, which allows to fling the tabs.
-     */
-    private class FlingAnimation extends android.view.animation.Animation {
-
-        /**
-         * The distance, the tabs should be moved.
-         */
-        private final float distance;
-
-        /**
-         * Creates a new fling animation.
-         *
-         * @param distance
-         *         The distance, the tabs should be moved, in pixels as a {@link Float} value
-         */
-        FlingAnimation(final float distance) {
-            this.distance = distance;
-        }
-
-        @Override
-        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
-            if (flingAnimation != null) {
-                dragHandler.handleDrag(distance * interpolatedTime, 0);
-            }
-        }
-
-    }
-
-    /**
      * The ratio, which specifies the maximum space between the currently selected tab and its
      * predecessor in relation to the default space.
      */
@@ -265,11 +234,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * maximum space.
      */
     private static final float MIN_TAB_SPACING_RATIO = 0.375f;
-
-    /**
-     * The threshold, which must be reached until tabs are dragged, in pixels.
-     */
-    private final int dragThreshold;
 
     /**
      * The inset of tabs in pixels.
@@ -410,11 +374,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The animation, which is used to show or hide the toolbar.
      */
     private ViewPropertyAnimator toolbarAnimation;
-
-    /**
-     * The animation, which is used to fling the tabs.
-     */
-    private android.view.animation.Animation flingAnimation;
 
     /**
      * The index of the first visible tab.
@@ -1062,7 +1021,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @NonNull
     private TabItem[] calculateInitialTabItems() {
         int count = getTabSwitcher().getCount();
-        dragHandler.reset(dragThreshold);
+        dragHandler.reset(getDragThreshold());
         firstVisibleIndex = -1;
         TabItem[] tabItems = new TabItem[count];
 
@@ -1506,23 +1465,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         return result;
-    }
-
-    /**
-     * Animates flinging the tabs.
-     *
-     * @param distance
-     *         The distance, the tabs should be flinged, in pixels as a {@link Float} value
-     * @param duration
-     *         The duration of the fling in milliseconds as a {@link Long} value
-     */
-    private void animateFling(final float distance, final long duration) {
-        flingAnimation = new FlingAnimation(distance);
-        flingAnimation.setFillAfter(true);
-        flingAnimation.setAnimationListener(createFlingAnimationListener());
-        flingAnimation.setDuration(duration);
-        flingAnimation.setInterpolator(new DecelerateInterpolator());
-        getTabSwitcher().startAnimation(flingAnimation);
     }
 
     /**
@@ -2134,37 +2076,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 animateRevertStartOvershoot(new DecelerateInterpolator());
-            }
-
-        };
-    }
-
-    /**
-     * Creates and returns an animation listener, which allows to handle, when a fling animation
-     * ended.
-     *
-     * @return The listener, which has been created, as an instance of the class {@link
-     * AnimationListener}. The listener may not be null
-     */
-    @NonNull
-    private AnimationListener createFlingAnimationListener() {
-        return new AnimationListener() {
-
-            @Override
-            public void onAnimationStart(final android.view.animation.Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(final android.view.animation.Animation animation) {
-                dragHandler.handleRelease(null, dragThreshold);
-                flingAnimation = null;
-                notifyOnAnimationsEnded();
-            }
-
-            @Override
-            public void onAnimationRepeat(final android.view.animation.Animation animation) {
-
             }
 
         };
@@ -3055,8 +2966,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                   @NonNull final PhoneArithmetics arithmetics) {
         super(tabSwitcher, model, arithmetics);
         Resources resources = tabSwitcher.getResources();
-        dragThreshold =
-                getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
@@ -3088,11 +2997,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
         tabViewBottomMargin = -1;
         toolbarAnimation = null;
-        flingAnimation = null;
     }
 
+    @NonNull
     @Override
-    protected final void onInflateLayout() {
+    protected final AbstractDragHandler<?> onInflateLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar =
                 (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, getTabSwitcher(), false);
@@ -3111,16 +3020,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
         adaptDecorator();
         adaptToolbarMargin();
+        return dragHandler;
     }
 
     @Override
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         return dragHandler.handleTouchEvent(event);
-    }
-
-    @Override
-    public final boolean isAnimationRunning() {
-        return super.isAnimationRunning() || flingAnimation != null;
     }
 
     @Nullable
@@ -3332,20 +3237,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onClick(@NonNull final TabItem tabItem) {
         getModel().selectTab(tabItem.getTab());
-    }
-
-    @Override
-    public final void onFling(final float distance, final long duration) {
-        animateFling(distance, duration);
-    }
-
-    @Override
-    public final void onCancelFling() {
-        if (flingAnimation != null) {
-            flingAnimation.cancel();
-            flingAnimation = null;
-            dragHandler.handleRelease(null, dragThreshold);
-        }
     }
 
     @Override

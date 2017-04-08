@@ -18,7 +18,6 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CallSuper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,7 +28,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Transformation;
 
+import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.Model;
@@ -180,6 +183,35 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * An animation, which allows to fling the tabs.
+     */
+    private class FlingAnimation extends android.view.animation.Animation {
+
+        /**
+         * The distance, the tabs should be moved.
+         */
+        private final float distance;
+
+        /**
+         * Creates a new fling animation.
+         *
+         * @param distance
+         *         The distance, the tabs should be moved, in pixels as a {@link Float} value
+         */
+        FlingAnimation(final float distance) {
+            this.distance = distance;
+        }
+
+        @Override
+        protected void applyTransformation(final float interpolatedTime, final Transformation t) {
+            if (flingAnimation != null) {
+                dragHandler.handleDrag(distance * interpolatedTime, 0);
+            }
+        }
+
+    }
+
+    /**
      * The tab switcher, the layout belongs to.
      */
     private final TabSwitcher tabSwitcher;
@@ -195,6 +227,11 @@ public abstract class AbstractTabSwitcherLayout
     private final Arithmetics arithmetics;
 
     /**
+     * The threshold, which must be reached until tabs are dragged, in pixels.
+     */
+    private final int dragThreshold;
+
+    /**
      * The callback, which is notified about the layout's events.
      */
     private Callback callback;
@@ -203,6 +240,16 @@ public abstract class AbstractTabSwitcherLayout
      * The number of animations, which are currently running.
      */
     private int runningAnimations;
+
+    /**
+     * The animation, which is used to fling the tabs.
+     */
+    private android.view.animation.Animation flingAnimation;
+
+    /**
+     * The drag handler, which is used by the layout.
+     */
+    private AbstractDragHandler<?> dragHandler;
 
     /**
      * Adapts the visibility of the toolbars, which are shown, when the tab switcher is shown.
@@ -257,9 +304,40 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Creates and returns an animation listener, which allows to handle, when a fling animation
+     * ended.
+     *
+     * @return The listener, which has been created, as an instance of the class {@link
+     * Animation.AnimationListener}. The listener may not be null
+     */
+    @NonNull
+    private Animation.AnimationListener createFlingAnimationListener() {
+        return new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(final android.view.animation.Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(final android.view.animation.Animation animation) {
+                dragHandler.handleRelease(null, dragThreshold);
+                flingAnimation = null;
+                notifyOnAnimationsEnded();
+            }
+
+            @Override
+            public void onAnimationRepeat(final android.view.animation.Animation animation) {
+
+            }
+
+        };
+    }
+
+    /**
      * Notifies the callback, that all animations have been ended.
      */
-    protected final void notifyOnAnimationsEnded() {
+    private void notifyOnAnimationsEnded() {
         if (callback != null) {
             callback.onAnimationsEnded();
         }
@@ -299,6 +377,16 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns the threshold, which must be reached until tabs are dragged.
+     *
+     * @return The threshold, which must be reached until tabs are dragged, in pixels as an {@link
+     * Integer} value
+     */
+    protected final int getDragThreshold() {
+        return dragThreshold;
+    }
+
+    /**
      * Returns the context, which is used by the layout.
      *
      * @return The context, which is used by the layout, as an instance of the class {@link
@@ -331,14 +419,22 @@ public abstract class AbstractTabSwitcherLayout
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
+        this.dragThreshold =
+                getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
         this.callback = null;
         this.runningAnimations = 0;
+        this.flingAnimation = null;
+        this.dragHandler = null;
     }
 
     /**
      * The method, which is invoked on implementing subclasses in order to inflate the layout.
+     *
+     * @return The drag handler, which is used by the layout, as an instance of the class {@link
+     * AbstractDragHandler} or null, if no drag handler is used
      */
-    protected abstract void onInflateLayout();
+    @Nullable
+    protected abstract AbstractDragHandler<?> onInflateLayout();
 
     /**
      * Handles a touch event.
@@ -354,7 +450,7 @@ public abstract class AbstractTabSwitcherLayout
      * Inflates the layout.
      */
     public final void inflateLayout() {
-        onInflateLayout();
+        dragHandler = onInflateLayout();
         adaptToolbarVisibility();
         adaptToolbarTitle();
         adaptToolbarNavigationIcon();
@@ -372,10 +468,9 @@ public abstract class AbstractTabSwitcherLayout
         this.callback = callback;
     }
 
-    @CallSuper
     @Override
-    public boolean isAnimationRunning() {
-        return runningAnimations > 0;
+    public final boolean isAnimationRunning() {
+        return runningAnimations > 0 || flingAnimation != null;
     }
 
     @Nullable
@@ -414,13 +509,24 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     @Override
-    public void onFling(final float distance, final long duration) {
-        // TODO: Implement and make method final
+    public final void onFling(final float distance, final long duration) {
+        if (dragHandler != null) {
+            flingAnimation = new FlingAnimation(distance);
+            flingAnimation.setFillAfter(true);
+            flingAnimation.setAnimationListener(createFlingAnimationListener());
+            flingAnimation.setDuration(duration);
+            flingAnimation.setInterpolator(new DecelerateInterpolator());
+            getTabSwitcher().startAnimation(flingAnimation);
+        }
     }
 
     @Override
-    public void onCancelFling() {
-        // TODO: Implement and make method final
+    public final void onCancelFling() {
+        if (flingAnimation != null) {
+            flingAnimation.cancel();
+            flingAnimation = null;
+            dragHandler.handleRelease(null, dragThreshold);
+        }
     }
 
     @Override
