@@ -326,12 +326,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private float maxTabSpacing;
 
     /**
-     * The position on the dragging axis, where the distance between a tab and its predecessor
-     * should have reached the maximum, in pixels.
-     */
-    private float attachedPosition;
-
-    /**
      * The index of the first visible tab.
      */
     private int firstVisibleIndex;
@@ -534,7 +528,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                                          @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
                 predecessor.getTag().getPosition() >
-                        getAttachedPosition(false, getTabSwitcher().getCount())) {
+                        calculateAttachedPosition(getTabSwitcher().getCount())) {
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -598,7 +592,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private float calculateNonLinearPosition(final float predecessorPosition,
                                              final float maxTabSpacing) {
         float ratio = Math.min(1,
-                predecessorPosition / getAttachedPosition(false, getTabSwitcher().getCount()));
+                predecessorPosition / calculateAttachedPosition(getTabSwitcher().getCount()));
         float minTabSpacing = calculateMinTabSpacing(getTabSwitcher().getCount());
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
@@ -680,28 +674,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Calculates and returns the position on the dragging axis, where the distance between a tab
      * and its predecessor should have reached the maximum.
      *
-     * @param recalculate
-     *         True, if the position should be forced to be recalculated, false otherwise
      * @param count
      *         The total number of tabs, which are contained by the tabs switcher, as an {@link
      *         Integer} value
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
-    private float getAttachedPosition(final boolean recalculate, final int count) {
-        if (recalculate || attachedPosition == -1) {
-            Toolbar[] toolbars = getTabSwitcher().getToolbars();
-            float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
-                    (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                            getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                            toolbars[0].getHeight() + tabInset : 0);
+    private float calculateAttachedPosition(final int count) {
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
+        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
+                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
+                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                        toolbars[0].getHeight() + tabInset : 0);
+        float attachedPosition;
 
-            if (count == 3) {
-                attachedPosition = totalSpace * 0.66f;
-            } else if (count == 4) {
-                attachedPosition = totalSpace * 0.6f;
-            } else {
-                attachedPosition = totalSpace * 0.5f;
-            }
+        if (count == 3) {
+            attachedPosition = totalSpace * 0.66f;
+        } else if (count == 4) {
+            attachedPosition = totalSpace * 0.6f;
+        } else {
+            attachedPosition = totalSpace * 0.5f;
         }
 
         return attachedPosition;
@@ -994,7 +985,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         int count = getTabSwitcher().getCount();
         dragHandler.reset(dragThreshold);
         firstVisibleIndex = -1;
-        attachedPosition = -1;
         maxTabSpacing = calculateMaxTabSpacing(count);
         TabItem[] tabItems = new TabItem[count];
 
@@ -1013,7 +1003,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 if (tabItem.getIndex() == count - 1) {
                     position = 0;
                 } else if (tabItem.getIndex() == selectedTabIndex) {
-                    position = getAttachedPosition(false, count);
+                    position = calculateAttachedPosition(count);
                 } else {
                     position = calculateNonLinearPosition(tabItem, predecessor);
                 }
@@ -1047,7 +1037,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         position = (count - 1 - tabItem.getIndex()) * defaultTabSpacing;
                     }
                 } else {
-                    position = getAttachedPosition(false, count) + maxTabSpacing +
+                    position = calculateAttachedPosition(count) + maxTabSpacing +
                             ((selectedTabIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
                 }
 
@@ -1716,8 +1706,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 int count = getModel().getCount();
-                float previousAttachedPosition = getAttachedPosition(false, count - 1);
-                float attachedPosition = getAttachedPosition(true, count);
+                float previousAttachedPosition = calculateAttachedPosition(count - 1);
+                float attachedPosition = calculateAttachedPosition(count);
                 maxTabSpacing = calculateMaxTabSpacing(count);
                 TabItem[] tabItems;
 
@@ -1982,8 +1972,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     animateToolbarVisibility(getModel().areToolbarsShown(), 0);
                 }
 
-                float previousAttachedPosition = getAttachedPosition(false, -1);
-                float attachedPosition = getAttachedPosition(true, getModel().getCount());
+                float previousAttachedPosition =
+                        calculateAttachedPosition(getModel().getCount() + 1);
+                float attachedPosition = calculateAttachedPosition(getModel().getCount());
                 maxTabSpacing = calculateMaxTabSpacing(getModel().getCount());
                 State state = removedTabItem.getTag().getState();
 
