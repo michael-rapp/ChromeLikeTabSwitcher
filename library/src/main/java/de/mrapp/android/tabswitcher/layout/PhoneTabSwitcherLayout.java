@@ -55,7 +55,6 @@ import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.InitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
@@ -68,7 +67,9 @@ import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
+import static de.mrapp.android.util.Condition.ensureEqual;
 import static de.mrapp.android.util.Condition.ensureGreater;
+import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
 
 /**
@@ -79,6 +80,103 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  */
 public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         implements PhoneDragHandler.Callback {
+
+    /**
+     * An iterator, which allows to iterate the tab items, which correspond to the tabs of a {@link
+     * TabSwitcher}. When a tab item is referenced for the first time, its initial position and
+     * state is calculated and the tab item is stored in a backing array. When the tab item is
+     * iterated again, it is retrieved from the backing array.
+     */
+    private class InitialTabItemIterator extends AbstractTabItemIterator {
+
+        /**
+         * The backing array, which is used to store tab items, once their initial position and
+         * state has been calculated.
+         */
+        private final TabItem[] array;
+
+        /**
+         * Calculates the initial position and state of a specific tab item.
+         *
+         * @param tabItem
+         *         The tab item, whose position and state should be calculated, as an instance of
+         *         the class {@link TabItem}. The tab item may not be null
+         * @param predecessor
+         *         The predecessor of the given tab item as an instance of the class {@link TabItem}
+         *         or null, if the tab item does not have a predecessor
+         */
+        private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
+                                                   @Nullable final TabItem predecessor) {
+            float position = calculateStartPosition(tabItem);
+            Pair<Float, State> pair =
+                    clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
+                            predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
+        }
+
+        /**
+         * Calculates and returns the initial position of a specific tab item.
+         *
+         * @param tabItem
+         *         The tab item, whose position should be calculated, as an instance of the class
+         *         {@link TabItem}. The tab item may not be null
+         * @return The position, which has been calculated, as a {@link Float} value
+         */
+        private float calculateStartPosition(@NonNull final TabItem tabItem) {
+            if (tabItem.getIndex() == 0) {
+                return getCount() > stackedTabCount ? stackedTabCount * stackedTabSpacing :
+                        (getCount() - 1) * stackedTabSpacing;
+
+            } else {
+                return -1;
+            }
+        }
+
+        /**
+         * Creates a new iterator, which allows to iterate the tab items, which corresponds to the
+         * tabs of a {@link TabSwitcher}.
+         *
+         * @param array
+         *         The backing array, which should be used to store tab items, once their initial
+         *         position and state has been calculated, as an array of the type {@link TabItem}.
+         *         The array may not be null and the array's length must be equal to the number of
+         *         tabs, which are contained by the given tab switcher
+         * @param reverse
+         *         True, if the tabs should be iterated in reverse order, false otherwise
+         * @param start
+         *         The index of the first tab, which should be iterated, as an {@link Integer} value
+         *         or -1, if all tabs should be iterated
+         */
+        private InitialTabItemIterator(@NonNull final TabItem[] array, final boolean reverse,
+                                       final int start) {
+            ensureNotNull(array, "The array may not be null");
+            ensureEqual(array.length, getModel().getCount(),
+                    "The array's length must be " + getModel().getCount());
+            this.array = array;
+            initialize(reverse, start);
+        }
+
+        @Override
+        public final int getCount() {
+            return array.length;
+        }
+
+        @NonNull
+        @Override
+        public final TabItem getItem(final int index) {
+            TabItem tabItem = array[index];
+
+            if (tabItem == null) {
+                tabItem = TabItem.create(getModel(), viewRecycler, index);
+                calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
+                array[index] = tabItem;
+            }
+
+            return tabItem;
+        }
+
+    }
 
     /**
      * A layout listener, which encapsulates another listener, which is notified, when the listener
@@ -704,11 +802,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return A pair, which contains the position and state of the tab item, as an instance of the
      * class {@link Pair}. The pair may not be null
      */
-    // TODO: Make method private
     @NonNull
-    public final Pair<Float, State> clipTabPosition(final int count, final int index,
-                                                    final float position,
-                                                    @Nullable final TabItem predecessor) {
+    private Pair<Float, State> clipTabPosition(final int count, final int index,
+                                               final float position,
+                                               @Nullable final TabItem predecessor) {
         return clipTabPosition(count, index, position,
                 predecessor != null ? predecessor.getTag().getState() : null);
     }
@@ -936,9 +1033,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void animateShowSwitcher() {
         TabItem[] tabItems = calculateInitialTabItems();
-        AbstractTabItemIterator iterator =
-                new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this, tabItems)
-                        .create();
+        AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -974,8 +1069,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
             AbstractTabItemIterator iterator =
-                    new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this,
-                            tabItems).start(selectedTabIndex).create();
+                    new InitialTabItemIterator(tabItems, false, selectedTabIndex);
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -1001,8 +1095,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
 
             boolean overshooting = selectedTabIndex == count - 1 || isOvershootingAtEnd(iterator);
-            iterator = new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this,
-                    tabItems).create();
+            iterator = new InitialTabItemIterator(tabItems, false, 0);
             float defaultTabSpacing = calculateMaxTabSpacing(count, null);
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
@@ -3202,9 +3295,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     public final void onGlobalLayout() {
         if (getModel().isSwitcherShown()) {
             TabItem[] tabItems = calculateInitialTabItems();
-            AbstractTabItemIterator iterator =
-                    new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this,
-                            tabItems).create();
+            AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
