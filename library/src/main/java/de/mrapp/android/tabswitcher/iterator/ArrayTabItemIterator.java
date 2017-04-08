@@ -77,48 +77,6 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
     }
 
     /**
-     * A factory, which allows to create instances of the class {@link Builder}.
-     */
-    public static class Factory implements AbstractTabItemIterator.Factory {
-
-        /**
-         * The view recycler, which is used by the builders, which are created by the factory.
-         */
-        private final AttachedViewRecycler<TabItem, ?> viewRecycler;
-
-        /**
-         * The array, which is used by the builders, which are created by the factory.
-         */
-        private final Tab[] array;
-
-        /**
-         * Creates a new factory, which allows to create instances of the class {@link Builder}.
-         *
-         * @param viewRecycler
-         *         The view recycler, which should be used by the builders, which are created by the
-         *         factory, as an instance of the class {@link AttachedViewRecycler}. The view
-         *         recycler may not be null
-         * @param array
-         *         The array, which should be used by the builders, which are created by the
-         *         factory, as an array of the type {@link Tab}. The array may not be null
-         */
-        public Factory(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                       @NonNull final Tab[] array) {
-            ensureNotNull(viewRecycler, "The view recycler may not be null");
-            ensureNotNull(array, "The array may not be null");
-            this.viewRecycler = viewRecycler;
-            this.array = array;
-        }
-
-        @NonNull
-        @Override
-        public AbstractBuilder<?, ?> create() {
-            return new Builder(viewRecycler, array);
-        }
-
-    }
-
-    /**
      * The view recycler, which allows to inflate the views, which are used to visualize the
      * iterated tabs.
      */

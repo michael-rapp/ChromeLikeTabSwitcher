@@ -150,8 +150,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (flingAnimation != null) {
-                dragHandler.handleDrag(new TabItemIterator.Factory(getTabSwitcher(), viewRecycler),
-                        distance * interpolatedTime, 0);
+                dragHandler.handleDrag(distance * interpolatedTime, 0);
             }
         }
 
@@ -277,7 +276,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The drag handler, which is used by the layout.
      */
-    private final PhoneDragHandler dragHandler;
+    private PhoneDragHandler dragHandler;
 
     /**
      * The view recycler, which allows to recycler the child views of tabs.
@@ -346,24 +345,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * Calculates the positions of all tabs, when dragging towards the start.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculatePositionsWhenDraggingToEnd(
-            @NonNull final AbstractTabItemIterator.Factory factory, final float dragDistance) {
+    private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
-        AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-        AbstractTabItemIterator iterator = builder.start(Math.max(0, firstVisibleIndex)).create();
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
 
         while ((tabItem = iterator.next()) != null && !abort) {
             if (getTabSwitcher().getCount() - tabItem.getIndex() > 1) {
-                abort = calculatePositionWhenDraggingToEnd(factory, dragDistance, tabItem,
+                abort = calculatePositionWhenDraggingToEnd(dragDistance, tabItem,
                         iterator.previous());
 
                 if (firstVisibleIndex == -1 && tabItem.getTag().getState() == State.FLOATING) {
@@ -384,10 +379,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * Calculates the position of a specific tab, when dragging towards the end.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      * @param tabItem
@@ -398,14 +389,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         null, if the tab item does not have a predecessor
      * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
      */
-    private boolean calculatePositionWhenDraggingToEnd(
-            @NonNull final AbstractTabItemIterator.Factory factory, final float dragDistance,
-            @NonNull final TabItem tabItem, @Nullable final TabItem predecessor) {
+    private boolean calculatePositionWhenDraggingToEnd(final float dragDistance,
+                                                       @NonNull final TabItem tabItem,
+                                                       @Nullable final TabItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
             if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
-                float thresholdPosition = calculateEndPosition(factory, tabItem.getIndex());
+                float thresholdPosition = calculateEndPosition(tabItem.getIndex());
                 float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
                 Pair<Float, State> pair =
                         clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
@@ -416,7 +407,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 return true;
             }
         } else {
-            float thresholdPosition = calculateEndPosition(factory, tabItem.getIndex());
+            float thresholdPosition = calculateEndPosition(tabItem.getIndex());
             float newPosition =
                     Math.min(calculateNonLinearPosition(tabItem, predecessor), thresholdPosition);
             Pair<Float, State> pair =
@@ -432,17 +423,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * Calculates the positions of all tabs, when dragging towards the end.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragDistance
      *         The current drag distance in pixels as a {@link Float} value
      */
-    private void calculatePositionsWhenDraggingToStart(
-            @NonNull final AbstractTabItemIterator.Factory factory, final float dragDistance) {
-        AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-        AbstractTabItemIterator iterator = builder.start(Math.max(0, firstVisibleIndex)).create();
+    private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                        .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -463,7 +450,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator = builder.reverse(true).start(start).create();
+            iterator = new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
+                    .start(start).create();
             abort = false;
 
             while ((tabItem = iterator.next()) != null && !abort) {
@@ -594,23 +582,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * Calculates and returns the position of a specific tab, when located at the end.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param index
      *         The index of the tab, whose position should be calculated, as an {@link Integer}
      *         value
      * @return The position, which has been calculated, as a {@link Float} value
      */
-    private float calculateEndPosition(@NonNull final AbstractTabItemIterator.Factory factory,
-                                       final int index) {
+    private float calculateEndPosition(final int index) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
         int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
 
         if (selectedTabIndex > index) {
-            AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-            AbstractTabItemIterator iterator = builder.create();
+            AbstractTabItemIterator iterator =
+                    new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
             TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
             float selectedTabSpacing =
                     calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
@@ -836,18 +819,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the
      * tabs are overshooting at the start.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @return True, if the tabs are overshooting at the start, false otherwise
      */
-    private boolean isOvershootingAtStart(@NonNull final AbstractTabItemIterator.Factory factory) {
+    private boolean isOvershootingAtStart() {
         if (getTabSwitcher().getCount() <= 1) {
             return true;
         } else {
-            AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-            AbstractTabItemIterator iterator = builder.create();
+            AbstractTabItemIterator iterator =
+                    new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
             TabItem tabItem = iterator.getItem(0);
             return tabItem.getTag().getState() == State.STACKED_START_ATOP;
         }
@@ -857,18 +836,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the
      * tabs are overshooting at the end.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
+     * @param iterator
+     *         An iterator, which allows to iterate the tabs, which are contained by the tab
+     *         switcher, as an instance of the class {@link AbstractTabItemIterator}. The iterator
+     *         may not be null
      * @return True, if the tabs are overshooting at the end, false otherwise
      */
-    private boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator.Factory factory) {
+    private boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
         if (getTabSwitcher().getCount() <= 1) {
             return true;
         } else {
-            AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-            AbstractTabItemIterator iterator = builder.create();
             TabItem lastTabItem = iterator.getItem(getTabSwitcher().getCount() - 1);
             TabItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);
             return Math.round(predecessor.getTag().getPosition()) >=
@@ -996,10 +973,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
-            AbstractTabItemIterator.Factory factory =
-                    new InitialTabItemIterator.Factory(getTabSwitcher(), viewRecycler, this,
-                            tabItems);
-            AbstractTabItemIterator iterator = factory.create().start(selectedTabIndex).create();
+            AbstractTabItemIterator iterator =
+                    new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this,
+                            tabItems).start(selectedTabIndex).create();
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
@@ -1024,8 +1000,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            boolean overshooting = selectedTabIndex == count - 1 || isOvershootingAtEnd(factory);
-            iterator = factory.create().create();
+            boolean overshooting = selectedTabIndex == count - 1 || isOvershootingAtEnd(iterator);
+            iterator = new InitialTabItemIterator.Builder(getTabSwitcher(), viewRecycler, this,
+                    tabItems).create();
             float defaultTabSpacing = calculateMaxTabSpacing(count, null);
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
@@ -2087,9 +2064,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onAnimationEnd(final android.view.animation.Animation animation) {
-                dragHandler
-                        .handleRelease(new TabItemIterator.Factory(getTabSwitcher(), viewRecycler),
-                                null, dragThreshold);
+                dragHandler.handleRelease(null, dragThreshold);
                 flingAnimation = null;
                 notifyOnAnimationsEnded();
             }
@@ -2309,9 +2284,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem,
                                                  final float attachedPosition,
                                                  boolean attachedPositionChanged) {
-        AbstractTabItemIterator.Factory factory =
-                new TabItemIterator.Factory(getTabSwitcher(), viewRecycler);
-        AbstractTabItemIterator.AbstractBuilder builder = factory.create();
         AbstractTabItemIterator iterator;
         TabItem tabItem;
         float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
@@ -2328,8 +2300,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             .getPosition() - referencePosition) / 2f;
         }
 
-        referencePosition = Math.min(calculateEndPosition(factory, removedTabItem.getIndex() - 1),
-                referencePosition);
+        referencePosition =
+                Math.min(calculateEndPosition(removedTabItem.getIndex() - 1), referencePosition);
         float initialReferencePosition = referencePosition;
 
         if (removedTabItem.getIndex() > 0) {
@@ -2337,7 +2309,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
             float maxTabSpacing = calculateMaxTabSpacing(getModel().getCount(), selectedTabItem);
-            iterator = builder.start(removedTabItem.getIndex() - 1).reverse(true).create();
+            iterator = new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                    .start(removedTabItem.getIndex() - 1).reverse(true).create();
 
             while ((tabItem = iterator.next()) != null) {
                 TabItem predecessor = iterator.peek();
@@ -2404,7 +2377,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (attachedPositionChanged && getModel().getCount() > 2 &&
                 removedTabItem.getTag().getState() != State.STACKED_START_ATOP) {
-            iterator = builder.start(removedTabItem.getIndex()).reverse(false).create();
+            iterator = new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
+                    .start(removedTabItem.getIndex()).create();
             float previousPosition = initialReferencePosition;
             Tag previousTag = removedTabItem.getTag();
 
@@ -3019,7 +2993,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
         maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
-        dragHandler = new PhoneDragHandler(tabSwitcher, arithmetics);
         tabViewBottomMargin = -1;
         toolbarAnimation = null;
         flingAnimation = null;
@@ -3042,15 +3015,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
+        dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
         adaptDecorator();
         adaptToolbarMargin();
     }
 
     @Override
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        return dragHandler
-                .handleTouchEvent(new TabItemIterator.Factory(getTabSwitcher(), viewRecycler),
-                        event);
+        return dragHandler.handleTouchEvent(event);
     }
 
     @Override
@@ -3251,18 +3223,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Nullable
     @Override
-    public final DragState onDrag(@NonNull final AbstractTabItemIterator.Factory factory,
-                                  @NonNull final DragState dragState, final float dragDistance) {
+    public final DragState onDrag(@NonNull final DragState dragState, final float dragDistance) {
         if (dragDistance != 0) {
             if (dragState == DragState.DRAG_TO_END) {
-                calculatePositionsWhenDraggingToEnd(factory, dragDistance);
+                calculatePositionsWhenDraggingToEnd(dragDistance);
             } else {
-                calculatePositionsWhenDraggingToStart(factory, dragDistance);
+                calculatePositionsWhenDraggingToStart(dragDistance);
             }
         }
 
-        return isOvershootingAtEnd(factory) ? DragState.OVERSHOOT_END :
-                (isOvershootingAtStart(factory) ? DragState.OVERSHOOT_START : null);
+        return isOvershootingAtEnd(
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create()) ?
+                DragState.OVERSHOOT_END :
+                (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);
     }
 
     @Override
@@ -3280,8 +3253,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (flingAnimation != null) {
             flingAnimation.cancel();
             flingAnimation = null;
-            dragHandler.handleRelease(new TabItemIterator.Factory(getTabSwitcher(), viewRecycler),
-                    null, dragThreshold);
+            dragHandler.handleRelease(null, dragThreshold);
         }
     }
 
@@ -3331,11 +3303,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             animateSwipe(tabItem, false, 0, new SwipeAnimation.Builder().create(),
                     createSwipeAnimationListener(tabItem));
         }
-    }
-
-    @Override
-    public final void onViewStateChanged(@NonNull final TabItem tabItem) {
-        inflateOrRemoveView(tabItem);
     }
 
 }

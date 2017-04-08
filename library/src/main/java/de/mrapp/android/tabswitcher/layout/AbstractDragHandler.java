@@ -23,7 +23,6 @@ import android.view.ViewConfiguration;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.DragState;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -52,10 +51,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
          * The method, which is invoked in order to calculate the positions of all tabs, depending
          * on the current drag distance.
          *
-         * @param factory
-         *         The factory, which allows to create builders, which allow to create iterators for
-         *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-         *         The factory may not be null
          * @param dragState
          *         The current drag state as a value of the enum {@link DragState}. The drag state
          *         must either be {@link DragState#DRAG_TO_END} or {@link DragState#DRAG_TO_START}
@@ -66,8 +61,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
          * DragState#OVERSHOOT_END}, null otherwise
          */
         @Nullable
-        DragState onDrag(@NonNull AbstractTabItemIterator.Factory factory,
-                         @NonNull DragState dragState, float dragDistance);
+        DragState onDrag(@NonNull DragState dragState, float dragDistance);
 
         /**
          * The method, which is invoked, when a tab has been clicked.
@@ -260,18 +254,12 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     /**
      * Handles a click.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param event
      *         The motion event, which triggered the click, as an instance of the class {@link
      *         MotionEvent}. The motion event may not be null
      */
-    private void handleClick(@NonNull final AbstractTabItemIterator.Factory factory,
-                             @NonNull final MotionEvent event) {
-        TabItem tabItem =
-                getFocusedTab(factory, arithmetics.getPosition(Axis.DRAGGING_AXIS, event));
+    private void handleClick(@NonNull final MotionEvent event) {
+        TabItem tabItem = getFocusedTab(arithmetics.getPosition(Axis.DRAGGING_AXIS, event));
 
         if (tabItem != null) {
             notifyOnClick(tabItem);
@@ -319,10 +307,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * Notifies the callback in order to calculate the positions of all tabs, depending on the
      * current drag distance.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragState
      *         The current drag state as a value of the enum {@link DragState}. The drag state must
      *         either be {@link DragState#DRAG_TO_END} or {@link DragState#DRAG_TO_START}
@@ -332,10 +316,9 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * are overshooting, the drag state must be {@link DragState#OVERSHOOT_START} or {@link
      * DragState#OVERSHOOT_END}, null otherwise
      */
-    private DragState notifyOnDrag(@NonNull final AbstractTabItemIterator.Factory factory,
-                                   @NonNull final DragState dragState, final float dragDistance) {
+    private DragState notifyOnDrag(@NonNull final DragState dragState, final float dragDistance) {
         if (callback != null) {
-            return callback.onDrag(factory, dragState, dragDistance);
+            return callback.onDrag(dragState, dragDistance);
         }
 
         return null;
@@ -501,26 +484,17 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * The method, which is invoked on implementing subclasses in order to retrieve the tab item,
      * which corresponds to the tab, which is focused when clicking/dragging at a specific position.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param position
      *         The position on the dragging axis in pixels as a {@link Float} value
      * @return The tab item, which corresponds to the focused tab, as an instance of the class
      * {@link TabItem} or null, if no tab is focused
      */
-    protected abstract TabItem getFocusedTab(@NonNull final AbstractTabItemIterator.Factory factory,
-                                             final float position);
+    protected abstract TabItem getFocusedTab(final float position);
 
     /**
      * The method, which is invoked on implementing subclasses, when the tabs are overshooting at
      * the start.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @param overshootThreshold
@@ -529,8 +503,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * @return The updated position on the dragging axis, an overshoot at the start starts at, in
      * pixels as a {@link Float} value
      */
-    protected float onOvershootStart(@NonNull final AbstractTabItemIterator.Factory factory,
-                                     final float dragPosition, final float overshootThreshold) {
+    protected float onOvershootStart(final float dragPosition, final float overshootThreshold) {
         return overshootThreshold;
     }
 
@@ -538,10 +511,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * The method, which is invoked on implementing subclasses, when the tabs are overshooting at
      * the end.
      *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @param overshootThreshold
@@ -550,8 +519,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * @return The updated position on the dragging axis, an overshoot at the end starts at, in
      * pixels as a {@link Float} value
      */
-    protected float onOvershootEnd(@NonNull final AbstractTabItemIterator.Factory factory,
-                                   final float dragPosition, final float overshootThreshold) {
+    protected float onOvershootEnd(final float dragPosition, final float overshootThreshold) {
         return overshootThreshold;
     }
 
@@ -596,19 +564,12 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     /**
      * Handles a touch event.
      *
-     * @param factory
-     *         The factory, which should be used to create builders, which allow to configure and
-     *         create the iterators for iterating the tabs, whose positions and states should be
-     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
      * @param event
      *         The event, which should be handled, as an instance of the class {@link MotionEvent}.
      *         The event may be not null
      * @return True, if the event has been handled, false otherwise
      */
-    public final boolean handleTouchEvent(@NonNull final AbstractTabItemIterator.Factory factory,
-                                          @NonNull final MotionEvent event) {
-        ensureNotNull(factory, "The factory may not be null");
+    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The motion event may not be null");
 
         if (tabSwitcher.isSwitcherShown() && !tabSwitcher.isEmpty()) {
@@ -625,17 +586,17 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(factory, arithmetics.getPosition(Axis.DRAGGING_AXIS, event),
+                        handleDrag(arithmetics.getPosition(Axis.DRAGGING_AXIS, event),
                                 arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event));
                     } else {
-                        handleRelease(factory, null, dragThreshold);
+                        handleRelease(null, dragThreshold);
                         handleDown(event);
                     }
 
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
-                        handleRelease(factory, event, dragThreshold);
+                        handleRelease(event, dragThreshold);
                     }
 
                     return true;
@@ -650,11 +611,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     /**
      * Handles drag gestures.
      *
-     * @param factory
-     *         The factory, which should be used to create builders, which allow to configure and
-     *         create the iterators for iterating the tabs, whose positions and states should be
-     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
      * @param dragPosition
      *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
      * @param orthogonalPosition
@@ -662,19 +618,15 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      *         value
      * @return True, if any tabs have been moved, false otherwise
      */
-    public final boolean handleDrag(@NonNull final AbstractTabItemIterator.Factory factory,
-                                    final float dragPosition, final float orthogonalPosition) {
-        ensureNotNull(factory, "The factory may not be null");
-
+    public final boolean handleDrag(final float dragPosition, final float orthogonalPosition) {
         if (dragPosition <= startOvershootThreshold) {
             handleOvershoot();
             dragState = DragState.OVERSHOOT_START;
-            startOvershootThreshold =
-                    onOvershootStart(factory, dragPosition, startOvershootThreshold);
+            startOvershootThreshold = onOvershootStart(dragPosition, startOvershootThreshold);
         } else if (dragPosition >= endOvershootThreshold) {
             handleOvershoot();
             dragState = DragState.OVERSHOOT_END;
-            endOvershootThreshold = onOvershootEnd(factory, dragPosition, endOvershootThreshold);
+            endOvershootThreshold = onOvershootEnd(dragPosition, endOvershootThreshold);
         } else {
             onOvershootReverted();
             float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
@@ -684,7 +636,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
                 swipeDragHelper.update(orthogonalPosition);
 
                 if (dragState == DragState.NONE && swipeDragHelper.hasThresholdBeenReached()) {
-                    TabItem tabItem = getFocusedTab(factory, dragHelper.getDragStartPosition());
+                    TabItem tabItem = getFocusedTab(dragHelper.getDragStartPosition());
 
                     if (tabItem != null) {
                         dragState = DragState.SWIPE;
@@ -716,7 +668,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
                 float currentDragDistance = dragHelper.getDragDistance();
                 float distance = currentDragDistance - dragDistance;
                 dragDistance = currentDragDistance;
-                DragState overshoot = notifyOnDrag(factory, dragState, distance);
+                DragState overshoot = notifyOnDrag(dragState, distance);
 
                 if (overshoot == DragState.OVERSHOOT_END && (dragState == DragState.DRAG_TO_END ||
                         dragState == DragState.OVERSHOOT_END)) {
@@ -739,11 +691,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     /**
      * Handles, when a drag gesture has been ended.
      *
-     * @param factory
-     *         The factory, which should be used to create builders, which allow to configure and
-     *         create the iterators for iterating the tabs, whose positions and states should be
-     *         calculated, as an instance of the type {@link AbstractTabItemIterator.Factory}. The
-     *         factory may not be null
      * @param event
      *         The motion event, which ended the drag gesture, as an instance of the class {@link
      *         MotionEvent} or null, if no fling animation should be triggered
@@ -751,10 +698,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
      *         {@link Integer} value
      */
-    public final void handleRelease(@NonNull final AbstractTabItemIterator.Factory factory,
-                                    @Nullable final MotionEvent event, final int dragThreshold) {
-        ensureNotNull(factory, "The factory may not be null");
-
+    public final void handleRelease(@Nullable final MotionEvent event, final int dragThreshold) {
         if (dragState == DragState.SWIPE) {
             float swipeVelocity = 0;
 
@@ -778,7 +722,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             notifyOnRevertStartOvershoot();
         } else if (event != null && !dragHelper.hasThresholdBeenReached() &&
                 !swipeDragHelper.hasThresholdBeenReached()) {
-            handleClick(factory, event);
+            handleClick(event);
         }
 
         resetDragging(dragThreshold);

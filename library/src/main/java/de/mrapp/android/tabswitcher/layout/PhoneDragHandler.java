@@ -25,10 +25,14 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
+import de.mrapp.android.util.view.AttachedViewRecycler;
+
+import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * A drag handler, which allows to calculate the position and state of tabs on touch events, when
@@ -71,17 +75,13 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
          */
         void onTiltOnEndOvershoot(float angle);
 
-        /**
-         * The method, which is invoked, when the position or state of a tab has been changed.
-         *
-         * @param tabItem
-         *         The tab item, which corresponds to the tab, whose position or state has been
-         *         changed, as an instance of the class {@link TabItem}. The tab item may not be
-         *         null
-         */
-        void onViewStateChanged(@NonNull TabItem tabItem);
-
     }
+
+    /**
+     * The view recycler, which allows to inflate the views, which are used to visualize the tabs,
+     * whose positions and states are calculated by the drag handler.
+     */
+    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
     /**
      * The drag helper, which is used to recognize drag gestures when overshooting.
@@ -107,11 +107,6 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      * The number of tabs, which are contained by a stack.
      */
     private final int stackedTabCount;
-
-    /**
-     * The space between tabs, which are part of a stack, in pixels.
-     */
-    private final int stackedTabSpacing;
 
     /**
      * The inset of tabs in pixels.
@@ -155,19 +150,6 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
     }
 
     /**
-     * Notifies, that the position or state of a tab has been changed.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose position or state has been changed,
-     *         as an instance of the class {@link TabItem}. The tab item may not be null
-     */
-    private void notifyOnViewStateChanged(@NonNull final TabItem tabItem) {
-        if (getCallback() != null) {
-            getCallback().onViewStateChanged(tabItem);
-        }
-    }
-
-    /**
      * Creates a new drag handler, which allows to calculate the position and state of tabs on touch
      * events, when using the smartphone layout.
      *
@@ -179,15 +161,22 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      *         The arithmetics, which should be used to calculate the position, size and rotation of
      *         tabs, as an instance of the type {@link Arithmetics}. The arithmetics may not be
      *         null
+     * @param viewRecycler
+     *         The view recycler, which allows to inflate the views, which are used to visualize the
+     *         tabs, whose positions and states should be calculated by the tab switcher, as an
+     *         instance of the class {@link AttachedViewRecycler}. The view recycler may not be
+     *         null
      */
     public PhoneDragHandler(@NonNull final TabSwitcher tabSwitcher,
-                            @NonNull final Arithmetics arithmetics) {
+                            @NonNull final Arithmetics arithmetics,
+                            @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
+        ensureNotNull(viewRecycler, "The view recycler may not be null");
+        this.viewRecycler = viewRecycler;
         this.overshootDragHelper = new DragHelper(0);
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
-        this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.maxOvershootDistance = resources.getDimensionPixelSize(R.dimen.max_overshoot_distance);
         this.maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         this.maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
@@ -195,10 +184,9 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
 
     @Override
     @Nullable
-    protected final TabItem getFocusedTab(@NonNull final AbstractTabItemIterator.Factory factory,
-                                          final float position) {
-        AbstractTabItemIterator.AbstractBuilder<?, ?> builder = factory.create();
-        AbstractTabItemIterator iterator = builder.create();
+    protected final TabItem getFocusedTab(final float position) {
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
@@ -224,8 +212,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
     }
 
     @Override
-    protected final float onOvershootStart(@NonNull final AbstractTabItemIterator.Factory factory,
-                                           final float dragPosition,
+    protected final float onOvershootStart(final float dragPosition,
                                            final float overshootThreshold) {
         float result = overshootThreshold;
         overshootDragHelper.update(dragPosition);
@@ -241,8 +228,8 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
             if (absOvershootDistance <= startOvershootDistance) {
                 float ratio =
                         Math.max(0, Math.min(1, absOvershootDistance / startOvershootDistance));
-                AbstractTabItemIterator.AbstractBuilder builder = factory.create();
-                AbstractTabItemIterator iterator = builder.create();
+                AbstractTabItemIterator iterator =
+                        new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
                 TabItem tabItem = iterator.getItem(0);
                 float currentPosition = tabItem.getTag().getPosition();
                 float position = currentPosition - (currentPosition * ratio);
@@ -265,8 +252,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
     }
 
     @Override
-    protected final float onOvershootEnd(@NonNull final AbstractTabItemIterator.Factory factory,
-                                         final float dragPosition, final float overshootThreshold) {
+    protected final float onOvershootEnd(final float dragPosition, final float overshootThreshold) {
         float result = overshootThreshold;
         overshootDragHelper.update(dragPosition);
         float overshootDistance = overshootDragHelper.getDragDistance();
