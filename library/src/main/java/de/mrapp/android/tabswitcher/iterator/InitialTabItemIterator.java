@@ -21,6 +21,7 @@ import android.support.v4.util.Pair;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.PhoneDragHandler;
+import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -59,9 +60,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
         /**
-         * The drag handler, which is used to calculate the initial position and state of tabs.
+         * The layout, which is used to calculate the initial position and state of tabs.
          */
-        private final PhoneDragHandler dragHandler;
+        private final PhoneTabSwitcherLayout layout;
 
         /**
          * The backing array, which is used to store tab items, once their initial position and
@@ -82,10 +83,10 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         the tabs, which are iterated by the iterator, which is created by the builder, as
          *         an instance of the class {@link AttachedViewRecycler}. The view recycler may not
          *         be null
-         * @param dragHandler
-         *         The drag handler, which should be used to calculate the initial position and
-         *         state of tabs, as an instance of the class {@link PhoneDragHandler}. The drag handler
-         *         may not be null
+         * @param layout
+         *         The layout, which should be used to calculate the initial position and state of
+         *         tabs, as an instance of the class {@link PhoneDragHandler}. The drag handler may
+         *         not be null
          * @param array
          *         The backing array, which should be used to store tab items, once their initial
          *         position and state has been calculated, as an array of the type {@link TabItem}.
@@ -94,24 +95,24 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          */
         public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                       @NonNull final PhoneDragHandler dragHandler, @NonNull final TabItem[] array) {
+                       @NonNull final PhoneTabSwitcherLayout layout,
+                       @NonNull final TabItem[] array) {
             ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
-            ensureNotNull(dragHandler, "The drag handler may not be null");
+            ensureNotNull(layout, "The layout may not be null");
             ensureNotNull(array, "The array may not be null");
             ensureEqual(array.length, model.getCount(),
                     "The array's length must be " + model.getCount());
             this.model = model;
             this.viewRecycler = viewRecycler;
-            this.dragHandler = dragHandler;
+            this.layout = layout;
             this.array = array;
         }
 
         @NonNull
         @Override
         public InitialTabItemIterator create() {
-            return new InitialTabItemIterator(model, viewRecycler, dragHandler, array, reverse,
-                    start);
+            return new InitialTabItemIterator(model, viewRecycler, layout, array, reverse, start);
         }
 
     }
@@ -132,9 +133,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
         private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
         /**
-         * The drag handler, which is used by the builders, which are created by the factory.
+         * The layout, which is used by the builders, which are created by the factory.
          */
-        private final PhoneDragHandler dragHandler;
+        private final PhoneTabSwitcherLayout layout;
 
         /**
          * The backing array, which is used by the builders, which are created by the factory.
@@ -151,10 +152,10 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          *         The view recycler, which should be used by the builders, which are created by the
          *         factory, as an instance of the class {@link AttachedViewRecycler}. The view
          *         recycler may not be null
-         * @param dragHandler
-         *         The drag handler, which should be used by the builders, which are created by the
-         *         factory, as an instance of the class {@link PhoneDragHandler}. The drag handler may
-         *         not be null
+         * @param layout
+         *         The layout, which should be used by the builders, which are created by the
+         *         factory, as an instance of the class {@link PhoneDragHandler}. The drag handler
+         *         may not be null
          * @param array
          *         The backing array, which should be used by the builders, which are created by the
          *         factory, as an array of the type {@link TabItem}. The array may not be null and
@@ -163,23 +164,24 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
          */
         public Factory(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                       @NonNull final PhoneDragHandler dragHandler, @NonNull final TabItem[] array) {
+                       @NonNull final PhoneTabSwitcherLayout layout,
+                       @NonNull final TabItem[] array) {
             ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
-            ensureNotNull(dragHandler, "The drag handler may not be null");
+            ensureNotNull(layout, "The layout may not be null");
             ensureNotNull(array, "The array may not be null");
             ensureEqual(array.length, model.getCount(),
                     "The array's length must be " + model.getCount());
             this.model = model;
             this.viewRecycler = viewRecycler;
-            this.dragHandler = dragHandler;
+            this.layout = layout;
             this.array = array;
         }
 
         @NonNull
         @Override
         public AbstractBuilder<?, ?> create() {
-            return new Builder(model, viewRecycler, dragHandler, array);
+            return new Builder(model, viewRecycler, layout, array);
         }
 
     }
@@ -196,9 +198,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
     /**
-     * The drag handler, which is used to calculate the initial position and state of tab items.
+     * The layout, which is used to calculate the initial position and state of tab items.
      */
-    private final PhoneDragHandler dragHandler;
+    private final PhoneTabSwitcherLayout layout;
 
     /**
      * The backing array, which is used to store tab items, once their initial position and state
@@ -229,8 +231,8 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
     private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
                                                @Nullable final TabItem predecessor) {
         float position = calculateStartPosition(tabItem);
-        Pair<Float, State> pair = dragHandler
-                .clipTabPosition(model.getCount(), tabItem.getIndex(), position, predecessor);
+        Pair<Float, State> pair =
+                layout.clipTabPosition(model.getCount(), tabItem.getIndex(), position, predecessor);
         tabItem.getTag().setPosition(pair.first);
         tabItem.getTag().setState(pair.second);
     }
@@ -264,9 +266,9 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
      *         The view recycler, which allows to inflate the views, which are used to visualize the
      *         iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view
      *         recycler may not be null
-     * @param dragHandler
-     *         The drag handler, which should be used to calculate the initial position and state of
-     *         tab items, as an instance of the class {@link TabItem}. The tab item may not be null
+     * @param layout
+     *         The layout, which should be used to calculate the initial position and state of tab
+     *         items, as an instance of the class {@link TabItem}. The tab item may not be null
      * @param array
      *         The backing array, which should be used to store tab items, once their initial
      *         position and state has been calculated, as an array of the type {@link TabItem}. The
@@ -280,18 +282,18 @@ public class InitialTabItemIterator extends AbstractTabItemIterator {
      */
     private InitialTabItemIterator(@NonNull final Model model,
                                    @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                                   @NonNull final PhoneDragHandler dragHandler,
+                                   @NonNull final PhoneTabSwitcherLayout layout,
                                    @NonNull final TabItem[] array, final boolean reverse,
                                    final int start) {
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
-        ensureNotNull(dragHandler, "The drag handler may not be null");
+        ensureNotNull(layout, "The layout may not be null");
         ensureNotNull(array, "The array may not be null");
         ensureEqual(array.length, model.getCount(),
                 "The array's length must be " + model.getCount());
         this.model = model;
         this.viewRecycler = viewRecycler;
-        this.dragHandler = dragHandler;
+        this.layout = layout;
         this.array = array;
         Resources resources = viewRecycler.getContext().getResources();
         this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);

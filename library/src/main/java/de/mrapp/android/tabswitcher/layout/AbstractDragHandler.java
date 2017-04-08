@@ -49,6 +49,27 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     public interface Callback {
 
         /**
+         * The method, which is invoked in order to calculate the positions of all tabs, depending
+         * on the current drag distance.
+         *
+         * @param factory
+         *         The factory, which allows to create builders, which allow to create iterators for
+         *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
+         *         The factory may not be null
+         * @param dragState
+         *         The current drag state as a value of the enum {@link DragState}. The drag state
+         *         must either be {@link DragState#DRAG_TO_END} or {@link DragState#DRAG_TO_START}
+         * @param dragDistance
+         *         The current drag distance in pixels as a {@link Float} value
+         * @return A drag state, which specifies whether the tabs are overshooting, or not. If the
+         * tabs are overshooting, the drag state must be {@link DragState#OVERSHOOT_START} or {@link
+         * DragState#OVERSHOOT_END}, null otherwise
+         */
+        @Nullable
+        DragState onDrag(@NonNull AbstractTabItemIterator.Factory factory,
+                         @NonNull DragState dragState, float dragDistance);
+
+        /**
          * The method, which is invoked, when a tab has been clicked.
          *
          * @param tabItem
@@ -295,26 +316,29 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     /**
-     * Checks if a drag gesture resulted in overshooting.
+     * Notifies the callback in order to calculate the positions of all tabs, depending on the
+     * current drag distance.
      *
      * @param factory
      *         The factory, which allows to create builders, which allow to create iterators for
      *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
      *         The factory may not be null
-     * @param dragPosition
-     *         The position of the pointer on the dragging axis in pixels as a {@link Float} value
+     * @param dragState
+     *         The current drag state as a value of the enum {@link DragState}. The drag state must
+     *         either be {@link DragState#DRAG_TO_END} or {@link DragState#DRAG_TO_START}
+     * @param dragDistance
+     *         The current drag distance in pixels as a {@link Float} value
+     * @return A drag state, which specifies whether the tabs are overshooting, or not. If the tabs
+     * are overshooting, the drag state must be {@link DragState#OVERSHOOT_START} or {@link
+     * DragState#OVERSHOOT_END}, null otherwise
      */
-    private void checkIfOvershooting(@NonNull final AbstractTabItemIterator.Factory factory,
-                                     final float dragPosition) {
-        if (isOvershootingAtEnd(factory) &&
-                (dragState == DragState.DRAG_TO_END || dragState == DragState.OVERSHOOT_END)) {
-            endOvershootThreshold = dragPosition;
-            dragState = DragState.OVERSHOOT_END;
-        } else if (isOvershootingAtStart(factory) &&
-                (dragState == DragState.DRAG_TO_START || dragState == DragState.OVERSHOOT_START)) {
-            startOvershootThreshold = dragPosition;
-            dragState = DragState.OVERSHOOT_START;
+    private DragState notifyOnDrag(@NonNull final AbstractTabItemIterator.Factory factory,
+                                   @NonNull final DragState dragState, final float dragDistance) {
+        if (callback != null) {
+            return callback.onDrag(factory, dragState, dragDistance);
         }
+
+        return null;
     }
 
     /**
@@ -488,49 +512,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      */
     protected abstract TabItem getFocusedTab(@NonNull final AbstractTabItemIterator.Factory factory,
                                              final float position);
-
-    /**
-     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
-     * tabs are overshooting at the start.
-     *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
-     * @return True, if the tabs are overshooting at the start, false otherwise
-     */
-    protected abstract boolean isOvershootingAtStart(
-            @NonNull final AbstractTabItemIterator.Factory factory);
-
-    /**
-     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
-     * tabs are overshooting at the end.
-     *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
-     * @return True, if the tabs are overshooting at the end, false otherwise
-     */
-    protected abstract boolean isOvershootingAtEnd(
-            @NonNull final AbstractTabItemIterator.Factory factory);
-
-    /**
-     * The method, which is invoked on implementing subclasses in order to calculate the positions
-     * of all tabs, depending on the current drag distance.
-     *
-     * @param factory
-     *         The factory, which allows to create builders, which allow to create iterators for
-     *         iterating the tabs, as an instance of the type {@link AbstractTabItemIterator.Factory}.
-     *         The factory may not be null
-     * @param dragState
-     *         The current drag state as a value of the enum {@link DragState}. The drag state must
-     *         either be {@link DragState#DRAG_TO_END} or {@link DragState#DRAG_TO_START}
-     * @param dragDistance
-     *         The current drag distance in pixels as a {@link Float} value
-     */
-    protected abstract void onDrag(@NonNull final AbstractTabItemIterator.Factory factory,
-                                   @NonNull final DragState dragState, final float dragDistance);
 
     /**
      * The method, which is invoked on implementing subclasses, when the tabs are overshooting at
@@ -732,16 +713,22 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             if (dragState == DragState.SWIPE) {
                 notifyOnSwipe(swipedTabItem, swipeDragHelper.getDragDistance());
             } else if (dragState != DragState.NONE) {
-
                 float currentDragDistance = dragHelper.getDragDistance();
                 float distance = currentDragDistance - dragDistance;
                 dragDistance = currentDragDistance;
+                DragState overshoot = notifyOnDrag(factory, dragState, distance);
 
-                if (distance != 0) {
-                    onDrag(factory, dragState, distance);
+                if (overshoot == DragState.OVERSHOOT_END && (dragState == DragState.DRAG_TO_END ||
+                        dragState == DragState.OVERSHOOT_END)) {
+                    endOvershootThreshold = dragPosition;
+                    dragState = DragState.OVERSHOOT_END;
+                } else if (overshoot == DragState.OVERSHOOT_START &&
+                        (dragState == DragState.DRAG_TO_START ||
+                                dragState == DragState.OVERSHOOT_START)) {
+                    startOvershootThreshold = dragPosition;
+                    dragState = DragState.OVERSHOOT_START;
                 }
 
-                checkIfOvershooting(factory, dragPosition);
                 return true;
             }
         }
