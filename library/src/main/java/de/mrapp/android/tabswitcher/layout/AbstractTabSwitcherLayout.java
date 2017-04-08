@@ -43,12 +43,10 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * An abstract base class for all layouts, which implement the functionality of a {@link
  * TabSwitcher}.
  *
- * @param <DragHandlerType>
- *         The type of the drag handler, which is used by the layout
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractTabSwitcherLayout<DragHandlerType extends AbstractDragHandler<? extends AbstractDragHandler.Callback>>
+public abstract class AbstractTabSwitcherLayout
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         AbstractDragHandler.Callback {
 
@@ -197,11 +195,6 @@ public abstract class AbstractTabSwitcherLayout<DragHandlerType extends Abstract
     private final Arithmetics arithmetics;
 
     /**
-     * The drag handler, which is used by the layout.
-     */
-    private final DragHandlerType dragHandler;
-
-    /**
      * The callback, which is notified about the layout's events.
      */
     private Callback callback;
@@ -306,17 +299,6 @@ public abstract class AbstractTabSwitcherLayout<DragHandlerType extends Abstract
     }
 
     /**
-     * Returns the drag handler, which is used by the layout.
-     *
-     * @return The drag handler, which is used by the layout, as an instance of the generic type
-     * DragHandlerType. The drag handler may not be null
-     */
-    @NonNull
-    protected final DragHandlerType getDragHandler() {
-        return dragHandler;
-    }
-
-    /**
      * Returns the context, which is used by the layout.
      *
      * @return The context, which is used by the layout, as an instance of the class {@link
@@ -339,22 +321,16 @@ public abstract class AbstractTabSwitcherLayout<DragHandlerType extends Abstract
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the type
      *         {@link Arithmetics}. The arithmetics may not be null
-     * @param dragHandler
-     *         The drag handler, which should be used by the layout, as an instance of the generic
-     *         type DragHandlerType. The drag handler may not be null
      */
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final TabSwitcherModel model,
-                                     @NonNull final Arithmetics arithmetics,
-                                     @NonNull final DragHandlerType dragHandler) {
+                                     @NonNull final Arithmetics arithmetics) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
-        ensureNotNull(dragHandler, "The drag handler may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
-        this.dragHandler = dragHandler;
         this.callback = null;
         this.runningAnimations = 0;
     }
