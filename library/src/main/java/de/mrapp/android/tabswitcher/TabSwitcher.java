@@ -815,7 +815,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     @NonNull
     public final Layout getLayout() {
-        if (getDeviceType(getContext()) == DeviceType.TABLET) {
+        if (layoutPolicy != LayoutPolicy.PHONE &&
+                getDeviceType(getContext()) == DeviceType.TABLET) {
             return Layout.TABLET;
         } else {
             return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
