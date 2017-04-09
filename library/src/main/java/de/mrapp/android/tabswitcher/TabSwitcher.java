@@ -280,11 +280,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
-        // TODO: Obtain color state list
-        int color = typedArray.getColor(R.styleable.TabSwitcher_tabBackgroundColor, -1);
+        ColorStateList colorStateList =
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabBackgroundColor);
 
-        if (color != -1) {
-            setTabBackgroundColor(color);
+        if (colorStateList != null) {
+            setTabBackgroundColor(colorStateList);
         }
     }
 
@@ -296,11 +296,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         {@link TypedArray}. The typed array may not be null
      */
     private void obtainTabTitleTextColor(@NonNull final TypedArray typedArray) {
-        // TODO: Obtain color state list
-        int color = typedArray.getColor(R.styleable.TabSwitcher_tabTitleTextColor, -1);
+        ColorStateList colorStateList =
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabTitleTextColor);
 
-        if (color != -1) {
-            setTabTitleTextColor(color);
+        if (colorStateList != null) {
+            setTabTitleTextColor(colorStateList);
         }
     }
 
