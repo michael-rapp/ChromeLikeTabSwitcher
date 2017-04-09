@@ -3024,15 +3024,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final void onDetachLayout() {
+    protected final void onDetachLayout(final boolean tabsOnly) {
         childViewRecycler.removeAll();
         childViewRecycler.clearCache();
         viewRecycler.removeAll();
         viewRecycler.clearCache();
         recyclerAdapter.clearCachedPreviews();
-        getModel().removeListener(recyclerAdapter);
-        getTabSwitcher().removeView(toolbar);
-        getTabSwitcher().removeView(tabContainer);
+
+        if (!tabsOnly) {
+            getModel().removeListener(recyclerAdapter);
+            getTabSwitcher().removeView(toolbar);
+            getTabSwitcher().removeView(tabContainer);
+        }
     }
 
     @Override
