@@ -29,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.TextUtils;
@@ -801,8 +802,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         ensureNotNull(layoutPolicy, "The layout policy may not be null");
 
         if (this.layoutPolicy != layoutPolicy) {
+            Layout previousLayout = getLayout();
             this.layoutPolicy = layoutPolicy;
-            // TODO: Detach and re-inflate layout
+
+            if (ViewCompat.isLaidOut(this) && previousLayout != getLayout()) {
+                // TODO: Detach and re-inflate layout
+            }
         }
     }
 
