@@ -29,6 +29,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.TextUtils;
@@ -143,6 +144,46 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
+    }
+
+    /**
+     * Initializes a specific layout.
+     *
+     * @param layout
+     *         The layout, which should be initialized, as a value of the enum {@link Layout}. The
+     *         layout may not be null
+     */
+    private void initializeLayout(@NonNull final Layout layout) {
+        if (layout == Layout.TABLET) {
+            // TODO: Use tablet layout once implemented
+            PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
+            this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
+        } else {
+            PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
+            this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
+        }
+
+        this.layout.setCallback(createLayoutCallback());
+        this.model.addListener(this.layout);
+        this.layout.inflateLayout();
+        final ViewGroup tabContainer = getTabContainer();
+        assert tabContainer != null;
+
+        if (ViewCompat.isLaidOut(tabContainer)) {
+            this.layout.onGlobalLayout();
+        } else {
+            tabContainer.getViewTreeObserver()
+                    .addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+
+                        @Override
+                        public void onGlobalLayout() {
+                            ViewUtil.removeOnGlobalLayoutListener(
+                                    tabContainer.getViewTreeObserver(), this);
+                            TabSwitcher.this.layout.onGlobalLayout();
+                        }
+
+                    });
+        }
     }
 
     /**
@@ -533,21 +574,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             public void onGlobalLayout() {
                 ensureNotNull(getDecorator(), "No decorator has been set",
                         IllegalStateException.class);
-                Layout layoutType = getLayout();
-
-                if (layoutType == Layout.TABLET) {
-                    // TODO: Use tablet layout once implemented
-                    PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
-                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
-                } else {
-                    PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
-                    layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
-                }
-
-                layout.setCallback(createLayoutCallback());
-                model.addListener(layout);
-                layout.inflateLayout();
-                layout.onGlobalLayout();
+                initializeLayout(getLayout());
             }
 
         };
@@ -804,8 +831,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             Layout previousLayout = getLayout();
             this.layoutPolicy = layoutPolicy;
 
-            if (layout != null && previousLayout != getLayout()) {
-                // TODO: Detach and re-inflate layout
+            if (layout != null) {
+                Layout newLayout = getLayout();
+
+                if (previousLayout != newLayout) {
+                    layout.detachLayout(false);
+                    model.removeListener(layout);
+                    initializeLayout(newLayout);
+                }
             }
         }
     }
@@ -819,8 +852,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     @NonNull
     public final Layout getLayout() {
-        if (layoutPolicy != LayoutPolicy.PHONE &&
-                getDeviceType(getContext()) == DeviceType.TABLET) {
+        if (layoutPolicy == LayoutPolicy.TABLET || (layoutPolicy == LayoutPolicy.AUTO &&
+                getDeviceType(getContext()) == DeviceType.TABLET)) {
             return Layout.TABLET;
         } else {
             return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
