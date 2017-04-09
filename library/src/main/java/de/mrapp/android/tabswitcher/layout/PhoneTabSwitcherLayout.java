@@ -3024,6 +3024,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    protected final void onDetachLayout() {
+        childViewRecycler.removeAll();
+        childViewRecycler.clearCache();
+        viewRecycler.removeAll();
+        viewRecycler.clearCache();
+        recyclerAdapter.clearCachedPreviews();
+        getModel().removeListener(recyclerAdapter);
+        getTabSwitcher().removeView(toolbar);
+        getTabSwitcher().removeView(tabContainer);
+    }
+
+    @Override
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         return dragHandler.handleTouchEvent(event);
     }
@@ -3053,8 +3065,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
         adaptDecorator();
-        // TODO: detachLayout();
-        // TODO: inflateLayout();
+        super.onDecoratorChanged(decorator);
     }
 
     @Override

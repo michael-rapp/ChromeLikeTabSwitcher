@@ -18,15 +18,18 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CallSuper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
@@ -34,6 +37,7 @@ import android.view.animation.Transformation;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -437,6 +441,11 @@ public abstract class AbstractTabSwitcherLayout
     protected abstract AbstractDragHandler<?> onInflateLayout();
 
     /**
+     * The method, which is invoked on implementing subclasses in order to detach the layout.
+     */
+    protected abstract void onDetachLayout();
+
+    /**
      * Handles a touch event.
      *
      * @param event
@@ -455,6 +464,13 @@ public abstract class AbstractTabSwitcherLayout
         adaptToolbarTitle();
         adaptToolbarNavigationIcon();
         inflateToolbarMenu();
+    }
+
+    /**
+     * Detaches the layout.
+     */
+    public final void detachLayout() {
+        onDetachLayout();
     }
 
     /**
@@ -484,6 +500,30 @@ public abstract class AbstractTabSwitcherLayout
         }
 
         return null;
+    }
+
+    @CallSuper
+    @Override
+    public void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+        detachLayout();
+        inflateLayout();
+        ViewGroup tabContainer = getTabContainer();
+
+        if (tabContainer != null) {
+            if (ViewCompat.isLaidOut(tabContainer)) {
+                onGlobalLayout();
+            } else {
+                tabContainer.getViewTreeObserver().addOnGlobalLayoutListener(
+                        new LayoutListenerWrapper(tabContainer, new OnGlobalLayoutListener() {
+
+                            @Override
+                            public void onGlobalLayout() {
+                                AbstractTabSwitcherLayout.this.onGlobalLayout();
+                            }
+
+                        }));
+            }
+        }
     }
 
     @Override

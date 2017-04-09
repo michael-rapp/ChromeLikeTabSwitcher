@@ -208,7 +208,7 @@ public class TabSwitcherModel implements Model {
      *         TabSwitcherDecorator}. The decorator may not be null
      */
     private void notifyOnDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
-        for (Listener listener : listeners) {
+        for (Listener listener : new LinkedHashSet<>(listeners)) {
             listener.onDecoratorChanged(decorator);
         }
     }
