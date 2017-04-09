@@ -799,7 +799,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     public final void setLayoutPolicy(@NonNull final LayoutPolicy layoutPolicy) {
         ensureNotNull(layoutPolicy, "The layout policy may not be null");
-        this.layoutPolicy = layoutPolicy;
+
+        if (this.layoutPolicy != layoutPolicy) {
+            this.layoutPolicy = layoutPolicy;
+            // TODO: Detach and re-inflate layout
+        }
     }
 
     /**
