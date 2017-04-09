@@ -769,7 +769,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 predecessor != null ? predecessor.getTag().getState() : null);
     }
 
-    // TODO: Comment or remove the other method with same name
+    /**
+     * Clips the position of a specific tab.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
+     * @param position
+     *         The position, which should be clipped, in pixels as a {@link Float} value
+     * @param predecessorState
+     *         The state of the predecessor of the given tab item as a value of the enum {@link
+     *         State} or null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the tab item, as an instance of the
+     * class {@link Pair}. The pair may not be null
+     */
     private Pair<Float, State> clipTabPosition(final int count, final int index,
                                                final float position,
                                                @Nullable final State predecessorState) {
@@ -817,7 +832,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 predecessor != null ? predecessor.getTag().getState() : null);
     }
 
-    // TODO: Comment or remove method with same name
+    /**
+     * Calculates and returns the position and state of a specific tab, when stacked at the start.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @param predecessorState
+     *         The state of the predecessor of the given tab item as a value of the enum {@link
+     *         State} or null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the start, as an instance of the class {@link Pair}. The pair may not be null
+     */
     @NonNull
     private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
                                                                            final int index,
