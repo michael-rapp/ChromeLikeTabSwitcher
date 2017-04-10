@@ -21,7 +21,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * A swipe animation, which moves tabs on the orthogonal axis, while animating their size and
- * opacity at the same time.
+ * opacity at the same time. Swipe animations can be used to add or remove tabs to a {@link
+ * TabSwitcher} when using the smartphone layout.
  *
  * @author Michael Rapp
  * @since 1.0.0
