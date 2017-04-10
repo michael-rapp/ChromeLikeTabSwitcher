@@ -20,6 +20,7 @@ import android.view.animation.Interpolator;
 /**
  * A reveal animation, which animates the size of a tab starting at a specific position. Reveal
  * animations can be used to add tabs to a {@link TabSwitcher} when using the smartphone layout.
+ * Tabs, which have been added by using a reveal animation, are selected automatically.
  *
  * @author Michael Rapp
  * @since 1.0.0
