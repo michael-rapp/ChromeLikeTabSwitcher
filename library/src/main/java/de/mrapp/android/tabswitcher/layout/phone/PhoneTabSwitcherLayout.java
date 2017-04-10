@@ -43,6 +43,7 @@ import java.util.Collections;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
+import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
@@ -66,6 +67,7 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureEqual;
+import static de.mrapp.android.util.Condition.ensureFalse;
 import static de.mrapp.android.util.Condition.ensureGreater;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
@@ -324,6 +326,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The duration of a reveal animation.
      */
     private final long revealAnimationDuration;
+
+    /**
+     * The duration of a peek animation.
+     */
+    private final long peekAnimationDuration;
 
     /**
      * The maximum angle, tabs can be rotated by, when overshooting at the start, in degrees.
@@ -964,18 +971,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         View}. The view may not be null
      * @param margin
      *         The bottom margin, which should be set by the animation, as an {@link Integer} value
-     * @param animationDuration
+     * @param duration
      *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param delay
+     *         The delay of the animation in milliseconds as a {@link Long} value
      */
     private void animateBottomMargin(@NonNull final View view, final int margin,
-                                     final long animationDuration) {
+                                     final long duration, final long delay) {
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         final int initialMargin = layoutParams.bottomMargin;
         ValueAnimator animation = ValueAnimator.ofInt(margin - initialMargin);
-        animation.setDuration(animationDuration);
+        animation.setDuration(duration);
         animation.addListener(new AnimationListenerWrapper(null));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setStartDelay(0);
+        animation.setStartDelay(delay);
         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
@@ -1034,7 +1043,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             new LayoutListenerWrapper(view,
                                     createShowSwitcherLayoutListener(tabItem)));
                 } else {
-                    animateShowSwitcher(tabItem);
+                    animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
+                    animateToolbarVisibility(getModel().areToolbarsShown(),
+                            toolbarVisibilityAnimationDelay);
                 }
             }
         }
@@ -1168,8 +1179,41 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
+     * @param listener
+     *         The listener, which should be notified about the animation's progress, as an instance
+     *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateShowSwitcher(@NonNull final TabItem tabItem) {
+    private void animateShowSwitcher(@NonNull final TabItem tabItem,
+                                     @Nullable final AnimatorListener listener) {
+        animateShowSwitcher(tabItem, tabItem.getTag().getPosition(), 0,
+                showSwitcherAnimationDuration, new AccelerateDecelerateInterpolator(), null);
+    }
+
+    /**
+     * Animates the position and size of a specific tab in order to show the tab switcher.
+     *
+     * @param tabItem
+     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
+     *         The tab item may not be null
+     * @param dragPosition
+     *         The position on the dragging axis, the tab should be moved to, in pixels as a {@link
+     *         Float} value
+     * @param orthogonalPosition
+     *         The position on the orthogonal axis, the tab should be moved to, in pixels as a
+     *         {@link Float} value
+     * @param duration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param interpolator
+     *         The interpolator, which should be used by the animation, as an instance of the type
+     *         {@link Interpolator}. The interpolator may not be null
+     * @param listener
+     *         The listener, which should be notified about the animation's progress, as an instance
+     *         of the type {@link AnimatorListener} or null, if no listener should be notified
+     */
+    private void animateShowSwitcher(@NonNull final TabItem tabItem, final float dragPosition,
+                                     final float orthogonalPosition, final long duration,
+                                     @NonNull final Interpolator interpolator,
+                                     @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         view.setX(layoutParams.leftMargin);
@@ -1196,20 +1240,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             tabViewBottomMargin = calculateBottomMargin(view);
         }
 
-        animateBottomMargin(view, tabViewBottomMargin, showSwitcherAnimationDuration);
+        animateBottomMargin(view, tabViewBottomMargin, duration, 0);
         ViewPropertyAnimator animation = view.animate();
-        animation.setDuration(showSwitcherAnimationDuration);
-        animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setListener(
-                new AnimationListenerWrapper(createUpdateViewAnimationListener(tabItem)));
+        animation.setDuration(duration);
+        animation.setInterpolator(interpolator);
+        animation.setListener(new AnimationListenerWrapper(listener));
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, scale);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                tabItem.getTag().getPosition(), true);
-        getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
+        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, dragPosition, true);
+        getArithmetics()
+                .animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, orthogonalPosition, true);
         animation.setStartDelay(0);
         animation.start();
-        animateToolbarVisibility(getModel().areToolbarsShown(), toolbarVisibilityAnimationDelay);
     }
 
     /**
@@ -1223,9 +1265,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                animateHideSwitcher(tabItem);
+                animateHideSwitcher(tabItem,
+                        tabItem.getIndex() == getModel().getSelectedTabIndex() ?
+                                createHideSwitcherAnimationListener() : null);
             } else if (tabItem.getTab() == getModel().getSelectedTab()) {
                 inflateAndUpdateView(tabItem, createHideSwitcherLayoutListener(tabItem));
+                animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
             }
         }
     }
@@ -1236,17 +1281,41 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
+     * @param listener
+     *         The listener, which should be notified about the animation's progress, as an instance
+     *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateHideSwitcher(@NonNull final TabItem tabItem) {
-        int selectedTabIndex = getModel().getSelectedTabIndex();
+    private void animateHideSwitcher(@NonNull final TabItem tabItem,
+                                     @Nullable final AnimatorListener listener) {
+        animateHideSwitcher(tabItem, hideSwitcherAnimationDuration,
+                new AccelerateDecelerateInterpolator(), 0, listener);
+    }
+
+    /**
+     * Animates the position and size of a specific tab item in order to hide the tab switcher.
+     *
+     * @param tabItem
+     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
+     *         The tab item may not be null
+     * @param duration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param interpolator
+     *         The interpolator, which should be used by the animation, as an instance of the class
+     *         {@link Interpolator}. The interpolator may not be null
+     * @param delay
+     *         The delay of the animation in milliseconds as a {@link Long} value
+     * @param listener
+     *         The listener, which should be notified about the animation's progress, as an instance
+     *         of the type {@link AnimatorListener} or null, if no listener should be notified
+     */
+    private void animateHideSwitcher(@NonNull final TabItem tabItem, final long duration,
+                                     @NonNull final Interpolator interpolator, final long delay,
+                                     @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
-        animateBottomMargin(view, -(tabInset + tabBorderWidth), hideSwitcherAnimationDuration);
-        AnimatorListener listener =
-                tabItem.getIndex() == selectedTabIndex ? createHideSwitcherAnimationListener() :
-                        null;
+        animateBottomMargin(view, -(tabInset + tabBorderWidth), duration, delay);
         ViewPropertyAnimator animation = view.animate();
-        animation.setDuration(hideSwitcherAnimationDuration);
-        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setDuration(duration);
+        animation.setInterpolator(interpolator);
         animation.setListener(new AnimationListenerWrapper(listener));
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
@@ -1254,6 +1323,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
                 getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0,
                 false);
+        int selectedTabIndex = getModel().getSelectedTabIndex();
 
         if (tabItem.getIndex() < selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
@@ -1268,9 +1338,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             layoutParams.topMargin, false);
         }
 
-        animation.setStartDelay(0);
+        animation.setStartDelay(delay);
         animation.start();
-        animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -1543,7 +1612,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
-                animateShowSwitcher(tabItem);
+                animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
+                animateToolbarVisibility(getModel().areToolbarsShown(),
+                        toolbarVisibilityAnimationDelay);
             }
 
         };
@@ -1566,7 +1637,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             @Override
             public void onGlobalLayout() {
-                animateHideSwitcher(tabItem);
+                animateHideSwitcher(tabItem,
+                        tabItem.getIndex() == getModel().getSelectedTabIndex() ?
+                                createHideSwitcherAnimationListener() : null);
+                animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
             }
 
         };
@@ -2105,6 +2179,66 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 animateRevertStartOvershoot(new DecelerateInterpolator());
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to restore the original size of the
+     * selected tab, when a peek animation has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the selected tab, as an instance of the class
+     *         {@link TabItem}. The tab item may not be null
+     * @param peekAnimation
+     *         The peek animation as an instance of the class {@link PeekAnimation}. The peek
+     *         animation may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createPeekAnimationListener(@NonNull final TabItem tabItem,
+                                                         @NonNull final PeekAnimation peekAnimation) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                long totalDuration =
+                        peekAnimation.getDuration() != -1 ? peekAnimation.getDuration() :
+                                peekAnimationDuration;
+                long duration = totalDuration / 3;
+                Interpolator interpolator =
+                        peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
+                                new AccelerateDecelerateInterpolator();
+                animateHideSwitcher(tabItem, duration, interpolator, duration,
+                        createRevertPeekAnimationListener(tabItem));
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to restore the original state of the
+     * views of the selected tab, when the animation, which reverts a peek animation, has been
+     * ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the selected tab, as an instance of the class
+     *         {@link TabItem}. The tab item may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    private AnimatorListener createRevertPeekAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
+                viewHolder.borderView.setVisibility(View.GONE);
+                viewHolder.closeButton.setVisibility(View.VISIBLE);
             }
 
         };
@@ -3022,6 +3156,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         revertOvershootAnimationDuration =
                 resources.getInteger(R.integer.revert_overshoot_animation_duration);
         revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
+        peekAnimationDuration = resources.getInteger(R.integer.peek_animation_duration);
         maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
         tabViewBottomMargin = -1;
@@ -3116,7 +3251,29 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
                                  final boolean switcherHidden, @NonNull final Animation animation) {
-        if (switcherHidden) {
+        if (animation instanceof PeekAnimation && !getModel().isEmpty()) {
+            ensureFalse(getModel().isSwitcherShown(), animation.getClass().getSimpleName() +
+                    " not supported when the tab switcher is shown");
+            PeekAnimation peekAnimation = (PeekAnimation) animation;
+            TabItem selectedTabItem = TabItem.create(getModel(), viewRecycler, selectedTabIndex);
+            Toolbar[] toolbars = getToolbars();
+            float dragPosition = getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
+                    getModel().areToolbarsShown() ? toolbars[0].getHeight() - tabInset : 0;
+            float orthogonalPosition = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE &&
+                    getModel().areToolbarsShown() ? toolbars[0].getHeight() - tabInset : 0;
+            PhoneTabViewHolder viewHolder = selectedTabItem.getViewHolder();
+            viewHolder.borderView.setVisibility(View.VISIBLE);
+            viewHolder.closeButton.setVisibility(View.INVISIBLE);
+            long totalDuration = peekAnimation.getDuration() != -1 ? peekAnimation.getDuration() :
+                    peekAnimationDuration;
+            long duration = totalDuration / 3;
+            Interpolator interpolator =
+                    peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
+                            new AccelerateDecelerateInterpolator();
+            animateShowSwitcher(selectedTabItem, dragPosition, orthogonalPosition, duration,
+                    interpolator, createPeekAnimationListener(selectedTabItem, peekAnimation));
+            // TODO: Implement
+        } else if (switcherHidden) {
             TabItem tabItem = new TabItem(0, tab);
             RevealAnimation revealAnimation =
                     animation instanceof RevealAnimation ? (RevealAnimation) animation :
@@ -3132,8 +3289,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
                                      @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
-                animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getTabSwitcher().getLayout());
+                animation.getClass().getSimpleName() + " not supported for adding multiple tabs");
         addAllTabs(index, tabs, animation);
     }
 
@@ -3142,8 +3298,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
                                    @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
-                animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getTabSwitcher().getLayout());
+                animation.getClass().getSimpleName() + " not supported for removing tabs");
         TabItem removedTabItem = TabItem.create(viewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
@@ -3182,8 +3337,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
                                        @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
-                animation.getClass().getSimpleName() + " not supported when using layout " +
-                        getTabSwitcher().getLayout());
+                animation.getClass().getSimpleName() + " not supported for removing tabs ");
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.removeAll();

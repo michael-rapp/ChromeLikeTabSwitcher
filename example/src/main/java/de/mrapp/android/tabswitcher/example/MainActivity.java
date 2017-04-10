@@ -37,6 +37,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -160,8 +161,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                         if (tabSwitcher.isSwitcherShown()) {
                             tabSwitcher.addTab(tab, 0, createRevealAnimation());
                         } else {
-                            tabSwitcher.addTab(tab, 0);
-                            tabSwitcher.selectTab(tab);
+                            tabSwitcher.addTab(tab, 0, new PeekAnimation.Builder().create());
                         }
 
                         return true;
