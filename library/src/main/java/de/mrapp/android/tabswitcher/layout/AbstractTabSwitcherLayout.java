@@ -36,7 +36,6 @@ import android.view.animation.Transformation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -146,7 +145,7 @@ public abstract class AbstractTabSwitcherLayout
          *         The listener, which should be encapsulated, as an instance of the type {@link
          *         AnimatorListener} or null, if no listener should be encapsulated
          */
-        AnimationListenerWrapper(@Nullable final AnimatorListener listener) {
+        public AnimationListenerWrapper(@Nullable final AnimatorListener listener) {
             this.listener = listener;
         }
 

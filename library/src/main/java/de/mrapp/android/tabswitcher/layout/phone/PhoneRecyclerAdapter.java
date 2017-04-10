@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.view;
+package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -58,12 +58,12 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * A view recycler adapter, which allows to inflate the views, which are used to visualize the tabs
- * of a {@link TabSwitcher}.
+ * of a {@link TabSwitcher}, when using the smartphone layout.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integer>
+public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integer>
         implements Tab.Callback, Model.Listener,
         AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
 
@@ -125,7 +125,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         an instance of the class {@link TabItem}. The tab item may not be null
      */
     private void addChildView(@NonNull final TabItem tabItem) {
-        TabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
         View view = viewHolder.child;
         Tab tab = tabItem.getTab();
 
@@ -157,7 +157,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      */
     private void renderChildView(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
-        TabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.borderView.setVisibility(View.VISIBLE);
 
         if (viewHolder.child != null) {
@@ -174,12 +174,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The tab, whose child should be removed, as an instance of the class {@link Tab}. The
      *         tab may not be null
      */
-    private void removeChildView(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void removeChildView(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
         if (viewHolder.childContainer.getChildCount() > 2) {
             viewHolder.childContainer.removeViewAt(0);
         }
@@ -193,12 +193,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The tab, whose title should be adapted, as an instance of the class {@link Tab}. The
      *         tab may not be null
      */
-    private void adaptTitle(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void adaptTitle(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
         viewHolder.titleTextView.setText(tab.getTitle());
     }
 
@@ -207,12 +207,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The icon, whose icon should be adapted, as an instance of the class {@link Tab}. The
      *         tab may not be null
      */
-    private void adaptIcon(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void adaptIcon(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
         Drawable icon = tab.getIcon(model.getContext());
         viewHolder.titleTextView
                 .setCompoundDrawablesWithIntrinsicBounds(icon != null ? icon : model.getTabIcon(),
@@ -224,12 +224,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The icon, whose close button should be adapted, as an instance of the class {@link
      *         Tab}. The tab may not be null
      */
-    private void adaptCloseButton(@NonNull final TabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void adaptCloseButton(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(
                 tab.isCloseable() ? createCloseButtonClickListener(viewHolder.closeButton, tab) :
@@ -241,12 +241,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The icon, whose icon hould be adapted, as an instance of the class {@link Tab}. The
      *         tab may not be null
      */
-    private void adaptCloseButtonIcon(@NonNull final TabViewHolder viewHolder,
+    private void adaptCloseButtonIcon(@NonNull final PhoneTabViewHolder viewHolder,
                                       @NonNull final Tab tab) {
         Drawable icon = tab.getCloseButtonIcon(model.getContext());
 
@@ -316,13 +316,13 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         View}. The view may not be null
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The tab, whose background color should be adapted, as an instance of the class {@link
      *         Tab}. The tab may not be null
      */
     private void adaptBackgroundColor(@NonNull final View view,
-                                      @NonNull final TabViewHolder viewHolder,
+                                      @NonNull final PhoneTabViewHolder viewHolder,
                                       @NonNull final Tab tab) {
         ColorStateList colorStateList =
                 tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
@@ -347,12 +347,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The tab, whose text color should be adapted, as an instance of the class {@link Tab}.
      *         The tab may not be null
      */
-    private void adaptTitleTextColor(@NonNull final TabViewHolder viewHolder,
+    private void adaptTitleTextColor(@NonNull final PhoneTabViewHolder viewHolder,
                                      @NonNull final Tab tab) {
         ColorStateList colorStateList = tab.getTitleTextColor() != null ? tab.getTitleTextColor() :
                 model.getTabTitleTextColor();
@@ -369,12 +369,12 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
      *         The tab, whose selection state should be adapted, as an instance of the class {@link
      *         Tab}. The tab may not be null
      */
-    private void adaptSelectionState(@NonNull final TabViewHolder viewHolder,
+    private void adaptSelectionState(@NonNull final PhoneTabViewHolder viewHolder,
                                      @NonNull final Tab tab) {
         boolean selected = model.getSelectedTab() == tab;
         viewHolder.titleTextView.setSelected(selected);
@@ -393,7 +393,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
                 Tab tab = tabItem.getTab();
-                TabViewHolder viewHolder = tabItem.getViewHolder();
+                PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
                 adaptSelectionState(viewHolder, tab);
                 adaptBackgroundColor(tabItem.getView(), viewHolder, tab);
             }
@@ -405,9 +405,9 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link TabViewHolder}. The view holder may not be null
+     *         class {@link PhoneTabViewHolder}. The view holder may not be null
      */
-    private void adaptPadding(@NonNull final TabViewHolder viewHolder) {
+    private void adaptPadding(@NonNull final PhoneTabViewHolder viewHolder) {
         if (viewHolder.child != null) {
             LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
             childLayoutParams.setMargins(model.getPaddingLeft(), model.getPaddingTop(),
@@ -460,9 +460,9 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
      *         The view recycler, which allows to inflate the child views of tabs, as an instance of
      *         the class {@link ViewRecycler}. The view recycler may not be null
      */
-    public RecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                           @NonNull final TabSwitcherModel model,
-                           @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
+    public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                                @NonNull final TabSwitcherModel model,
+                                @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
@@ -509,7 +509,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
                                     @Nullable final ViewGroup parent,
                                     @NonNull final TabItem tabItem, final int viewType,
                                     @NonNull final Integer... params) {
-        TabViewHolder viewHolder = new TabViewHolder();
+        PhoneTabViewHolder viewHolder = new PhoneTabViewHolder();
         View view = inflater.inflate(
                 tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.tab_view_horizontally :
                         R.layout.tab_view, tabSwitcher.getTabContainer(), false);
@@ -539,7 +539,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
                                  @NonNull final TabItem tabItem, final boolean inflated,
                                  @NonNull final Integer... params) {
-        TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) view.getTag(R.id.tag_view_holder);
 
         if (!tabItem.isInflated()) {
             tabItem.setView(view);
@@ -577,7 +577,7 @@ public class RecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, Integ
 
     @Override
     public final void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
-        TabViewHolder viewHolder = (TabViewHolder) view.getTag(R.id.tag_view_holder);
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) view.getTag(R.id.tag_view_holder);
         Tab tab = tabItem.getTab();
         tab.removeCallback(this);
         removeChildView(viewHolder, tab);

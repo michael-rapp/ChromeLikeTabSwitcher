@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.view;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.content.Context;
 import android.os.Bundle;

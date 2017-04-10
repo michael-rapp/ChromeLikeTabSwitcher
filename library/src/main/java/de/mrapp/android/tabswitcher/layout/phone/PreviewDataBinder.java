@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.view;
+package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -74,7 +74,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     protected final void onPreExecute(@NonNull final ImageView view,
                                       @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
-        TabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
         View child = viewHolder.child;
         Tab tab = tabItem.getTab();
 
@@ -93,7 +93,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
-        TabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
         View child = viewHolder.child;
         viewHolder.child = null;
         int width = parent.getWidth();

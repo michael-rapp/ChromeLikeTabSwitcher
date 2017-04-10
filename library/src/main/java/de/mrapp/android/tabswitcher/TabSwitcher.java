@@ -49,11 +49,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
-import de.mrapp.android.tabswitcher.layout.PhoneTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.phone.PhoneArithmetics;
+import de.mrapp.android.tabswitcher.layout.phone.PhoneTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;

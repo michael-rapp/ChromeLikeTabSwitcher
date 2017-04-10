@@ -11,39 +11,28 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.view;
+package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 
 /**
- * A view holder, which allows to store references to the views a tab of a {@link TabSwitcher}
- * consists of.
+ * A view holder, which allows to store references to the views, a tab of a {@link TabSwitcher}
+ * consists of, when using the smartphone layout.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabViewHolder {
+public class PhoneTabViewHolder extends AbstractTabViewHolder {
 
     /**
      * The view group, which contains the title and close button of a tab.
      */
     public ViewGroup titleContainer;
-
-    /**
-     * The text view, which is used to display the title of a tab.
-     */
-    public TextView titleTextView;
-
-    /**
-     * The close button of a tab.
-     */
-    public ImageButton closeButton;
 
     /**
      * The view group, which contains the child view of a tab.

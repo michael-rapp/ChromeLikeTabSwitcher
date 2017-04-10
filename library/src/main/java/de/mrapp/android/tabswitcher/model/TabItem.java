@@ -20,7 +20,7 @@ import android.view.View;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.view.TabViewHolder;
+import de.mrapp.android.tabswitcher.layout.phone.PhoneTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
@@ -96,7 +96,7 @@ public class TabItem {
     /**
      * The view holder, which stores references the views, which belong to the tab.
      */
-    private TabViewHolder viewHolder;
+    private PhoneTabViewHolder viewHolder;
 
     /**
      * The tag, which is associated with the tab.
@@ -169,7 +169,7 @@ public class TabItem {
 
         if (view != null) {
             tabItem.setView(view);
-            tabItem.setViewHolder((TabViewHolder) view.getTag(R.id.tag_view_holder));
+            tabItem.setViewHolder((PhoneTabViewHolder) view.getTag(R.id.tag_view_holder));
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
 
             if (tag != null) {
@@ -223,10 +223,10 @@ public class TabItem {
     /**
      * Returns the view holder, which stores references to the views, which belong to the tab.
      *
-     * @return The view holder as an instance of the class {@link TabViewHolder} or null, if no view
+     * @return The view holder as an instance of the class {@link PhoneTabViewHolder} or null, if no view
      * is is currently inflated to visualize the tab
      */
-    public final TabViewHolder getViewHolder() {
+    public final PhoneTabViewHolder getViewHolder() {
         return viewHolder;
     }
 
@@ -235,9 +235,9 @@ public class TabItem {
      *
      * @param viewHolder
      *         The view holder, which should be set, as an instance of the class {@link
-     *         TabViewHolder} or null, if no view holder should be set
+     *         PhoneTabViewHolder} or null, if no view holder should be set
      */
-    public final void setViewHolder(@Nullable final TabViewHolder viewHolder) {
+    public final void setViewHolder(@Nullable final PhoneTabViewHolder viewHolder) {
         this.viewHolder = viewHolder;
     }
 

@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.layout;
+package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
@@ -23,10 +23,11 @@ import android.view.View;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
-import de.mrapp.android.tabswitcher.model.Axis;
+import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
+import de.mrapp.android.tabswitcher.layout.Arithmetics;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;

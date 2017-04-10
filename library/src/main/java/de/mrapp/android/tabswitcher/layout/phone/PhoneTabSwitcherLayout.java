@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.layout;
+package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -50,18 +50,18 @@ import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.arithmetic.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
-import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.model.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
+import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.view.ChildRecyclerAdapter;
-import de.mrapp.android.tabswitcher.view.RecyclerAdapter;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -348,7 +348,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
      */
-    private RecyclerAdapter recyclerAdapter;
+    private PhoneRecyclerAdapter recyclerAdapter;
 
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
@@ -3040,7 +3040,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new RecyclerAdapter(getTabSwitcher(), getModel(), childViewRecycler);
+        recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), childViewRecycler);
         getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));

@@ -12,7 +12,7 @@
  * the License.
  */
 
-package de.mrapp.android.tabswitcher.arithmetic;
+package de.mrapp.android.tabswitcher.layout;
 
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
@@ -20,8 +20,7 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.model.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 
 /**
  * Defines the interface, a class, which provides methods, which allow to calculate the position,
@@ -31,6 +30,33 @@ import de.mrapp.android.tabswitcher.model.DragState;
  * @since 1.0.0
  */
 public interface Arithmetics {
+
+    /**
+     * Contains all axes on which the tabs of a {@link TabSwitcher} can be moved.
+     */
+    enum Axis {
+
+        /**
+         * The axis on which a tab is moved when dragging it.
+         */
+        DRAGGING_AXIS,
+
+        /**
+         * The axis on which a tab is moved, when it is added to or removed from the switcher.
+         */
+        ORTHOGONAL_AXIS,
+
+        /**
+         * The horizontal axis.
+         */
+        X_AXIS,
+
+        /**
+         * The vertical axis.
+         */
+        Y_AXIS
+
+    }
 
     /**
      * Returns the position of a motion event on a specific axis.

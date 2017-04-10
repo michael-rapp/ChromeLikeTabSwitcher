@@ -11,47 +11,30 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.mrapp.android.tabswitcher.model;
+package de.mrapp.android.tabswitcher.layout;
+
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
 /**
- * Contains all possible states of dragging gestures, which can be performed on a {@link
- * TabSwitcher}.
+ * An abstract base class for all view holders, which allow to store references to the views, a tab
+ * of a {@link TabSwitcher} consists of.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public enum DragState {
+public abstract class AbstractTabViewHolder {
 
     /**
-     * When no dragging gesture is being performed.
+     * The text view, which is used to display the title of a tab.
      */
-    NONE,
+    public TextView titleTextView;
 
     /**
-     * When the tabs are dragged towards the start.
+     * The close button of a tab.
      */
-    DRAG_TO_START,
-
-    /**
-     * When the tabs are dragged towards the end.
-     */
-    DRAG_TO_END,
-
-    /**
-     * When an overshoot at the start is being performed.
-     */
-    OVERSHOOT_START,
-
-    /**
-     * When an overshoot at the end is being performed.
-     */
-    OVERSHOOT_END,
-
-    /**
-     * When a tab is swiped.
-     */
-    SWIPE
+    public ImageButton closeButton;
 
 }

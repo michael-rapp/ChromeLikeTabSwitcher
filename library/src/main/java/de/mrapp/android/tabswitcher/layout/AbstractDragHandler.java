@@ -22,9 +22,7 @@ import android.view.ViewConfiguration;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.arithmetic.Arithmetics;
-import de.mrapp.android.tabswitcher.model.Axis;
-import de.mrapp.android.tabswitcher.model.DragState;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
 
@@ -40,6 +38,44 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandler.Callback> {
+
+    /**
+     * Contains all possible states of dragging gestures, which can be performed on a {@link
+     * TabSwitcher}.
+     */
+    public enum DragState {
+
+        /**
+         * When no dragging gesture is being performed.
+         */
+        NONE,
+
+        /**
+         * When the tabs are dragged towards the start.
+         */
+        DRAG_TO_START,
+
+        /**
+         * When the tabs are dragged towards the end.
+         */
+        DRAG_TO_END,
+
+        /**
+         * When an overshoot at the start is being performed.
+         */
+        OVERSHOOT_START,
+
+        /**
+         * When an overshoot at the end is being performed.
+         */
+        OVERSHOOT_END,
+
+        /**
+         * When a tab is swiped.
+         */
+        SWIPE
+
+    }
 
     /**
      * Defines the interface, a class, which should be notified about the events of a drag handler,
