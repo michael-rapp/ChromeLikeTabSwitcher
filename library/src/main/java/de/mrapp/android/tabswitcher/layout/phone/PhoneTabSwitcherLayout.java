@@ -1043,11 +1043,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                     createShowSwitcherLayoutListener(tabItem)));
                 } else {
                     animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
-                    animateToolbarVisibility(getModel().areToolbarsShown(),
-                            toolbarVisibilityAnimationDelay);
                 }
             }
         }
+
+        animateToolbarVisibility(getModel().areToolbarsShown(), toolbarVisibilityAnimationDelay);
     }
 
     /**
@@ -1262,9 +1262,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 createHideSwitcherAnimationListener() : null);
             } else if (tabItem.getTab() == getModel().getSelectedTab()) {
                 inflateAndUpdateView(tabItem, createHideSwitcherLayoutListener(tabItem));
-                animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
             }
         }
+
+        animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
     }
 
     /**
@@ -1682,8 +1683,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
-                animateToolbarVisibility(getModel().areToolbarsShown(),
-                        toolbarVisibilityAnimationDelay);
             }
 
         };
@@ -1709,7 +1708,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 animateHideSwitcher(tabItem,
                         tabItem.getIndex() == getModel().getSelectedTabIndex() ?
                                 createHideSwitcherAnimationListener() : null);
-                animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
             }
 
         };
