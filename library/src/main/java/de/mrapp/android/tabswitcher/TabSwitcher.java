@@ -441,7 +441,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onTabAdded(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
-                                   final boolean switcherHidden,
+                                   final boolean switcherVisibilityChanged,
                                    @NonNull final Animation animation) {
                 notifyOnTabAdded(index, tab, animation);
 
@@ -450,7 +450,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
 
-                if (switcherHidden) {
+                if (switcherVisibilityChanged) {
                     notifyOnSwitcherHidden();
                 }
             }

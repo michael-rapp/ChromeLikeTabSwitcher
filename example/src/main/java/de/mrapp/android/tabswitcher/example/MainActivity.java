@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                         if (tabSwitcher.isSwitcherShown()) {
                             tabSwitcher.addTab(tab, 0, createRevealAnimation());
                         } else {
-                            tabSwitcher.addTab(tab, 0, new PeekAnimation.Builder().create());
+                            tabSwitcher.addTab(tab, 0, createPeekAnimation());
                         }
 
                         return true;
@@ -242,6 +242,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         }
 
         return new RevealAnimation.Builder().setX(x).setY(y).create();
+    }
+
+    @NonNull
+    private Animation createPeekAnimation() {
+        return new PeekAnimation.Builder().setX(tabSwitcher.getWidth() / 2f).create();
     }
 
     @Nullable

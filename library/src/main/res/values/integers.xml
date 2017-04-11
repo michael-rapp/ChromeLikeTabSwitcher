@@ -28,6 +28,6 @@ License.
     <integer name="relocate_animation_delay">@android:integer/config_shortAnimTime</integer>
     <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="reveal_animation_duration">@android:integer/config_shortAnimTime</integer>
-    <integer name="peek_animation_duration">@android:integer/config_longAnimTime</integer>
+    <integer name="peek_animation_duration">1200</integer>
 
 </resources>

@@ -679,7 +679,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
-                                 final boolean switcherHidden, @NonNull final Animation animation) {
+                                 final boolean switcherVisibilityChanged, @NonNull final Animation animation) {
         if (previousSelectedTabIndex != selectedTabIndex) {
             adaptAllSelectionStates();
         }

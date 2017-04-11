@@ -40,6 +40,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.Tab;
@@ -267,19 +268,20 @@ public class TabSwitcherModel implements Model {
      * @param selectedTabIndex
      *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
      *         switcher does not contain any tabs
-     * @param switcherHidden
-     *         True, if adding the tab caused the tab switcher to be hidden, false otherwise
+     * @param switcherVisibilityChanged
+     *         True, if adding the tab caused the visibility of the tab switcher to be changed,
+     *         false otherwise
      * @param animation
      *         The animation, which has been used to add the tab, as an instance of the class {@link
      *         Animation}. The animation may not be null
      */
     private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
                                   final int previousSelectedTabIndex, final int selectedTabIndex,
-                                  final boolean switcherHidden,
+                                  final boolean switcherVisibilityChanged,
                                   @NonNull final Animation animation) {
         for (Listener listener : listeners) {
             listener.onTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
-                    switcherHidden, animation);
+                    switcherVisibilityChanged, animation);
         }
     }
 
@@ -670,7 +672,7 @@ public class TabSwitcherModel implements Model {
         tabs.add(index, tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
         int selectedTabIndex = previousSelectedTabIndex;
-        boolean switcherHidden = false;
+        boolean switcherVisibilityChanged = false;
 
         if (previousSelectedTabIndex == -1) {
             selectedTab = tab;
@@ -680,11 +682,15 @@ public class TabSwitcherModel implements Model {
         if (animation instanceof RevealAnimation) {
             selectedTab = tab;
             selectedTabIndex = index;
-            switcherHidden = setSwitcherShown(false);
+            switcherVisibilityChanged = setSwitcherShown(false);
         }
 
-        notifyOnTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex, switcherHidden,
-                animation);
+        if (animation instanceof PeekAnimation) {
+            switcherVisibilityChanged = setSwitcherShown(true);
+        }
+
+        notifyOnTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
+                switcherVisibilityChanged, animation);
     }
 
     @Override

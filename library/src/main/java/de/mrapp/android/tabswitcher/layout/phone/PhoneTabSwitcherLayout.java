@@ -67,7 +67,6 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureEqual;
-import static de.mrapp.android.util.Condition.ensureFalse;
 import static de.mrapp.android.util.Condition.ensureGreater;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
@@ -1185,8 +1184,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void animateShowSwitcher(@NonNull final TabItem tabItem,
                                      @Nullable final AnimatorListener listener) {
-        animateShowSwitcher(tabItem, tabItem.getTag().getPosition(), 0,
-                showSwitcherAnimationDuration, new AccelerateDecelerateInterpolator(), null);
+        animateShowSwitcher(tabItem, showSwitcherAnimationDuration,
+                new AccelerateDecelerateInterpolator(), listener);
     }
 
     /**
@@ -1195,12 +1194,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tabItem
      *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
      *         The tab item may not be null
-     * @param dragPosition
-     *         The position on the dragging axis, the tab should be moved to, in pixels as a {@link
-     *         Float} value
-     * @param orthogonalPosition
-     *         The position on the orthogonal axis, the tab should be moved to, in pixels as a
-     *         {@link Float} value
      * @param duration
      *         The duration of the animation in milliseconds as a {@link Long} value
      * @param interpolator
@@ -1210,8 +1203,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The listener, which should be notified about the animation's progress, as an instance
      *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateShowSwitcher(@NonNull final TabItem tabItem, final float dragPosition,
-                                     final float orthogonalPosition, final long duration,
+    private void animateShowSwitcher(@NonNull final TabItem tabItem, final long duration,
                                      @NonNull final Interpolator interpolator,
                                      @Nullable final AnimatorListener listener) {
         View view = tabItem.getView();
@@ -1247,9 +1239,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setListener(new AnimationListenerWrapper(listener));
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, scale);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, dragPosition, true);
-        getArithmetics()
-                .animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, orthogonalPosition, true);
+        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
+                tabItem.getTag().getPosition(), true);
+        getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
         animation.setStartDelay(0);
         animation.start();
     }
@@ -1596,6 +1588,83 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
+     * Starts a peek animation to add a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param duration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param interpolator
+     *         The interpolator, which should be used by the animation, as an instance of the type
+     *         {@link Interpolator}. The interpolator may not be null
+     * @param peekPosition
+     *         The position on the dragging axis, the tab should be moved to, in pixels as a {@link
+     *         Float} value
+     * @param peekAnimation
+     *         The peek animation, which has been used to add the tab, as an instance of the class
+     *         {@link PeekAnimation}. The peek animation may not be null
+     */
+    private void animatePeek(@NonNull final TabItem tabItem, final long duration,
+                             @NonNull final Interpolator interpolator, final float peekPosition,
+                             @NonNull final PeekAnimation peekAnimation) {
+        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
+        viewHolder.closeButton.setVisibility(View.GONE);
+        View view = tabItem.getView();
+        float x = peekAnimation.getX();
+        float y = peekAnimation.getY() + tabTitleContainerHeight;
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
+        view.setAlpha(1f);
+        getArithmetics().setPivot(Axis.X_AXIS, view, x);
+        getArithmetics().setPivot(Axis.Y_AXIS, view, y);
+        view.setX(layoutParams.leftMargin);
+        view.setY(layoutParams.topMargin);
+        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 0);
+        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 0);
+        ViewPropertyAnimator animation = view.animate();
+        animation.setInterpolator(interpolator);
+        animation.setListener(
+                new AnimationListenerWrapper(createPeekAnimationListener(tabItem, peekAnimation)));
+        animation.setStartDelay(0);
+        animation.setDuration(duration);
+        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
+        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
+        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, peekPosition, true);
+        animation.start();
+        int selectedTabIndex = getModel().getSelectedTabIndex();
+        TabItem selectedTabItem = TabItem.create(getModel(), viewRecycler, selectedTabIndex);
+        animateZoomOut(selectedTabItem, duration, interpolator,
+                createZoomOutAnimationListener(selectedTabItem, peekAnimation));
+        selectedTabItem.getTag().setPosition(0);
+        PhoneTabViewHolder selectedTabViewHolder = selectedTabItem.getViewHolder();
+        selectedTabViewHolder.borderView.setVisibility(View.VISIBLE);
+        selectedTabViewHolder.closeButton.setVisibility(View.GONE);
+        animateShowSwitcher(selectedTabItem, duration, interpolator,
+                createZoomOutAnimationListener(selectedTabItem, peekAnimation));
+    }
+
+    /**
+     * Zooms out a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be zoomed out, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param duration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param interpolator
+     *         The interpolator, which should be used by the animation, as an instance of the type
+     *         {@link Interpolator}. The interpolator may not be null
+     * @param listener
+     *         The listener, which should be notified about the animation's progress, as an instance
+     *         of the type {@link AnimatorListener} or null, if no listener should be notified
+     */
+    private void animateZoomOut(@NonNull final TabItem tabItem, final long duration,
+                                @NonNull final Interpolator interpolator,
+                                @Nullable final AnimatorListener listener) {
+
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to animate the position and size of a tab
      * in order to show the tab switcher, once its view has been inflated.
      *
@@ -1776,6 +1845,46 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 0);
                 getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 0);
                 animateReveal(tabItem, revealAnimation);
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a layout listener, which allows to start a peek animation to add a tab,
+     * once its view has been inflated.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be added, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param peekAnimation
+     *         The peek animation, which should be started, as an instance of the class {@link
+     *         PeekAnimation}. The peek animation may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    private OnGlobalLayoutListener createPeekLayoutListener(@NonNull final TabItem tabItem,
+                                                            @NonNull final PeekAnimation peekAnimation) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                long totalDuration =
+                        peekAnimation.getDuration() != -1 ? peekAnimation.getDuration() :
+                                peekAnimationDuration;
+                long duration = totalDuration / 3;
+                Interpolator interpolator =
+                        peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
+                                new AccelerateDecelerateInterpolator();
+                Toolbar[] toolbars = getToolbars();
+                float peekPosition =
+                        (getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
+                                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
+                                        getTabSwitcher()) -
+                                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
+                                        getTabSwitcher().areToolbarsShown() ?
+                                        toolbars[0].getHeight() : 0)) * 0.66f;
+                animatePeek(tabItem, duration, interpolator, peekPosition, peekAnimation);
             }
 
         };
@@ -2185,12 +2294,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Creates and returns an animation listener, which allows to restore the original size of the
-     * selected tab, when a peek animation has been ended.
+     * Creates and returns an animation listener, which allows to hide a tab, which has been added
+     * by using a peek animation, when the animation has been ended.
      *
      * @param tabItem
-     *         The tab item, which corresponds to the selected tab, as an instance of the class
-     *         {@link TabItem}. The tab item may not be null
+     *         The tab item, which corresponds to the tab, which has been added by using the peek
+     *         animation, as an instance of the class {@link TabItem}. The tab item may not be null
      * @param peekAnimation
      *         The peek animation as an instance of the class {@link PeekAnimation}. The peek
      *         animation may not be null
@@ -2212,25 +2321,99 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Interpolator interpolator =
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
-                animateHideSwitcher(tabItem, duration, interpolator, duration,
-                        createRevertPeekAnimationListener(tabItem));
+                View view = tabItem.getView();
+                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, tabTitleContainerHeight);
+                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                ViewPropertyAnimator animator = view.animate();
+                animator.setDuration(duration);
+                animator.setStartDelay(duration);
+                animator.setInterpolator(interpolator);
+                animator.setListener(
+                        new AnimationListenerWrapper(createRevertPeekAnimationListener(tabItem)));
+                animator.alpha(0);
+                getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animator, view,
+                        getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) * 1.5f, false);
+                getArithmetics().animateScale(Axis.DRAGGING_AXIS, animator, 0);
+                getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animator, 0);
+                animator.start();
             }
 
         };
     }
 
     /**
-     * Creates and returns an animation listener, which allows to restore the original state of the
-     * views of the selected tab, when the animation, which reverts a peek animation, has been
-     * ended.
+     * Creates and returns an animation listener, which allows to remove the view of a tab, which
+     * has been added by using a peek animation, when the animation, which reverts the peek
+     * animation, has been ended.
      *
      * @param tabItem
-     *         The tab item, which corresponds to the selected tab, as an instance of the class
-     *         {@link TabItem}. The tab item may not be null
+     *         The tab item, which corresponds to the tab, which has been added by using the peek
+     *         animation, as an instance of the class {@link TabItem}. The tab item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
+    @NonNull
     private AnimatorListener createRevertPeekAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                viewRecycler.remove(tabItem);
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to zoom in the currently selected
+     * tab, when a peek animation has been ended.
+     *
+     * @param selectedTabItem
+     *         The tab item, which corresponds to the currently selected tab, as an instance of the
+     *         class {@link TabItem}. The tab item may not be null
+     * @param peekAnimation
+     *         The peek animation as an instance of the class {@link PeekAnimation}. The peek
+     *         animation may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createZoomOutAnimationListener(@NonNull final TabItem selectedTabItem,
+                                                            @NonNull final PeekAnimation peekAnimation) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                getModel().removeListener(PhoneTabSwitcherLayout.this);
+                getModel().hideSwitcher();
+                long totalDuration =
+                        peekAnimation.getDuration() != -1 ? peekAnimation.getDuration() :
+                                peekAnimationDuration;
+                long duration = totalDuration / 3;
+                Interpolator interpolator =
+                        peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
+                                new AccelerateDecelerateInterpolator();
+                animateHideSwitcher(selectedTabItem, duration, interpolator, duration,
+                        createZoomInAnimationListener(selectedTabItem));
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to restore the original state of a
+     * tab, when an animation, which zooms in the tab, has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which has been zoomed in, as an instance
+     *         of the class {@link TabItem}. The tab item may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    private AnimatorListener createZoomInAnimationListener(@NonNull final TabItem tabItem) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -2239,6 +2422,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
                 viewHolder.borderView.setVisibility(View.GONE);
                 viewHolder.closeButton.setVisibility(View.VISIBLE);
+                getModel().addListener(PhoneTabSwitcherLayout.this);
             }
 
         };
@@ -3250,34 +3434,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
-                                 final boolean switcherHidden, @NonNull final Animation animation) {
+                                 final boolean switcherVisibilityChanged,
+                                 @NonNull final Animation animation) {
         if (animation instanceof PeekAnimation && !getModel().isEmpty()) {
-            ensureFalse(getModel().isSwitcherShown(), animation.getClass().getSimpleName() +
+            ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
-            TabItem selectedTabItem = TabItem.create(getModel(), viewRecycler, selectedTabIndex);
-            Toolbar[] toolbars = getToolbars();
-            float dragPosition = getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                    getModel().areToolbarsShown() ? toolbars[0].getHeight() - tabInset : 0;
-            float orthogonalPosition = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE &&
-                    getModel().areToolbarsShown() ? toolbars[0].getHeight() - tabInset : 0;
-            PhoneTabViewHolder viewHolder = selectedTabItem.getViewHolder();
-            viewHolder.borderView.setVisibility(View.VISIBLE);
-            viewHolder.closeButton.setVisibility(View.INVISIBLE);
-            long totalDuration = peekAnimation.getDuration() != -1 ? peekAnimation.getDuration() :
-                    peekAnimationDuration;
-            long duration = totalDuration / 3;
-            Interpolator interpolator =
-                    peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
-                            new AccelerateDecelerateInterpolator();
-            animateShowSwitcher(selectedTabItem, dragPosition, orthogonalPosition, duration,
-                    interpolator, createPeekAnimationListener(selectedTabItem, peekAnimation));
-            // TODO: Implement
-        } else if (switcherHidden) {
             TabItem tabItem = new TabItem(0, tab);
-            RevealAnimation revealAnimation =
-                    animation instanceof RevealAnimation ? (RevealAnimation) animation :
-                            new RevealAnimation.Builder().create();
+            inflateView(tabItem, createPeekLayoutListener(tabItem, peekAnimation));
+        } else if (animation instanceof RevealAnimation && switcherVisibilityChanged) {
+            TabItem tabItem = new TabItem(0, tab);
+            RevealAnimation revealAnimation = (RevealAnimation) animation;
             inflateView(tabItem, createRevealLayoutListener(tabItem, revealAnimation));
         } else {
             addAllTabs(index, new Tab[]{tab}, animation);

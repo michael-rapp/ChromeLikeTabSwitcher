@@ -104,14 +104,16 @@ public interface Model extends Iterable<Tab> {
          * @param selectedTabIndex
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
-         * @param switcherHidden
-         *         True, if adding the tab caused the tab switcher to be hidden, false otherwise
+         * @param switcherVisibilityChanged
+         *         True, if adding the tab caused the visibility of the tab switcher to be changed,
+         *         false otherwise
          * @param animation
          *         The animation, which has been used to add the tab, as an instance of the class
          *         {@link Animation}. The animation may not be null
          */
         void onTabAdded(int index, @NonNull Tab tab, int previousSelectedTabIndex,
-                        int selectedTabIndex, boolean switcherHidden, @NonNull Animation animation);
+                        int selectedTabIndex, boolean switcherVisibilityChanged,
+                        @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when multiple tabs have been added to the model.
