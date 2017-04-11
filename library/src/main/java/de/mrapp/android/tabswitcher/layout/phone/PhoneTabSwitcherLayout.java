@@ -1634,35 +1634,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.start();
         int selectedTabIndex = getModel().getSelectedTabIndex();
         TabItem selectedTabItem = TabItem.create(getModel(), viewRecycler, selectedTabIndex);
-        animateZoomOut(selectedTabItem, duration, interpolator,
-                createZoomOutAnimationListener(selectedTabItem, peekAnimation));
+        viewRecycler.inflate(selectedTabItem);
         selectedTabItem.getTag().setPosition(0);
         PhoneTabViewHolder selectedTabViewHolder = selectedTabItem.getViewHolder();
-        selectedTabViewHolder.borderView.setVisibility(View.VISIBLE);
         selectedTabViewHolder.closeButton.setVisibility(View.GONE);
         animateShowSwitcher(selectedTabItem, duration, interpolator,
                 createZoomOutAnimationListener(selectedTabItem, peekAnimation));
-    }
-
-    /**
-     * Zooms out a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be zoomed out, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     * @param duration
-     *         The duration of the animation in milliseconds as a {@link Long} value
-     * @param interpolator
-     *         The interpolator, which should be used by the animation, as an instance of the type
-     *         {@link Interpolator}. The interpolator may not be null
-     * @param listener
-     *         The listener, which should be notified about the animation's progress, as an instance
-     *         of the type {@link AnimatorListener} or null, if no listener should be notified
-     */
-    private void animateZoomOut(@NonNull final TabItem tabItem, final long duration,
-                                @NonNull final Interpolator interpolator,
-                                @Nullable final AnimatorListener listener) {
-
     }
 
     /**
@@ -2417,10 +2394,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
-                viewHolder.borderView.setVisibility(View.GONE);
-                viewHolder.closeButton.setVisibility(View.VISIBLE);
                 getModel().addListener(PhoneTabSwitcherLayout.this);
+                viewRecycler.inflate(tabItem);
+                viewRecycler.clearCache();
+                recyclerAdapter.clearCachedPreviews();
+                tabViewBottomMargin = -1;
             }
 
         };
