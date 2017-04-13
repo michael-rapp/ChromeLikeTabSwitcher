@@ -514,7 +514,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
                 tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.tab_view_horizontally :
                         R.layout.tab_view, tabSwitcher.getTabContainer(), false);
         Drawable backgroundDrawable =
-                ContextCompat.getDrawable(model.getContext(), R.drawable.tab_background);
+                ContextCompat.getDrawable(model.getContext(), R.drawable.phone_tab_background);
         ViewUtil.setBackground(view, backgroundDrawable);
         int padding = tabInset + tabBorderWidth;
         view.setPadding(padding, tabInset, padding, padding);
@@ -526,7 +526,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
         adaptPadding(viewHolder);
         viewHolder.borderView = view.findViewById(R.id.border_view);
         Drawable borderDrawable =
-                ContextCompat.getDrawable(model.getContext(), R.drawable.tab_border);
+                ContextCompat.getDrawable(model.getContext(), R.drawable.phone_tab_border);
         ViewUtil.setBackground(viewHolder.borderView, borderDrawable);
         view.setTag(R.id.tag_view_holder, viewHolder);
         tabItem.setView(view);

@@ -96,7 +96,7 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
         textSizeSmall =
                 resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_small);
         background =
-                ContextCompat.getDrawable(context, R.drawable.tab_switcher_menu_item_background)
+                ContextCompat.getDrawable(context, R.drawable.tab_switcher_drawable_background)
                         .mutate();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.WHITE);

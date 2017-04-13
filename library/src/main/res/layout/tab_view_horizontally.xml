@@ -32,7 +32,7 @@ License.
             android:layout_gravity="center_vertical"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:src="@drawable/ic_close_tab_18dp"/>
+            android:src="@drawable/phone_close_tab_icon"/>
 
         <TextView
             android:id="@+id/tab_title_text_view"
