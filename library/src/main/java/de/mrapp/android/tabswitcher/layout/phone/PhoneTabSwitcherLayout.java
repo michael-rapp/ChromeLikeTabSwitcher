@@ -515,19 +515,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             int start = firstVisibleIndex - 1;
             iterator = new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true)
                     .start(start).create();
-            abort = false;
 
-            while ((tabItem = iterator.next()) != null && !abort) {
+            while ((tabItem = iterator.next()) != null) {
                 TabItem predecessor = iterator.previous();
                 float predecessorPosition = predecessor.getTag().getPosition();
-                float newPosition = predecessorPosition +
-                        calculateMaxTabSpacing(getTabSwitcher().getCount(), predecessor);
-                tabItem.getTag().setPosition(newPosition);
 
                 if (tabItem.getIndex() < start) {
                     Pair<Float, State> pair =
                             clipTabPosition(getTabSwitcher().getCount(), predecessor.getIndex(),
-                                    predecessor.getTag().getPosition(), tabItem);
+                                    predecessorPosition, tabItem);
                     predecessor.getTag().setPosition(pair.first);
                     predecessor.getTag().setState(pair.second);
                     inflateOrRemoveView(predecessor);
@@ -535,9 +531,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     if (predecessor.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = predecessor.getIndex();
                     } else {
-                        abort = true;
+                        break;
                     }
                 }
+
+                float newPosition = predecessorPosition +
+                        calculateMaxTabSpacing(getTabSwitcher().getCount(), predecessor);
+                tabItem.getTag().setPosition(newPosition);
 
                 if (!iterator.hasNext()) {
                     Pair<Float, State> pair =
@@ -3553,10 +3553,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
+        print();
+
         return isOvershootingAtEnd(
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create()) ?
                 DragState.OVERSHOOT_END :
                 (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);
+    }
+
+    private void print() {
+        System.out.println("------------------------------------");
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            System.out.println(tabItem.getIndex() + ": pos = " + tabItem.getTag().getPosition() +
+                    "; state = " + tabItem.getTag().getState());
+        }
     }
 
     @Override
