@@ -1154,13 +1154,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                                 new SwipeAnimation.Builder().create();
                 TabItem[] tabItems = new TabItem[tabs.length];
+                OnGlobalLayoutListener compoundListener = new CompoundLayoutListener(tabs.length,
+                        createSwipeLayoutListener(tabItems, swipeAnimation));
 
                 for (int i = 0; i < tabs.length; i++) {
                     Tab tab = tabs[i];
-                    tabItems[i] = new TabItem(index + i, tab);
+                    TabItem tabItem = new TabItem(index + i, tab);
+                    tabItems[i] = tabItem;
+                    inflateView(tabItem, compoundListener);
                 }
-
-                inflateViews(tabItems, createSwipeLayoutListener(tabItems, swipeAnimation));
             } else if (!getModel().isSwitcherShown()) {
                 toolbar.setAlpha(0);
 
@@ -2530,33 +2532,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             } else {
                 listener.onGlobalLayout();
             }
-        }
-    }
-
-    /**
-     * Inflates the views, which are used to visualize several tabs.
-     *
-     * @param tabItems
-     *         An array, which contains the tab items, which correspond to the tabs, whose views
-     *         should be inflated, as an array of the type {@link TabItem}. The array may not be
-     *         null
-     * @param listener
-     *         The layout listener, which should be notified, when all views have been inflated, as
-     *         an instance of the type {@link OnGlobalLayoutListener} or null, if no listener should
-     *         be notified
-     * @param params
-     *         An array, which contains optional parameters, which should be passed to the view
-     *         recycler, which is used to inflate the views, as an array of the type {@link
-     *         Integer}. The array may not be null
-     */
-    private void inflateViews(@NonNull final TabItem[] tabItems,
-                              @Nullable final OnGlobalLayoutListener listener,
-                              @NonNull final Integer... params) {
-        OnGlobalLayoutListener compoundListener =
-                new CompoundLayoutListener(tabItems.length, listener);
-
-        for (TabItem tabItem : tabItems) {
-            inflateView(tabItem, compoundListener, params);
         }
     }
 
