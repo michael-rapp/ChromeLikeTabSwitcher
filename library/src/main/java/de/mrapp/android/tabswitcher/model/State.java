@@ -17,7 +17,7 @@ package de.mrapp.android.tabswitcher.model;
  * Contains all possible states of a tab, while the switcher is shown.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public enum State {
 

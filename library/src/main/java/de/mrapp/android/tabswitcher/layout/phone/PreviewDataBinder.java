@@ -36,7 +36,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * afterwards.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> {
 

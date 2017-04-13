@@ -75,7 +75,7 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * A layout, which implements the functionality of a {@link TabSwitcher} on smartphones.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         implements PhoneDragHandler.Callback {

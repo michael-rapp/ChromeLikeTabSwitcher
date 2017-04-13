@@ -36,12 +36,12 @@ import de.mrapp.android.util.ViewUtil;
  * the interface {@link TabSwitcherListener}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class TabSwitcherButton extends AppCompatImageButton implements TabSwitcherListener {
 
     /**
-     * The drawable, which is used by the image button.F
+     * The drawable, which is used by the image button.
      */
     private TabSwitcherDrawable drawable;
 

@@ -27,7 +27,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
  * size and rotation of a {@link TabSwitcher}'s children, must implement.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public interface Arithmetics {
 

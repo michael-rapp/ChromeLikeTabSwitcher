@@ -40,7 +40,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * using the smartphone layout.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callback> {
 

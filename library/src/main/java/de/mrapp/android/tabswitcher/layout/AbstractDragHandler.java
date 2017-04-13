@@ -35,7 +35,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @param <CallbackType>
  *         The type of the drag handler's callback
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandler.Callback> {
 

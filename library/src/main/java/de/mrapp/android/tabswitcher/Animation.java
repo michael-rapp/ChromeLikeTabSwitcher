@@ -23,7 +23,7 @@ import static de.mrapp.android.util.Condition.ensureAtLeast;
  * An animation, which can be used to add or remove tabs to/from a {@link TabSwitcher}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public abstract class Animation {
 

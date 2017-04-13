@@ -36,7 +36,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void> {
 

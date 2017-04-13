@@ -25,7 +25,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
  * consists of, when using the smartphone layout.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class PhoneTabViewHolder extends AbstractTabViewHolder {
 

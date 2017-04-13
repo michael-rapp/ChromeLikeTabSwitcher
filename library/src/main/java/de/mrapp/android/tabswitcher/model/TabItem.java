@@ -30,7 +30,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * An item, which contains information about a tab of a {@link TabSwitcher}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class TabItem {
 

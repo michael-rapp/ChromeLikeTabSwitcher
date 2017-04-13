@@ -44,7 +44,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * displayed label up to date. It therefore implements the interface {@link TabSwitcherListener}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener {
 

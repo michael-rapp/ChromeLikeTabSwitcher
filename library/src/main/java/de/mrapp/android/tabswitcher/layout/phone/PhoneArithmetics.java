@@ -36,7 +36,7 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * TabSwitcher}'s children, when using the smartphone layout.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class PhoneArithmetics implements Arithmetics {
 

@@ -23,7 +23,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * of a {@link TabSwitcher} consists of.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public abstract class AbstractTabViewHolder {
 

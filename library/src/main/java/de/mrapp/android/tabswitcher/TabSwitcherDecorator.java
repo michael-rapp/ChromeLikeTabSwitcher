@@ -30,7 +30,7 @@ import de.mrapp.android.util.view.AbstractViewHolderAdapter;
  * should be used to visualize the tabs of a {@link TabSwitcher}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
 

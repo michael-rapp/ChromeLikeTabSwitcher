@@ -23,7 +23,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * A tag, which allows to store the properties of the tabs of a {@link TabSwitcher}.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class Tag implements Cloneable {
 

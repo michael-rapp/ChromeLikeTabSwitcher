@@ -86,7 +86,7 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * these methods results in the tabs being added or removed in an animated manner.
  *
  * @author Michael Rapp
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model {
 
