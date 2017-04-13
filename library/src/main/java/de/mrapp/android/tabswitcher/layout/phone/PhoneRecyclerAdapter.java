@@ -511,8 +511,8 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
                                     @NonNull final Integer... params) {
         PhoneTabViewHolder viewHolder = new PhoneTabViewHolder();
         View view = inflater.inflate(
-                tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.tab_view_horizontally :
-                        R.layout.tab_view, tabSwitcher.getTabContainer(), false);
+                tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.phone_tab_landscape :
+                        R.layout.phone_tab, tabSwitcher.getTabContainer(), false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(model.getContext(), R.drawable.phone_tab_background);
         ViewUtil.setBackground(view, backgroundDrawable);

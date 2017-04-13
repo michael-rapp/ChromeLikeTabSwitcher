@@ -3328,7 +3328,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     protected final AbstractDragHandler<?> onInflateLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         toolbar =
-                (Toolbar) inflater.inflate(R.layout.tab_switcher_toolbar, getTabSwitcher(), false);
+                (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
         toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
         getTabSwitcher().addView(toolbar);
         tabContainer = new FrameLayout(getContext());
