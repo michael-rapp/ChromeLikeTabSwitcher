@@ -36,7 +36,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
-import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
@@ -179,7 +178,8 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
      *         The tab, whose child should be removed, as an instance of the class {@link Tab}. The
      *         tab may not be null
      */
-    private void removeChildView(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void removeChildView(@NonNull final PhoneTabViewHolder viewHolder,
+                                 @NonNull final Tab tab) {
         if (viewHolder.childContainer.getChildCount() > 2) {
             viewHolder.childContainer.removeViewAt(0);
         }
@@ -229,7 +229,8 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
      *         The icon, whose close button should be adapted, as an instance of the class {@link
      *         Tab}. The tab may not be null
      */
-    private void adaptCloseButton(@NonNull final PhoneTabViewHolder viewHolder, @NonNull final Tab tab) {
+    private void adaptCloseButton(@NonNull final PhoneTabViewHolder viewHolder,
+                                  @NonNull final Tab tab) {
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(
                 tab.isCloseable() ? createCloseButtonClickListener(viewHolder.closeButton, tab) :
@@ -510,9 +511,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
                                     @NonNull final TabItem tabItem, final int viewType,
                                     @NonNull final Integer... params) {
         PhoneTabViewHolder viewHolder = new PhoneTabViewHolder();
-        View view = inflater.inflate(
-                tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? R.layout.phone_tab_landscape :
-                        R.layout.phone_tab, tabSwitcher.getTabContainer(), false);
+        View view = inflater.inflate(R.layout.phone_tab, tabSwitcher.getTabContainer(), false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(model.getContext(), R.drawable.phone_tab_background);
         ViewUtil.setBackground(view, backgroundDrawable);
@@ -679,7 +678,8 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
-                                 final boolean switcherVisibilityChanged, @NonNull final Animation animation) {
+                                 final boolean switcherVisibilityChanged,
+                                 @NonNull final Animation animation) {
         if (previousSelectedTabIndex != selectedTabIndex) {
             adaptAllSelectionStates();
         }
