@@ -3553,24 +3553,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        print();
-
         return isOvershootingAtEnd(
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create()) ?
                 DragState.OVERSHOOT_END :
                 (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);
-    }
-
-    private void print() {
-        System.out.println("------------------------------------");
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).reverse(true).create();
-        TabItem tabItem;
-
-        while ((tabItem = iterator.next()) != null) {
-            System.out.println(tabItem.getIndex() + ": pos = " + tabItem.getTag().getPosition() +
-                    "; state = " + tabItem.getTag().getState());
-        }
     }
 
     @Override
