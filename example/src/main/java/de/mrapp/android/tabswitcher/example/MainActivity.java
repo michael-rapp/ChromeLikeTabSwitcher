@@ -52,9 +52,11 @@ import de.mrapp.android.util.ViewUtil;
  */
 public class MainActivity extends AppCompatActivity implements TabSwitcherListener {
 
-    private static final String VIEW_TYPE_EXTRA = MainActivity.class.getName() + "::ViewType";
-
-    public final class Decorator extends TabSwitcherDecorator {
+    /**
+     * The decorator, which is used to inflate and visualize the tabs of the activity's tab
+     * switcher.
+     */
+    private class Decorator extends TabSwitcherDecorator {
 
         @NonNull
         @Override
@@ -106,6 +108,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
+     * The name of the extra, which is used to store the view type of a tab within a bundle.
+     */
+    private static final String VIEW_TYPE_EXTRA = MainActivity.class.getName() + "::ViewType";
+
+    /**
      * The number of tabs, which are contained by the example app's tab switcher.
      */
     private static final int TAB_COUNT = 12;
@@ -120,6 +127,13 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
      */
     private Snackbar snackbar;
 
+    /**
+     * Creates a listener, which allows to apply the window insets to the tab switcher's padding.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnApplyWindowInsetsListener}. The listener may not be nullFG
+     */
+    @NonNull
     private OnApplyWindowInsetsListener createWindowInsetsListener() {
         return new OnApplyWindowInsetsListener() {
 
@@ -135,6 +149,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Creates and returns a listener, which allows to add a tab to the activity's tab switcher,
+     * when a button is clicked.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnClickListener}. The listener may not be null
+     */
+    @NonNull
     private OnClickListener createAddTabListener() {
         return new OnClickListener() {
 
@@ -148,6 +170,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Creates and returns a listener, which allows to observe, when an item of the tab switcher's
+     * toolbar has been clicked.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnMenuItemClickListener}. The listener may not be null
+     */
+    @NonNull
     private OnMenuItemClickListener createToolbarMenuListener() {
         return new OnMenuItemClickListener() {
 
@@ -176,6 +206,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Creates and returns a layout listener, which allows to setup the tab switcher's toolbar menu,
+     * once the tab switcher has been laid out.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
     private OnGlobalLayoutListener createTabSwitcherLayoutListener() {
         return new OnGlobalLayoutListener() {
 
@@ -192,6 +230,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Creates and returns a listener, which allows to toggle the visibility of the tab switcher,
+     * when a button is clicked.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnClickListener}. The listener may not be null
+     */
+    @NonNull
     private OnClickListener createTabSwitcherButtonListener() {
         return new OnClickListener() {
 
@@ -203,6 +249,22 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Creates and returns a listener, which allows to undo the removal of tabs from the tab
+     * switcher, when the button of the activity's snackbar is clicked.
+     *
+     * @param snackbar
+     *         The activity's snackbar as an instance of the class {@link Snackbar}. The snackbar
+     *         may not be null
+     * @param index
+     *         The index of the first tab, which has been removed, as an {@link Integer} value
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The array may not be null
+     * @return The listener, which has been created, as an instance of the type {@link
+     * OnClickListener}. The listener may not be null
+     */
+    @NonNull
     private OnClickListener createUndoSnackbarListener(@NonNull final Snackbar snackbar,
                                                        final int index,
                                                        @NonNull final Tab... tabs) {
@@ -220,6 +282,18 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         };
     }
 
+    /**
+     * Shows a snackbar, which allows to undo the removal of tabs from the activity's tab switcher.
+     *
+     * @param text
+     *         The text of the snackbar as an instance of the type {@link CharSequence}. The text
+     *         may not be null
+     * @param index
+     *         The index of the first tab, which has been removed, as an {@link Integer} value
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The array may not be null
+     */
     private void showUndoSnackbar(@NonNull final CharSequence text, final int index,
                                   @NonNull final Tab... tabs) {
         snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG).setActionTextColor(
@@ -228,6 +302,12 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         snackbar.show();
     }
 
+    /**
+     * Creates a reveal animation, which can be used to add a tab to the activity's tab switcher.
+     *
+     * @return The reveal animation, which has been created, as an instance of the class {@link
+     * Animation}. The animation may not be null
+     */
     @NonNull
     private Animation createRevealAnimation() {
         float x = 0;
@@ -244,11 +324,23 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         return new RevealAnimation.Builder().setX(x).setY(y).create();
     }
 
+    /**
+     * Creates a peek animation, which can be used to add a tab to the activity's tab switcher.
+     *
+     * @return The peek animation, which has been created, as an instance of the class {@link
+     * Animation}. The animation may not be null
+     */
     @NonNull
     private Animation createPeekAnimation() {
         return new PeekAnimation.Builder().setX(tabSwitcher.getWidth() / 2f).create();
     }
 
+    /**
+     * Returns the menu item, which shows the navigation icon of the tab switcher's toolbar.
+     *
+     * @return The menu item, which shows the navigation icon of the tab switcher's toolbar, as an
+     * instance of the class {@link View} or null, if no navigation icon is shown
+     */
     @Nullable
     private View getNavigationMenuItem() {
         Toolbar[] toolbars = tabSwitcher.getToolbars();
@@ -269,6 +361,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         return null;
     }
 
+    /**
+     * Creates and returns a tab.
+     *
+     * @param index
+     *         The index, the tab should be added at, as an {@link Integer} value
+     * @return The tab, which has been created, as an instance of the class {@link Tab}. The tab may
+     * not be null
+     */
+    @NonNull
     private Tab createTab(final int index) {
         CharSequence title = getString(R.string.tab_title, index + 1);
         Tab tab = new Tab(title);
