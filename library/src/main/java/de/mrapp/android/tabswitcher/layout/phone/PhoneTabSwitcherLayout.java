@@ -1921,32 +1921,42 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     }
                 }
 
+                Tag previousTag = null;
+
                 for (TabItem tabItem : tabItems) {
                     Tag tag = tabItem.getTag();
-                    createBottomMarginLayoutListener(tabItem).onGlobalLayout();
-                    View view = tabItem.getView();
-                    view.setTag(R.id.tag_properties, tag);
-                    view.setAlpha(swipedTabAlpha);
-                    float swipePosition = calculateSwipePosition();
-                    float scale = getArithmetics().getScale(view, true);
-                    getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                            getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                    getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                            getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-                    getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
-                    getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view,
-                            swipeAnimation.getDirection() == SwipeDirection.LEFT ?
-                                    -1 * swipePosition : swipePosition);
-                    getArithmetics().setScale(Axis.DRAGGING_AXIS, view, scale);
-                    getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-                    getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                            getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
-                    getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                            getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-                    getArithmetics().setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
-                    getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
-                    animateSwipe(tabItem, false, 0, swipeAnimation,
-                            createSwipeAnimationListener(tabItem));
+
+                    if (previousTag == null || tag.getPosition() != previousTag.getPosition()) {
+                        createBottomMarginLayoutListener(tabItem).onGlobalLayout();
+                        View view = tabItem.getView();
+                        view.setTag(R.id.tag_properties, tag);
+                        view.setAlpha(swipedTabAlpha);
+                        float swipePosition = calculateSwipePosition();
+                        float scale = getArithmetics().getScale(view, true);
+                        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                                .getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                                .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+                        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
+                        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view,
+                                swipeAnimation.getDirection() == SwipeDirection.LEFT ?
+                                        -1 * swipePosition : swipePosition);
+                        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, scale);
+                        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                                .getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
+                        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                                .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
+                        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
+                        getArithmetics()
+                                .setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
+                        animateSwipe(tabItem, false, 0, swipeAnimation,
+                                createSwipeAnimationListener(tabItem));
+                    } else {
+                        viewRecycler.remove(tabItem);
+                    }
+
+                    previousTag = tag;
                 }
             }
 
