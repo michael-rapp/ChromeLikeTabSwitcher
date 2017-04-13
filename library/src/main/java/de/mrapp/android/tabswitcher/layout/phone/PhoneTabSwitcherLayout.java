@@ -1886,7 +1886,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 int count = getModel().getCount();
-                float previousAttachedPosition = calculateAttachedPosition(count - 1);
+                float previousAttachedPosition =
+                        calculateAttachedPosition(count - addedTabItems.length);
                 float attachedPosition = calculateAttachedPosition(count);
                 TabItem[] tabItems;
 
@@ -3327,8 +3328,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     protected final AbstractDragHandler<?> onInflateLayout() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        toolbar =
-                (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
+        toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
         toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
         getTabSwitcher().addView(toolbar);
         tabContainer = new FrameLayout(getContext());
