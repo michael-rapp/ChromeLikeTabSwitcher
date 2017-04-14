@@ -629,22 +629,24 @@ public class TabSwitcherModel implements Model {
      * Restores a previously saved state.
      *
      * @param savedState
-     *         The saved state as an instance of the class {@link Bundle}. The bundle may not be
-     *         null
+     *         The saved state as an instance of the class {@link Bundle} or null, if no saved state
+     *         is available
      */
-    public final void restoreInstanceState(@NonNull final Bundle savedState) {
-        tabs = savedState.getParcelableArrayList(TABS_EXTRA);
-        switcherShown = savedState.getBoolean(SWITCHER_SHOWN_EXTRA);
-        selectedTab = savedState.getParcelable(SELECTED_TAB_EXTRA);
-        padding = savedState.getIntArray(PADDING_EXTRA);
-        tabIconId = savedState.getInt(TAB_ICON_ID_EXTRA);
-        tabIconBitmap = savedState.getParcelable(TAB_ICON_BITMAP_EXTRA);
-        tabBackgroundColor = savedState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
-        tabTitleTextColor = savedState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
-        tabCloseButtonIconId = savedState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
-        tabCloseButtonIconBitmap = savedState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
-        showToolbars = savedState.getBoolean(SHOW_TOOLBARS_EXTRA);
-        toolbarTitle = savedState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+    public final void restoreInstanceState(@Nullable final Bundle savedState) {
+        if (savedState != null) {
+            tabs = savedState.getParcelableArrayList(TABS_EXTRA);
+            switcherShown = savedState.getBoolean(SWITCHER_SHOWN_EXTRA);
+            selectedTab = savedState.getParcelable(SELECTED_TAB_EXTRA);
+            padding = savedState.getIntArray(PADDING_EXTRA);
+            tabIconId = savedState.getInt(TAB_ICON_ID_EXTRA);
+            tabIconBitmap = savedState.getParcelable(TAB_ICON_BITMAP_EXTRA);
+            tabBackgroundColor = savedState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
+            tabTitleTextColor = savedState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
+            tabCloseButtonIconId = savedState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
+            tabCloseButtonIconBitmap = savedState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
+            showToolbars = savedState.getBoolean(SHOW_TOOLBARS_EXTRA);
+            toolbarTitle = savedState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+        }
     }
 
     /**
