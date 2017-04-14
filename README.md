@@ -4,7 +4,7 @@
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
-![](doc/images/example.png)
+![](doc/images/smartphone_layout.gif)
 
 The library provides the following features:
 
