@@ -131,9 +131,39 @@ tabSwitcher.setDecorator(new Decorator());
 
 In order to observe the state of a `TabSwitcher`, the interface `TabSwitcherListener` listener can be implemented. The interface provides methods, which are invoked, when tabs are added to or removed from a tab switcher, or if the tab switcher has been hidden or shown (only when using the smartphone layout). Instances of the type `TabSwitcherListener` can be added by using a `TabSwitcher`'s `addListener`-method. In order to observe, when the close button of a tab has been clicked, the interface `TabCloseListener` can be implemented and added by using the `addTabCloseListener`-method accordingly.  
 
-## Adding and Removing Tabs
+## Using Animations
 
-TODO
+The class `TabSwitcher` provides various methods to add or remove one or several tabs. If the tab switcher is currently shown, tabs are added or removed in an animated manner. In order to use custom animations, an instance of the class `Animation` can be passed to the methods.
+
+### Swipe Animation
+
+When using the smartphone layout, a `SwipeAnimation` is used to add or remove tabs by default. It causes tabs to be swiped horizontally (or vertically in landscape mode). By specifying a value of the enum `SwipeAnimation.SwipeDirection`, it can be specified, whether the tab should be moved to/from the left or right (respectively to/from the top or bottom in landscape mode). The following code sample illustrates how instances of the class `SwipeAnimation` can be created by using a builder.
+ 
+```java
+Animation animation = new SwipeAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator()).setDirection(SwipeAnimation.SwipeDirection.LEFT).create();
+```
+
+### Reveal Animation
+
+When using the smartphone layout, a `RevealAnimation` can be used to add a single tab. Starting at a specific position, the size of the tab will be animated until it is shown fullscreen. Using a `RevealAnimation` causes the tab switcher to become hidden and the added tab is selected automatically. The following code shows, how a `RevealAnimation` can be instantiated. All of the builder's setter methods are optional. If they are not called, default values are used.
+
+```java
+Animation animation = new RevealAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+```
+
+The following GIF shows a `RevealAnimation` in action.
+
+![](doc/images/reveal_animation.gif)
+
+### PeekAnimation
+
+A `RevealAnimation` can be used to add a tab, if the smartphone layout is used and when the switcher is currently not shown. Similar to a `RevealAnimation`, the size of the added tab is animated, starting at a specific position. The tab is then shown at the bottom (or right in landscape mode) of the tab switcher for a short time. Unlike a `RevealAnimation`, a `PeekAnimation` does not cause the added tab to become selected. Its purpose is to give a preview of the added tab, while another tab is still shown fullscreen. This corresponds to the animation, which is used in the Google Chrome browser when opening a link in a new tab. A `PeekAnimation` can be created by using the builder pattern as shown below.
+
+```java
+Animation animation = new PeekAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+```
+
+![](doc/images/peek_animation.gif)
 
 ## Toolbars and Menus
 
