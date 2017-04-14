@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
@@ -35,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -61,6 +61,81 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model {
 
     /**
+     * The name of the extra, which is used to store the tabs within a bundle.
+     */
+    private static final String TABS_EXTRA = TabSwitcherModel.class.getName() + "::Tabs";
+
+    /**
+     * The name of the extra, which is used to store, whether the tab switcher is shown, or not,
+     * within a bundle.
+     */
+    private static final String SWITCHER_SHOWN_EXTRA =
+            TabSwitcherModel.class.getName() + "::SwitcherShown";
+
+    /**
+     * The name of the extra, which is used to store the selected tab within a bundle.
+     */
+    private static final String SELECTED_TAB_EXTRA =
+            TabSwitcherModel.class.getName() + "::SelectedTab";
+
+    /**
+     * The name of the extra, which is used to store the padding within a bundle.
+     */
+    private static final String PADDING_EXTRA = TabSwitcherModel.class.getName() + "::Padding";
+
+    /**
+     * The name of the extra, which is used to store the resource id of a tab's icon within a
+     * bundle.
+     */
+    private static final String TAB_ICON_ID_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabIconId";
+
+    /**
+     * The name of the extra, which is used to store the bitmap of a tab's icon within a bundle.
+     */
+    private static final String TAB_ICON_BITMAP_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabIconBitmap";
+
+    /**
+     * The name of the extra, which is used to store the background color of a tab within a bundle.
+     */
+    private static final String TAB_BACKGROUND_COLOR_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabBackgroundColor";
+
+    /**
+     * The name of the extra, which is used to store the text color of a tab's title within a
+     * bundle.
+     */
+    private static final String TAB_TITLE_TEXT_COLOR_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabTitleTextColor";
+
+    /**
+     * The name of the extra, which is used to store the resource id of a tab's icon within a
+     * bundle.
+     */
+    private static final String TAB_CLOSE_BUTTON_ICON_ID_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabCloseButtonIconId";
+
+    /**
+     * The name of the extra, which is used to store the bitmap of a tab's icon within a bundle.
+     */
+    private static final String TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA =
+            TabSwitcher.class.getName() + "::TabCloseButtonIconBitmap";
+
+    /**
+     * The name of the extra, which is used to store, whether the toolbars are shown, or not, within
+     * a bundle.
+     */
+    private static final String SHOW_TOOLBARS_EXTRA =
+            TabSwitcher.class.getName() + "::ShowToolbars";
+
+    /**
+     * The name of the extra, which is used to store the title of the toolbar within a bundle.
+     */
+    private static final String TOOLBAR_TITLE_EXTRA =
+            TabSwitcher.class.getName() + "::ToolbarTitle";
+
+    /**
      * The parent view of the tab switcher, the model belongs to.
      */
     private final ViewGroup parent;
@@ -73,7 +148,7 @@ public class TabSwitcherModel implements Model {
     /**
      * A list, which contains the tabs, which are contained by the tab switcher.
      */
-    private final List<Tab> tabs;
+    private ArrayList<Tab> tabs;
 
     /**
      * True, if the tab switcher is currently shown, false otherwise.
@@ -524,6 +599,52 @@ public class TabSwitcherModel implements Model {
         this.toolbarMenuItemListener = null;
         this.tabCloseListeners = new LinkedHashSet<>();
         this.tabPreviewListeners = new LinkedHashSet<>();
+    }
+
+    /**
+     * Saves the current state of the model.
+     *
+     * @return A bundle, which stores the saved state, as an instance of the class {@link Bundle}.
+     * The bundle may not be null
+     */
+    @NonNull
+    public final Bundle saveInstanceState() {
+        Bundle outState = new Bundle();
+        outState.putParcelableArrayList(TABS_EXTRA, tabs);
+        outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
+        outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
+        outState.putIntArray(PADDING_EXTRA, padding);
+        outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
+        outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
+        outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
+        outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
+        outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
+        outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
+        outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
+        outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
+        return outState;
+    }
+
+    /**
+     * Restores a previously saved state.
+     *
+     * @param savedState
+     *         The saved state as an instance of the class {@link Bundle}. The bundle may not be
+     *         null
+     */
+    public final void restoreInstanceState(@NonNull final Bundle savedState) {
+        tabs = savedState.getParcelableArrayList(TABS_EXTRA);
+        switcherShown = savedState.getBoolean(SWITCHER_SHOWN_EXTRA);
+        selectedTab = savedState.getParcelable(SELECTED_TAB_EXTRA);
+        padding = savedState.getIntArray(PADDING_EXTRA);
+        tabIconId = savedState.getInt(TAB_ICON_ID_EXTRA);
+        tabIconBitmap = savedState.getParcelable(TAB_ICON_BITMAP_EXTRA);
+        tabBackgroundColor = savedState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
+        tabTitleTextColor = savedState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
+        tabCloseButtonIconId = savedState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
+        tabCloseButtonIconBitmap = savedState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
+        showToolbars = savedState.getBoolean(SHOW_TOOLBARS_EXTRA);
+        toolbarTitle = savedState.getCharSequence(TOOLBAR_TITLE_EXTRA);
     }
 
     /**

@@ -20,6 +20,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
@@ -60,6 +63,7 @@ import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.DeviceType;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.view.AbstractSavedState;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.DisplayUtil.getDeviceType;
@@ -89,6 +93,54 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
  * @since 0.1.0
  */
 public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model {
+
+    /**
+     * A saved state, which allows to store the state of a {@link TabSwitcher}.
+     */
+    private class TabSwitcherState extends AbstractSavedState {
+
+        /**
+         * The saved layout policy, which is used by the tab switcher.
+         */
+        private LayoutPolicy layoutPolicy;
+
+        /**
+         * The saved state of the model, which is used by the tab switcher.
+         */
+        private Bundle modelState;
+
+        /**
+         * Creates a new saved state, which allows to store the state of a {@link TabSwitcher}.
+         *
+         * @param source
+         *         The parcel to read read from as a instance of the class {@link Parcel}. The
+         *         parcel may not be null
+         */
+        private TabSwitcherState(@NonNull final Parcel source) {
+            super(source);
+            layoutPolicy = (LayoutPolicy) source.readSerializable();
+            modelState = source.readBundle(getClass().getClassLoader());
+        }
+
+        /**
+         * Creates a new saved state, which allows to store the state of a {@link TabSwitcher}.
+         *
+         * @param superState
+         *         The state of the superclass of the view, this saved state corresponds to, as an
+         *         instance of the type {@link Parcelable} or null if no state is available
+         */
+        public TabSwitcherState(@Nullable final Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(final Parcel dest, final int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeSerializable(layoutPolicy);
+            dest.writeBundle(modelState);
+        }
+
+    }
 
     /**
      * A queue, which contains all pending actions.
@@ -183,6 +235,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                         }
 
                     });
+        }
+    }
+
+    /**
+     * Detaches the current layout.
+     */
+    private void detachLayout() {
+        if (layout != null) {
+            layout.detachLayout(false);
+            model.removeListener(layout);
+            layout = null;
         }
     }
 
@@ -835,8 +898,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 Layout newLayout = getLayout();
 
                 if (previousLayout != newLayout) {
-                    layout.detachLayout(false);
-                    model.removeListener(layout);
+                    detachLayout();
                     initializeLayout(newLayout);
                 }
             }
@@ -1317,6 +1379,29 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
         return (layout != null && layout.handleTouchEvent(event)) || super.onTouchEvent(event);
+    }
+
+    @Override
+    public final Parcelable onSaveInstanceState() {
+        detachLayout();
+        executePendingAction();
+        Parcelable superState = super.onSaveInstanceState();
+        TabSwitcherState savedState = new TabSwitcherState(superState);
+        savedState.layoutPolicy = layoutPolicy;
+        savedState.modelState = model.saveInstanceState();
+        return savedState;
+    }
+
+    @Override
+    public final void onRestoreInstanceState(final Parcelable state) {
+        if (state instanceof TabSwitcherState) {
+            TabSwitcherState savedState = (TabSwitcherState) state;
+            this.layoutPolicy = savedState.layoutPolicy;
+            model.restoreInstanceState(savedState.modelState);
+            super.onRestoreInstanceState(savedState.getSuperState());
+        } else {
+            super.onRestoreInstanceState(state);
+        }
     }
 
 }
