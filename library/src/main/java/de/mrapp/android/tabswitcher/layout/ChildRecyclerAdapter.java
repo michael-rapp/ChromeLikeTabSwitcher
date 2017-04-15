@@ -17,12 +17,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -52,9 +50,9 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     private final TabSwitcherDecorator decorator;
 
     /**
-     * A map, which manages the saved instance states of previously removed child views.
+     * A sparse array, which manages the saved instance states of previously removed child views.
      */
-    private final Map<Tab, Bundle> savedInstanceStates;
+    private final SparseArray<Bundle> savedInstanceStates;
 
     /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
@@ -75,7 +73,7 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
         ensureNotNull(decorator, "The decorator may not be null");
         this.tabSwitcher = tabSwitcher;
         this.decorator = decorator;
-        this.savedInstanceStates = new HashMap<>();
+        this.savedInstanceStates = new SparseArray<>();
     }
 
     @NonNull
@@ -92,7 +90,7 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
                                  @NonNull final Tab item, final boolean inflated,
                                  @NonNull final Void... params) {
         int index = tabSwitcher.indexOf(item);
-        Bundle savedInstanceState = savedInstanceStates.get(item);
+        Bundle savedInstanceState = savedInstanceStates.get(item.hashCode());
         decorator.applyDecorator(context, tabSwitcher, view, item, index, savedInstanceState);
     }
 
@@ -100,7 +98,7 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     public final void onRemoveView(@NonNull final View view, @NonNull final Tab item) {
         int index = tabSwitcher.indexOf(item);
         Bundle outState = decorator.saveInstanceState(view, item, index);
-        savedInstanceStates.put(item, outState);
+        savedInstanceStates.put(item.hashCode(), outState);
     }
 
     @Override
