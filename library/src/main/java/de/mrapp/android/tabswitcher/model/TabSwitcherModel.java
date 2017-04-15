@@ -58,7 +58,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class TabSwitcherModel implements Model {
+public class TabSwitcherModel implements Model, Restorable {
 
     /**
      * The name of the extra, which is used to store the tabs within a bundle.
@@ -602,54 +602,6 @@ public class TabSwitcherModel implements Model {
     }
 
     /**
-     * Saves the current state of the model.
-     *
-     * @return A bundle, which stores the saved state, as an instance of the class {@link Bundle}.
-     * The bundle may not be null
-     */
-    @NonNull
-    public final Bundle saveInstanceState() {
-        Bundle outState = new Bundle();
-        outState.putParcelableArrayList(TABS_EXTRA, tabs);
-        outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
-        outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
-        outState.putIntArray(PADDING_EXTRA, padding);
-        outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
-        outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
-        outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
-        outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
-        outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
-        outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
-        outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
-        outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
-        return outState;
-    }
-
-    /**
-     * Restores a previously saved state.
-     *
-     * @param savedState
-     *         The saved state as an instance of the class {@link Bundle} or null, if no saved state
-     *         is available
-     */
-    public final void restoreInstanceState(@Nullable final Bundle savedState) {
-        if (savedState != null) {
-            tabs = savedState.getParcelableArrayList(TABS_EXTRA);
-            switcherShown = savedState.getBoolean(SWITCHER_SHOWN_EXTRA);
-            selectedTab = savedState.getParcelable(SELECTED_TAB_EXTRA);
-            padding = savedState.getIntArray(PADDING_EXTRA);
-            tabIconId = savedState.getInt(TAB_ICON_ID_EXTRA);
-            tabIconBitmap = savedState.getParcelable(TAB_ICON_BITMAP_EXTRA);
-            tabBackgroundColor = savedState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
-            tabTitleTextColor = savedState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
-            tabCloseButtonIconId = savedState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
-            tabCloseButtonIconBitmap = savedState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
-            showToolbars = savedState.getBoolean(SHOW_TOOLBARS_EXTRA);
-            toolbarTitle = savedState.getCharSequence(TOOLBAR_TITLE_EXTRA);
-        }
-    }
-
-    /**
      * Adds a new listener, which should be notified about the model's events.
      *
      * @param listener
@@ -1175,6 +1127,41 @@ public class TabSwitcherModel implements Model {
     public final void removeTabPreviewListener(@NonNull final TabPreviewListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         tabPreviewListeners.remove(listener);
+    }
+
+    @Override
+    public final void saveInstanceState(@NonNull final Bundle outState) {
+        outState.putParcelableArrayList(TABS_EXTRA, tabs);
+        outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
+        outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
+        outState.putIntArray(PADDING_EXTRA, padding);
+        outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
+        outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
+        outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
+        outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
+        outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
+        outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
+        outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
+        outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
+    }
+
+    @Override
+    public final void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
+            switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);
+            selectedTab = savedInstanceState.getParcelable(SELECTED_TAB_EXTRA);
+            padding = savedInstanceState.getIntArray(PADDING_EXTRA);
+            tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
+            tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
+            tabBackgroundColor = savedInstanceState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
+            tabTitleTextColor = savedInstanceState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
+            tabCloseButtonIconId = savedInstanceState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
+            tabCloseButtonIconBitmap =
+                    savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
+            showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
+            toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+        }
     }
 
 }

@@ -1388,7 +1388,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         Parcelable superState = super.onSaveInstanceState();
         TabSwitcherState savedState = new TabSwitcherState(superState);
         savedState.layoutPolicy = layoutPolicy;
-        savedState.modelState = model.saveInstanceState();
+        Bundle modelState = new Bundle();
+        model.saveInstanceState(modelState);
+        savedState.modelState = modelState;
         return savedState;
     }
 
