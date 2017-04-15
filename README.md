@@ -85,6 +85,9 @@ In order to specify how the tabs of a `TabSwitcher` should look like, the abstra
 
 If different views should be inflated for different tabs, the `getViewTypeCount`- and `getViewType`-methods must be overridden as well. The first one should return the total number of different views, which are inflated by the `onInflateView`-method, the latter one must return a distinct integer value, which specifies the view type of a specific tab. The following code illustrates how the class `TabSwitcherDecorator` can be implemented.
 
+Furthermore, the class `TabSwitcherDecorator` enables to override the `onSaveInstanceState`-method in order to store the current state of a tab within a `Bundle`. When the tab is shown again, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state.
+
+
 ```java
 class Decorator extends TabSwitcherDecorator {
 
@@ -135,8 +138,6 @@ class Decorator extends TabSwitcherDecorator {
 
 }
 ```
-
-The class `TabSwitcherDecorator` enables to store the current state of a tab within a `Bundle`. When the tab is shown later, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state.
 
 In order to apply a decorator to a `TabSwitcher` its `setDecorator`-method must be used as shown below. If no decorator has been set, an `IllegalStateException` will be thrown as soon as the view should become visible.
 
