@@ -81,7 +81,9 @@ tab.addCallback(new Tab.Callback() { /* ... */ });
 tabSwitcher.addTab(tab);
 ```
 
-In order to specify how the tabs of a `TabSwitcher` should look like, the abstract class `TabSwitcherDecorator` must be overridden and an instance of the implementing class must be applied to the tab switcher by using its `setDecorator`-method. This is very similar to the paradigm of adapters commonly used in Android developing for populating a `ListView`, `RecyclerView`, etc. Each custom implementation of the class `TabSwitcherDecorator` must override the `onInflateView`- and `onShowTab`-method. The first one is used to inflate the view, which should be used by a tab, the latter allows to customize the appearance of the inflated view, depending on the current state. If different views should be inflated for different tabs, the `getViewTypeCount`- and `getViewType`-methods must be overridden as well. The first one should return the total number of different views, which are inflated by the `onInflateView`-method, the latter one must return a distinct integer value, which specifies the view type of a specific tab. The following code illustrates how the class `TabSwitcherDecorator` can be implemented.
+In order to specify how the tabs of a `TabSwitcher` should look like, the abstract class `TabSwitcherDecorator` must be overridden and an instance of the implementing class must be applied to the tab switcher by using its `setDecorator`-method. This is very similar to the paradigm of adapters commonly used in Android developing for populating a `ListView`, `RecyclerView`, etc. Each custom implementation of the class `TabSwitcherDecorator` must override the `onInflateView`- and `onShowTab`-method. The first one is used to inflate the view, which should be used by a tab, the latter allows to customize the appearance of the inflated view, depending on the current state. Within the scope of the `onShowTab`-method the decorator's `findViewById`-method can be used to reference views. It uses a built-in view holder for better performance.
+
+If different views should be inflated for different tabs, the `getViewTypeCount`- and `getViewType`-methods must be overridden as well. The first one should return the total number of different views, which are inflated by the `onInflateView`-method, the latter one must return a distinct integer value, which specifies the view type of a specific tab. The following code illustrates how the class `TabSwitcherDecorator` can be implemented.
 
 ```java
 class Decorator extends TabSwitcherDecorator {
@@ -108,6 +110,10 @@ class Decorator extends TabSwitcherDecorator {
             Button button = findViewById(R.id.button);
             button.setText(tab.getTitle());
         }
+        
+        if (savedInstanceState != null) {
+            // Restore the tab's state if necessary
+        }
     }
 
     @Override
@@ -120,9 +126,17 @@ class Decorator extends TabSwitcherDecorator {
         Bundle parameters = tab.getParameters();
         return parameters != null ? parameters.getInt("view_type") : 0;
     }
+    
+    @Override
+    public void onSaveInstanceState(@NonNull View view, @NonNull Tab tab, int index,
+                                    int viewType, @NonNull Bundle outState) {
+        // Store the tab's current state in the Bundle outState if necessary
+    }
 
 }
 ```
+
+The class `TabSwitcherDecorator` enables to store the current state of a tab within a `Bundle`. When the tab is shown later, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state.
 
 In order to apply a decorator to a `TabSwitcher` its `setDecorator`-method must be used as shown below. If no decorator has been set, an `IllegalStateException` will be thrown as soon as the view should become visible.
 
