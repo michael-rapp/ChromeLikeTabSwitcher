@@ -161,6 +161,8 @@ Animation animation = new SwipeAnimation.Builder().setDuration(2000)
         .create();
 ```
 
+![](doc/images/swipe_animation.gif)
+
 ### Reveal Animation
 
 When using the smartphone layout, a `RevealAnimation` can be used to add a single tab. Starting at a specific position, the size of the tab will be animated until it is shown fullscreen. Using a `RevealAnimation` causes the tab switcher to become hidden and the added tab is selected automatically. The following code shows, how a `RevealAnimation` can be instantiated. All of the builder's setter methods are optional. If they are not called, default values are used.
@@ -170,8 +172,6 @@ Animation animation = new RevealAnimation.Builder().setDuration(2000)
         .setInterpolator(new LinearInterpolator().setX(20).setY(50)
         .create();
 ```
-
-The following GIF shows a `RevealAnimation` in action.
 
 ![](doc/images/reveal_animation.gif)
 
