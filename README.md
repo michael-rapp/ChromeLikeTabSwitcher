@@ -142,7 +142,8 @@ When using the smartphone layout, a `SwipeAnimation` is used to add or remove ta
  
 ```java
 Animation animation = new SwipeAnimation.Builder().setDuration(2000)
-        .setInterpolator(new LinearInterpolator()).setDirection(SwipeAnimation.SwipeDirection.LEFT).create();
+        .setInterpolator(new LinearInterpolator()).setDirection(SwipeAnimation.SwipeDirection.LEFT)
+        .create();
 ```
 
 ### Reveal Animation
@@ -151,7 +152,8 @@ When using the smartphone layout, a `RevealAnimation` can be used to add a singl
 
 ```java
 Animation animation = new RevealAnimation.Builder().setDuration(2000)
-        .setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+        .setInterpolator(new LinearInterpolator().setX(20).setY(50)
+        .create();
 ```
 
 The following GIF shows a `RevealAnimation` in action.
@@ -164,7 +166,8 @@ A `RevealAnimation` can be used to add a tab, if the smartphone layout is used a
 
 ```java
 Animation animation = new PeekAnimation.Builder().setDuration(2000)
-        .setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+        .setInterpolator(new LinearInterpolator().setX(20).setY(50)
+        .create();
 ```
 
 ![](doc/images/peek_animation.gif)
