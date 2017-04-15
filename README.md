@@ -36,20 +36,21 @@ The library's tab switcher is implemented as a custom view `TabSwitcher`. It can
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<de.mrapp.android.tabswitcher.TabSwitcher android:id="@+id/tab_switcher"
-                                          xmlns:android="http://schemas.android.com/apk/res/android"
-                                          xmlns:custom="http://schemas.android.com/apk/res-auto"
-                                          android:layout_width="match_parent"
-                                          android:layout_height="match_parent"
-                                          android:background="@color/tab_switcher_background_color"
-                                          custom:layoutPolicy="auto"
-                                          custom:tabIcon="@drawable/ic_file_outline_18dp"
-                                          custom:tabBackgroundColor="@color/tab_background_color"
-                                          custom:tabTitleTextColor="@color/tab_title_text_color"
-                                          custom:tabCloseButtonIcon="@ic_close_18dp"
-                                          custom:toolbarTitle="@string/tab_switcher_toolbar_title"
-                                          custom:toolbarMenu="@menu/tab_switcher_toolbar_menu"
-                                          custom:toolbarNavigationIcon="@drawable/ic_add_box_white_24dp"/>
+<de.mrapp.android.tabswitcher.TabSwitcher 
+        android:id="@+id/tab_switcher"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/tab_switcher_background_color"
+        custom:layoutPolicy="auto"
+        custom:tabIcon="@drawable/ic_file_outline_18dp"
+        custom:tabBackgroundColor="@color/tab_background_color"
+        custom:tabTitleTextColor="@color/tab_title_text_color"
+        custom:tabCloseButtonIcon="@ic_close_18dp"
+        custom:toolbarTitle="@string/tab_switcher_toolbar_title"
+        custom:toolbarMenu="@menu/tab_switcher_toolbar_menu"
+        custom:toolbarNavigationIcon="@drawable/ic_add_box_white_24dp"/>
 ```
 
 When instantiating a `TabSwitcher` programmatically, the following Java code can be used. For all XML attributes shown in the example above, corresponding setter methods are available. 
@@ -140,7 +141,8 @@ The class `TabSwitcher` provides various methods to add or remove one or several
 When using the smartphone layout, a `SwipeAnimation` is used to add or remove tabs by default. It causes tabs to be swiped horizontally (or vertically in landscape mode). By specifying a value of the enum `SwipeAnimation.SwipeDirection`, it can be specified, whether the tab should be moved to/from the left or right (respectively to/from the top or bottom in landscape mode). The following code sample illustrates how instances of the class `SwipeAnimation` can be created by using a builder.
  
 ```java
-Animation animation = new SwipeAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator()).setDirection(SwipeAnimation.SwipeDirection.LEFT).create();
+Animation animation = new SwipeAnimation.Builder().setDuration(2000)
+        .setInterpolator(new LinearInterpolator()).setDirection(SwipeAnimation.SwipeDirection.LEFT).create();
 ```
 
 ### Reveal Animation
@@ -148,7 +150,8 @@ Animation animation = new SwipeAnimation.Builder().setDuration(2000).setInterpol
 When using the smartphone layout, a `RevealAnimation` can be used to add a single tab. Starting at a specific position, the size of the tab will be animated until it is shown fullscreen. Using a `RevealAnimation` causes the tab switcher to become hidden and the added tab is selected automatically. The following code shows, how a `RevealAnimation` can be instantiated. All of the builder's setter methods are optional. If they are not called, default values are used.
 
 ```java
-Animation animation = new RevealAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+Animation animation = new RevealAnimation.Builder().setDuration(2000)
+        .setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
 ```
 
 The following GIF shows a `RevealAnimation` in action.
@@ -160,7 +163,8 @@ The following GIF shows a `RevealAnimation` in action.
 A `RevealAnimation` can be used to add a tab, if the smartphone layout is used and when the switcher is currently not shown. Similar to a `RevealAnimation`, the size of the added tab is animated, starting at a specific position. The tab is then shown at the bottom (or right in landscape mode) of the tab switcher for a short time. Unlike a `RevealAnimation`, a `PeekAnimation` does not cause the added tab to become selected. Its purpose is to give a preview of the added tab, while another tab is still shown fullscreen. This corresponds to the animation, which is used in the Google Chrome browser when opening a link in a new tab. A `PeekAnimation` can be created by using the builder pattern as shown below.
 
 ```java
-Animation animation = new PeekAnimation.Builder().setDuration(2000).setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
+Animation animation = new PeekAnimation.Builder().setDuration(2000)
+        .setInterpolator(new LinearInterpolator().setX(20).setY(50).create();
 ```
 
 ![](doc/images/peek_animation.gif)
@@ -186,7 +190,7 @@ In order to provide a button, similar to the one, which is used in Google's Chro
 </menu>
 ```
 
-In order to register a menu's `TabSwitcherButton` as a listener of a `TabSwitcher`, the static `setupWithMenu`-method can be used. It automatically registeres all items of a `Menu`, that use a `TabSwitcherButton`, as listeners of a specific `TabSwitcher`. The `OnClickListener`, which can optionally be specified, is invoked when one of these buttons is clicked. The following code shows, how the method can be used together with the toolbar menu of a `TabSwitcher`. However, it also works with arbitrary menus.
+In order to register a menu's `TabSwitcherButton` as a listener of a `TabSwitcher`, the static `setupWithMenu`-method can be used. It automatically registers all items of a `Menu`, that use a `TabSwitcherButton`, as listeners of a specific `TabSwitcher`. The `OnClickListener`, which can optionally be specified, is invoked when one of these buttons is clicked. The following code shows, how the method can be used together with the toolbar menu of a `TabSwitcher`. However, it also works with arbitrary menus.
 
 ```java
 tabSwitcher.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
