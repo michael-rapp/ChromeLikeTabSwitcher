@@ -167,7 +167,38 @@ Animation animation = new PeekAnimation.Builder().setDuration(2000).setInterpola
 
 ## Toolbars and Menus
 
-TODO
+The view `TabSwitcher`, which is provided by the library, allows to show a toolbar. By default, the toolbar is always hidden. In order to show it, the `showToolbars`-method must be used. When using the smartphone layout, the toolbar is shown when the tab switcher is currently shown, or if no tabs are contained by the tab switcher. When using the tablet layout, two toolbars - one to the left and one to the right of the tabs - are always shown. The toolbars can be referenced by using the `getToolbars`-method. It returns an array, which contains the layout's toolbars. When using the smartphone layout, only one `Toolbar` is contained by the array, when using the tablet layout, the left one is contained at index 0 and the right one is contained at index 1.
+
+The class `TabSwitcher` provides a few methods, which allow to set the toolbar's title, navigation icon and menu. The `setToolbarTitle`-method allows to set a title. When using the tablet layout, the title is applied to the left toolbar. The `setToolbarNavigationIcon`-method allows to specify the navigation icon of the toolbar as well as a listener which is invoked when the icon is clicked. When using the tablet layout, the navigation icon is applied to the left toolbar. In order to add a menu to a `TabSwitcher`'s toolbar, the `inflateToolbarMenu`-method can be used. Besides the resource id of the menu resource, which should be applied, it also allows to specify a listener, which is notified when a menu item is clicked.
+
+In order to provide a button, similar to the one, which is used in Google's Chrome browser, which shows the total number of tabs contained by a `TabSwitcher` and allows to toggle the visibility of the tab switcher, the class `TabSwitcherButton` is exposed by the library. It implements a custom `ImageButton`, which implements the interface `TabSwitcherListener` in order to keep the displayed number of tabs up-to-date. The appearance of the button is given by the class `TabSwitcherDrawable`. If a `TabSwitcherButton` should be used as part of a toolbar menu, it must be included in a menu resource as shown in the following XML code.
+
+```xml
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/toggle_tab_switcher_menu_item"
+        android:title="@string/toggle_tab_switcher_menu_item"
+        app:actionLayout="@layout/tab_switcher_menu_item"
+        app:showAsAction="ifRoom"/>
+
+</menu>
+```
+
+In order to register a menu's `TabSwitcherButton` as a listener of a `TabSwitcher`, the static `setupWithMenu`-method can be used. It automatically registeres all items of a `Menu`, that use a `TabSwitcherButton`, as listeners of a specific `TabSwitcher`. The `OnClickListener`, which can optionally be specified, is invoked when one of these buttons is clicked. The following code shows, how the method can be used together with the toolbar menu of a `TabSwitcher`. However, it also works with arbitrary menus.
+
+```java
+tabSwitcher.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+    
+    @Override
+    public void onGlobalLayout() {
+        Menu menu = tabSwitcher.getToolbarMenu();
+        TabSwitcher.setupWithMenu(tabSwitcher, menu, new OnClickListener() { /* ... */ });
+    }
+    
+});
+```
 
 ## Padding
 
