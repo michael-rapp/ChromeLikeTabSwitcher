@@ -11,7 +11,7 @@ The library provides the following features:
 - Provides layouts optimized for smartphones and tablets.
 - Tabs can dynamically be added and removed either programmatically or by using the UI. Different types of animations are available for said purpose.
 - The tab switcher's state is automatically restored on configuration changes.
-- In order to provide great performance, views are automatically recycled and and the previews of tabs are rendered as bitmaps.
+- In order to provide great performance, views are automatically recycled and the previews of tabs are rendered as bitmaps.
 - The apperance of tabs, e.g. their background or title color, can be customized.
  
 ## License Agreement
