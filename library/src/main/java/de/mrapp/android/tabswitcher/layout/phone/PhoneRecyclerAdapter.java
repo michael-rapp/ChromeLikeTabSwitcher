@@ -48,6 +48,7 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -186,6 +187,13 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
 
         viewHolder.child = null;
         childViewRecycler.remove(tab);
+    }
+
+    /**
+     * Adapts the log level.
+     */
+    private void adaptLogLevel() {
+        dataBinder.setLogLevel(model.getLogLevel());
     }
 
     /**
@@ -482,6 +490,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
         this.tabTitleTextColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color);
         this.viewRecycler = null;
+        adaptLogLevel();
     }
 
     /**
@@ -651,6 +660,11 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
         if (tabItem != null) {
             adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
         }
+    }
+
+    @Override
+    public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
+        adaptLogLevel();
     }
 
     @Override

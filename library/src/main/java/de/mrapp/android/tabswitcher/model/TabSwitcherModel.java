@@ -49,6 +49,7 @@ import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
+import de.mrapp.android.util.logging.LogLevel;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -60,6 +61,11 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public class TabSwitcherModel implements Model, Restorable {
+
+    /**
+     * The name of the extra, which is used to store the log level within a bundle.
+     */
+    private static final String LOG_LEVEL_EXTRA = TabSwitcherModel.class.getName() + "::LogLevel";
 
     /**
      * The name of the extra, which is used to store the tabs within a bundle.
@@ -145,6 +151,11 @@ public class TabSwitcherModel implements Model, Restorable {
      * A set, which contains the listeners, which are notified about the model's events.
      */
     private final Set<Listener> listeners;
+
+    /**
+     * The log level, which is used for logging.
+     */
+    private LogLevel logLevel;
 
     /**
      * A list, which contains the tabs, which are contained by the tab switcher.
@@ -280,6 +291,19 @@ public class TabSwitcherModel implements Model, Restorable {
         }
 
         return false;
+    }
+
+    /**
+     * Notifies the listeners, that the log level has been changed.
+     *
+     * @param logLevel
+     *         The log level, which has been set, as a value of the enum {@link LogLevel}. The log
+     *         level may not be null
+     */
+    private void notifyOnLogLevelChanged(@NonNull final LogLevel logLevel) {
+        for (Listener listener : listeners) {
+            listener.onLogLevelChanged(logLevel);
+        }
     }
 
     /**
@@ -586,6 +610,7 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
+        this.logLevel = LogLevel.INFO;
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
@@ -723,6 +748,19 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final TabSwitcherDecorator getDecorator() {
         return decorator;
+    }
+
+    @NonNull
+    @Override
+    public final LogLevel getLogLevel() {
+        return logLevel;
+    }
+
+    @Override
+    public final void setLogLevel(@NonNull final LogLevel logLevel) {
+        ensureNotNull(logLevel, "The log level may not be null");
+        this.logLevel = logLevel;
+        notifyOnLogLevelChanged(logLevel);
     }
 
     @Override
@@ -1149,6 +1187,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void saveInstanceState(@NonNull final Bundle outState) {
+        outState.putSerializable(LOG_LEVEL_EXTRA, logLevel);
         outState.putParcelableArrayList(TABS_EXTRA, tabs);
         outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
         outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
@@ -1167,6 +1206,7 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
         if (savedInstanceState != null) {
+            logLevel = (LogLevel) savedInstanceState.getSerializable(LOG_LEVEL_EXTRA);
             tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
             switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);
             selectedTab = savedInstanceState.getParcelable(SELECTED_TAB_EXTRA);

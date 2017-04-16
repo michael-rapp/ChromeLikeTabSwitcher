@@ -40,6 +40,7 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.logging.Logger;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -233,6 +234,11 @@ public abstract class AbstractTabSwitcherLayout
     private final int dragThreshold;
 
     /**
+     * The logger, which is used for logging.
+     */
+    private final Logger logger;
+
+    /**
      * The callback, which is notified about the layout's events.
      */
     private Callback callback;
@@ -388,6 +394,17 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns the logger, which is used for logging.
+     *
+     * @return The logger, which is used for logging, as an instance of the class {@link Logger}.
+     * The logger may not be null
+     */
+    @NonNull
+    protected final Logger getLogger() {
+        return logger;
+    }
+
+    /**
      * Returns the context, which is used by the layout.
      *
      * @return The context, which is used by the layout, as an instance of the class {@link
@@ -422,6 +439,7 @@ public abstract class AbstractTabSwitcherLayout
         this.arithmetics = arithmetics;
         this.dragThreshold =
                 getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
+        this.logger = new Logger(model.getLogLevel());
         this.callback = null;
         this.runningAnimations = 0;
         this.flingAnimation = null;
@@ -551,6 +569,9 @@ public abstract class AbstractTabSwitcherLayout
             flingAnimation.setDuration(duration);
             flingAnimation.setInterpolator(new DecelerateInterpolator());
             getTabSwitcher().startAnimation(flingAnimation);
+            logger.logVerbose(getClass(),
+                    "Started fling animation using a distance of " + distance +
+                            " pixels and a duration of " + duration + " milliseconds");
         }
     }
 
@@ -560,6 +581,7 @@ public abstract class AbstractTabSwitcherLayout
             flingAnimation.cancel();
             flingAnimation = null;
             dragHandler.handleRelease(null, dragThreshold);
+            logger.logVerbose(getClass(), "Canceled fling animation");
         }
     }
 

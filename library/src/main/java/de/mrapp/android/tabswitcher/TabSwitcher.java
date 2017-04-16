@@ -63,6 +63,7 @@ import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.DeviceType;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractSavedState;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -482,6 +483,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @NonNull
     private Model.Listener createModelListener() {
         return new Model.Listener() {
+
+            @Override
+            public void onLogLevelChanged(@NonNull final LogLevel logLevel) {
+
+            }
 
             @Override
             public void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
@@ -1191,6 +1197,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final TabSwitcherDecorator getDecorator() {
         return model.getDecorator();
+    }
+
+    @NonNull
+    @Override
+    public final LogLevel getLogLevel() {
+        return model.getLogLevel();
+    }
+
+    @Override
+    public final void setLogLevel(@NonNull final LogLevel logLevel) {
+        model.setLogLevel(logLevel);
     }
 
     @Override

@@ -62,6 +62,7 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
+import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -384,6 +385,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The index of the first visible tab.
      */
     private int firstVisibleIndex;
+
+    /**
+     * Adapts the log level.
+     */
+    private void adaptLogLevel() {
+        viewRecycler.setLogLevel(getModel().getLogLevel());
+        childViewRecycler.setLogLevel(getModel().getLogLevel());
+    }
 
     /**
      * Adapts the decorator.
@@ -3331,6 +3340,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
+        adaptLogLevel();
         adaptDecorator();
         adaptToolbarMargin();
         return dragHandler;
@@ -3369,13 +3379,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    public final void onSwitcherShown() {
-        animateShowSwitcher();
-    }
-
-    @Override
-    public final void onSwitcherHidden() {
-        animateHideSwitcher();
+    public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
+        adaptLogLevel();
     }
 
     @Override
@@ -3384,10 +3389,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         super.onDecoratorChanged(decorator);
     }
 
+
+    @Override
+    public final void onSwitcherShown() {
+        getLogger().logInfo(getClass(), "Showed tab switcher");
+        animateShowSwitcher();
+    }
+
+    @Override
+    public final void onSwitcherHidden() {
+        getLogger().logInfo(getClass(), "Hid tab switcher");
+        animateHideSwitcher();
+    }
     @Override
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
+        getLogger().logInfo(getClass(), "Selected tab at index " + index);
+
         if (switcherHidden) {
             animateHideSwitcher();
         } else {
@@ -3401,6 +3420,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
+        getLogger().logInfo(getClass(),
+                "Added tab at index " + index + " using a " + animation.getClass().getSimpleName());
+
         if (animation instanceof PeekAnimation && !getModel().isEmpty()) {
             ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
@@ -3422,6 +3444,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                      @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for adding multiple tabs");
+        getLogger().logInfo(getClass(),
+                "Added " + tabs.length + " tabs at index " + index + " using a " +
+                        animation.getClass().getSimpleName());
         addAllTabs(index, tabs, animation);
     }
 
@@ -3431,6 +3456,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                    @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for removing tabs");
+        getLogger().logInfo(getClass(), "Removed tab at index " + index + " using a " +
+                animation.getClass().getSimpleName());
         TabItem removedTabItem = TabItem.create(viewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
@@ -3470,6 +3497,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                        @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for removing tabs ");
+        getLogger().logInfo(getClass(),
+                "Removed all tabs using a " + animation.getClass().getSimpleName());
 
         if (!getModel().isSwitcherShown()) {
             viewRecycler.removeAll();
@@ -3557,44 +3586,60 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             }
         }
 
-        return isOvershootingAtEnd(
+        DragState overshoot = isOvershootingAtEnd(
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create()) ?
                 DragState.OVERSHOOT_END :
                 (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);
+        getLogger().logVerbose(getClass(),
+                "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
+                        dragState + ", overshoot is " + overshoot);
+        return overshoot;
     }
 
     @Override
     public final void onClick(@NonNull final TabItem tabItem) {
         getModel().selectTab(tabItem.getTab());
+        getLogger().logVerbose(getClass(), "Clicked tab at index " + tabItem.getIndex());
     }
 
     @Override
     public final void onRevertStartOvershoot() {
         animateRevertStartOvershoot();
+        getLogger().logVerbose(getClass(), "Reverting overshoot at the start");
     }
 
     @Override
     public final void onRevertEndOvershoot() {
         animateRevertEndOvershoot();
+        getLogger().logVerbose(getClass(), "Reverting overshoot at the end");
     }
 
     public final void onStartOvershoot(final float position) {
         startOvershoot(position);
+        getLogger().logVerbose(getClass(),
+                "Overshooting at the start using a position of " + position + " pixels");
     }
 
     @Override
     public final void onTiltOnStartOvershoot(final float angle) {
         tiltOnStartOvershoot(angle);
+        getLogger().logVerbose(getClass(),
+                "Tilting on start overshoot using an angle of " + angle + " degrees");
     }
 
     @Override
     public final void onTiltOnEndOvershoot(final float angle) {
         tiltOnEndOvershoot(angle);
+        getLogger().logVerbose(getClass(),
+                "Tilting on end overshoot using an angle of " + angle + " degrees");
     }
 
     @Override
     public final void onSwipe(@NonNull final TabItem tabItem, final float distance) {
         swipe(tabItem, distance);
+        getLogger().logVerbose(getClass(),
+                "Swiping tab at index " + tabItem.getIndex() + ". Current swipe distance is " +
+                        distance + " pixels");
     }
 
     @Override
@@ -3614,6 +3659,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             animateSwipe(tabItem, false, 0, new SwipeAnimation.Builder().create(),
                     createSwipeAnimationListener(tabItem));
         }
+
+        getLogger().logVerbose(getClass(),
+                "Ended swiping tab at index " + tabItem.getIndex() + ". Tab will " +
+                        (remove ? "" : "not ") + "be removed");
     }
 
 }

@@ -37,6 +37,7 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.util.logging.LogLevel;
 
 /**
  * Defines the interface, a class, which implements the model of a {@link TabSwitcher} must
@@ -52,6 +53,15 @@ public interface Model extends Iterable<Tab> {
      * implement.
      */
     interface Listener {
+
+        /**
+         * The method, which is invoked, when the log level has been changed.
+         *
+         * @param logLevel
+         *         The log level, which has been set, as a value of the enum {@link LogLevel}. The
+         *         log level may not be null
+         */
+        void onLogLevelChanged(@NonNull LogLevel logLevel);
 
         /**
          * The method, which is invoked, when the decorator has been changed.
@@ -298,6 +308,24 @@ public interface Model extends Iterable<Tab> {
      * decorator has been set
      */
     TabSwitcherDecorator getDecorator();
+
+    /**
+     * Returns the log level, which is used for logging.
+     *
+     * @return The log level, which is used for logging, as a value of the enum {@link LogLevel}.
+     * The log level may not be null
+     */
+    @NonNull
+    LogLevel getLogLevel();
+
+    /**
+     * Sets the log level, which should be used for logging.
+     *
+     * @param logLevel
+     *         The log level, which should be set, as a value of the enum {@link LogLevel}. The log
+     *         level may not be null
+     */
+    void setLogLevel(@NonNull LogLevel logLevel);
 
     /**
      * Returns, whether the tab switcher is empty, or not.
