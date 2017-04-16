@@ -58,7 +58,6 @@ import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
-import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -390,8 +389,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        childViewRecycler
-                .setAdapter(new ChildRecyclerAdapter(getTabSwitcher(), getModel().getDecorator()));
+        childViewRecycler.setAdapter(getModel().getChildRecyclerAdapter());
         recyclerAdapter.clearCachedPreviews();
     }
 

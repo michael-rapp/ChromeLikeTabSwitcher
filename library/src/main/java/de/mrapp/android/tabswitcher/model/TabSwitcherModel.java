@@ -48,6 +48,7 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -136,9 +137,9 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcher.class.getName() + "::ToolbarTitle";
 
     /**
-     * The parent view of the tab switcher, the model belongs to.
+     * The tab switcher, the model belongs to.
      */
-    private final ViewGroup parent;
+    private final TabSwitcher tabSwitcher;
 
     /**
      * A set, which contains the listeners, which are notified about the model's events.
@@ -165,6 +166,11 @@ public class TabSwitcherModel implements Model, Restorable {
      * tabs.
      */
     private TabSwitcherDecorator decorator;
+
+    /**
+     * The adapter, which allows to inflate the child views of tabs.
+     */
+    private ChildRecyclerAdapter childRecyclerAdapter;
 
     /**
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
@@ -572,18 +578,19 @@ public class TabSwitcherModel implements Model, Restorable {
     /**
      * Creates a new model of a {@link TabSwitcher}.
      *
-     * @param parent
-     *         The parent view of the tab switcher, the model belongs to, as an instance of the
-     *         class {@link ViewGroup}. The parent may not be null
+     * @param tabSwitcher
+     *         The tab switcher, the model belongs to, as an instance of the class {@link
+     *         ViewGroup}. The parent may not be null
      */
-    public TabSwitcherModel(@NonNull final ViewGroup parent) {
-        ensureNotNull(parent, "The parent may not be null");
-        this.parent = parent;
+    public TabSwitcherModel(@NonNull final TabSwitcher tabSwitcher) {
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
         this.decorator = null;
+        this.childRecyclerAdapter = null;
         this.padding = new int[]{0, 0, 0, 0};
         this.tabIconId = -1;
         this.tabIconBitmap = null;
@@ -689,16 +696,27 @@ public class TabSwitcherModel implements Model, Restorable {
         return tabPreviewListeners;
     }
 
+    /**
+     * Returns the adapter, which allows to inflate the child views of tabs.
+     *
+     * @return The adapter, which allows to inflate the child views of tabs, as an instance of the
+     * class {@link ChildRecyclerAdapter}
+     */
+    public final ChildRecyclerAdapter getChildRecyclerAdapter() {
+        return childRecyclerAdapter;
+    }
+
     @NonNull
     @Override
     public final Context getContext() {
-        return parent.getContext();
+        return tabSwitcher.getContext();
     }
 
     @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
+        this.childRecyclerAdapter = new ChildRecyclerAdapter(tabSwitcher, decorator);
         notifyOnDecoratorChanged(decorator);
     }
 
@@ -947,8 +965,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final int getPaddingStart() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return parent.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? getPaddingRight() :
-                    getPaddingLeft();
+            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
+                    getPaddingRight() : getPaddingLeft();
         }
 
         return getPaddingLeft();
@@ -957,8 +975,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final int getPaddingEnd() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return parent.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? getPaddingLeft() :
-                    getPaddingRight();
+            return tabSwitcher.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ?
+                    getPaddingLeft() : getPaddingRight();
         }
 
         return getPaddingRight();
@@ -1143,6 +1161,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
+        childRecyclerAdapter.saveInstanceState(outState);
     }
 
     @Override
@@ -1161,6 +1180,7 @@ public class TabSwitcherModel implements Model, Restorable {
                     savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+            childRecyclerAdapter.restoreInstanceState(savedInstanceState);
         }
     }
 

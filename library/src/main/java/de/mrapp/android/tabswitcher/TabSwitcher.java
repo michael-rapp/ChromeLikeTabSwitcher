@@ -258,20 +258,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
-     * Detaches the current layout.
-     *
-     * @param tabsOnly
-     *         True, if only the tabs should be detached, false otherwise
-     */
-    private void detachLayout(final boolean tabsOnly) {
-        if (layout != null) {
-            layout.detachLayout(tabsOnly);
-            model.removeListener(layout);
-            layout = null;
-        }
-    }
-
-    /**
      * Obtains all attributes from a specific attribute set.
      *
      * @param attributeSet
@@ -922,7 +908,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 Layout newLayout = getLayout();
 
                 if (previousLayout != newLayout) {
-                    detachLayout(false);
+                    layout.detachLayout(false);
+                    model.removeListener(layout);
                     initializeLayout(newLayout, false);
                 }
             }
@@ -1407,16 +1394,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final Parcelable onSaveInstanceState() {
-        detachLayout(true);
-        executePendingAction();
-        getViewTreeObserver().addOnGlobalLayoutListener(
-                new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
         Parcelable superState = super.onSaveInstanceState();
         TabSwitcherState savedState = new TabSwitcherState(superState);
         savedState.layoutPolicy = layoutPolicy;
-        Bundle modelState = new Bundle();
-        model.saveInstanceState(modelState);
-        savedState.modelState = modelState;
+        savedState.modelState = new Bundle();
+        layout.detachLayout(true);
+        model.removeListener(layout);
+        layout = null;
+        executePendingAction();
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
+        model.saveInstanceState(savedState.modelState);
         return savedState;
     }
 
