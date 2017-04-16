@@ -97,7 +97,24 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     /**
      * A saved state, which allows to store the state of a {@link TabSwitcher}.
      */
-    private class TabSwitcherState extends AbstractSavedState {
+    private static class TabSwitcherState extends AbstractSavedState {
+
+        /**
+         * A creator, which allows to create instances of the class {@link TabSwitcherState}.
+         */
+        public static Creator<TabSwitcherState> CREATOR = new Creator<TabSwitcherState>() {
+
+            @Override
+            public TabSwitcherState createFromParcel(final Parcel source) {
+                return new TabSwitcherState(source);
+            }
+
+            @Override
+            public TabSwitcherState[] newArray(final int size) {
+                return new TabSwitcherState[size];
+            }
+
+        };
 
         /**
          * The saved layout policy, which is used by the tab switcher.
@@ -129,7 +146,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
          *         The state of the superclass of the view, this saved state corresponds to, as an
          *         instance of the type {@link Parcelable} or null if no state is available
          */
-        public TabSwitcherState(@Nullable final Parcelable superState) {
+        TabSwitcherState(@Nullable final Parcelable superState) {
             super(superState);
         }
 
