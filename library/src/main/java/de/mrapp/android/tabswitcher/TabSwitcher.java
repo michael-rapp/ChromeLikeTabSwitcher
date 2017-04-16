@@ -192,7 +192,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
         getViewTreeObserver().addOnGlobalLayoutListener(
-                new LayoutListenerWrapper(this, createGlobalLayoutListener()));
+                new LayoutListenerWrapper(this, createGlobalLayoutListener(false)));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -201,11 +201,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     /**
      * Initializes a specific layout.
      *
+     * @param inflatedTabsOnly
+     *         True, if only the tabs should be inflated, false otherwise
      * @param layout
      *         The layout, which should be initialized, as a value of the enum {@link Layout}. The
      *         layout may not be null
      */
-    private void initializeLayout(@NonNull final Layout layout) {
+    private void initializeLayout(@NonNull final Layout layout, final boolean inflatedTabsOnly) {
         if (layout == Layout.TABLET) {
             // TODO: Use tablet layout once implemented
             PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
@@ -217,7 +219,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
         this.layout.setCallback(createLayoutCallback());
         this.model.addListener(this.layout);
-        this.layout.inflateLayout();
+        this.layout.inflateLayout(inflatedTabsOnly);
         final ViewGroup tabContainer = getTabContainer();
         assert tabContainer != null;
 
@@ -240,10 +242,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     /**
      * Detaches the current layout.
+     *
+     * @param tabsOnly
+     *         True, if only the tabs should be detached, false otherwise
      */
-    private void detachLayout() {
+    private void detachLayout(final boolean tabsOnly) {
         if (layout != null) {
-            layout.detachLayout(false);
+            layout.detachLayout(tabsOnly);
             model.removeListener(layout);
             layout = null;
         }
@@ -626,18 +631,20 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      * Creates and returns a listener, which allows to inflate the view's layout once the view is
      * laid out.
      *
+     * @param inflateTabsOnly
+     *         True, if only the tabs should be inflated, false otherwise
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createGlobalLayoutListener() {
+    private OnGlobalLayoutListener createGlobalLayoutListener(final boolean inflateTabsOnly) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
                 ensureNotNull(getDecorator(), "No decorator has been set",
                         IllegalStateException.class);
-                initializeLayout(getLayout());
+                initializeLayout(getLayout(), inflateTabsOnly);
             }
 
         };
@@ -898,8 +905,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 Layout newLayout = getLayout();
 
                 if (previousLayout != newLayout) {
-                    detachLayout();
-                    initializeLayout(newLayout);
+                    detachLayout(false);
+                    initializeLayout(newLayout, false);
                 }
             }
         }
@@ -1383,8 +1390,10 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final Parcelable onSaveInstanceState() {
-        detachLayout();
+        detachLayout(true);
         executePendingAction();
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
         Parcelable superState = super.onSaveInstanceState();
         TabSwitcherState savedState = new TabSwitcherState(superState);
         savedState.layoutPolicy = layoutPolicy;

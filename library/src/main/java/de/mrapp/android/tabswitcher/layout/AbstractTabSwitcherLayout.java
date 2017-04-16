@@ -431,11 +431,13 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * The method, which is invoked on implementing subclasses in order to inflate the layout.
      *
+     * @param tabsOnly
+     *         True, if only the tabs should be inflated, false otherwise
      * @return The drag handler, which is used by the layout, as an instance of the class {@link
      * AbstractDragHandler} or null, if no drag handler is used
      */
     @Nullable
-    protected abstract AbstractDragHandler<?> onInflateLayout();
+    protected abstract AbstractDragHandler<?> onInflateLayout(final boolean tabsOnly);
 
     /**
      * The method, which is invoked on implementing subclasses in order to detach the layout.
@@ -457,13 +459,19 @@ public abstract class AbstractTabSwitcherLayout
 
     /**
      * Inflates the layout.
+     *
+     * @param tabsOnly
+     *         True, if only the tabs should be inflated, false otherwise
      */
-    public final void inflateLayout() {
-        dragHandler = onInflateLayout();
-        adaptToolbarVisibility();
-        adaptToolbarTitle();
-        adaptToolbarNavigationIcon();
-        inflateToolbarMenu();
+    public final void inflateLayout(final boolean tabsOnly) {
+        dragHandler = onInflateLayout(tabsOnly);
+
+        if (!tabsOnly) {
+            adaptToolbarVisibility();
+            adaptToolbarTitle();
+            adaptToolbarNavigationIcon();
+            inflateToolbarMenu();
+        }
     }
 
     /**

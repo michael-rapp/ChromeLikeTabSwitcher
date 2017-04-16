@@ -3311,11 +3311,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @NonNull
     @Override
-    protected final AbstractDragHandler<?> onInflateLayout() {
+    protected final AbstractDragHandler<?> onInflateLayout(final boolean tabsOnly) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
-        toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
-        getTabSwitcher().addView(toolbar);
+
+        if (tabsOnly) {
+            toolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
+        } else {
+            toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
+            toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
+            getTabSwitcher().addView(toolbar);
+        }
+
         tabContainer = new FrameLayout(getContext());
         getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
