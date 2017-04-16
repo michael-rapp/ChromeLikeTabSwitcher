@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.model.Restorable;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -36,7 +37,15 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void> {
+public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void>
+        implements Restorable {
+
+    /**
+     * The name of the extra, which is used to store the saved instance states of previously removed
+     * child views within a bundle.
+     */
+    private static final String SAVED_INSTANCE_STATES_EXTRA =
+            ChildRecyclerAdapter.class.getName() + "::SavedInstanceStates";
 
     /**
      * The tab switcher, which contains the tabs, the child views, which are inflated by the
@@ -52,7 +61,7 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     /**
      * A sparse array, which manages the saved instance states of previously removed child views.
      */
-    private final SparseArray<Bundle> savedInstanceStates;
+    private SparseArray<Bundle> savedInstanceStates;
 
     /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
@@ -110,6 +119,19 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     public final int getViewType(@NonNull final Tab item) {
         int index = tabSwitcher.indexOf(item);
         return decorator.getViewType(item, index);
+    }
+
+    @Override
+    public final void saveInstanceState(@NonNull final Bundle outState) {
+        outState.putSparseParcelableArray(SAVED_INSTANCE_STATES_EXTRA, savedInstanceStates);
+    }
+
+    @Override
+    public final void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            savedInstanceStates =
+                    savedInstanceState.getSparseParcelableArray(SAVED_INSTANCE_STATES_EXTRA);
+        }
     }
 
 }
