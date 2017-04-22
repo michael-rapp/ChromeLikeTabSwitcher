@@ -23,7 +23,7 @@ License.
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Translucent"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity
             android:name="de.mrapp.android.tabswitcher.example.MainActivity"
