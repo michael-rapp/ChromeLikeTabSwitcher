@@ -22,6 +22,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.Menu;
@@ -462,8 +463,11 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
+     * @return A pair, which contains the index of the first visible tab, as well as its current
+     * position, as an instance of the class {@link Pair} or null, if the tab switcher is not shown
      */
-    protected abstract void onDetachLayout(final boolean tabsOnly);
+    @Nullable
+    protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);
 
     /**
      * Handles a touch event.
@@ -497,9 +501,12 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
+     * @return A pair, which contains the index of the first visible tab, as well as its current
+     * position, as an instance of the class {@link Pair} or null, if the tab switcher is not shown
      */
-    public final void detachLayout(final boolean tabsOnly) {
-        onDetachLayout(tabsOnly);
+    @Nullable
+    public final Pair<Integer, Float> detachLayout(final boolean tabsOnly) {
+        return onDetachLayout(tabsOnly);
     }
 
     /**

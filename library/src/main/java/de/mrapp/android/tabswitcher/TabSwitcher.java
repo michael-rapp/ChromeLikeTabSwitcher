@@ -32,6 +32,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
@@ -1415,7 +1416,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         TabSwitcherState savedState = new TabSwitcherState(superState);
         savedState.layoutPolicy = layoutPolicy;
         savedState.modelState = new Bundle();
-        layout.detachLayout(true);
+        Pair<Integer, Float> pair = layout.detachLayout(true);
+
+        if (pair != null) {
+            savedState.modelState.putInt(TabSwitcherModel.FIRST_VISIBLE_TAB_INDEX_EXTRA, pair.first);
+            savedState.modelState
+                    .putFloat(TabSwitcherModel.FIRST_VISIBLE_TAB_POSITION_EXTRA, pair.second);
+        }
+
         model.removeListener(layout);
         layout = null;
         executePendingAction();

@@ -63,6 +63,20 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model, Restorable {
 
     /**
+     * The name of the extra, which is used to store the index of the first visible tab within a
+     * bundle.
+     */
+    public static final String FIRST_VISIBLE_TAB_INDEX_EXTRA =
+            TabSwitcherModel.class.getName() + "::FirstVisibleIndex";
+
+    /**
+     * The name of the extra, which is used to store the position of the first visible tab within a
+     * bundle.
+     */
+    public static final String FIRST_VISIBLE_TAB_POSITION_EXTRA =
+            TabSwitcherModel.class.getName() + "::FirstVisiblePosition";
+
+    /**
      * The name of the extra, which is used to store the log level within a bundle.
      */
     private static final String LOG_LEVEL_EXTRA = TabSwitcherModel.class.getName() + "::LogLevel";
@@ -151,6 +165,16 @@ public class TabSwitcherModel implements Model, Restorable {
      * A set, which contains the listeners, which are notified about the model's events.
      */
     private final Set<Listener> listeners;
+
+    /**
+     * The index of the first visible tab.
+     */
+    private int firstVisibleTabIndex;
+
+    /**
+     * The position of the first visible tab.
+     */
+    private float firstVisibleTabPosition;
 
     /**
      * The log level, which is used for logging.
@@ -610,6 +634,8 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
+        this.firstVisibleTabIndex = -1;
+        this.firstVisibleTabPosition = -1;
         this.logLevel = LogLevel.INFO;
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
@@ -655,6 +681,26 @@ public class TabSwitcherModel implements Model, Restorable {
     public final void removeListener(@NonNull final Listener listener) {
         ensureNotNull(listener, "The listener may not be null");
         listeners.remove(listener);
+    }
+
+    /**
+     * Returns the index of the first visible tab.
+     *
+     * @return The index of the first visible tab as an {@link Integer} value or -1, if the index is
+     * unknown
+     */
+    public final int getFirstVisibleTabIndex() {
+        return firstVisibleTabIndex;
+    }
+
+    /**
+     * Returns the position of the first visible tab.
+     *
+     * @return The position of the first visible tab as a {@link Float} value or -1, if the position
+     * is unknown
+     */
+    public final float getFirstVisibleTabPosition() {
+        return firstVisibleTabPosition;
     }
 
     /**
@@ -1206,6 +1252,9 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
         if (savedInstanceState != null) {
+            firstVisibleTabIndex = savedInstanceState.getInt(FIRST_VISIBLE_TAB_INDEX_EXTRA, -1);
+            firstVisibleTabPosition =
+                    savedInstanceState.getFloat(FIRST_VISIBLE_TAB_POSITION_EXTRA, -1);
             logLevel = (LogLevel) savedInstanceState.getSerializable(LOG_LEVEL_EXTRA);
             tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
             switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);
