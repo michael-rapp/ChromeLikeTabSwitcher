@@ -4,7 +4,7 @@
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
-![](doc/images/smartphone_layout.gif)
+![](doc/images/smartphone_layout.gif){ width=50% }
 
 The library provides the following features:
 
@@ -68,7 +68,7 @@ tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher_toolbar_menu, null);
 tabSwitcher.setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, null);
 ```
 
-The tabs, which are contained by a `TabSwitcher` are represented by instances of the class `Tab`. The following Java code demonstrates, how a new tab can be created and added to a tab switcher. By setting a custom icon, background color, title color etc., the defaults, which are applied to the `TabSwitcher` can be overridden for that particular tab. The `setParameters`-method allows to associate a tab with a `Bundle`, which may contain additional information about the tab. By implementing the interface `Tab.Callback` and registering an instance at a `Tab` by using its `addCallback`-method, it can be observed, when the properties of a tab has been changed.   
+The tabs, which are contained by a `TabSwitcher` are represented by instances of the class `Tab`. The following Java code demonstrates, how a new tab can be created and added to a tab switcher. By setting a custom icon, background color, title color etc., the defaults, which are applied to the `TabSwitcher` can be overridden for that particular tab. The `setParameters`-method allows to associate a tab with a `Bundle`, which may contain additional information about the tab. By implementing the interface `Tab.Callback` and registering an instance at a `Tab` by using its `addCallback`-method, it can be observed, when the properties of a tab has been changed. 
 
 ```java
 Tab tab = new Tab("Title");
@@ -145,7 +145,7 @@ In order to apply a decorator to a `TabSwitcher` its `setDecorator`-method must 
 tabSwitcher.setDecorator(new Decorator());
 ```
 
-In order to observe the state of a `TabSwitcher`, the interface `TabSwitcherListener` listener can be implemented. The interface provides methods, which are invoked, when tabs are added to or removed from a tab switcher, or if the tab switcher has been hidden or shown (only when using the smartphone layout). Instances of the type `TabSwitcherListener` can be added by using a `TabSwitcher`'s `addListener`-method. In order to observe, when the close button of a tab has been clicked, the interface `TabCloseListener` can be implemented and added by using the `addTabCloseListener`-method accordingly.  
+In order to observe the state of a `TabSwitcher`, the interface `TabSwitcherListener` listener can be implemented. The interface provides methods, which are invoked, when tabs are added to or removed from a tab switcher, or if the tab switcher has been hidden or shown (only when using the smartphone layout). Instances of the type `TabSwitcherListener` can be added by using a `TabSwitcher`'s `addListener`-method. In order to observe, when the close button of a tab has been clicked, the interface `TabCloseListener` can be implemented and added by using the `addTabCloseListener`-method accordingly. 
 
 ## Using Animations
 
@@ -161,7 +161,7 @@ Animation animation = new SwipeAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/swipe_animation.gif)
+![](doc/images/swipe_animation.gif){ width=50% }
 
 ### Reveal Animation
 
@@ -173,7 +173,7 @@ Animation animation = new RevealAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/reveal_animation.gif)
+![](doc/images/reveal_animation.gif){ width=50% }
 
 ### PeekAnimation
 
@@ -185,7 +185,7 @@ Animation animation = new PeekAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/peek_animation.gif)
+![](doc/images/peek_animation.gif){ width=50% }
 
 ## Toolbars and Menus
 
