@@ -55,7 +55,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
          *         the tabs, which should be iterated by the iterator, as an instance of the class
-         *         {@link AttachedViewRecycler}. The view recycler may not be null
+         *         AttachedViewRecycler. The view recycler may not be null
          * @param array
          *         The array, which contains the tabs, which should be iterated by the iterator, as
          *         an array of the type {@link Tab}. The array may not be null
@@ -93,8 +93,8 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
      *
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
-     *         iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view
-     *         recycler may not be null
+     *         iterated tabs, as an instance of the class AttachedViewRecycler. The view recycler
+     *         may not be null
      * @param array
      *         The array, which contains the tabs, which should be iterated by the iterator, as an
      *         array of the type {@link Tab}. The array may not be null

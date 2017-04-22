@@ -397,8 +397,8 @@ public abstract class AbstractTabSwitcherLayout
     /**
      * Returns the logger, which is used for logging.
      *
-     * @return The logger, which is used for logging, as an instance of the class {@link Logger}.
-     * The logger may not be null
+     * @return The logger, which is used for logging, as an instance of the class Logger. The logger
+     * may not be null
      */
     @NonNull
     protected final Logger getLogger() {
@@ -464,7 +464,7 @@ public abstract class AbstractTabSwitcherLayout
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
      * @return A pair, which contains the index of the first visible tab, as well as its current
-     * position, as an instance of the class {@link Pair} or null, if the tab switcher is not shown
+     * position, as an instance of the class Pair or null, if the tab switcher is not shown
      */
     @Nullable
     protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);
@@ -502,7 +502,7 @@ public abstract class AbstractTabSwitcherLayout
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
      * @return A pair, which contains the index of the first visible tab, as well as its current
-     * position, as an instance of the class {@link Pair} or null, if the tab switcher is not shown
+     * position, as an instance of the class Pair or null, if the tab switcher is not shown
      */
     @Nullable
     public final Pair<Integer, Float> detachLayout(final boolean tabsOnly) {

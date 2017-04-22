@@ -59,7 +59,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      *         {@link ViewGroup}. The parent may not be null
      * @param childViewRecycler
      *         The view recycler, which should be used to inflate child views, as an instance of the
-     *         class {@link ViewRecycler}. The view recycler may not be null
+     *         class ViewRecycler. The view recycler may not be null
      */
     public PreviewDataBinder(@NonNull final ViewGroup parent,
                              @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {

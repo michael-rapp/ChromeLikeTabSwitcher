@@ -60,8 +60,7 @@ public class TabItemIterator extends AbstractTabItemIterator {
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
          *         the tabs, which are iterated by the iterator, which is created by the builder, as
-         *         an instance of the class {@link AttachedViewRecycler}. The view recycler may not
-         *         be null
+         *         an instance of the class AttachedViewRecycler. The view recycler may not be null
          */
         public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
@@ -99,8 +98,8 @@ public class TabItemIterator extends AbstractTabItemIterator {
      *         instance of the type {@link Model}. The model may not be null
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
-     *         iterated tabs, as an instance of the class {@link AttachedViewRecycler}. The view
-     *         recycler may not be null
+     *         iterated tabs, as an instance of the class AttachedViewRecycler. The view recycler
+     *         may not be null
      * @param reverse
      *         True, if the tabs should be iterated in reverse order, false otherwise
      * @param start

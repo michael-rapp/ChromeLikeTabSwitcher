@@ -467,7 +467,7 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
      *         TabSwitcherModel}. The model may not be null
      * @param childViewRecycler
      *         The view recycler, which allows to inflate the child views of tabs, as an instance of
-     *         the class {@link ViewRecycler}. The view recycler may not be null
+     *         the class ViewRecycler. The view recycler may not be null
      */
     public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherModel model,
@@ -497,8 +497,8 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
      * Sets the view recycler, which allows to inflate the views, which are used to visualize tabs.
      *
      * @param viewRecycler
-     *         The view recycler, which should be set, as an instance of the class {@link
-     *         AttachedViewRecycler}. The view recycler may not be null
+     *         The view recycler, which should be set, as an instance of the class
+     *         AttachedViewRecycler. The view recycler may not be null
      */
     public final void setViewRecycler(
             @NonNull final AttachedViewRecycler<TabItem, Integer> viewRecycler) {

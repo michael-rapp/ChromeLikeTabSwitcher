@@ -58,8 +58,8 @@ public interface Model extends Iterable<Tab> {
          * The method, which is invoked, when the log level has been changed.
          *
          * @param logLevel
-         *         The log level, which has been set, as a value of the enum {@link LogLevel}. The
-         *         log level may not be null
+         *         The log level, which has been set, as a value of the enum LogLevel. The log level
+         *         may not be null
          */
         void onLogLevelChanged(@NonNull LogLevel logLevel);
 
@@ -273,8 +273,8 @@ public interface Model extends Iterable<Tab> {
          *         value. The resource id must correspond to a valid menu resource
          * @param listener
          *         The listener, which has been registered to be notified, when an item of the menu
-         *         has been clicked, as an instance of the type {@link OnMenuItemClickListener} or
-         *         null, if no listener should be notified
+         *         has been clicked, as an instance of the type OnMenuItemClickListener or null, if
+         *         no listener should be notified
          */
         void onToolbarMenuInflated(@MenuRes int resourceId,
                                    @Nullable OnMenuItemClickListener listener);
@@ -312,8 +312,8 @@ public interface Model extends Iterable<Tab> {
     /**
      * Returns the log level, which is used for logging.
      *
-     * @return The log level, which is used for logging, as a value of the enum {@link LogLevel}.
-     * The log level may not be null
+     * @return The log level, which is used for logging, as a value of the enum LogLevel. The log
+     * level may not be null
      */
     @NonNull
     LogLevel getLogLevel();
@@ -322,8 +322,8 @@ public interface Model extends Iterable<Tab> {
      * Sets the log level, which should be used for logging.
      *
      * @param logLevel
-     *         The log level, which should be set, as a value of the enum {@link LogLevel}. The log
-     *         level may not be null
+     *         The log level, which should be set, as a value of the enum LogLevel. The log level
+     *         may not be null
      */
     void setLogLevel(@NonNull LogLevel logLevel);
 
@@ -867,8 +867,8 @@ public interface Model extends Iterable<Tab> {
      *         The resource id must correspond to a valid menu resource
      * @param listener
      *         The listener, which should be notified, when an menu item has been clicked, as an
-     *         instance of the type {@link OnMenuItemClickListener} or null, if no listener should
-     *         be notified
+     *         instance of the type OnMenuItemClickListener or null, if no listener should be
+     *         notified
      */
     void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
 

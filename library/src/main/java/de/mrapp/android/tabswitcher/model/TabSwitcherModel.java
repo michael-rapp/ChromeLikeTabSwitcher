@@ -594,8 +594,8 @@ public class TabSwitcherModel implements Model, Restorable {
      *         The resource id must correspond to a valid menu resource
      * @param menuItemClickListener
      *         The listener, which has been registered to be notified, when an item of the menu has
-     *         been clicked, as an instance of the type {@link OnMenuItemClickListener} or null, if
-     *         no listener should be notified
+     *         been clicked, as an instance of the type OnMenuItemClickListener or null, if no
+     *         listener should be notified
      */
     private void notifyOnToolbarMenuInflated(@MenuRes final int resourceId,
                                              @Nullable final OnMenuItemClickListener menuItemClickListener) {
@@ -733,8 +733,8 @@ public class TabSwitcherModel implements Model, Restorable {
      * shown, when the tab switcher is shown, has been clicked.
      *
      * @return The listener, which is notified, when an item of the menu of the toolbar, which is
-     * shown, when the tab switcher is shown, has been clicked as an instance of the type {@link
-     * OnMenuItemClickListener} or null, if no listener should be notified
+     * shown, when the tab switcher is shown, has been clicked as an instance of the type
+     * OnMenuItemClickListener or null, if no listener should be notified
      */
     @Nullable
     public final OnMenuItemClickListener getToolbarMenuItemListener() {

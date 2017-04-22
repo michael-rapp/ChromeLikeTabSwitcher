@@ -165,8 +165,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
      *         tabs, whose positions and states should be calculated by the tab switcher, as an
-     *         instance of the class {@link AttachedViewRecycler}. The view recycler may not be
-     *         null
+     *         instance of the class AttachedViewRecycler. The view recycler may not be null
      */
     public PhoneDragHandler(@NonNull final TabSwitcher tabSwitcher,
                             @NonNull final Arithmetics arithmetics,

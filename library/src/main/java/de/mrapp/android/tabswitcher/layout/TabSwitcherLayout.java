@@ -52,8 +52,7 @@ public interface TabSwitcherLayout {
      * to the primary toolbar.
      *
      * @return An array, which contains the toolbars, which are shown, when the tab switcher is
-     * shown, as an array of the type {@link Toolbar} or null, if the view has not been laid out
-     * yet
+     * shown, as an array of the type Toolbar or null, if the view has not been laid out yet
      */
     @Nullable
     Toolbar[] getToolbars();

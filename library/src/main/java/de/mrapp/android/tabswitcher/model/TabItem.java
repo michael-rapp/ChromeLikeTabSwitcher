@@ -131,8 +131,8 @@ public class TabItem {
      *         may not be null
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
-     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may
-     *         not be null
+     *         tabs, as an instance of the class AttachedViewRecycler. The view recycler may not be
+     *         null
      * @param index
      *         The index of the tab as an {@link Integer} value. The index must be at least 0
      * @return The item, which has been created, as an instance of the class {@link TabItem}. The
@@ -152,8 +152,8 @@ public class TabItem {
      *
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
-     *         tabs, as an instance of the class {@link AttachedViewRecycler}. The view recycler may
-     *         not be null
+     *         tabs, as an instance of the class AttachedViewRecycler. The view recycler may not be
+     *         null
      * @param index
      *         The index of the tab as an {@link Integer} value. The index must be at least 0
      * @param tab
@@ -223,8 +223,8 @@ public class TabItem {
     /**
      * Returns the view holder, which stores references to the views, which belong to the tab.
      *
-     * @return The view holder as an instance of the class {@link PhoneTabViewHolder} or null, if no view
-     * is is currently inflated to visualize the tab
+     * @return The view holder as an instance of the class {@link PhoneTabViewHolder} or null, if no
+     * view is is currently inflated to visualize the tab
      */
     public final PhoneTabViewHolder getViewHolder() {
         return viewHolder;
