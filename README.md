@@ -4,7 +4,7 @@
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
-![](doc/images/smartphone_layout.gif){ width=50% }
+![](doc/images/smartphone_layout.gif)
 
 The library provides the following features:
 
@@ -161,7 +161,7 @@ Animation animation = new SwipeAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/swipe_animation.gif){ width=50% }
+![](doc/images/swipe_animation.gif)
 
 ### Reveal Animation
 
@@ -173,7 +173,7 @@ Animation animation = new RevealAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/reveal_animation.gif){ width=50% }
+![](doc/images/reveal_animation.gif)
 
 ### PeekAnimation
 
@@ -185,7 +185,7 @@ Animation animation = new PeekAnimation.Builder().setDuration(2000)
         .create();
 ```
 
-![](doc/images/peek_animation.gif){ width=50% }
+![](doc/images/peek_animation.gif)
 
 ## Toolbars and Menus
 
