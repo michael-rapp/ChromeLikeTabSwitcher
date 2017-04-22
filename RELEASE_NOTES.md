@@ -1,6 +1,6 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 0.1.0 (Apr. 14th 2017)
+## Version 0.1.0 (Apr. 22th 2017)
 
 The first unstable release of the library, which provides the following features:
 
