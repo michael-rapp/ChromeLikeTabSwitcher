@@ -271,6 +271,8 @@ public abstract class AbstractTabSwitcherLayout
                         getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
             }
         }
+
+        // TODO: Detach and re-inflate layout
     }
 
     /**
