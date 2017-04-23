@@ -3377,6 +3377,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             getTabSwitcher().addView(toolbar);
         }
 
+        // TODO: Only inflate tab container when tabsOnly == false
         tabContainer = new FrameLayout(getContext());
         getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
