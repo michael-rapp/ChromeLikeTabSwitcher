@@ -18,6 +18,7 @@ License.
     <!-- Views -->
     <item name="primary_toolbar" type="id"/>
     <item name="secondary_toolbar" type="id"/>
+    <item name="tab_container" type="id"/>
 
     <!-- Tags -->
     <item name="tag_view_holder" type="id"/>
