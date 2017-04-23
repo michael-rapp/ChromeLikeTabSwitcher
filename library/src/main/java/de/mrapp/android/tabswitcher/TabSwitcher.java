@@ -58,6 +58,8 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListe
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.tablet.TabletArithmetics;
+import de.mrapp.android.tabswitcher.layout.tablet.TabletTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
@@ -229,8 +231,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private void initializeLayout(@NonNull final Layout layout, final boolean inflatedTabsOnly) {
         if (layout == Layout.TABLET) {
             // TODO: Use tablet layout once implemented
-            PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
-            this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
+            TabletArithmetics arithmetics = new TabletArithmetics();
+            this.layout = new TabletTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
         } else {
             PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
             this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
@@ -1419,7 +1421,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         Pair<Integer, Float> pair = layout.detachLayout(true);
 
         if (pair != null) {
-            savedState.modelState.putInt(TabSwitcherModel.FIRST_VISIBLE_TAB_INDEX_EXTRA, pair.first);
+            savedState.modelState
+                    .putInt(TabSwitcherModel.FIRST_VISIBLE_TAB_INDEX_EXTRA, pair.first);
             savedState.modelState
                     .putFloat(TabSwitcherModel.FIRST_VISIBLE_TAB_POSITION_EXTRA, pair.second);
         }
