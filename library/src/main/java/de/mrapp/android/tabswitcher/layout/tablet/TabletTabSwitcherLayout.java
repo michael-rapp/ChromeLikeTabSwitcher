@@ -19,10 +19,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
@@ -40,6 +42,31 @@ import de.mrapp.android.util.logging.LogLevel;
  * @since 1.0.0
  */
 public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
+
+    /**
+     * The drag handler, which is used by the layout.
+     */
+    private TabletDragHandler dragHandler;
+
+    /**
+     * The layout's primary toolbar.
+     */
+    private Toolbar primaryToolbar;
+
+    /**
+     * The layout's secondary toolbar.
+     */
+    private Toolbar secondaryToolbar;
+
+    /**
+     * The view group, which contains the tab switcher's tabs.
+     */
+    private ViewGroup tabContainer;
+
+    /**
+     * The view group, which contains the children of the tab switcher's tabs.
+     */
+    private ViewGroup contentContainer;
 
     /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on tablets.
@@ -63,7 +90,18 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
     @Nullable
     @Override
     protected final AbstractDragHandler<?> onInflateLayout(final boolean tabsOnly) {
-        return null;
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        if (!tabsOnly) {
+            inflater.inflate(R.layout.tablet_layout, getTabSwitcher(), true);
+        }
+
+        primaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
+        secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
+        tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
+        contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
+        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics());
+        return dragHandler;
     }
 
     @Nullable
@@ -85,13 +123,14 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
     @Nullable
     @Override
     public final ViewGroup getTabContainer() {
-        return null;
+        return tabContainer;
     }
 
     @Nullable
     @Override
     public final Toolbar[] getToolbars() {
-        return new Toolbar[0];
+        return primaryToolbar != null && secondaryToolbar != null ?
+                new Toolbar[]{primaryToolbar, secondaryToolbar} : null;
     }
 
     @Override
