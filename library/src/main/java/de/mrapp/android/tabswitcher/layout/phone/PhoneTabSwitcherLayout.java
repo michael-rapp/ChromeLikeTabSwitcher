@@ -3375,13 +3375,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         } else {
             tabContainer = new FrameLayout(getContext());
             tabContainer.setId(R.id.tab_container);
+            getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT);
             toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
             toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
             getTabSwitcher().addView(toolbar);
         }
 
-        getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT);
         childViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), childViewRecycler);
         getModel().addListener(recyclerAdapter);
