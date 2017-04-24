@@ -1152,7 +1152,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean isSwitcherShown() {
-        return model.isSwitcherShown();
+        return getLayout() == Layout.TABLET || model.isSwitcherShown();
     }
 
     @Override
