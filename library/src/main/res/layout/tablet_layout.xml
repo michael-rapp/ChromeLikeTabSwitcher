@@ -34,11 +34,6 @@ License.
             android:visibility="invisible"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <FrameLayout
-            android:id="@id/tab_container"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/tablet_tab_container_height"/>
-
         <android.support.v7.widget.Toolbar
             android:id="@id/secondary_toolbar"
             android:layout_width="match_parent"
@@ -48,6 +43,12 @@ License.
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
             android:visibility="invisible"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+
+        <FrameLayout
+            android:id="@id/tab_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tablet_tab_container_height"/>
+
     </FrameLayout>
 
     <FrameLayout
