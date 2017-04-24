@@ -51,6 +51,7 @@ import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.iterator.AbstractInitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
@@ -66,9 +67,7 @@ import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
-import static de.mrapp.android.util.Condition.ensureEqual;
 import static de.mrapp.android.util.Condition.ensureGreater;
-import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
 
 /**
@@ -86,13 +85,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * state is calculated and the tab item is stored in a backing array. When the tab item is
      * iterated again, it is retrieved from the backing array.
      */
-    private class InitialTabItemIterator extends AbstractTabItemIterator {
-
-        /**
-         * The backing array, which is used to store tab items, once their initial position and
-         * state has been calculated.
-         */
-        private final TabItem[] array;
+    private class InitialTabItemIterator extends AbstractInitialTabItemIterator {
 
         /**
          * Calculates the initial position and state of a specific tab item.
@@ -134,9 +127,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         /**
          * Creates a new iterator, which allows to iterate the tab items, which corresponds to the
-         * tabs of a {@link TabSwitcher}.
+         * tabs of a {@link TabSwitcher}. When a tab item is referenced for the first time, its
+         * initial position and state is calculated and the tab item is stored in a backing array.
+         * When the tab item is iterated again, it is retrieved from the backing array.
          *
-         * @param array
+         * @param backingArray
          *         The backing array, which should be used to store tab items, once their initial
          *         position and state has been calculated, as an array of the type {@link TabItem}.
          *         The array may not be null and the array's length must be equal to the number of
@@ -147,31 +142,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
          *         The index of the first tab, which should be iterated, as an {@link Integer} value
          *         or -1, if all tabs should be iterated
          */
-        private InitialTabItemIterator(@NonNull final TabItem[] array, final boolean reverse,
+        private InitialTabItemIterator(@NonNull final TabItem[] backingArray, final boolean reverse,
                                        final int start) {
-            ensureNotNull(array, "The array may not be null");
-            ensureEqual(array.length, getModel().getCount(),
-                    "The array's length must be " + getModel().getCount());
-            this.array = array;
-            initialize(reverse, start);
-        }
-
-        @Override
-        public final int getCount() {
-            return array.length;
+            super(backingArray, reverse, start);
         }
 
         @NonNull
         @Override
-        public final TabItem getItem(final int index) {
-            TabItem tabItem = array[index];
-
-            if (tabItem == null) {
-                tabItem = TabItem.create(getModel(), viewRecycler, index);
-                calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
-                array[index] = tabItem;
-            }
-
+        protected TabItem createInitialTabItem(final int index) {
+            TabItem tabItem = TabItem.create(getModel(), viewRecycler, index);
+            calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
             return tabItem;
         }
 
