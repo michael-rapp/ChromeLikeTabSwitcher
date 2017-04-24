@@ -3370,16 +3370,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         if (tabsOnly) {
-            tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
             toolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
+            tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         } else {
+            toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
+            toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
+            getTabSwitcher().addView(toolbar);
             tabContainer = new FrameLayout(getContext());
             tabContainer.setId(R.id.tab_container);
             getTabSwitcher().addView(tabContainer, FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT);
-            toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
-            toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
-            getTabSwitcher().addView(toolbar);
         }
 
         childViewRecycler = new ViewRecycler<>(inflater);
