@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
@@ -69,6 +70,20 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
     private ViewGroup contentContainer;
 
     /**
+     * Adapts the margin of the layout's toolbars.
+     */
+    private void adaptToolbarMargin() {
+        FrameLayout.LayoutParams primaryToolbarLayoutParams =
+                (FrameLayout.LayoutParams) primaryToolbar.getLayoutParams();
+        primaryToolbarLayoutParams
+                .setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(), 0, 0);
+        FrameLayout.LayoutParams secondaryToolbarLayoutParams =
+                (FrameLayout.LayoutParams) secondaryToolbar.getLayoutParams();
+        secondaryToolbarLayoutParams
+                .setMargins(0, getModel().getPaddingTop(), getModel().getPaddingRight(), 0);
+    }
+
+    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on tablets.
      *
      * @param tabSwitcher
@@ -101,6 +116,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics());
+        adaptToolbarMargin();
         return dragHandler;
     }
 
@@ -186,7 +202,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout {
     @Override
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
-
+        adaptToolbarMargin();
     }
 
     @Override
