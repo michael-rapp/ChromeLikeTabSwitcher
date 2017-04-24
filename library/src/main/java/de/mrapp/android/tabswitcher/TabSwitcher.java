@@ -1157,38 +1157,44 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final void showSwitcher() {
-        enqueuePendingAction(new Runnable() {
+        if (getLayout() != Layout.TABLET) {
+            enqueuePendingAction(new Runnable() {
 
-            @Override
-            public void run() {
-                model.showSwitcher();
-            }
+                @Override
+                public void run() {
+                    model.showSwitcher();
+                }
 
-        });
+            });
+        }
     }
 
     @Override
     public final void hideSwitcher() {
-        enqueuePendingAction(new Runnable() {
+        if (getLayout() != Layout.TABLET) {
+            enqueuePendingAction(new Runnable() {
 
-            @Override
-            public void run() {
-                model.hideSwitcher();
-            }
+                @Override
+                public void run() {
+                    model.hideSwitcher();
+                }
 
-        });
+            });
+        }
     }
 
     @Override
     public final void toggleSwitcherVisibility() {
-        enqueuePendingAction(new Runnable() {
+        if (getLayout() != Layout.TABLET) {
+            enqueuePendingAction(new Runnable() {
 
-            @Override
-            public void run() {
-                model.toggleSwitcherVisibility();
-            }
+                @Override
+                public void run() {
+                    model.toggleSwitcherVisibility();
+                }
 
-        });
+            });
+        }
     }
 
     @Override
