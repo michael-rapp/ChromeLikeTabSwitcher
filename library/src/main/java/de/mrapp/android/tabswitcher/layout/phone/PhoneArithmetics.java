@@ -163,7 +163,7 @@ public class PhoneArithmetics implements Arithmetics {
 
     /**
      * Creates a new class, which provides methods, which allow to calculate the position, size and
-     * rotation of a {@link TabSwitcher}'s children.
+     * rotation of a {@link TabSwitcher}'s children, when using the smartphone layout.
      *
      * @param tabSwitcher
      *         The tab switcher, the arithmetics should be calculated for, as an instance of the
