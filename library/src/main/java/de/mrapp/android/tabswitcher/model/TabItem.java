@@ -20,6 +20,7 @@ import android.view.View;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
@@ -96,7 +97,7 @@ public class TabItem {
     /**
      * The view holder, which stores references the views, which belong to the tab.
      */
-    private PhoneTabViewHolder viewHolder;
+    private AbstractTabViewHolder viewHolder;
 
     /**
      * The tag, which is associated with the tab.
@@ -223,10 +224,10 @@ public class TabItem {
     /**
      * Returns the view holder, which stores references to the views, which belong to the tab.
      *
-     * @return The view holder as an instance of the class {@link PhoneTabViewHolder} or null, if no
-     * view is is currently inflated to visualize the tab
+     * @return The view holder as an instance of the class {@link AbstractTabViewHolder} or null, if
+     * no view is is currently inflated to visualize the tab
      */
-    public final PhoneTabViewHolder getViewHolder() {
+    public final AbstractTabViewHolder getViewHolder() {
         return viewHolder;
     }
 
@@ -235,9 +236,9 @@ public class TabItem {
      *
      * @param viewHolder
      *         The view holder, which should be set, as an instance of the class {@link
-     *         PhoneTabViewHolder} or null, if no view holder should be set
+     *         AbstractTabViewHolder} or null, if no view holder should be set
      */
-    public final void setViewHolder(@Nullable final PhoneTabViewHolder viewHolder) {
+    public final void setViewHolder(@Nullable final AbstractTabViewHolder viewHolder) {
         this.viewHolder = viewHolder;
     }
 

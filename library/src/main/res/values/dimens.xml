@@ -35,5 +35,7 @@ License.
 
     <!-- Tablet layout -->
     <dimen name="tablet_tab_container_height">48dp</dimen>
+    <dimen name="tablet_tab_width">64dp</dimen>
+    <dimen name="tablet_tab_height">32dp</dimen>
 
 </resources>

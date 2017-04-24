@@ -1666,7 +1666,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animatePeek(@NonNull final TabItem tabItem, final long duration,
                              @NonNull final Interpolator interpolator, final float peekPosition,
                              @NonNull final PeekAnimation peekAnimation) {
-        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
         viewHolder.closeButton.setVisibility(View.GONE);
         View view = tabItem.getView();
         float x = peekAnimation.getX();
@@ -1693,7 +1693,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem selectedTabItem = TabItem.create(getModel(), viewRecycler, selectedTabIndex);
         viewRecycler.inflate(selectedTabItem);
         selectedTabItem.getTag().setPosition(0);
-        PhoneTabViewHolder selectedTabViewHolder = selectedTabItem.getViewHolder();
+        PhoneTabViewHolder selectedTabViewHolder =
+                (PhoneTabViewHolder) selectedTabItem.getViewHolder();
         selectedTabViewHolder.closeButton.setVisibility(View.GONE);
         animateShowSwitcher(selectedTabItem, duration, interpolator,
                 createZoomOutAnimationListener(selectedTabItem, peekAnimation));

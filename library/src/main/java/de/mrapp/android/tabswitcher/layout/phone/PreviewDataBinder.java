@@ -74,7 +74,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     protected final void onPreExecute(@NonNull final ImageView view,
                                       @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
-        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
         View child = viewHolder.child;
         Tab tab = tabItem.getTab();
 
@@ -93,7 +93,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
-        PhoneTabViewHolder viewHolder = tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
         View child = viewHolder.child;
         viewHolder.child = null;
         int width = parent.getWidth();
