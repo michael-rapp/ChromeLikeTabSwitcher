@@ -17,7 +17,11 @@ License.
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/tablet_tab_width"
     android:layout_height="@dimen/tablet_tab_height"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingEnd="@dimen/tablet_tab_padding_right"
+    android:paddingLeft="@dimen/tablet_tab_padding_left"
+    android:paddingRight="@dimen/tablet_tab_padding_right"
+    android:paddingStart="@dimen/tablet_tab_padding_left">
 
     <TextView
         android:id="@+id/tab_title_text_view"
@@ -25,9 +29,7 @@ License.
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:paddingLeft="@dimen/tab_title_padding"
-        android:paddingRight="@dimen/tab_title_padding"/>
+        android:layout_weight="1"/>
 
     <ImageButton
         android:id="@+id/close_tab_button"

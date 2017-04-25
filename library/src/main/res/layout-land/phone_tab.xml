@@ -41,8 +41,8 @@ License.
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:paddingLeft="@dimen/tab_title_padding"
-            android:paddingRight="@dimen/tab_title_padding"/>
+            android:paddingLeft="@dimen/phone_tab_title_padding"
+            android:paddingRight="@dimen/phone_tab_title_padding"/>
 
     </LinearLayout>
 
