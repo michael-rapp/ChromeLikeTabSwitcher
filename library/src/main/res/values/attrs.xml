@@ -21,6 +21,7 @@ License.
             <enum name="auto" value="0"/>
             <enum name="phone" value="1"/>
             <enum name="tablet" value="2"/>
+            <enum name="tablet_landscape" value="3"/>
         </attr>
         <attr name="tabIcon" format="reference"/>
         <attr name="tabBackgroundColor" format="color"/>

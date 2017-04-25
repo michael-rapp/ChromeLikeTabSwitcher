@@ -35,7 +35,12 @@ public enum LayoutPolicy {
     /**
      * If the tablet layout should be used, regardless of the device.
      */
-    TABLET(2);
+    TABLET(2),
+
+    /**
+     * If the tablet layout should be used, regardless of the device, when in landscape mode.
+     */
+    TABLET_LANDSCAPE(3);
 
     /**
      * The value of the layout policy.

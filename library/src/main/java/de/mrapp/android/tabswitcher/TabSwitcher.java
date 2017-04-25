@@ -888,7 +888,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *
      * @return The layout policy, which is used by the tab switcher, as a value of the enum {@link
      * LayoutPolicy}. The layout policy may either be {@link LayoutPolicy#AUTO}, {@link
-     * LayoutPolicy#PHONE} or {@link LayoutPolicy#TABLET}
+     * LayoutPolicy#PHONE}, {@link LayoutPolicy#TABLET} or {@link LayoutPolicy#TABLET_LANDSCAPE}
      */
     @NonNull
     public final LayoutPolicy getLayoutPolicy() {
@@ -902,8 +902,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *
      * @param layoutPolicy
      *         The layout policy, which should be set, as a value of the enum {@link LayoutPolicy}.
-     *         The layout policy may either be {@link LayoutPolicy#AUTO}, {@link LayoutPolicy#PHONE}
-     *         or {@link LayoutPolicy#TABLET}
+     *         The layout policy may either be {@link LayoutPolicy#AUTO}, {@link
+     *         LayoutPolicy#PHONE}, {@link LayoutPolicy#TABLET} or {@link
+     *         LayoutPolicy#TABLET_LANDSCAPE}
      */
     public final void setLayoutPolicy(@NonNull final LayoutPolicy layoutPolicy) {
         ensureNotNull(layoutPolicy, "The layout policy may not be null");
@@ -934,7 +935,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @NonNull
     public final Layout getLayout() {
         if (layoutPolicy == LayoutPolicy.TABLET || (layoutPolicy == LayoutPolicy.AUTO &&
-                getDeviceType(getContext()) == DeviceType.TABLET)) {
+                getDeviceType(getContext()) == DeviceType.TABLET) ||
+                (layoutPolicy == LayoutPolicy.TABLET_LANDSCAPE) &&
+                        getOrientation(getContext()) == Orientation.LANDSCAPE) {
             return Layout.TABLET;
         } else {
             return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
