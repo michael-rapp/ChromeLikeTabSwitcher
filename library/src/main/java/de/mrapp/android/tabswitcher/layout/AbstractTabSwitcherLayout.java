@@ -17,6 +17,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.MenuRes;
@@ -37,22 +38,29 @@ import android.view.animation.Transformation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.model.Model;
+import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.Logger;
+import de.mrapp.android.util.view.AttachedViewRecycler;
 
+import static de.mrapp.android.util.Condition.ensureEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * An abstract base class for all layouts, which implement the functionality of a {@link
  * TabSwitcher}.
  *
+ * @param <ViewRecyclerParamType>
+ *         The type of the parameters, which can optionally be passed when inflating the views,
+ *         which are used to visualize tabs
  * @author Michael Rapp
  * @since 0.1.0
  */
-public abstract class AbstractTabSwitcherLayout
+public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         AbstractDragHandler.Callback {
 
@@ -186,6 +194,105 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * An iterator, which allows to iterate the tab items, which correspond to the tabs of a {@link
+     * TabSwitcher}. When a tab item is referenced for the first time, its initial position and
+     * state is calculated and the tab item is stored in a backing array. When the tab item is
+     * iterated again, it is retrieved from the backing array.
+     */
+    protected class InitialTabItemIterator extends AbstractTabItemIterator {
+
+        /**
+         * The backing array, which is used to store tab items, once their initial position and
+         * state has been calculated.
+         */
+        private final TabItem[] backingArray;
+
+        /**
+         * Calculates the initial position and state of a specific tab item.
+         *
+         * @param tabItem
+         *         The tab item, whose position and state should be calculated, as an instance of
+         *         the class {@link TabItem}. The tab item may not be null
+         * @param predecessor
+         *         The predecessor of the given tab item as an instance of the class {@link TabItem}
+         *         or null, if the tab item does not have a predecessor
+         */
+        private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
+                                                   @Nullable final TabItem predecessor) {
+            float position = calculateStartPosition(tabItem);
+            Pair<Float, State> pair =
+                    clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
+                            predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
+        }
+
+        /**
+         * Calculates and returns the initial position of a specific tab item.
+         *
+         * @param tabItem
+         *         The tab item, whose position should be calculated, as an instance of the class
+         *         {@link TabItem}. The tab item may not be null
+         * @return The position, which has been calculated, as a {@link Float} value
+         */
+        private float calculateStartPosition(@NonNull final TabItem tabItem) {
+            if (tabItem.getIndex() == 0) {
+                return getCount() > stackedTabCount ? stackedTabCount * stackedTabSpacing :
+                        (getCount() - 1) * stackedTabSpacing;
+
+            } else {
+                return -1;
+            }
+        }
+
+        /**
+         * Creates a new iterator, which allows to iterate the tab items, which corresponds to the
+         * tabs of a {@link TabSwitcher}. When a tab item is referenced for the first time, its
+         * initial position and state is calculated and the tab item is stored in a backing array.
+         * When the tab item is iterated again, it is retrieved from the backing array.
+         *
+         * @param backingArray
+         *         The backing array, which should be used to store tab items, once their initial
+         *         position and state has been calculated, as an array of the type {@link TabItem}.
+         *         The array may not be null and the array's length must be equal to the number of
+         *         tabs, which are contained by the given tab switcher
+         * @param reverse
+         *         True, if the tabs should be iterated in reverse order, false otherwise
+         * @param start
+         *         The index of the first tab, which should be iterated, as an {@link Integer} value
+         *         or -1, if all tabs should be iterated
+         */
+        public InitialTabItemIterator(@NonNull final TabItem[] backingArray, final boolean reverse,
+                                      final int start) {
+            ensureNotNull(backingArray, "The backing array may not be null");
+            ensureEqual(backingArray.length, getModel().getCount(),
+                    "The length of the backing array must be " + getModel().getCount());
+            this.backingArray = backingArray;
+            initialize(reverse, start);
+        }
+
+        @Override
+        public final int getCount() {
+            return backingArray.length;
+        }
+
+        @NonNull
+        @Override
+        public final TabItem getItem(final int index) {
+            TabItem tabItem = backingArray[index];
+
+            if (tabItem == null) {
+                tabItem = TabItem.create(getModel(), getViewRecycler(), index);
+                calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
+                backingArray[index] = tabItem;
+            }
+
+            return tabItem;
+        }
+
+    }
+
+    /**
      * An animation, which allows to fling the tabs.
      */
     private class FlingAnimation extends android.view.animation.Animation {
@@ -208,7 +315,7 @@ public abstract class AbstractTabSwitcherLayout
         @Override
         protected void applyTransformation(final float interpolatedTime, final Transformation t) {
             if (flingAnimation != null) {
-                dragHandler.handleDrag(distance * interpolatedTime, 0);
+                getDragHandler().handleDrag(distance * interpolatedTime, 0);
             }
         }
 
@@ -235,6 +342,16 @@ public abstract class AbstractTabSwitcherLayout
     private final int dragThreshold;
 
     /**
+     * The number of tabs, which are contained by a stack.
+     */
+    private final int stackedTabCount;
+
+    /**
+     * The space between tabs, which are part of a stack, in pixels.
+     */
+    private final int stackedTabSpacing;
+
+    /**
      * The logger, which is used for logging.
      */
     private final Logger logger;
@@ -253,11 +370,6 @@ public abstract class AbstractTabSwitcherLayout
      * The animation, which is used to fling the tabs.
      */
     private android.view.animation.Animation flingAnimation;
-
-    /**
-     * The drag handler, which is used by the layout.
-     */
-    private AbstractDragHandler<?> dragHandler;
 
     /**
      * Adapts the visibility of the toolbars, which are shown, when the tab switcher is shown.
@@ -331,7 +443,7 @@ public abstract class AbstractTabSwitcherLayout
 
             @Override
             public void onAnimationEnd(final android.view.animation.Animation animation) {
-                dragHandler.handleRelease(null, dragThreshold);
+                getDragHandler().handleRelease(null, dragThreshold);
                 flingAnimation = null;
                 notifyOnAnimationsEnded();
             }
@@ -397,6 +509,25 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Returns the number of tabs, which are contained by a stack.
+     *
+     * @return The number of tabs, which are contained by a stack, as an {@link Integer} value
+     */
+    protected final int getStackedTabCount() {
+        return stackedTabCount;
+    }
+
+    /**
+     * Returns the space between tabs, which are part of a stack.
+     *
+     * @return The space between tabs, which are part of a stack, in pixels as an {@link Integer}
+     * value
+     */
+    protected final int getStackedTabSpacing() {
+        return stackedTabSpacing;
+    }
+
+    /**
      * Returns the logger, which is used for logging.
      *
      * @return The logger, which is used for logging, as an instance of the class Logger. The logger
@@ -416,6 +547,159 @@ public abstract class AbstractTabSwitcherLayout
     @NonNull
     protected final Context getContext() {
         return tabSwitcher.getContext();
+    }
+
+    /**
+     * Clips the position of a specific tab.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
+     * @param position
+     *         The position, which should be clipped, in pixels as a {@link Float} value
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the tab item, as an instance of the
+     * class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    protected final Pair<Float, State> clipTabPosition(final int count, final int index,
+                                                       final float position,
+                                                       @Nullable final TabItem predecessor) {
+        return clipTabPosition(count, index, position,
+                predecessor != null ? predecessor.getTag().getState() : null);
+    }
+
+    /**
+     * Clips the position of a specific tab.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
+     * @param position
+     *         The position, which should be clipped, in pixels as a {@link Float} value
+     * @param predecessorState
+     *         The state of the predecessor of the given tab item as a value of the enum {@link
+     *         State} or null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the tab item, as an instance of the
+     * class {@link Pair}. The pair may not be null
+     */
+    protected final Pair<Float, State> clipTabPosition(final int count, final int index,
+                                                       final float position,
+                                                       @Nullable final State predecessorState) {
+        Pair<Float, State> startPair =
+                calculatePositionAndStateWhenStackedAtStart(count, index, predecessorState);
+        float startPosition = startPair.first;
+
+        if (position <= startPosition) {
+            State state = startPair.second;
+            return Pair.create(startPosition, state);
+        } else {
+            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(index);
+            float endPosition = endPair.first;
+
+            if (position >= endPosition) {
+                State state = endPair.second;
+                return Pair.create(endPosition, state);
+            } else {
+                State state = State.FLOATING;
+                return Pair.create(position, state);
+            }
+        }
+    }
+
+    /**
+     * Calculates and returns the position and state of a specific tab, when stacked at the start.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the start, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                                   final int index,
+                                                                                   @Nullable final TabItem predecessor) {
+        return calculatePositionAndStateWhenStackedAtStart(count, index,
+                predecessor != null ? predecessor.getTag().getState() : null);
+    }
+
+    /**
+     * Calculates and returns the position and state of a specific tab, when stacked at the start.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @param predecessorState
+     *         The state of the predecessor of the given tab item as a value of the enum {@link
+     *         State} or null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the start, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                           final int index,
+                                                                           @Nullable final State predecessorState) {
+        if ((count - index) <= stackedTabCount) {
+            float position = stackedTabSpacing * (count - (index + 1));
+            return Pair.create(position,
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.STACKED_START);
+        } else {
+            float position = stackedTabSpacing * stackedTabCount;
+            return Pair.create(position,
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.HIDDEN);
+        }
+    }
+
+    /**
+     * Inflates the view, which is used to visualize a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param listener
+     *         The layout listener, which should be notified, when the view has been inflated, as an
+     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
+     *         notified
+     * @param params
+     *         An array, which contains optional parameters, which should be passed to the view
+     *         recycler, which is used to inflate the view, as an array of the generic type
+     *         ViewRecyclerParamType. The array may not be null
+     */
+    @SafeVarargs
+    protected final void inflateView(@NonNull final TabItem tabItem,
+                                     @Nullable final OnGlobalLayoutListener listener,
+                                     @NonNull final ViewRecyclerParamType... params) {
+        Pair<View, Boolean> pair = getViewRecycler().inflate(tabItem, params);
+
+        if (listener != null) {
+            boolean inflated = pair.second;
+
+            if (inflated) {
+                View view = pair.first;
+                view.getViewTreeObserver()
+                        .addOnGlobalLayoutListener(new LayoutListenerWrapper(view, listener));
+            } else {
+                listener.onGlobalLayout();
+            }
+        }
     }
 
     /**
@@ -440,13 +724,14 @@ public abstract class AbstractTabSwitcherLayout
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
-        this.dragThreshold =
-                getTabSwitcher().getResources().getDimensionPixelSize(R.dimen.drag_threshold);
+        Resources resources = tabSwitcher.getResources();
+        this.dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
+        this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
+        this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.logger = new Logger(model.getLogLevel());
         this.callback = null;
         this.runningAnimations = 0;
         this.flingAnimation = null;
-        this.dragHandler = null;
     }
 
     /**
@@ -454,11 +739,8 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param tabsOnly
      *         True, if only the tabs should be inflated, false otherwise
-     * @return The drag handler, which is used by the layout, as an instance of the class {@link
-     * AbstractDragHandler} or null, if no drag handler is used
      */
-    @Nullable
-    protected abstract AbstractDragHandler<?> onInflateLayout(final boolean tabsOnly);
+    protected abstract void onInflateLayout(final boolean tabsOnly);
 
     /**
      * The method, which is invoked on implementing subclasses in order to detach the layout.
@@ -470,6 +752,39 @@ public abstract class AbstractTabSwitcherLayout
      */
     @Nullable
     protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the drag
+     * handler, which is used by the layout.
+     *
+     * @return The drag handler, which is used by the layout, as an instance of the class {@link
+     * AbstractDragHandler} or null, if the drag handler has not been initialized yet
+     */
+    protected abstract AbstractDragHandler<?> getDragHandler();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the view
+     * recycler, which allows to inflate the views, which are used to visualize the tabs.
+     *
+     * @return The view recycler, which allows to inflate the views, which are used to visualize the
+     * tabs, as an instance of the class {@link AttachedViewRecycler} or null, if the view recycler
+     * has not been initialized yet
+     */
+    protected abstract AttachedViewRecycler<TabItem, ViewRecyclerParamType> getViewRecycler();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the position and
+     * state of a specific tab, when stacked at the end.
+     *
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the end, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    protected abstract Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(
+            final int index);
 
     /**
      * Handles a touch event.
@@ -488,7 +803,7 @@ public abstract class AbstractTabSwitcherLayout
      *         True, if only the tabs should be inflated, false otherwise
      */
     public final void inflateLayout(final boolean tabsOnly) {
-        dragHandler = onInflateLayout(tabsOnly);
+        onInflateLayout(tabsOnly);
 
         if (!tabsOnly) {
             adaptToolbarVisibility();
@@ -571,7 +886,7 @@ public abstract class AbstractTabSwitcherLayout
 
     @Override
     public final void onFling(final float distance, final long duration) {
-        if (dragHandler != null) {
+        if (getDragHandler() != null) {
             flingAnimation = new FlingAnimation(distance);
             flingAnimation.setFillAfter(true);
             flingAnimation.setAnimationListener(createFlingAnimationListener());
@@ -589,7 +904,7 @@ public abstract class AbstractTabSwitcherLayout
         if (flingAnimation != null) {
             flingAnimation.cancel();
             flingAnimation = null;
-            dragHandler.handleRelease(null, dragThreshold);
+            getDragHandler().handleRelease(null, dragThreshold);
             logger.logVerbose(getClass(), "Canceled fling animation");
         }
     }

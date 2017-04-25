@@ -51,13 +51,13 @@ import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.iterator.AbstractInitialTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -76,86 +76,8 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
+public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         implements PhoneDragHandler.Callback {
-
-    /**
-     * An iterator, which allows to iterate the tab items, which correspond to the tabs of a {@link
-     * TabSwitcher}. When a tab item is referenced for the first time, its initial position and
-     * state is calculated and the tab item is stored in a backing array. When the tab item is
-     * iterated again, it is retrieved from the backing array.
-     */
-    private class InitialTabItemIterator extends AbstractInitialTabItemIterator {
-
-        /**
-         * Calculates the initial position and state of a specific tab item.
-         *
-         * @param tabItem
-         *         The tab item, whose position and state should be calculated, as an instance of
-         *         the class {@link TabItem}. The tab item may not be null
-         * @param predecessor
-         *         The predecessor of the given tab item as an instance of the class {@link TabItem}
-         *         or null, if the tab item does not have a predecessor
-         */
-        private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
-                                                   @Nullable final TabItem predecessor) {
-            float position = calculateStartPosition(tabItem);
-            Pair<Float, State> pair =
-                    clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
-                            predecessor);
-            tabItem.getTag().setPosition(pair.first);
-            tabItem.getTag().setState(pair.second);
-        }
-
-        /**
-         * Calculates and returns the initial position of a specific tab item.
-         *
-         * @param tabItem
-         *         The tab item, whose position should be calculated, as an instance of the class
-         *         {@link TabItem}. The tab item may not be null
-         * @return The position, which has been calculated, as a {@link Float} value
-         */
-        private float calculateStartPosition(@NonNull final TabItem tabItem) {
-            if (tabItem.getIndex() == 0) {
-                return getCount() > stackedTabCount ? stackedTabCount * stackedTabSpacing :
-                        (getCount() - 1) * stackedTabSpacing;
-
-            } else {
-                return -1;
-            }
-        }
-
-        /**
-         * Creates a new iterator, which allows to iterate the tab items, which corresponds to the
-         * tabs of a {@link TabSwitcher}. When a tab item is referenced for the first time, its
-         * initial position and state is calculated and the tab item is stored in a backing array.
-         * When the tab item is iterated again, it is retrieved from the backing array.
-         *
-         * @param backingArray
-         *         The backing array, which should be used to store tab items, once their initial
-         *         position and state has been calculated, as an array of the type {@link TabItem}.
-         *         The array may not be null and the array's length must be equal to the number of
-         *         tabs, which are contained by the given tab switcher
-         * @param reverse
-         *         True, if the tabs should be iterated in reverse order, false otherwise
-         * @param start
-         *         The index of the first tab, which should be iterated, as an {@link Integer} value
-         *         or -1, if all tabs should be iterated
-         */
-        private InitialTabItemIterator(@NonNull final TabItem[] backingArray, final boolean reverse,
-                                       final int start) {
-            super(backingArray, reverse, start);
-        }
-
-        @NonNull
-        @Override
-        protected TabItem createInitialTabItem(final int index) {
-            TabItem tabItem = TabItem.create(getModel(), viewRecycler, index);
-            calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
-            return tabItem;
-        }
-
-    }
 
     /**
      * A layout listener, which encapsulates another listener, which is notified, when the listener
@@ -230,16 +152,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * The height of a tab's title container in pixels.
      */
     private final int tabTitleContainerHeight;
-
-    /**
-     * The number of tabs, which are contained by a stack.
-     */
-    private final int stackedTabCount;
-
-    /**
-     * The space between tabs, which are part of a stack, in pixels.
-     */
-    private final int stackedTabSpacing;
 
     /**
      * The maximum camera distance, when tilting a tab, in pixels.
@@ -739,161 +651,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Clips the position of a specific tab.
-     *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
-     * @param index
-     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
-     * @param position
-     *         The position, which should be clipped, in pixels as a {@link Float} value
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the tab item, as an instance of the
-     * class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    private Pair<Float, State> clipTabPosition(final int count, final int index,
-                                               final float position,
-                                               @Nullable final TabItem predecessor) {
-        return clipTabPosition(count, index, position,
-                predecessor != null ? predecessor.getTag().getState() : null);
-    }
-
-    /**
-     * Clips the position of a specific tab.
-     *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
-     * @param index
-     *         The index of the tab, whose position should be clipped, as an {@link Integer} value
-     * @param position
-     *         The position, which should be clipped, in pixels as a {@link Float} value
-     * @param predecessorState
-     *         The state of the predecessor of the given tab item as a value of the enum {@link
-     *         State} or null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the tab item, as an instance of the
-     * class {@link Pair}. The pair may not be null
-     */
-    private Pair<Float, State> clipTabPosition(final int count, final int index,
-                                               final float position,
-                                               @Nullable final State predecessorState) {
-        Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(count, index, predecessorState);
-        float startPosition = startPair.first;
-
-        if (position <= startPosition) {
-            State state = startPair.second;
-            return Pair.create(startPosition, state);
-        } else {
-            Pair<Float, State> endPair = calculatePositionAndStateWhenStackedAtEnd(index);
-            float endPosition = endPair.first;
-
-            if (position >= endPosition) {
-                State state = endPair.second;
-                return Pair.create(endPosition, state);
-            } else {
-                State state = State.FLOATING;
-                return Pair.create(position, state);
-            }
-        }
-    }
-
-    /**
-     * Calculates and returns the position and state of a specific tab, when stacked at the start.
-     *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
-     * @param index
-     *         The index of the tab, whose position and state should be returned, as an {@link
-     *         Integer} value
-     * @param predecessor
-     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
-     *         null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the start, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
-                                                                           final int index,
-                                                                           @Nullable final TabItem predecessor) {
-        return calculatePositionAndStateWhenStackedAtStart(count, index,
-                predecessor != null ? predecessor.getTag().getState() : null);
-    }
-
-    /**
-     * Calculates and returns the position and state of a specific tab, when stacked at the start.
-     *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
-     * @param index
-     *         The index of the tab, whose position and state should be returned, as an {@link
-     *         Integer} value
-     * @param predecessorState
-     *         The state of the predecessor of the given tab item as a value of the enum {@link
-     *         State} or null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the start, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
-                                                                           final int index,
-                                                                           @Nullable final State predecessorState) {
-        if ((count - index) <= stackedTabCount) {
-            float position = stackedTabSpacing * (count - (index + 1));
-            return Pair.create(position,
-                    (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.STACKED_START);
-        } else {
-            float position = stackedTabSpacing * stackedTabCount;
-            return Pair.create(position,
-                    (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.HIDDEN);
-        }
-    }
-
-    /**
-     * Calculates and returns the position and state of a specific tab, when stacked at the end.
-     *
-     * @param index
-     *         The index of the tab, whose position and state should be returned, as an {@link
-     *         Integer} value
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the end, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    private Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
-        Toolbar[] toolbars = getTabSwitcher().getToolbars();
-        int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
-                getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                toolbars[0].getHeight() - tabInset : 0;
-        int padding =
-                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START, getTabSwitcher()) +
-                        getArithmetics()
-                                .getPadding(Axis.DRAGGING_AXIS, Gravity.END, getTabSwitcher());
-        int offset = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
-                stackedTabCount * stackedTabSpacing : 0;
-
-        if (index < stackedTabCount) {
-            float position =
-                    size - toolbarHeight - tabInset - (stackedTabSpacing * (index + 1)) - padding +
-                            offset;
-            return Pair.create(position, State.STACKED_END);
-        } else {
-            float position =
-                    size - toolbarHeight - tabInset - (stackedTabSpacing * stackedTabCount) -
-                            padding + offset;
-            return Pair.create(position, State.HIDDEN);
-        }
-    }
-
-    /**
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the
      * tabs are overshooting at the start.
      *
@@ -944,7 +701,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float containerHeight = getArithmetics().getSize(Axis.Y_AXIS, tabContainer);
         int toolbarHeight = getModel().areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
         int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
-                stackedTabCount * stackedTabSpacing;
+                getStackedTabCount() * getStackedTabSpacing();
         return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
                 (containerHeight - getModel().getPaddingTop() - getModel().getPaddingBottom()));
     }
@@ -1510,7 +1267,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         final float startPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, view);
         ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
         animation.setDuration(Math.round(revertOvershootAnimationDuration * Math.abs(
-                (targetPosition - position) / (float) (stackedTabCount * stackedTabSpacing))));
+                (targetPosition - position) /
+                        (float) (getStackedTabCount() * getStackedTabSpacing()))));
         animation.addListener(new AnimationListenerWrapper(null));
         animation.setInterpolator(interpolator);
         animation.setStartDelay(0);
@@ -2476,7 +2234,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             if (state == State.HIDDEN || state == State.STACKED_START) {
                 Pair<Float, State> pair =
                         calculatePositionAndStateWhenStackedAtStart(count, swipedTabItem.getIndex(),
-                                (TabItem) null);
+                                null);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateOrRemoveView(tabItem);
@@ -2546,39 +2304,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                       @Nullable final OnGlobalLayoutListener listener) {
         inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener),
                 tabViewBottomMargin);
-    }
-
-    /**
-     * Inflates the view, which is used to visualize a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     * @param listener
-     *         The layout listener, which should be notified, when the view has been inflated, as an
-     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
-     *         notified
-     * @param params
-     *         An array, which contains optional parameters, which should be passed to the view
-     *         recycler, which is used to inflate the view, as an array of the type {@link Integer}.
-     *         The array may not be null
-     */
-    private void inflateView(@NonNull final TabItem tabItem,
-                             @Nullable final OnGlobalLayoutListener listener,
-                             @NonNull final Integer... params) {
-        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem, params);
-
-        if (listener != null) {
-            boolean inflated = pair.second;
-
-            if (inflated) {
-                View view = pair.first;
-                view.getViewTreeObserver()
-                        .addOnGlobalLayoutListener(new LayoutListenerWrapper(view, listener));
-            } else {
-                listener.onGlobalLayout();
-            }
-        }
     }
 
     /**
@@ -2844,7 +2569,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         int count = getTabSwitcher().getCount();
         TabItem firstAddedTabItem = addedTabItems[0];
         TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
-
         float referencePosition = referenceTabItem.getTag().getPosition();
 
         if (isReferencingPredecessor && attachedPositionChanged &&
@@ -2863,7 +2587,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float minTabSpacing = calculateMinTabSpacing(count);
         TabItem currentReferenceTabItem = referenceTabItem;
         int referenceIndex = referenceTabItem.getIndex();
-
         AbstractTabItemIterator.AbstractBuilder builder =
                 new TabItemIterator.Builder(getTabSwitcher(), viewRecycler);
 
@@ -3315,8 +3038,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
-        stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         maxCameraDistance = resources.getDimensionPixelSize(R.dimen.max_camera_distance);
         TypedValue typedValue = new TypedValue();
         resources.getValue(R.dimen.swiped_tab_scale, typedValue, true);
@@ -3345,9 +3066,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         toolbarAnimation = null;
     }
 
-    @NonNull
     @Override
-    protected final AbstractDragHandler<?> onInflateLayout(final boolean tabsOnly) {
+    protected final void onInflateLayout(final boolean tabsOnly) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         if (tabsOnly) {
@@ -3374,7 +3094,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         adaptLogLevel();
         adaptDecorator();
         adaptToolbarMargin();
-        return dragHandler;
     }
 
     @Nullable
@@ -3400,6 +3119,43 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         return result;
+    }
+
+    @Override
+    protected final AbstractDragHandler<?> getDragHandler() {
+        return dragHandler;
+    }
+
+    @Override
+    protected final AttachedViewRecycler<TabItem, Integer> getViewRecycler() {
+        return viewRecycler;
+    }
+
+    @NonNull
+    @Override
+    protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
+        float size = getArithmetics().getSize(Arithmetics.Axis.DRAGGING_AXIS, getTabSwitcher());
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
+        int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
+                getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                toolbars[0].getHeight() - tabInset : 0;
+        int padding = getArithmetics()
+                .getPadding(Arithmetics.Axis.DRAGGING_AXIS, Gravity.START, getTabSwitcher()) +
+                getArithmetics()
+                        .getPadding(Arithmetics.Axis.DRAGGING_AXIS, Gravity.END, getTabSwitcher());
+        int offset = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
+                getStackedTabCount() * getStackedTabSpacing() : 0;
+
+        if (index < getStackedTabCount()) {
+            float position =
+                    size - toolbarHeight - tabInset - (getStackedTabSpacing() * (index + 1)) -
+                            padding + offset;
+            return Pair.create(position, State.STACKED_END);
+        } else {
+            float position = size - toolbarHeight - tabInset -
+                    (getStackedTabSpacing() * getStackedTabCount()) - padding + offset;
+            return Pair.create(position, State.HIDDEN);
+        }
     }
 
     @Override
