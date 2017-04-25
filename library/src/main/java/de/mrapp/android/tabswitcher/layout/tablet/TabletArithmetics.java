@@ -13,12 +13,15 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 
+import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
@@ -34,6 +37,38 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * @since 1.0.0
  */
 public class TabletArithmetics implements Arithmetics {
+
+    /**
+     * The tab switcher, the arithmetics are calculated for.
+     */
+    private final TabSwitcher tabSwitcher;
+
+    /**
+     * The height of a tab in pixels.
+     */
+    private final int tabHeight;
+
+    /**
+     * The height of the container, which contains tabs, in pixels.
+     */
+    private final int tabContainerHeight;
+
+    /**
+     * Creates a new class, which provides methods, which allow to calculate the position, size and
+     * rotation of a {@link TabSwitcher}'s children, when using the tablet layout.
+     *
+     * @param tabSwitcher
+     *         The tab switcher, the arithmetics should be calculated for, as an instance of the
+     *         class {@link TabSwitcher}. The tab switcher may not be null
+     */
+    public TabletArithmetics(@NonNull final TabSwitcher tabSwitcher) {
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        this.tabSwitcher = tabSwitcher;
+        Resources resources = tabSwitcher.getResources();
+        this.tabHeight = resources.getDimensionPixelSize(R.dimen.tablet_tab_height);
+        this.tabContainerHeight =
+                resources.getDimensionPixelSize(R.dimen.tablet_tab_container_height);
+    }
 
     @Override
     public final float getPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
@@ -53,9 +88,12 @@ public class TabletArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return view.getX();
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            return view.getX() -
+                    (tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
+                            0);
         } else {
-            return view.getY();
+            return view.getY() - (tabContainerHeight - tabHeight);
         }
     }
 
@@ -66,9 +104,11 @@ public class TabletArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            view.setX(position);
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            view.setX((tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
+                    0) + position);
         } else {
-            view.setY(position);
+            view.setY((tabContainerHeight - tabHeight) + position);
         }
     }
 
@@ -82,9 +122,12 @@ public class TabletArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            animator.x(position);
+            Toolbar[] toolbars = tabSwitcher.getToolbars();
+            animator.x(
+                    (tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
+                            0) + position);
         } else {
-            animator.y(position);
+            animator.y((tabContainerHeight - tabHeight) + position);
         }
     }
 

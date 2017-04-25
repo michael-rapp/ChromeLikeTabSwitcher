@@ -34,8 +34,8 @@ License.
     <item name="swiped_tab_alpha" format="float" type="dimen">0</item>
 
     <!-- Tablet layout -->
-    <dimen name="tablet_tab_container_height">48dp</dimen>
-    <dimen name="tablet_tab_width">64dp</dimen>
-    <dimen name="tablet_tab_height">32dp</dimen>
+    <dimen name="tablet_tab_container_height">64dp</dimen>
+    <dimen name="tablet_tab_width">164dp</dimen>
+    <dimen name="tablet_tab_height">48dp</dimen>
 
 </resources>

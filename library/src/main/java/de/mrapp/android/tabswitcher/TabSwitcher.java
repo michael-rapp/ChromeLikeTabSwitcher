@@ -230,7 +230,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     private void initializeLayout(@NonNull final Layout layout, final boolean inflatedTabsOnly) {
         if (layout == Layout.TABLET) {
-            TabletArithmetics arithmetics = new TabletArithmetics();
+            TabletArithmetics arithmetics = new TabletArithmetics(TabSwitcher.this);
             this.layout = new TabletTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
         } else {
             PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
