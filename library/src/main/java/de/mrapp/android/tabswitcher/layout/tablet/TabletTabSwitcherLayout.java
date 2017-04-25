@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -45,6 +46,21 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
  * @since 1.0.0
  */
 public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
+
+    /**
+     * The maximum width of a tab.
+     */
+    private final int maxTabWidth;
+
+    /**
+     * The minimum width of a tab.
+     */
+    private final int minTabWidth;
+
+    /**
+     * The offset between two neighboring tabs.
+     */
+    private final int tabOffset;
 
     /**
      * The drag handler, which is used by the layout.
@@ -97,6 +113,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                 (FrameLayout.LayoutParams) secondaryToolbar.getLayoutParams();
         secondaryToolbarLayoutParams
                 .setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(), 0);
+    }
+
+    /**
+     * Calculates and returns the width of the tabs, depending on the total number of tabs, which
+     * are currently contained by the tab switcher.
+     *
+     * @return The width, which has been calculated, in pixels as an {@link Integer} value
+     */
+    private int calculateTabWidth() {
+        return maxTabWidth;
     }
 
     /**
@@ -179,6 +205,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                                    @NonNull final TabSwitcherModel model,
                                    @NonNull final Arithmetics arithmetics) {
         super(tabSwitcher, model, arithmetics);
+        Resources resources = tabSwitcher.getResources();
+        maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
+        minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
+        tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
     }
 
     @Override
@@ -256,24 +286,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
 
     @Override
     protected final float calculateEndPosition(final int index) {
-        // TODO: Use correct distance
-        return (getModel().getCount() - index - 1) * 200;
+        return (getModel().getCount() - index - 1) * (calculateTabWidth() - tabOffset);
     }
 
     @Override
     protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
                                                      @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        // TODO: Use correct distance
-        return predecessorPosition - 200;
+        return predecessorPosition - (calculateTabWidth() - tabOffset);
     }
 
     @Override
     protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                        @NonNull final TabItem successor) {
         float successorPosition = successor.getTag().getPosition();
-        // TODO: Use correct distance
-        return successorPosition + 200;
+        return successorPosition + (calculateTabWidth() - tabOffset);
     }
 
     @Override

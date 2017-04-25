@@ -15,7 +15,7 @@ License.
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/tablet_tab_width"
+    android:layout_width="@dimen/tablet_tab_max_width"
     android:layout_height="@dimen/tablet_tab_height"
     android:orientation="horizontal"
     android:paddingEnd="@dimen/tablet_tab_padding_right"
