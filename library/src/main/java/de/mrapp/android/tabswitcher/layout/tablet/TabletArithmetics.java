@@ -54,6 +54,11 @@ public class TabletArithmetics implements Arithmetics {
     private final int tabContainerHeight;
 
     /**
+     * The offset between two neighboring tabs in pixels.
+     */
+    private final int tabOffset;
+
+    /**
      * Creates a new class, which provides methods, which allow to calculate the position, size and
      * rotation of a {@link TabSwitcher}'s children, when using the tablet layout.
      *
@@ -68,6 +73,7 @@ public class TabletArithmetics implements Arithmetics {
         this.tabHeight = resources.getDimensionPixelSize(R.dimen.tablet_tab_height);
         this.tabContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tablet_tab_container_height);
+        this.tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
     }
 
     @Override
@@ -89,9 +95,8 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            return view.getX() -
-                    (tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
-                            0);
+            return view.getX() - (tabSwitcher.areToolbarsShown() && toolbars != null ?
+                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0);
         } else {
             return view.getY() - (tabContainerHeight - tabHeight);
         }
@@ -105,8 +110,8 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            view.setX((tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
-                    0) + position);
+            view.setX((tabSwitcher.areToolbarsShown() && toolbars != null ?
+                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0) + position);
         } else {
             view.setY((tabContainerHeight - tabHeight) + position);
         }
@@ -123,9 +128,8 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            animator.x(
-                    (tabSwitcher.areToolbarsShown() && toolbars != null ? toolbars[0].getWidth() :
-                            0) + position);
+            animator.x((tabSwitcher.areToolbarsShown() && toolbars != null ?
+                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0) + position);
         } else {
             animator.y((tabContainerHeight - tabHeight) + position);
         }

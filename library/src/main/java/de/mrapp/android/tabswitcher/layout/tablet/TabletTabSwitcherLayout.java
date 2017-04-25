@@ -33,6 +33,7 @@ import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -48,17 +49,17 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
 
     /**
-     * The maximum width of a tab.
+     * The maximum width of a tab in pixels.
      */
     private final int maxTabWidth;
 
     /**
-     * The minimum width of a tab.
+     * The minimum width of a tab in pixels.
      */
     private final int minTabWidth;
 
     /**
-     * The offset between two neighboring tabs.
+     * The offset between two neighboring tabs in pixels.
      */
     private final int tabOffset;
 
@@ -261,13 +262,20 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float size = 1000; // TODO: Use correct width of the tab container
+        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
+        int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
+        Toolbar[] toolbars = getToolbars();
+        float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
+                Math.max(0, toolbars[0].getWidth() - tabOffset) +
+                        Math.max(0, toolbars[1].getWidth() - tabOffset) : 0;
 
         if (index < getStackedTabCount()) {
-            float position = size - (getStackedTabSpacing() * (index + 1));
+            float position = size - padding - toolbarSize - calculateTabWidth() -
+                    (getStackedTabSpacing() * (index + 1));
             return Pair.create(position, State.STACKED_END);
         } else {
-            float position = size - (getStackedTabSpacing() * getStackedTabCount());
+            float position = size - padding - toolbarSize - calculateTabWidth() -
+                    (getStackedTabSpacing() * getStackedTabCount());
             return Pair.create(position, State.HIDDEN);
         }
     }
