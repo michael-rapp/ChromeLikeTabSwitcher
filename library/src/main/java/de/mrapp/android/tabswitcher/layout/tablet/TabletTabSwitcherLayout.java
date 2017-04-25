@@ -13,8 +13,6 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -368,26 +366,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
         adaptTabContainerMargin();
-    }
-
-    @Override
-    public final void onTabIconChanged(@Nullable final Drawable icon) {
-
-    }
-
-    @Override
-    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
-
-    }
-
-    @Override
-    public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
-
-    }
-
-    @Override
-    public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
-
     }
 
     @Nullable

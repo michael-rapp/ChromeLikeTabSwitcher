@@ -17,6 +17,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -882,6 +883,26 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     public final void onToolbarMenuInflated(@MenuRes final int resourceId,
                                             @Nullable final OnMenuItemClickListener listener) {
         inflateToolbarMenu();
+    }
+
+    @Override
+    public final void onTabIconChanged(@Nullable final Drawable icon) {
+
+    }
+
+    @Override
+    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
+    public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
+    public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+
     }
 
     @Override
