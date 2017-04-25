@@ -314,14 +314,14 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
 
     @Override
     public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
-
+        // TODO: Implement
     }
 
     @Override
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
-
+        // TODO: Implement
     }
 
     @Override
@@ -329,27 +329,27 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
-
+        // TODO: Implement
     }
 
     @Override
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
                                      @NonNull final Animation animation) {
-
+        // TODO: Implement
     }
 
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
                                    @NonNull final Animation animation) {
-
+        // TODO: Implement
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
                                        @NonNull final Animation animation) {
-
+        // TODO: Implement
     }
 
     @Override
@@ -361,6 +361,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @Nullable
     @Override
     public final DragState onDrag(@NonNull final DragState dragState, final float dragDistance) {
+        // TODO: Implement
         return null;
     }
 
