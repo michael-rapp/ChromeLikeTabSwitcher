@@ -15,12 +15,8 @@ License.
 -->
 <resources>
 
-    <style name="Tab.Title" parent="@style/TextAppearance.AppCompat.Small">
-        <item name="android:drawablePadding">@dimen/tab_title_drawable_padding</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:maxLines">1</item>
+    <style name="Tab.Title.Phone" parent="@style/Tab.Title.Base">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/tab_title_text_color</item>
     </style>
 
 </resources>

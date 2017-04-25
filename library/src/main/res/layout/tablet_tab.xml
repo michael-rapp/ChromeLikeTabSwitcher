@@ -21,7 +21,7 @@ License.
 
     <TextView
         android:id="@+id/tab_title_text_view"
-        style="@style/Tab.Title"
+        style="@style/Tab.Title.Tablet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
