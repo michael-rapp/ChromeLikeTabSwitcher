@@ -318,16 +318,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     @Override
-    public final void onSwitcherShown() {
-
-    }
-
-    @Override
-    public final void onSwitcherHidden() {
-
-    }
-
-    @Override
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {

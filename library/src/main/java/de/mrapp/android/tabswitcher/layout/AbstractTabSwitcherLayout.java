@@ -906,6 +906,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     @Override
+    public void onSwitcherShown() {
+
+    }
+
+    @Override
+    public void onSwitcherHidden() {
+
+    }
+
+    @Override
     public final void onClick(@NonNull final TabItem tabItem) {
         getModel().selectTab(tabItem.getTab());
         getLogger().logVerbose(getClass(), "Clicked tab at index " + tabItem.getIndex());
