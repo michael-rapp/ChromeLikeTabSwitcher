@@ -230,7 +230,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
-        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics());
+        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
         adaptTabContainerAndToolbarMargins();
     }
 
