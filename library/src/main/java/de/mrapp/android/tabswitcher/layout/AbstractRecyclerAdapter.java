@@ -19,6 +19,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
@@ -72,19 +73,24 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     private final TabSwitcherModel model;
 
     /**
-     * The default background color of tabs.
-     */
-    private final int tabBackgroundColor;
-
-    /**
      * The default text color of a tab's title.
      */
     private final int tabTitleTextColor;
 
     /**
+     * The default background color of tabs.
+     */
+    private final int tabBackgroundColor;
+
+    /**
+     * The default background color of tabs, when selected.
+     */
+    private final int tabBackgroundColorSelected;
+
+    /**
      * The resource id of the default icon of a tab's close button.
      */
-    private final int defaultCloseButtonIconId;
+    private final int closeButtonIconId;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -163,7 +169,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         if (icon != null) {
             viewHolder.closeButton.setImageDrawable(icon);
         } else {
-            viewHolder.closeButton.setImageResource(defaultCloseButtonIconId);
+            viewHolder.closeButton.setImageResource(closeButtonIconId);
         }
     }
 
@@ -186,13 +192,15 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         ColorStateList colorStateList =
                 tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
                         model.getTabBackgroundColor();
-        int color = tabBackgroundColor;
+        int color;
 
         if (colorStateList != null) {
             int[] stateSet =
                     model.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
                             new int[]{};
             color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
+        } else {
+            color = model.getSelectedTab() == tab ? tabBackgroundColorSelected : tabBackgroundColor;
         }
 
         Drawable background = view.getBackground();
@@ -440,22 +448,32 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param defaultCloseButtonIconId
+     * @param tabBackgroundColorId
+     *         The resource id of the default background color of tabs as an {@link Integer} value.
+     *         The resource id must correspond to a valid color resource
+     * @param tabBackgroundColorSelectedId
+     *         The resource id of the default background color of tabs, when selected, as an {@link
+     *         Integer} value. The resource id must correspond to a valid color resource
+     * @param closeButtonIconId
      *         The resource id of the default icon of a tab's close button as an {@link Integer}
      *         value. The resource id must correspond to a valid drawable resource
      */
     public AbstractRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
-                                   @DrawableRes final int defaultCloseButtonIconId) {
+                                   @ColorRes final int tabBackgroundColorId,
+                                   @ColorRes final int tabBackgroundColorSelectedId,
+                                   @DrawableRes final int closeButtonIconId) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
-        this.tabBackgroundColor =
-                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
         this.tabTitleTextColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color);
-        this.defaultCloseButtonIconId = defaultCloseButtonIconId;
+        this.tabBackgroundColor =
+                ContextCompat.getColor(tabSwitcher.getContext(), tabBackgroundColorId);
+        this.tabBackgroundColorSelected =
+                ContextCompat.getColor(tabSwitcher.getContext(), tabBackgroundColorSelectedId);
+        this.closeButtonIconId = closeButtonIconId;
         this.viewRecycler = null;
     }
 
