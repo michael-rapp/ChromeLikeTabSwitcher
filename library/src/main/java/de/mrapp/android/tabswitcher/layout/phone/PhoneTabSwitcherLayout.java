@@ -3395,12 +3395,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    public final void onClick(@NonNull final TabItem tabItem) {
-        getModel().selectTab(tabItem.getTab());
-        getLogger().logVerbose(getClass(), "Clicked tab at index " + tabItem.getIndex());
-    }
-
-    @Override
     public final void onRevertStartOvershoot() {
         animateRevertStartOvershoot();
         getLogger().logVerbose(getClass(), "Reverting overshoot at the start");

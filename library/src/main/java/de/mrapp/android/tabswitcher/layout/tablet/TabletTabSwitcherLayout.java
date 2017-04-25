@@ -396,9 +396,4 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         return null;
     }
 
-    @Override
-    public final void onClick(@NonNull final TabItem tabItem) {
-
-    }
-
 }

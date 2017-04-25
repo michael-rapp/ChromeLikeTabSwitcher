@@ -885,6 +885,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     @Override
+    public final void onClick(@NonNull final TabItem tabItem) {
+        getModel().selectTab(tabItem.getTab());
+        getLogger().logVerbose(getClass(), "Clicked tab at index " + tabItem.getIndex());
+    }
+
+    @Override
     public final void onFling(final float distance, final long duration) {
         if (getDragHandler() != null) {
             flingAnimation = new FlingAnimation(distance);
