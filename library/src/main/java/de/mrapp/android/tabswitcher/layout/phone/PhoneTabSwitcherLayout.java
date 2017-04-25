@@ -313,8 +313,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
         AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler)
-                        .start(Math.max(0, firstVisibleIndex)).create();
+                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
         TabItem tabItem;
         boolean abort = false;
 
