@@ -157,7 +157,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         if (icon != null) {
             viewHolder.closeButton.setImageDrawable(icon);
         } else {
-            viewHolder.closeButton.setImageResource(R.drawable.ic_close_tab_18dp);
+            viewHolder.closeButton.setImageResource(R.drawable.phone_tab_close_button_icon);
         }
     }
 
