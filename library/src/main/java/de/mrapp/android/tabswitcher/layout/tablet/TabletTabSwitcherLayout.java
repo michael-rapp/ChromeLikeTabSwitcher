@@ -82,13 +82,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     private ViewGroup contentContainer;
 
     /**
-     * Adapts the margin of the tab container.
+     * Adapts the margins of the tab container and the toolbars.
      */
-    private void adaptTabContainerMargin() {
-        FrameLayout.LayoutParams layoutParams =
+    private void adaptTabContainerAndToolbarMargins() {
+        FrameLayout.LayoutParams tabContainerLayoutParams =
                 (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
-        layoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
+        tabContainerLayoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
                 getModel().getPaddingRight(), 0);
+        FrameLayout.LayoutParams primaryToolbarLayoutParams =
+                (FrameLayout.LayoutParams) primaryToolbar.getLayoutParams();
+        primaryToolbarLayoutParams
+                .setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(), 0);
+        FrameLayout.LayoutParams secondaryToolbarLayoutParams =
+                (FrameLayout.LayoutParams) secondaryToolbar.getLayoutParams();
+        secondaryToolbarLayoutParams
+                .setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(), 0);
     }
 
     /**
@@ -192,7 +200,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics());
-        adaptTabContainerMargin();
+        adaptTabContainerAndToolbarMargins();
     }
 
     @Override
@@ -338,7 +346,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @Override
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
-        adaptTabContainerMargin();
+        adaptTabContainerAndToolbarMargins();
     }
 
 }
