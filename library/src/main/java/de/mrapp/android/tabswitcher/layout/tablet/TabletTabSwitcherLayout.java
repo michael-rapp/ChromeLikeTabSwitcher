@@ -18,8 +18,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.FrameLayout;
@@ -32,10 +30,8 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
-import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -128,64 +124,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     /**
-     * Inflates and updates the view, which is used to visualize a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     * @param listener
-     *         The layout listener, which should be notified, when the view has been inflated, as an
-     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
-     *         notified
-     */
-    private void inflateAndUpdateView(@NonNull final TabItem tabItem,
-                                      @Nullable final OnGlobalLayoutListener listener) {
-        inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener));
-    }
-
-    /**
-     * Inflates the view, which is used to visualize a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     * @param listener
-     *         The layout listener, which should be notified, when the view has been inflated, as an
-     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
-     *         notified
-     */
-    private void inflateView(@NonNull final TabItem tabItem,
-                             @Nullable final OnGlobalLayoutListener listener) {
-        Pair<View, Boolean> pair = viewRecycler.inflate(tabItem);
-
-        if (listener != null) {
-            boolean inflated = pair.second;
-
-            if (inflated) {
-                View view = pair.first;
-                view.getViewTreeObserver()
-                        .addOnGlobalLayoutListener(new LayoutListenerWrapper(view, listener));
-            } else {
-                listener.onGlobalLayout();
-            }
-        }
-    }
-
-    /**
-     * Updates the view, which is used to visualize a specific tab.
-     *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be updated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     */
-    private void updateView(@NonNull final TabItem tabItem) {
-        float position = tabItem.getTag().getPosition();
-        View view = tabItem.getView();
-        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, position);
-        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
-    }
-
-    /**
      * Creates and returns a layout listener, which allows to adapt the size and position of a tab,
      * once its view has been inflated.
      *
@@ -257,10 +195,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         adaptTabContainerMargin();
     }
 
-    @Nullable
     @Override
-    protected final Pair<Integer, Float> onDetachLayout(final boolean tabsOnly) {
-        return null;
+    protected final void onDetachLayout(final boolean tabsOnly) {
+        // TODO: childViewRecycler.removeAll();
+        // TODO: childViewRecycler.clearCache();
+        if (!tabsOnly) {
+            getModel().removeListener(recyclerAdapter);
+        }
     }
 
     @Override
@@ -273,16 +214,58 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         return viewRecycler;
     }
 
+    @Override
+    protected final void inflateAndUpdateView(@NonNull final TabItem tabItem,
+                                              @Nullable final OnGlobalLayoutListener listener) {
+        inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener));
+    }
+
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        // TODO: Implement
-        return null;
+        float size = 1000; // TODO: Use correct width of the tab container
+
+        if (index < getStackedTabCount()) {
+            float position = size - (getStackedTabSpacing() * (index + 1));
+            return Pair.create(position, State.STACKED_END);
+        } else {
+            float position = size - (getStackedTabSpacing() * getStackedTabCount());
+            return Pair.create(position, State.HIDDEN);
+        }
     }
 
     @Override
-    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
+    protected final boolean isOvershootingAtStart() {
+        // TODO: Implement
         return false;
+    }
+
+    @Override
+    protected final boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
+        // TODO: Implement
+        return false;
+    }
+
+    @Override
+    protected final float calculateEndPosition(final int index) {
+        // TODO: Use correct distance
+        return (getModel().getCount() - index - 1) * 200;
+    }
+
+    @Override
+    protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
+                                                     @NonNull final TabItem predecessor) {
+        float predecessorPosition = predecessor.getTag().getPosition();
+        // TODO: Use correct distance
+        return predecessorPosition - 200;
+    }
+
+    @Override
+    protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
+                                                       @NonNull final TabItem successor) {
+        float successorPosition = successor.getTag().getPosition();
+        // TODO: Use correct distance
+        return successorPosition + 200;
     }
 
     @Override
@@ -356,13 +339,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
         adaptTabContainerMargin();
-    }
-
-    @Nullable
-    @Override
-    public final DragState onDrag(@NonNull final DragState dragState, final float dragDistance) {
-        // TODO: Implement
-        return null;
     }
 
 }

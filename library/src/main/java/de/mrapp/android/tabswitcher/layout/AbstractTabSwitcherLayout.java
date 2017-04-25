@@ -40,6 +40,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -373,6 +374,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     private android.view.animation.Animation flingAnimation;
 
     /**
+     * The index of the first visible tab.
+     */
+    private int firstVisibleIndex;
+
+    /**
      * Adapts the visibility of the toolbars, which are shown, when the tab switcher is shown.
      */
     private void adaptToolbarVisibility() {
@@ -467,6 +473,208 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Calculates the positions of all tabs, when dragging towards the start.
+     *
+     * @param dragDistance
+     *         The current drag distance in pixels as a {@link Float} value
+     */
+    private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
+        firstVisibleIndex = -1;
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).create();
+        TabItem tabItem;
+        boolean abort = false;
+
+        while ((tabItem = iterator.next()) != null && !abort) {
+            if (getTabSwitcher().getCount() - tabItem.getIndex() > 1) {
+                abort = calculatePositionWhenDraggingToEnd(dragDistance, tabItem,
+                        iterator.previous());
+
+                if (firstVisibleIndex == -1 && tabItem.getTag().getState() == State.FLOATING) {
+                    firstVisibleIndex = tabItem.getIndex();
+                }
+            } else {
+                Pair<Float, State> pair =
+                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                tabItem.getTag().getPosition(), iterator.previous());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+            }
+
+            inflateOrRemoveView(tabItem);
+        }
+    }
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to calculate the position of
+     * a specific tab, when dragging towards the end.
+     *
+     * @param dragDistance
+     *         The current drag distance in pixels as a {@link Float} value
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose position should be calculated, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
+     */
+    private boolean calculatePositionWhenDraggingToEnd(final float dragDistance,
+                                                       @NonNull final TabItem tabItem,
+                                                       @Nullable final TabItem predecessor) {
+        if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
+            if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
+                    tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
+                float currentPosition = tabItem.getTag().getPosition();
+                float thresholdPosition = calculateEndPosition(tabItem.getIndex());
+                float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
+                Pair<Float, State> pair =
+                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                newPosition, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+            } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+                return true;
+            }
+        } else {
+            float thresholdPosition = calculateEndPosition(tabItem.getIndex());
+            float newPosition =
+                    Math.min(calculateSuccessorPosition(tabItem, predecessor), thresholdPosition);
+            Pair<Float, State> pair =
+                    clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
+                            predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculates the positions of all tabs, when dragging towards the end.
+     *
+     * @param dragDistance
+     *         The current drag distance in pixels as a {@link Float} value
+     */
+    private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
+        AbstractTabItemIterator iterator =
+                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler())
+                        .start(Math.max(0, firstVisibleIndex)).create();
+        TabItem tabItem;
+        boolean abort = false;
+
+        while ((tabItem = iterator.next()) != null && !abort) {
+            if (getTabSwitcher().getCount() - tabItem.getIndex() > 1) {
+                abort = calculatePositionWhenDraggingToStart(dragDistance, tabItem,
+                        iterator.previous());
+            } else {
+                Pair<Float, State> pair =
+                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                tabItem.getTag().getPosition(), iterator.previous());
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+            }
+
+            inflateOrRemoveView(tabItem);
+        }
+
+        if (firstVisibleIndex > 0) {
+            int start = firstVisibleIndex - 1;
+            iterator =
+                    new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).reverse(true)
+                            .start(start).create();
+
+            while ((tabItem = iterator.next()) != null) {
+                TabItem successor = iterator.previous();
+                float successorPosition = successor.getTag().getPosition();
+
+                if (tabItem.getIndex() < start) {
+                    Pair<Float, State> pair =
+                            clipTabPosition(getTabSwitcher().getCount(), successor.getIndex(),
+                                    successorPosition, tabItem);
+                    successor.getTag().setPosition(pair.first);
+                    successor.getTag().setState(pair.second);
+                    inflateOrRemoveView(successor);
+
+                    if (successor.getTag().getState() == State.FLOATING) {
+                        firstVisibleIndex = successor.getIndex();
+                    } else {
+                        break;
+                    }
+                }
+
+                float newPosition = calculatePredecessorPosition(tabItem, successor);
+                tabItem.getTag().setPosition(newPosition);
+
+                if (!iterator.hasNext()) {
+                    Pair<Float, State> pair =
+                            clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                    newPosition, (TabItem) null);
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
+                    inflateOrRemoveView(tabItem);
+
+                    if (tabItem.getTag().getState() == State.FLOATING) {
+                        firstVisibleIndex = tabItem.getIndex();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Calculates the position of a specific tab, when dragging towards the start.
+     *
+     * @param dragDistance
+     *         The current drag distance in pixels as a {@link Float} value
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose position should be calculated, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @param predecessor
+     *         The predecessor of the given tab item as an instance of the class {@link TabItem} or
+     *         null, if the tab item does not have a predecessor
+     * @return True, if calculating the position of subsequent tabs can be omitted, false otherwise
+     */
+    private boolean calculatePositionWhenDraggingToStart(final float dragDistance,
+                                                         @NonNull final TabItem tabItem,
+                                                         @Nullable final TabItem predecessor) {
+        float attachedPosition = calculateAttachedPosition(getTabSwitcher().getCount());
+
+        if (predecessor == null || predecessor.getTag().getState() != State.FLOATING ||
+                (attachedPosition != -1 && predecessor.getTag().getPosition() > attachedPosition)) {
+            if (tabItem.getTag().getState() == State.FLOATING) {
+                float currentPosition = tabItem.getTag().getPosition();
+                float newPosition = currentPosition + dragDistance;
+                Pair<Float, State> pair =
+                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                newPosition, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+            } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+                float currentPosition = tabItem.getTag().getPosition();
+                Pair<Float, State> pair =
+                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
+                                currentPosition, predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+                return true;
+            } else if (tabItem.getTag().getState() == State.HIDDEN ||
+                    tabItem.getTag().getState() == State.STACKED_START) {
+                return true;
+            }
+        } else {
+            float newPosition = calculateSuccessorPosition(tabItem, predecessor);
+            Pair<Float, State> pair =
+                    clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
+                            predecessor);
+            tabItem.getTag().setPosition(pair.first);
+            tabItem.getTag().setState(pair.second);
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the tab switcher, the layout belongs to.
      *
      * @return The tab switcher, the layout belongs to, as an instance of the class {@link
@@ -548,6 +756,27 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     @NonNull
     protected final Context getContext() {
         return tabSwitcher.getContext();
+    }
+
+    /**
+     * Returns the index of the first visible tab.
+     *
+     * @return The index of the first visible tab as an {@link Integer} value or -1, if no tabs is
+     * visible
+     */
+    protected final int getFirstVisibleIndex() {
+        return firstVisibleIndex;
+    }
+
+    /**
+     * Sets the index of the first visible tab.
+     *
+     * @param firstVisibleIndex
+     *         The index, which should be set, as an {@link Integer} value or -1, if no tab is
+     *         visible
+     */
+    protected final void setFirstVisibleIndex(final int firstVisibleIndex) {
+        this.firstVisibleIndex = firstVisibleIndex;
     }
 
     /**
@@ -670,6 +899,26 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Inflates or removes the view, which is used to visualize a specific tab, depending on the
+     * tab's current state.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be inflated or removed,
+     *         as an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    protected final void inflateOrRemoveView(@NonNull final TabItem tabItem) {
+        if (tabItem.isInflated() && !tabItem.isVisible()) {
+            getViewRecycler().remove(tabItem);
+        } else if (tabItem.isVisible()) {
+            if (!tabItem.isInflated()) {
+                inflateAndUpdateView(tabItem, null);
+            } else {
+                updateView(tabItem);
+            }
+        }
+    }
+
+    /**
      * Inflates the view, which is used to visualize a specific tab.
      *
      * @param tabItem
@@ -704,6 +953,35 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Updates the view, which is used to visualize a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be updated, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     */
+    @CallSuper
+    protected void updateView(@NonNull final TabItem tabItem) {
+        float position = tabItem.getTag().getPosition();
+        View view = tabItem.getView();
+        getArithmetics().setPosition(Arithmetics.Axis.DRAGGING_AXIS, view, position);
+        getArithmetics().setPosition(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
+    }
+
+    /**
+     * Calculates and returns the position on the dragging axis, where the distance between a tab
+     * and its predecessor should have reached the maximum.
+     *
+     * @param count
+     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
+     *         Integer} value
+     * @return The position, which has been calculated, in pixels as an {@link Float} value or -1,
+     * if no attached position is used
+     */
+    protected float calculateAttachedPosition(final int count) {
+        return -1;
+    }
+
+    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher}.
      *
      * @param tabSwitcher
@@ -733,6 +1011,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         this.callback = null;
         this.runningAnimations = 0;
         this.flingAnimation = null;
+        this.firstVisibleIndex = -1;
     }
 
     /**
@@ -748,11 +1027,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
-     * @return A pair, which contains the index of the first visible tab, as well as its current
-     * position, as an instance of the class Pair or null, if the tab switcher is not shown
      */
-    @Nullable
-    protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);
+    protected abstract void onDetachLayout(final boolean tabsOnly);
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the drag
@@ -774,6 +1050,21 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     protected abstract AttachedViewRecycler<TabItem, ViewRecyclerParamType> getViewRecycler();
 
     /**
+     * The method, which is invoked on implementing subclasses in order to inflate and update the
+     * view, which is used to visualize a specific tab.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be inflated, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param listener
+     *         The layout listener, which should be notified, when the view has been inflated, as an
+     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
+     *         notified
+     */
+    protected abstract void inflateAndUpdateView(@NonNull final TabItem tabItem,
+                                                 @Nullable final OnGlobalLayoutListener listener);
+
+    /**
      * The method, which is invoked on implementing subclasses in order to retrieve the position and
      * state of a specific tab, when stacked at the end.
      *
@@ -788,6 +1079,65 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             final int index);
 
     /**
+     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
+     * tabs are overshooting at the start.
+     *
+     * @return True, if the tabs are overshooting at the start, false otherwise
+     */
+    protected abstract boolean isOvershootingAtStart();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
+     * tabs are overshooting at the end.
+     *
+     * @param iterator
+     *         An iterator, which allows to iterate the tabs, which are contained by the tab
+     *         switcher, as an instance of the class {@link AbstractTabItemIterator}. The iterator
+     *         may not be null
+     * @return True, if the tabs are overshooting at the end, false otherwise
+     */
+    protected abstract boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the position of
+     * a specific tab, when located at the end.
+     *
+     * @param index
+     *         The index of the tab, whose position should be calculated, as an {@link Integer}
+     *         value
+     * @return The position, which has been calculated, as a {@link Float} value
+     */
+    protected abstract float calculateEndPosition(final int index);
+
+    /**
+     * Calculates the position of a tab in relation to the position of its predecessor.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose position should be calculated, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @param predecessor
+     *         The predecessor as an instance of the class {@link TabItem}. The predecessor may not
+     *         be null
+     * @return The position, which has been calculated, as a {@link Float} value
+     */
+    protected abstract float calculateSuccessorPosition(@NonNull final TabItem tabItem,
+                                                        @NonNull final TabItem predecessor);
+
+    /**
+     * Calculates the position of a tab in relation to the position of its successor.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose position should be calculated, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     * @param successor
+     *         The successor as an instance of the class {@link TabItem}. The successor may not be
+     *         null
+     * @return The position, which has been calculated, as a {@link Float} value
+     */
+    protected abstract float calculatePredecessorPosition(@NonNull final TabItem tabItem,
+                                                          @NonNull final TabItem successor);
+
+    /**
      * Handles a touch event.
      *
      * @param event
@@ -795,7 +1145,9 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *         not be null
      * @return True, if the event has been handled, false otherwise
      */
-    public abstract boolean handleTouchEvent(@NonNull final MotionEvent event);
+    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
+        return getDragHandler().handleTouchEvent(event);
+    }
 
     /**
      * Inflates the layout.
@@ -824,7 +1176,22 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     @Nullable
     public final Pair<Integer, Float> detachLayout(final boolean tabsOnly) {
-        return onDetachLayout(tabsOnly);
+        Pair<Integer, Float> result = null;
+
+        if (getTabSwitcher().isSwitcherShown() && firstVisibleIndex != -1) {
+            TabItem tabItem = TabItem.create(getModel(), getViewRecycler(), firstVisibleIndex);
+            result = Pair.create(firstVisibleIndex, tabItem.getTag().getPosition());
+        }
+
+        getViewRecycler().removeAll();
+        getViewRecycler().clearCache();
+        onDetachLayout(tabsOnly);
+
+        if (!tabsOnly) {
+            getTabSwitcher().removeAllViews();
+        }
+
+        return result;
     }
 
     /**
@@ -913,6 +1280,28 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     @Override
     public void onSwitcherHidden() {
 
+    }
+
+    @Nullable
+    @Override
+    public final AbstractDragHandler.DragState onDrag(
+            @NonNull final AbstractDragHandler.DragState dragState, final float dragDistance) {
+        if (dragDistance != 0) {
+            if (dragState == AbstractDragHandler.DragState.DRAG_TO_END) {
+                calculatePositionsWhenDraggingToEnd(dragDistance);
+            } else {
+                calculatePositionsWhenDraggingToStart(dragDistance);
+            }
+        }
+
+        AbstractDragHandler.DragState overshoot = isOvershootingAtEnd(
+                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).create()) ?
+                AbstractDragHandler.DragState.OVERSHOOT_END :
+                (isOvershootingAtStart() ? AbstractDragHandler.DragState.OVERSHOOT_START : null);
+        getLogger().logVerbose(getClass(),
+                "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
+                        dragState + ", overshoot is " + overshoot);
+        return overshoot;
     }
 
     @Override
