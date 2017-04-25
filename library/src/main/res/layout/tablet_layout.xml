@@ -27,7 +27,7 @@ License.
         <android.support.v7.widget.Toolbar
             android:id="@id/primary_toolbar"
             android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="@dimen/tablet_tab_container_height"
             android:layout_gravity="start|bottom"
             android:background="@android:color/transparent"
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
@@ -37,7 +37,7 @@ License.
         <android.support.v7.widget.Toolbar
             android:id="@id/secondary_toolbar"
             android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="@dimen/tablet_tab_container_height"
             android:layout_gravity="end|bottom"
             android:background="@android:color/transparent"
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
