@@ -19,6 +19,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -79,6 +80,11 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * The default text color of a tab's title.
      */
     private final int tabTitleTextColor;
+
+    /**
+     * The resource id of the default icon of a tab's close button.
+     */
+    private final int defaultCloseButtonIconId;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -157,7 +163,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         if (icon != null) {
             viewHolder.closeButton.setImageDrawable(icon);
         } else {
-            viewHolder.closeButton.setImageResource(R.drawable.phone_tab_close_button_icon);
+            viewHolder.closeButton.setImageResource(defaultCloseButtonIconId);
         }
     }
 
@@ -434,9 +440,13 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
+     * @param defaultCloseButtonIconId
+     *         The resource id of the default icon of a tab's close button as an {@link Integer}
+     *         value. The resource id must correspond to a valid drawable resource
      */
     public AbstractRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                   @NonNull final TabSwitcherModel model) {
+                                   @NonNull final TabSwitcherModel model,
+                                   @DrawableRes final int defaultCloseButtonIconId) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         this.tabSwitcher = tabSwitcher;
@@ -445,6 +455,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_background_color);
         this.tabTitleTextColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color);
+        this.defaultCloseButtonIconId = defaultCloseButtonIconId;
         this.viewRecycler = null;
     }
 

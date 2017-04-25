@@ -196,7 +196,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherModel model,
                                 @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
-        super(tabSwitcher, model);
+        super(tabSwitcher, model, R.drawable.phone_tab_close_button_icon);
         ensureNotNull(childViewRecycler, "The child view recycler may not be null");
         this.childViewRecycler = childViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, childViewRecycler);

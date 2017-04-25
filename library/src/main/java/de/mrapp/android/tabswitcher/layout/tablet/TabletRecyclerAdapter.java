@@ -54,7 +54,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
      */
     public TabletRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                  @NonNull final TabSwitcherModel model) {
-        super(tabSwitcher, model);
+        super(tabSwitcher, model, R.drawable.tablet_tab_close_button_icon);
     }
 
     @NonNull
