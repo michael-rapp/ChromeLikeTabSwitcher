@@ -15,10 +15,6 @@ License.
 -->
 <resources>
 
-    <color name="color_primary">#FF3F51B5</color>
-    <color name="color_primary_dark">#FF303F9F</color>
-    <color name="color_accent">#FF2196F3</color>
-    <color name="snackbar_action_text_color">#FF00BCD4</color>
-    <color name="window_background">@color/phone_tab_switcher_background_color</color>
+    <color name="window_background">@color/tablet_tab_switcher_background_color</color>
 
 </resources>

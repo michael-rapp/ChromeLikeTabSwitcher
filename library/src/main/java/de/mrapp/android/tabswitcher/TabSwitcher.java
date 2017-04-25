@@ -323,8 +323,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         if (resourceId != 0) {
             ViewUtil.setBackground(this, ContextCompat.getDrawable(getContext(), resourceId));
         } else {
-            int defaultValue =
-                    ContextCompat.getColor(getContext(), R.color.tab_switcher_background_color);
+            int defaultValue = ContextCompat.getColor(getContext(),
+                    getLayout() == Layout.TABLET ? R.color.tablet_tab_switcher_background_color :
+                            R.color.phone_tab_switcher_background_color);
             int color =
                     typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
             setBackgroundColor(color);
