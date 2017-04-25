@@ -1895,7 +1895,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
                                         getTabSwitcher()) -
                                 (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                                        getTabSwitcher().areToolbarsShown() ?
+                                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
                                         toolbars[0].getHeight() : 0)) * 0.66f;
                 animatePeek(tabItem, duration, interpolator, peekPosition, peekAnimation);
             }
