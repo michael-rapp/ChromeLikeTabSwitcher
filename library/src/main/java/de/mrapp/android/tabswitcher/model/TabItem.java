@@ -21,7 +21,6 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
-import de.mrapp.android.tabswitcher.layout.phone.PhoneTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
@@ -170,7 +169,7 @@ public class TabItem {
 
         if (view != null) {
             tabItem.setView(view);
-            tabItem.setViewHolder((PhoneTabViewHolder) view.getTag(R.id.tag_view_holder));
+            tabItem.setViewHolder((AbstractTabViewHolder) view.getTag(R.id.tag_view_holder));
             Tag tag = (Tag) view.getTag(R.id.tag_properties);
 
             if (tag != null) {
