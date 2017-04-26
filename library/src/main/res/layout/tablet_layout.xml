@@ -44,6 +44,12 @@ License.
             android:visibility="invisible"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/tablet_tab_border_color"/>
+
         <FrameLayout
             android:id="@id/tab_container"
             android:layout_width="match_parent"

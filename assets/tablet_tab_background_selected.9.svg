@@ -14,7 +14,7 @@
     id="svg2"
     version="1.1"
     inkscape:version="0.92.1 r"
-    sodipodi:docname="tablet_tab_background.9.svg"
+    sodipodi:docname="tablet_tab_background_selected.9.svg"
     inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/raw.png"
     inkscape:export-xdpi="1348.6957"
     inkscape:export-ydpi="1348.6957">
@@ -28,8 +28,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="64"
-     inkscape:cx="5.6890682"
-     inkscape:cy="4.8038865"
+     inkscape:cx="5.6815967"
+     inkscape:cy="4.9949151"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -47,7 +47,7 @@
     <inkscape:grid
        type="xygrid"
        id="grid4136"
-       originx="-9.3749985"
+       originx="-9.3749988"
        originy="-1035.8205" />
   </sodipodi:namedview>
   <metadata
@@ -97,5 +97,14 @@
        id="path4497"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cscccccccc" />
+    <rect
+       style="opacity:1;fill:#aeaeae;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.23437501;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4497"
+       width="14.062502"
+       height="0.23437406"
+       x="9.375"
+       y="16.307755"
+       rx="0.35156253"
+       ry="0" />
   </g>
 </svg>

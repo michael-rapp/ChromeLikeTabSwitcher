@@ -220,8 +220,9 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
 
     @Override
     protected final void onAdaptBackgroundColor(@ColorInt final int color,
-                                                @NonNull final AbstractTabViewHolder viewHolder) {
-        Drawable border = ((PhoneTabViewHolder) viewHolder).borderView.getBackground();
+                                                @NonNull final TabItem tabItem) {
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
+        Drawable border = viewHolder.borderView.getBackground();
         border.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 

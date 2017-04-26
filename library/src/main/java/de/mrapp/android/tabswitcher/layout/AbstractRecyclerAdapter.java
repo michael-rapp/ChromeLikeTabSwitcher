@@ -100,30 +100,26 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * Adapts the title of a tab.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The tab, whose title should be adapted, as an instance of the class {@link Tab}. The
-     *         tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose title should be adapted, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptTitle(@NonNull final AbstractTabViewHolder viewHolder,
-                            @NonNull final Tab tab) {
+    private void adaptTitle(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.titleTextView.setText(tab.getTitle());
     }
 
     /**
      * Adapts the icon of a tab.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The icon, whose icon should be adapted, as an instance of the class {@link Tab}. The
-     *         tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose icon should be adapted, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptIcon(@NonNull final AbstractTabViewHolder viewHolder,
-                           @NonNull final Tab tab) {
+    private void adaptIcon(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         Drawable icon = tab.getIcon(model.getContext());
         viewHolder.titleTextView
                 .setCompoundDrawablesWithIntrinsicBounds(icon != null ? icon : model.getTabIcon(),
@@ -133,15 +129,13 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * Adapts the visibility of a tab's close button.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The icon, whose close button should be adapted, as an instance of the class {@link
-     *         Tab}. The tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose close button should be adapted, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptCloseButton(@NonNull final AbstractTabViewHolder viewHolder,
-                                  @NonNull final Tab tab) {
+    private void adaptCloseButton(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
         viewHolder.closeButton.setOnClickListener(
                 tab.isCloseable() ? createCloseButtonClickListener(viewHolder.closeButton, tab) :
@@ -151,15 +145,13 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * Adapts the icon of a tab's close button.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The icon, whose icon hould be adapted, as an instance of the class {@link Tab}. The
-     *         tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose close button icon should be
+     *         adapted, as an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptCloseButtonIcon(@NonNull final AbstractTabViewHolder viewHolder,
-                                      @NonNull final Tab tab) {
+    private void adaptCloseButtonIcon(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         Drawable icon = tab.getCloseButtonIcon(model.getContext());
 
         if (icon == null) {
@@ -176,19 +168,12 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * Adapts the background color of a tab.
      *
-     * @param view
-     *         The view, which is used to visualize the tab, as an instance of the class {@link
-     *         View}. The view may not be null
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The tab, whose background color should be adapted, as an instance of the class {@link
-     *         Tab}. The tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose background should be adapted, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptBackgroundColor(@NonNull final View view,
-                                      @NonNull final AbstractTabViewHolder viewHolder,
-                                      @NonNull final Tab tab) {
+    private void adaptBackgroundColor(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
         ColorStateList colorStateList =
                 tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
                         model.getTabBackgroundColor();
@@ -203,23 +188,22 @@ public abstract class AbstractRecyclerAdapter<ParamType>
             color = model.getSelectedTab() == tab ? tabBackgroundColorSelected : tabBackgroundColor;
         }
 
+        View view = tabItem.getView();
         Drawable background = view.getBackground();
         background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
-        onAdaptBackgroundColor(color, viewHolder);
+        onAdaptBackgroundColor(color, tabItem);
     }
 
     /**
      * Adapts the text color of a tab's title.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The tab, whose text color should be adapted, as an instance of the class {@link Tab}.
-     *         The tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose title should be adapted, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptTitleTextColor(@NonNull final AbstractTabViewHolder viewHolder,
-                                     @NonNull final Tab tab) {
+    private void adaptTitleTextColor(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         ColorStateList colorStateList = tab.getTitleTextColor() != null ? tab.getTitleTextColor() :
                 model.getTabTitleTextColor();
 
@@ -233,16 +217,14 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * Adapts the selection state of a tab's views.
      *
-     * @param viewHolder
-     *         The view holder, which stores references to the tab's views, as an instance of the
-     *         class {@link AbstractTabViewHolder}. The view holder may not be null
-     * @param tab
-     *         The tab, whose selection state should be adapted, as an instance of the class {@link
-     *         Tab}. The tab may not be null
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose selection state should be adapted,
+     *         as an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptSelectionState(@NonNull final AbstractTabViewHolder viewHolder,
-                                     @NonNull final Tab tab) {
-        boolean selected = model.getSelectedTab() == tab;
+    private void adaptSelectionState(@NonNull final TabItem tabItem) {
+        boolean selected = model.getSelectedTab() == tabItem.getTab();
+        tabItem.getView().setSelected(selected);
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.titleTextView.setSelected(selected);
         viewHolder.closeButton.setSelected(selected);
     }
@@ -258,10 +240,8 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                Tab tab = tabItem.getTab();
-                AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-                adaptSelectionState(viewHolder, tab);
-                adaptBackgroundColor(tabItem.getView(), viewHolder, tab);
+                adaptSelectionState(tabItem);
+                adaptBackgroundColor(tabItem);
             }
         }
     }
@@ -378,13 +358,12 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      *
      * @param color
      *         The color, which has been set, as an {@link Integer} value
-     * @param viewHolder
-     *         The view holder, which holds references to the child views of the view, which is used
-     *         to visualize the tab, whose background color has been changed, as an instance of the
-     *         class {@link AbstractTabViewHolder}
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose background color has been changed,
+     *         as an instance of the class {@link TabItem}. The tab item may not be null
      */
     protected void onAdaptBackgroundColor(@ColorInt final int color,
-                                          @NonNull final AbstractTabViewHolder viewHolder) {
+                                          @NonNull final TabItem tabItem) {
 
     }
 
@@ -564,7 +543,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                adaptIcon(tabItem.getViewHolder(), tabItem.getTab());
+                adaptIcon(tabItem);
             }
         }
     }
@@ -577,7 +556,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                adaptBackgroundColor(tabItem.getView(), tabItem.getViewHolder(), tabItem.getTab());
+                adaptBackgroundColor(tabItem);
             }
         }
     }
@@ -590,7 +569,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
+                adaptTitleTextColor(tabItem);
             }
         }
     }
@@ -603,7 +582,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.isInflated()) {
-                adaptCloseButtonIcon(tabItem.getViewHolder(), tabItem.getTab());
+                adaptCloseButtonIcon(tabItem);
             }
         }
     }
@@ -635,7 +614,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptTitle(tabItem.getViewHolder(), tabItem.getTab());
+            adaptTitle(tabItem);
         }
     }
 
@@ -644,7 +623,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptIcon(tabItem.getViewHolder(), tabItem.getTab());
+            adaptIcon(tabItem);
         }
     }
 
@@ -653,7 +632,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptCloseButton(tabItem.getViewHolder(), tabItem.getTab());
+            adaptCloseButton(tabItem);
         }
     }
 
@@ -662,7 +641,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptCloseButtonIcon(tabItem.getViewHolder(), tabItem.getTab());
+            adaptCloseButtonIcon(tabItem);
         }
     }
 
@@ -671,7 +650,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptBackgroundColor(tabItem.getView(), tabItem.getViewHolder(), tabItem.getTab());
+            adaptBackgroundColor(tabItem);
         }
     }
 
@@ -680,7 +659,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptTitleTextColor(tabItem.getViewHolder(), tabItem.getTab());
+            adaptTitleTextColor(tabItem);
         }
     }
 
@@ -718,13 +697,13 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
         Tab tab = tabItem.getTab();
         tab.addCallback(this);
-        adaptTitle(viewHolder, tab);
-        adaptIcon(viewHolder, tab);
-        adaptCloseButton(viewHolder, tab);
-        adaptCloseButtonIcon(viewHolder, tab);
-        adaptBackgroundColor(view, viewHolder, tab);
-        adaptTitleTextColor(viewHolder, tab);
-        adaptSelectionState(viewHolder, tab);
+        adaptTitle(tabItem);
+        adaptIcon(tabItem);
+        adaptCloseButton(tabItem);
+        adaptCloseButtonIcon(tabItem);
+        adaptBackgroundColor(tabItem);
+        adaptTitleTextColor(tabItem);
+        adaptSelectionState(tabItem);
         onShowView(view, tabItem, params);
     }
 

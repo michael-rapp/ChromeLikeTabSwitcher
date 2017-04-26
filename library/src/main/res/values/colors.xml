@@ -27,5 +27,6 @@ License.
     <color name="tablet_tab_background_color">#ffdadada</color>
     <color name="tablet_tab_background_color_selected">#fff2f2f2</color>
     <color name="tablet_tab_switcher_background_color">@android:color/black</color>
+    <color name="tablet_tab_border_color">#ffaeaeae</color>
 
 </resources>
