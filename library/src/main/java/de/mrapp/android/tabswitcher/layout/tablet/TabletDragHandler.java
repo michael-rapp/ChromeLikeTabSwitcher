@@ -46,6 +46,9 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
      */
     private final AttachedViewRecycler<TabItem, ?> viewRecycler;
 
+    /**
+     * The offset between two neighboring tabs in pixels.
+     */
     private final int tabOffset;
 
     /**

@@ -49,6 +49,38 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
 
     /**
+     * A comparator, which allows to compare two instances of the class {@link TabItem}. The tab
+     * item, which corresponds to the currently selected tab, is always sorted before all other tab
+     * items.
+     */
+    private static class TabletTabItemComparator extends TabItem.Comparator {
+
+        /**
+         * Creates a new comparator, which allows to compare two instances of the class {@link
+         * TabItem}. The tab item, which corresponds to the currently selected tab, is always sorted
+         * before all other tab items.
+         *
+         * @param tabSwitcher
+         *         The tab switcher, the tab items, which should be compared by the comparator,
+         *         belong to, as a instance of the class {@link TabSwitcher}. The tab switcher may
+         *         not be null
+         */
+        TabletTabItemComparator(@NonNull final TabSwitcher tabSwitcher) {
+            super(tabSwitcher);
+        }
+
+        @Override
+        public int compare(final TabItem o1, final TabItem o2) {
+            if (o1.getTab() == getTabSwitcher().getSelectedTab()) {
+                return -1;
+            } else {
+                return super.compare(o1, o2);
+            }
+        }
+
+    }
+
+    /**
      * The maximum width of a tab in pixels.
      */
     private final int maxTabWidth;
@@ -227,7 +259,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel());
         getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
-                Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
+                Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
@@ -347,7 +379,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
-        // TODO: Implement
+        if (previousIndex != index && selectedTab != null) {
+            viewRecycler.setComparator(
+                    Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
+        }
     }
 
     @Override

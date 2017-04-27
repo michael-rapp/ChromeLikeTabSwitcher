@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -24,6 +25,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
+import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -45,6 +47,17 @@ public class TabItem {
         private final TabSwitcher tabSwitcher;
 
         /**
+         * Returns the tab switcher, the tab items, which are compared by the comparator, belong to.
+         *
+         * @return The tab switcher, the tab items, which are compared by the comparator, belong to,
+         * as an instance of the class {@link TabSwitcher}. The tab switcher may not be null
+         */
+        @NonNull
+        protected final TabSwitcher getTabSwitcher() {
+            return tabSwitcher;
+        }
+
+        /**
          * Creates a new comparator, which allows to compare two instances of the class {@link
          * TabItem}.
          *
@@ -58,21 +71,19 @@ public class TabItem {
             this.tabSwitcher = tabSwitcher;
         }
 
+        @CallSuper
         @Override
         public int compare(final TabItem o1, final TabItem o2) {
             Tab tab1 = o1.getTab();
             Tab tab2 = o2.getTab();
             int index1 = tabSwitcher.indexOf(tab1);
+            index1 = index1 == -1 ? o1.getIndex() : index1;
             int index2 = tabSwitcher.indexOf(tab2);
-
-            if (index2 == -1) {
-                index2 = o2.getIndex();
-            }
-
-            if (index1 == -1 || index2 == -1) {
-                throw new RuntimeException("Tab not contained by tab switcher");
-            }
-
+            index2 = index2 == -1 ? o2.getIndex() : index2;
+            ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
+                    RuntimeException.class);
+            ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
+                    RuntimeException.class);
             return index1 < index2 ? -1 : 1;
         }
 
