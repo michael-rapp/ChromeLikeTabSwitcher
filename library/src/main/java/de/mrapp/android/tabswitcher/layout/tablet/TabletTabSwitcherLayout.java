@@ -159,6 +159,15 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     /**
+     * Calculates and returns the maximum space between two neighboring tabs.
+     *
+     * @return The space, which has been calculated, in pixels as an {@link Integer} value
+     */
+    private int calculateMaxTabSpacing() {
+        return calculateTabWidth() - tabOffset;
+    }
+
+    /**
      * Calculates and returns the tab items, which correspond to the tabs, when the tab switcher is
      * shown initially.
      *
@@ -313,34 +322,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     @Override
-    protected final boolean isOvershootingAtStart() {
-        // TODO: Implement
-        return false;
-    }
-
-    @Override
-    protected final boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
-        // TODO: Implement
-        return false;
-    }
-
-    @Override
     protected final float calculateEndPosition(final int index) {
-        return (getModel().getCount() - index - 1) * (calculateTabWidth() - tabOffset);
+        return (getModel().getCount() - index - 1) * calculateMaxTabSpacing();
     }
 
     @Override
     protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
                                                      @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        return predecessorPosition - (calculateTabWidth() - tabOffset);
+        return predecessorPosition - calculateMaxTabSpacing();
     }
 
     @Override
     protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                        @NonNull final TabItem successor) {
         float successorPosition = successor.getTag().getPosition();
-        return successorPosition + (calculateTabWidth() - tabOffset);
+        return successorPosition + calculateMaxTabSpacing();
     }
 
     @Override

@@ -1079,26 +1079,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             final int index);
 
     /**
-     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
-     * tabs are overshooting at the start.
-     *
-     * @return True, if the tabs are overshooting at the start, false otherwise
-     */
-    protected abstract boolean isOvershootingAtStart();
-
-    /**
-     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
-     * tabs are overshooting at the end.
-     *
-     * @param iterator
-     *         An iterator, which allows to iterate the tabs, which are contained by the tab
-     *         switcher, as an instance of the class {@link AbstractTabItemIterator}. The iterator
-     *         may not be null
-     * @return True, if the tabs are overshooting at the end, false otherwise
-     */
-    protected abstract boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator);
-
-    /**
      * The method, which is invoked on implementing subclasses in order to retrieve the position of
      * a specific tab, when located at the end.
      *
@@ -1136,6 +1116,30 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     protected abstract float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                           @NonNull final TabItem successor);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
+     * tabs are overshooting at the start.
+     *
+     * @return True, if the tabs are overshooting at the start, false otherwise
+     */
+    protected boolean isOvershootingAtStart() {
+        return false;
+    }
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve, whether the
+     * tabs are overshooting at the end.
+     *
+     * @param iterator
+     *         An iterator, which allows to iterate the tabs, which are contained by the tab
+     *         switcher, as an instance of the class {@link AbstractTabItemIterator}. The iterator
+     *         may not be null
+     * @return True, if the tabs are overshooting at the end, false otherwise
+     */
+    protected boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
+        return false;
+    }
 
     /**
      * Handles a touch event.
