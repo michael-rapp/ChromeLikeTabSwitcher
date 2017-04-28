@@ -502,7 +502,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     firstVisibleTabIndex : selectedTabIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
-            referencePosition = Math.min(calculateEndPosition(referenceIndex), referencePosition);
+            referencePosition = Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
             AbstractTabItemIterator iterator =
                     new InitialTabItemIterator(tabItems, false, referenceIndex);
             TabItem tabItem;
@@ -1998,7 +1998,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         }
 
         referencePosition =
-                Math.min(calculateEndPosition(removedTabItem.getIndex() - 1), referencePosition);
+                Math.min(calculateMaxEndPosition(removedTabItem.getIndex() - 1), referencePosition);
         float initialReferencePosition = referencePosition;
 
         if (removedTabItem.getIndex() > 0) {
@@ -2836,7 +2836,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final float calculateEndPosition(final int index) {
+    protected final float calculateMaxEndPosition(final int index) {
         float defaultMaxTabSpacing = calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
         int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
 

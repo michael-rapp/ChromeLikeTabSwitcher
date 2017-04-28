@@ -527,8 +527,13 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             if ((tabItem.getTag().getState() == State.STACKED_START_ATOP &&
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
-                float thresholdPosition = calculateEndPosition(tabItem.getIndex());
-                float newPosition = Math.min(currentPosition + dragDistance, thresholdPosition);
+                float newPosition = currentPosition + dragDistance;
+                float endPosition = calculateMaxEndPosition(tabItem.getIndex());
+
+                if (endPosition != -1) {
+                    newPosition = Math.min(newPosition, endPosition);
+                }
+
                 Pair<Float, State> pair =
                         clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
                                 newPosition, predecessor);
@@ -538,9 +543,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 return true;
             }
         } else {
-            float thresholdPosition = calculateEndPosition(tabItem.getIndex());
-            float newPosition =
-                    Math.min(calculateSuccessorPosition(tabItem, predecessor), thresholdPosition);
+            float newPosition = calculateSuccessorPosition(tabItem, predecessor);
+            float endPosition = calculateMaxEndPosition(tabItem.getIndex());
+
+            if (endPosition != -1) {
+                newPosition = Math.min(newPosition, endPosition);
+            }
             Pair<Float, State> pair =
                     clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
                             predecessor);
@@ -1080,17 +1088,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             final int index);
 
     /**
-     * The method, which is invoked on implementing subclasses in order to retrieve the position of
-     * a specific tab, when located at the end.
-     *
-     * @param index
-     *         The index of the tab, whose position should be calculated, as an {@link Integer}
-     *         value
-     * @return The position, which has been calculated, as a {@link Float} value
-     */
-    protected abstract float calculateEndPosition(final int index);
-
-    /**
      * Calculates the position of a tab in relation to the position of its predecessor.
      *
      * @param tabItem
@@ -1117,6 +1114,20 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     protected abstract float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                           @NonNull final TabItem successor);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the maximum
+     * position of a specific tab, when located at the end.
+     *
+     * @param index
+     *         The index of the tab, whose position should be calculated, as an {@link Integer}
+     *         value
+     * @return The position, which has been calculated, as a {@link Float} value or -1, if no
+     * maximum position is available
+     */
+    protected float calculateMaxEndPosition(final int index) {
+        return -1;
+    }
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the

@@ -377,7 +377,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     @Override
-    protected final float calculateEndPosition(final int index) {
+    protected final float calculateMaxEndPosition(final int index) {
         return (getModel().getCount() - index - 1) * calculateTabSpacing();
     }
 
