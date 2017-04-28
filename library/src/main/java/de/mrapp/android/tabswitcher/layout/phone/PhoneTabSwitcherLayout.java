@@ -531,7 +531,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             }
 
             boolean overshooting =
-                    referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
+                    referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd();
             iterator = new InitialTabItemIterator(tabItems, false, 0);
             float minTabSpacing = calculateMinTabSpacing(getModel().getCount());
             float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
@@ -2822,10 +2822,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
+    protected final boolean isOvershootingAtEnd() {
         if (getTabSwitcher().getCount() <= 1) {
             return true;
         } else {
+            AbstractTabItemIterator iterator =
+                    new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).create();
             TabItem lastTabItem = iterator.getItem(getTabSwitcher().getCount() - 1);
             TabItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);
             return Math.round(predecessor.getTag().getPosition()) >=

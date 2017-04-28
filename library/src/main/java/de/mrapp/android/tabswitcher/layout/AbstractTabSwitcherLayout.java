@@ -1131,13 +1131,9 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the
      * tabs are overshooting at the end.
      *
-     * @param iterator
-     *         An iterator, which allows to iterate the tabs, which are contained by the tab
-     *         switcher, as an instance of the class {@link AbstractTabItemIterator}. The iterator
-     *         may not be null
      * @return True, if the tabs are overshooting at the end, false otherwise
      */
-    protected boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
+    protected boolean isOvershootingAtEnd() {
         return false;
     }
 
@@ -1298,10 +1294,10 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             }
         }
 
-        AbstractDragHandler.DragState overshoot = isOvershootingAtEnd(
-                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).create()) ?
-                AbstractDragHandler.DragState.OVERSHOOT_END :
-                (isOvershootingAtStart() ? AbstractDragHandler.DragState.OVERSHOOT_START : null);
+        AbstractDragHandler.DragState overshoot =
+                isOvershootingAtEnd() ? AbstractDragHandler.DragState.OVERSHOOT_END :
+                        (isOvershootingAtStart() ? AbstractDragHandler.DragState.OVERSHOOT_START :
+                                null);
         getLogger().logVerbose(getClass(),
                 "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
                         dragState + ", overshoot is " + overshoot);
