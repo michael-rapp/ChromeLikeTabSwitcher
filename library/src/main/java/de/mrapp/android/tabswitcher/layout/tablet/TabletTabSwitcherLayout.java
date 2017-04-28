@@ -159,11 +159,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     /**
-     * Calculates and returns the maximum space between two neighboring tabs.
+     * Calculates and returns the space between two neighboring tabs.
      *
      * @return The space, which has been calculated, in pixels as an {@link Integer} value
      */
-    private int calculateMaxTabSpacing() {
+    private int calculateTabSpacing() {
         return calculateTabWidth() - tabOffset;
     }
 
@@ -187,11 +187,47 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         TabItem[] tabItems = new TabItem[getModel().getCount()];
 
         if (!getModel().isEmpty()) {
-            AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
+            int tabSpacing = calculateTabSpacing();
+            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                    firstVisibleTabIndex : 0;
+            float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                    firstVisibleTabPosition : -1;
+            TabItem referenceTabItem = null;
+            AbstractTabItemIterator iterator =
+                    new InitialTabItemIterator(tabItems, false, referenceIndex);
             TabItem tabItem;
 
             while ((tabItem = iterator.next()) != null) {
+                TabItem predecessor = iterator.previous();
+                float position;
 
+                if (tabItem.getIndex() == referenceIndex && referencePosition != -1) {
+                    referenceTabItem = tabItem;
+                    position = referencePosition;
+                } else {
+                    position = (getModel().getCount() - tabItem.getIndex() - 1) * tabSpacing;
+                }
+
+                Pair<Float, State> pair =
+                        clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
+                                predecessor);
+                tabItem.getTag().setPosition(pair.first);
+                tabItem.getTag().setState(pair.second);
+            }
+
+            if (referenceIndex > 0 && referenceTabItem != null) {
+                iterator = new InitialTabItemIterator(tabItems, true, referenceIndex - 1);
+
+                while ((tabItem = iterator.next()) != null && tabItem.getIndex() < referenceIndex) {
+                    TabItem predecessor = iterator.peek();
+                    float position = referenceTabItem.getTag().getPosition() +
+                            ((tabItem.getIndex() - referenceIndex) * tabSpacing);
+                    Pair<Float, State> pair =
+                            clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
+                                    predecessor);
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
+                }
             }
         }
 
@@ -323,21 +359,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
 
     @Override
     protected final float calculateEndPosition(final int index) {
-        return (getModel().getCount() - index - 1) * calculateMaxTabSpacing();
+        return (getModel().getCount() - index - 1) * calculateTabSpacing();
     }
 
     @Override
     protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
                                                      @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        return predecessorPosition - calculateMaxTabSpacing();
+        return predecessorPosition - calculateTabSpacing();
     }
 
     @Override
     protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                        @NonNull final TabItem successor) {
         float successorPosition = successor.getTag().getPosition();
-        return successorPosition + calculateMaxTabSpacing();
+        return successorPosition + calculateTabSpacing();
     }
 
     @Override
