@@ -56,9 +56,9 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         implements AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
 
     /**
-     * The view recycler, which allows to inflate the child views of tabs.
+     * The view recycler, which allows to inflate the views, which are associated with tabs.
      */
-    private final ViewRecycler<Tab, Void> childViewRecycler;
+    private final ViewRecycler<Tab, Void> tabViewRecycler;
 
     /**
      * The data binder, which allows to render previews of tabs.
@@ -94,7 +94,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
 
         if (view == null) {
             ViewGroup parent = viewHolder.childContainer;
-            Pair<View, ?> pair = childViewRecycler.inflate(tab, parent);
+            Pair<View, ?> pair = tabViewRecycler.inflate(tab, parent);
             view = pair.first;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -103,7 +103,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
             parent.addView(view, 0, layoutParams);
             viewHolder.child = view;
         } else {
-            childViewRecycler.getAdapter().onShowView(getModel().getContext(), view, tab, false);
+            tabViewRecycler.getAdapter().onShowView(getModel().getContext(), view, tab, false);
         }
 
         viewHolder.previewImageView.setVisibility(View.GONE);
@@ -124,7 +124,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         viewHolder.borderView.setVisibility(View.VISIBLE);
 
         if (viewHolder.child != null) {
-            childViewRecycler.getAdapter().onRemoveView(viewHolder.child, tab);
+            tabViewRecycler.getAdapter().onRemoveView(viewHolder.child, tab);
             dataBinder.load(tab, viewHolder.previewImageView, false, tabItem);
             removeChildView(viewHolder, tab);
         } else {
@@ -149,7 +149,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         }
 
         viewHolder.child = null;
-        childViewRecycler.remove(tab);
+        tabViewRecycler.remove(tab);
     }
 
     /**
@@ -189,19 +189,19 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param childViewRecycler
-     *         The view recycler, which allows to inflate the child views of tabs, as an instance of
-     *         the class ViewRecycler. The view recycler may not be null
+     * @param tabViewRecycler
+     *         The view recycler, which allows to inflate the views, which are associated with tabs,
+     *         as an instance of the class ViewRecycler. The view recycler may not be null
      */
     public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherModel model,
-                                @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
+                                @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
         super(tabSwitcher, model, R.color.phone_tab_background_color,
                 R.color.phone_tab_background_color_selected,
                 R.drawable.phone_tab_close_button_icon);
-        ensureNotNull(childViewRecycler, "The child view recycler may not be null");
-        this.childViewRecycler = childViewRecycler;
-        this.dataBinder = new PreviewDataBinder(tabSwitcher, childViewRecycler);
+        ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
+        this.tabViewRecycler = tabViewRecycler;
+        this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler);
         this.dataBinder.addListener(this);
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);

@@ -236,9 +236,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private PhoneDragHandler dragHandler;
 
     /**
-     * The view recycler, which allows to recycler the child views of tabs.
+     * The view recycler, which allows to recycler the views, which are associated of tabs.
      */
-    private ViewRecycler<Tab, Void> childViewRecycler;
+    private ViewRecycler<Tab, Void> tabViewRecycler;
 
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
@@ -275,14 +275,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      */
     private void adaptLogLevel() {
         viewRecycler.setLogLevel(getModel().getLogLevel());
-        childViewRecycler.setLogLevel(getModel().getLogLevel());
+        tabViewRecycler.setLogLevel(getModel().getLogLevel());
     }
 
     /**
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        childViewRecycler.setAdapter(getModel().getChildRecyclerAdapter());
+        tabViewRecycler.setAdapter(getModel().getChildRecyclerAdapter());
         recyclerAdapter.clearCachedPreviews();
     }
 
@@ -502,7 +502,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     firstVisibleTabIndex : selectedTabIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
-            referencePosition = Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
+            referencePosition =
+                    Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
             AbstractTabItemIterator iterator =
                     new InitialTabItemIterator(tabItems, false, referenceIndex);
             TabItem tabItem;
@@ -2706,8 +2707,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     FrameLayout.LayoutParams.MATCH_PARENT);
         }
 
-        childViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), childViewRecycler);
+        tabViewRecycler = new ViewRecycler<>(inflater);
+        recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), tabViewRecycler);
         getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
@@ -2721,8 +2722,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
     @Override
     protected final void onDetachLayout(final boolean tabsOnly) {
-        childViewRecycler.removeAll();
-        childViewRecycler.clearCache();
+        tabViewRecycler.removeAll();
+        tabViewRecycler.clearCache();
         recyclerAdapter.clearCachedPreviews();
 
         if (!tabsOnly) {
