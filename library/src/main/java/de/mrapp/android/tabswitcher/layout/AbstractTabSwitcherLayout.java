@@ -41,6 +41,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
 import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -1284,20 +1285,17 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
     @Nullable
     @Override
-    public final AbstractDragHandler.DragState onDrag(
-            @NonNull final AbstractDragHandler.DragState dragState, final float dragDistance) {
+    public final DragState onDrag(@NonNull final DragState dragState, final float dragDistance) {
         if (dragDistance != 0) {
-            if (dragState == AbstractDragHandler.DragState.DRAG_TO_END) {
+            if (dragState == DragState.DRAG_TO_END) {
                 calculatePositionsWhenDraggingToEnd(dragDistance);
             } else {
                 calculatePositionsWhenDraggingToStart(dragDistance);
             }
         }
 
-        AbstractDragHandler.DragState overshoot =
-                isOvershootingAtEnd() ? AbstractDragHandler.DragState.OVERSHOOT_END :
-                        (isOvershootingAtStart() ? AbstractDragHandler.DragState.OVERSHOOT_START :
-                                null);
+        DragState overshoot = isOvershootingAtEnd() ? DragState.OVERSHOOT_END :
+                (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);
         getLogger().logVerbose(getClass(),
                 "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
                         dragState + ", overshoot is " + overshoot);
