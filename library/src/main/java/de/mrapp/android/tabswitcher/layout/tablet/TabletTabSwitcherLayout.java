@@ -184,6 +184,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     private TabItem[] calculateInitialTabItems(final int firstVisibleTabIndex,
                                                final float firstVisibleTabPosition) {
         dragHandler.reset(getDragThreshold());
+        setFirstVisibleIndex(-1);
         TabItem[] tabItems = new TabItem[getModel().getCount()];
 
         if (!getModel().isEmpty()) {
@@ -213,6 +214,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                                 predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
+
+                if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
+                    setFirstVisibleIndex(tabItem.getIndex());
+                }
             }
 
             if (referenceIndex > 0 && referenceTabItem != null) {
@@ -227,6 +232,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                                     predecessor);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
+
+                    if (pair.second == State.FLOATING) {
+                        setFirstVisibleIndex(tabItem.getIndex());
+                    }
                 }
             }
         }
@@ -339,22 +348,26 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
+        float firstTabThresholdPosition = calculateFirstTabThresholdPosition();
+
+        if (index < getStackedTabCount()) {
+            float position = firstTabThresholdPosition - (getStackedTabSpacing() * (index + 1));
+            return Pair.create(position, State.STACKED_END);
+        } else {
+            float position =
+                    firstTabThresholdPosition - (getStackedTabSpacing() * getStackedTabCount());
+            return Pair.create(position, State.HIDDEN);
+        }
+    }
+
+    private float calculateFirstTabThresholdPosition() {
         float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
         int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
         Toolbar[] toolbars = getToolbars();
         float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
                 Math.max(0, toolbars[0].getWidth() - tabOffset) +
                         Math.max(0, toolbars[1].getWidth() - tabOffset) : 0;
-
-        if (index < getStackedTabCount()) {
-            float position = size - padding - toolbarSize - calculateTabWidth() -
-                    (getStackedTabSpacing() * (index + 1));
-            return Pair.create(position, State.STACKED_END);
-        } else {
-            float position = size - padding - toolbarSize - calculateTabWidth() -
-                    (getStackedTabSpacing() * getStackedTabCount());
-            return Pair.create(position, State.HIDDEN);
-        }
+        return size - padding - toolbarSize - calculateTabWidth();
     }
 
     @Override
