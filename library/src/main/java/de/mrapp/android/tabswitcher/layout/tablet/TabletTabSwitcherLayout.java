@@ -377,6 +377,18 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     @Override
+    protected final float calculateMinStartPosition(final int index) {
+        int thresholdPosition = (getModel().getCount() - 1) * calculateTabSpacing();
+        float tabContainerWidth = calculateTabContainerWidth();
+
+        if (thresholdPosition < tabContainerWidth) {
+            return (getModel().getCount() - index - 1) * calculateTabSpacing();
+        } else {
+            return tabContainerWidth - calculateTabWidth() - (index * calculateTabSpacing());
+        }
+    }
+
+    @Override
     protected final float calculateMaxEndPosition(final int index) {
         return (getModel().getCount() - index - 1) * calculateTabSpacing();
     }

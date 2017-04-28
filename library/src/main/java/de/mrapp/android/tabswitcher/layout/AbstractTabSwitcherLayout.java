@@ -528,10 +528,10 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                     tabItem.getIndex() == 0) || tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
-                float endPosition = calculateMaxEndPosition(tabItem.getIndex());
+                float maxEndPosition = calculateMaxEndPosition(tabItem.getIndex());
 
-                if (endPosition != -1) {
-                    newPosition = Math.min(newPosition, endPosition);
+                if (maxEndPosition != -1) {
+                    newPosition = Math.min(newPosition, maxEndPosition);
                 }
 
                 Pair<Float, State> pair =
@@ -544,10 +544,10 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             }
         } else {
             float newPosition = calculateSuccessorPosition(tabItem, predecessor);
-            float endPosition = calculateMaxEndPosition(tabItem.getIndex());
+            float maxEndPosition = calculateMaxEndPosition(tabItem.getIndex());
 
-            if (endPosition != -1) {
-                newPosition = Math.min(newPosition, endPosition);
+            if (maxEndPosition != -1) {
+                newPosition = Math.min(newPosition, maxEndPosition);
             }
             Pair<Float, State> pair =
                     clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
@@ -654,6 +654,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             if (tabItem.getTag().getState() == State.FLOATING) {
                 float currentPosition = tabItem.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
+                float minStartPosition = calculateMinStartPosition(tabItem.getIndex());
+
+                if (minStartPosition != -1) {
+                    newPosition = Math.max(newPosition, minStartPosition);
+                }
+
                 Pair<Float, State> pair =
                         clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
                                 newPosition, predecessor);
@@ -673,6 +679,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             }
         } else {
             float newPosition = calculateSuccessorPosition(tabItem, predecessor);
+            float minStartPosition = calculateMinStartPosition(tabItem.getIndex());
+
+            if (minStartPosition != -1) {
+                newPosition = Math.max(newPosition, minStartPosition);
+            }
+
             Pair<Float, State> pair =
                     clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
                             predecessor);
@@ -1116,8 +1128,22 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                                                           @NonNull final TabItem successor);
 
     /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the minimum
+     * position of a specific tab, when dragging towards the start.
+     *
+     * @param index
+     *         The index of the tab, whose position should be calculated, as an {@link Integer}
+     *         value
+     * @return The position, which has been calculated, as a {@link Float} value or -1, if no
+     * minimum position is available
+     */
+    protected float calculateMinStartPosition(final int index) {
+        return -1;
+    }
+
+    /**
      * The method, which is invoked on implementing subclasses in order to retrieve the maximum
-     * position of a specific tab, when located at the end.
+     * position of a specific tab, when dragging towards the end.
      *
      * @param index
      *         The index of the tab, whose position should be calculated, as an {@link Integer}
