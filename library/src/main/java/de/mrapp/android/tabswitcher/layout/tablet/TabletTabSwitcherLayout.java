@@ -37,8 +37,8 @@ import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
-import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AttachedViewRecycler;
+import de.mrapp.android.util.view.ViewRecycler;
 
 /**
  * A layout, which implements the functionality of a {@link TabSwitcher} on tablets.
@@ -99,6 +99,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
      * The drag handler, which is used by the layout.
      */
     private TabletDragHandler dragHandler;
+
+    /**
+     * The view recycler, which allows to recycler the views, which are associated with of tabs.
+     */
+    private ViewRecycler<Tab, Void> tabViewRecycler;
 
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
@@ -325,6 +330,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
+        tabViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel());
         getModel().addListener(recyclerAdapter);
         viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
@@ -347,6 +353,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @Override
     protected final AbstractDragHandler<?> getDragHandler() {
         return dragHandler;
+    }
+
+    @Override
+    protected final ViewRecycler<Tab, Void> getTabViewRecycler() {
+        return tabViewRecycler;
     }
 
     @Override
@@ -432,11 +443,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final Toolbar[] getToolbars() {
         return primaryToolbar != null && secondaryToolbar != null ?
                 new Toolbar[]{primaryToolbar, secondaryToolbar} : null;
-    }
-
-    @Override
-    public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
-        // TODO: Implement
     }
 
     @Override

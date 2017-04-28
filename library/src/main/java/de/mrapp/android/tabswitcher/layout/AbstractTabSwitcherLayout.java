@@ -37,6 +37,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
 import de.mrapp.android.tabswitcher.R;
+import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
@@ -47,8 +48,10 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.ViewUtil;
+import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
 import de.mrapp.android.util.view.AttachedViewRecycler;
+import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -417,6 +420,21 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             toolbar.setNavigationIcon(getModel().getToolbarNavigationIcon());
             toolbar.setNavigationOnClickListener(getModel().getToolbarNavigationIconListener());
         }
+    }
+
+    /**
+     * Adapts the decorator.
+     */
+    private void adaptDecorator() {
+        getTabViewRecycler().setAdapter(getModel().getChildRecyclerAdapter());
+    }
+
+    /**
+     * Adapts the log level.
+     */
+    private void adaptLogLevel() {
+        getViewRecycler().setLogLevel(getModel().getLogLevel());
+        getTabViewRecycler().setLogLevel(getModel().getLogLevel());
     }
 
     /**
@@ -1062,6 +1080,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view
+     * recycler, which allows to recycle the views, which are associated with tabs.
+     *
+     * @return The view recycler, which allows to recycle the views, which are associated with tabs,
+     * as an instance of the class {@link ViewRecycler} or null, if the view recycler has not been
+     * initialized yet
+     */
+    protected abstract ViewRecycler<Tab, Void> getTabViewRecycler();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the view
      * recycler, which allows to inflate the views, which are used to visualize the tabs.
      *
      * @return The view recycler, which allows to inflate the views, which are used to visualize the
@@ -1195,6 +1223,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     public final void inflateLayout(final boolean tabsOnly) {
         onInflateLayout(tabsOnly);
+        adaptDecorator();
+        adaptLogLevel();
 
         if (!tabsOnly) {
             adaptToolbarVisibility();
@@ -1261,9 +1291,15 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         return null;
     }
 
+    @Override
+    public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
+        adaptLogLevel();
+    }
+
     @CallSuper
     @Override
     public void onDecoratorChanged(@NonNull final TabSwitcherDecorator decorator) {
+        adaptDecorator();
         detachLayout(true);
         onGlobalLayout();
     }

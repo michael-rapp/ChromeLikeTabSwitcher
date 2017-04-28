@@ -60,7 +60,6 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -236,7 +235,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private PhoneDragHandler dragHandler;
 
     /**
-     * The view recycler, which allows to recycler the views, which are associated of tabs.
+     * The view recycler, which allows to recycle the views, which are associated of tabs.
      */
     private ViewRecycler<Tab, Void> tabViewRecycler;
 
@@ -271,18 +270,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private ViewPropertyAnimator toolbarAnimation;
 
     /**
-     * Adapts the log level.
-     */
-    private void adaptLogLevel() {
-        viewRecycler.setLogLevel(getModel().getLogLevel());
-        tabViewRecycler.setLogLevel(getModel().getLogLevel());
-    }
-
-    /**
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        tabViewRecycler.setAdapter(getModel().getChildRecyclerAdapter());
         recyclerAdapter.clearCachedPreviews();
     }
 
@@ -2715,7 +2705,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         viewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
-        adaptLogLevel();
         adaptDecorator();
         adaptToolbarMargin();
     }
@@ -2734,6 +2723,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     @Override
     protected final AbstractDragHandler<?> getDragHandler() {
         return dragHandler;
+    }
+
+    @Override
+    protected final ViewRecycler<Tab, Void> getTabViewRecycler() {
+        return tabViewRecycler;
     }
 
     @Override
@@ -2879,11 +2873,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     @Override
     public final Toolbar[] getToolbars() {
         return toolbar != null ? new Toolbar[]{toolbar} : null;
-    }
-
-    @Override
-    public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
-        adaptLogLevel();
     }
 
     @Override
