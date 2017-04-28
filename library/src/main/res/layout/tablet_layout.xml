@@ -61,6 +61,7 @@ License.
         android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="?android:attr/windowBackground"/>
 
 </LinearLayout>

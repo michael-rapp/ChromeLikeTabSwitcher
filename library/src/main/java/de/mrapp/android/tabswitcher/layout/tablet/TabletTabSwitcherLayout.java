@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.FrameLayout;
@@ -429,6 +430,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
             if (tabItem.isVisible()) {
                 inflateAndUpdateView(tabItem, null);
             }
+        }
+
+        Tab selectedTab = getModel().getSelectedTab();
+
+        if (selectedTab != null) {
+            Pair<View, ?> pair = tabViewRecycler.inflate(selectedTab, contentContainer);
+            View view = pair.first;
+            FrameLayout.LayoutParams layoutParams =
+                    new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT);
+            layoutParams.setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(),
+                    getModel().getPaddingBottom());
+            contentContainer.addView(view, layoutParams);
         }
     }
 
