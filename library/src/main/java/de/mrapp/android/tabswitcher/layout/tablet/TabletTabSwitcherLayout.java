@@ -168,6 +168,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     }
 
     /**
+     * Calculates and returns the width of the tab container.
+     *
+     * @return The width of the tab container in pixels as a {@link Float} value
+     */
+    private float calculateTabContainerWidth() {
+        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
+        int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
+        Toolbar[] toolbars = getToolbars();
+        float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
+                Math.max(0, toolbars[0].getWidth() - tabOffset) +
+                        Math.max(0, toolbars[1].getWidth() - tabOffset) : 0;
+        return size - padding - toolbarSize;
+    }
+
+    /**
      * Calculates and returns the tab items, which correspond to the tabs, when the tab switcher is
      * shown initially.
      *
@@ -348,26 +363,17 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float firstTabThresholdPosition = calculateFirstTabThresholdPosition();
+        float tabContainerWidth = calculateTabContainerWidth();
 
         if (index < getStackedTabCount()) {
-            float position = firstTabThresholdPosition - (getStackedTabSpacing() * (index + 1));
+            float position = tabContainerWidth - calculateTabWidth() -
+                    (getStackedTabSpacing() * (index + 1));
             return Pair.create(position, State.STACKED_END);
         } else {
-            float position =
-                    firstTabThresholdPosition - (getStackedTabSpacing() * getStackedTabCount());
+            float position = tabContainerWidth - calculateTabWidth() -
+                    (getStackedTabSpacing() * getStackedTabCount());
             return Pair.create(position, State.HIDDEN);
         }
-    }
-
-    private float calculateFirstTabThresholdPosition() {
-        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
-        int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
-        Toolbar[] toolbars = getToolbars();
-        float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
-                Math.max(0, toolbars[0].getWidth() - tabOffset) +
-                        Math.max(0, toolbars[1].getWidth() - tabOffset) : 0;
-        return size - padding - toolbarSize - calculateTabWidth();
     }
 
     @Override
