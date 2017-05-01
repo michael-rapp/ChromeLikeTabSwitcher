@@ -227,9 +227,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         private void calculateAndClipStartPosition(@NonNull final TabItem tabItem,
                                                    @Nullable final TabItem predecessor) {
             float position = calculateStartPosition(tabItem);
-            Pair<Float, State> pair =
-                    clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
-                            predecessor);
+            Pair<Float, State> pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
         }
@@ -511,8 +509,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 }
             } else {
                 Pair<Float, State> pair =
-                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                tabItem.getTag().getPosition(), iterator.previous());
+                        clipTabPosition(tabItem.getIndex(), tabItem.getTag().getPosition(),
+                                iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             }
@@ -550,8 +548,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 }
 
                 Pair<Float, State> pair =
-                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                newPosition, predecessor);
+                        clipTabPosition(tabItem.getIndex(), newPosition, predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
@@ -564,9 +561,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             if (maxEndPosition != -1) {
                 newPosition = Math.min(newPosition, maxEndPosition);
             }
-            Pair<Float, State> pair =
-                    clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
-                            predecessor);
+            Pair<Float, State> pair = clipTabPosition(tabItem.getIndex(), newPosition, predecessor);
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
         }
@@ -593,8 +588,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                         iterator.previous());
             } else {
                 Pair<Float, State> pair =
-                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                tabItem.getTag().getPosition(), iterator.previous());
+                        clipTabPosition(tabItem.getIndex(), tabItem.getTag().getPosition(),
+                                iterator.previous());
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             }
@@ -613,8 +608,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
                 if (tabItem.getIndex() < start) {
                     Pair<Float, State> pair =
-                            clipTabPosition(getTabSwitcher().getCount(), successor.getIndex(),
-                                    successorPosition, tabItem);
+                            clipTabPosition(successor.getIndex(), successorPosition, tabItem);
                     successor.getTag().setPosition(pair.first);
                     successor.getTag().setState(pair.second);
                     inflateOrRemoveView(successor);
@@ -631,8 +625,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
                 if (!iterator.hasNext()) {
                     Pair<Float, State> pair =
-                            clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                    newPosition, (TabItem) null);
+                            clipTabPosition(tabItem.getIndex(), newPosition, (TabItem) null);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
                     inflateOrRemoveView(tabItem);
@@ -675,15 +668,13 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 }
 
                 Pair<Float, State> pair =
-                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                newPosition, predecessor);
+                        clipTabPosition(tabItem.getIndex(), newPosition, predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
             } else if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
                 float currentPosition = tabItem.getTag().getPosition();
                 Pair<Float, State> pair =
-                        clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(),
-                                currentPosition, predecessor);
+                        clipTabPosition(tabItem.getIndex(), currentPosition, predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 return true;
@@ -699,9 +690,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 newPosition = Math.max(newPosition, minStartPosition);
             }
 
-            Pair<Float, State> pair =
-                    clipTabPosition(getTabSwitcher().getCount(), tabItem.getIndex(), newPosition,
-                            predecessor);
+            Pair<Float, State> pair = clipTabPosition(tabItem.getIndex(), newPosition, predecessor);
             tabItem.getTag().setPosition(pair.first);
             tabItem.getTag().setState(pair.second);
         }
@@ -808,9 +797,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     /**
      * Clips the position of a specific tab.
      *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
      * @param index
      *         The index of the tab, whose position should be clipped, as an {@link Integer} value
      * @param position
@@ -822,19 +808,15 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * class {@link Pair}. The pair may not be null
      */
     @NonNull
-    protected final Pair<Float, State> clipTabPosition(final int count, final int index,
-                                                       final float position,
+    protected final Pair<Float, State> clipTabPosition(final int index, final float position,
                                                        @Nullable final TabItem predecessor) {
-        return clipTabPosition(count, index, position,
+        return clipTabPosition(index, position,
                 predecessor != null ? predecessor.getTag().getState() : null);
     }
 
     /**
      * Clips the position of a specific tab.
      *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
      * @param index
      *         The index of the tab, whose position should be clipped, as an {@link Integer} value
      * @param position
@@ -845,11 +827,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * @return A pair, which contains the position and state of the tab item, as an instance of the
      * class {@link Pair}. The pair may not be null
      */
-    protected final Pair<Float, State> clipTabPosition(final int count, final int index,
-                                                       final float position,
+    protected final Pair<Float, State> clipTabPosition(final int index, final float position,
                                                        @Nullable final State predecessorState) {
         Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(count, index, predecessorState);
+                calculatePositionAndStateWhenStackedAtStart(getModel().getCount(), index,
+                        predecessorState);
         float startPosition = startPair.first;
 
         if (position <= startPosition) {

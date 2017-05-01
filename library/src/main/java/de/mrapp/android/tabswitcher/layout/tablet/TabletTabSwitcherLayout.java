@@ -303,8 +303,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                 }
 
                 Pair<Float, State> pair =
-                        clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
-                                predecessor);
+                        clipTabPosition(tabItem.getIndex(), position, predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
@@ -321,8 +320,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                     float position = referenceTabItem.getTag().getPosition() +
                             ((tabItem.getIndex() - referenceIndex) * tabSpacing);
                     Pair<Float, State> pair =
-                            clipTabPosition(getModel().getCount(), tabItem.getIndex(), position,
-                                    predecessor);
+                            clipTabPosition(tabItem.getIndex(), position, predecessor);
                     tabItem.getTag().setPosition(pair.first);
                     tabItem.getTag().setState(pair.second);
 
