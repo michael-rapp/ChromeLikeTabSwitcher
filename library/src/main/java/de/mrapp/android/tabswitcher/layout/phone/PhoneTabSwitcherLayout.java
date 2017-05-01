@@ -1903,7 +1903,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             if (state == State.HIDDEN || state == State.STACKED_START) {
                 Pair<Float, State> pair =
                         calculatePositionAndStateWhenStackedAtStart(count, swipedTabItem.getIndex(),
-                                null);
+                                (State) null);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
                 inflateOrRemoveView(tabItem);
@@ -2775,6 +2775,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     @Override
     protected final int getStackedTabCount() {
         return stackedTabCount;
+    }
+
+    @NonNull
+    @Override
+    protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                                   final int index,
+                                                                                   @Nullable final State predecessorState) {
+        if ((count - index) <= getStackedTabCount()) {
+            float position = getStackedTabSpacing() * (count - (index + 1));
+            return Pair.create(position,
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.STACKED_START);
+        } else {
+            float position = getStackedTabSpacing() * getStackedTabCount();
+            return Pair.create(position,
+                    (predecessorState == null || predecessorState == State.FLOATING) ?
+                            State.STACKED_START_ATOP : State.HIDDEN);
+        }
     }
 
     @NonNull

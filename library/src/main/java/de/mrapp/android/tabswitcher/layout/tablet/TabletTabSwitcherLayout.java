@@ -453,6 +453,46 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
 
     @NonNull
     @Override
+    protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
+                                                                                   final int index,
+                                                                                   @Nullable final State predecessorState) {
+        int selectedTabIndex = getModel().getSelectedTabIndex();
+        int tabWidth = calculateTabWidth();
+        float position;
+        State state;
+
+        if (index == selectedTabIndex) {
+            position = getStackedTabSpacing() * Math.min(count - (index + 1), getStackedTabCount());
+            state = State.STACKED_START_ATOP;
+        } else if (index < selectedTabIndex) {
+            if ((selectedTabIndex - index) < getStackedTabCount()) {
+                position = (getStackedTabSpacing() *
+                        Math.min(count - (selectedTabIndex + 1), getStackedTabCount())) +
+                        (getStackedTabSpacing() * (selectedTabIndex - index));
+                state = State.STACKED_END;
+            } else {
+                position = (getStackedTabSpacing() *
+                        Math.min(count - (selectedTabIndex + 1), getStackedTabCount())) +
+                        (getStackedTabSpacing() * getStackedTabCount());
+                state = State.HIDDEN;
+            }
+        } else {
+            if ((count - index) <= getStackedTabCount()) {
+                position = getStackedTabSpacing() * (count - (index + 1));
+                state = predecessorState == null || predecessorState == State.FLOATING ?
+                        State.STACKED_START_ATOP : State.STACKED_START;
+            } else {
+                position = getStackedTabSpacing() * getStackedTabCount();
+                state = predecessorState == null || predecessorState == State.FLOATING ?
+                        State.STACKED_START_ATOP : State.HIDDEN;
+            }
+        }
+
+        return Pair.create(position, state);
+    }
+
+    @NonNull
+    @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float tabContainerWidth = calculateTabContainerWidth();
         int tabWidth = calculateTabWidth();

@@ -875,38 +875,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
-     * Calculates and returns the position and state of a specific tab, when stacked at the start.
-     *
-     * @param count
-     *         The total number of tabs, which are currently contained by the tab switcher, as an
-     *         {@link Integer} value
-     * @param index
-     *         The index of the tab, whose position and state should be returned, as an {@link
-     *         Integer} value
-     * @param predecessorState
-     *         The state of the predecessor of the given tab item as a value of the enum {@link
-     *         State} or null, if the tab item does not have a predecessor
-     * @return A pair, which contains the position and state of the given tab item, when stacked at
-     * the start, as an instance of the class {@link Pair}. The pair may not be null
-     */
-    @NonNull
-    private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
-                                                                           final int index,
-                                                                           @Nullable final State predecessorState) {
-        if ((count - index) <= getStackedTabCount()) {
-            float position = stackedTabSpacing * (count - (index + 1));
-            return Pair.create(position,
-                    (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.STACKED_START);
-        } else {
-            float position = stackedTabSpacing * getStackedTabCount();
-            return Pair.create(position,
-                    (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.HIDDEN);
-        }
-    }
-
-    /**
      * Inflates or removes the view, which is used to visualize a specific tab, depending on the
      * tab's current state.
      *
@@ -1088,6 +1056,26 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * @return The number of tabs, which are contained by a stack, as an {@link Integer} value
      */
     protected abstract int getStackedTabCount();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the position and
+     * state of a specific tab, when stacked at the start.
+     *
+     * @param count
+     *         The total number of tabs, which are currently contained by the tab switcher, as an
+     *         {@link Integer} value
+     * @param index
+     *         The index of the tab, whose position and state should be returned, as an {@link
+     *         Integer} value
+     * @param predecessorState
+     *         The state of the predecessor of the given tab item as a value of the enum {@link
+     *         State} or null, if the tab item does not have a predecessor
+     * @return A pair, which contains the position and state of the given tab item, when stacked at
+     * the start, as an instance of the class {@link Pair}. The pair may not be null
+     */
+    @NonNull
+    protected abstract Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
+            final int count, final int index, @Nullable final State predecessorState);
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the position and
