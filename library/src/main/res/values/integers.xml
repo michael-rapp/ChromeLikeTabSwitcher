@@ -15,7 +15,7 @@ License.
 -->
 <resources>
 
-    <integer name="stacked_tab_count">3</integer>
+    <!-- Common -->
     <integer name="max_start_overshoot_angle">2</integer>
     <integer name="max_end_overshoot_angle">3</integer>
     <integer name="show_switcher_animation_duration">@android:integer/config_shortAnimTime</integer>
@@ -29,5 +29,11 @@ License.
     <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="reveal_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="peek_animation_duration">1200</integer>
+
+    <!-- Smartphone layout -->
+    <integer name="phone_stacked_tab_count">3</integer>
+
+    <!-- Tablet layout -->
+    <integer name="tablet_stacked_tab_count">4</integer>
 
 </resources>

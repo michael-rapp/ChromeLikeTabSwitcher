@@ -176,7 +176,7 @@ public class PhoneArithmetics implements Arithmetics {
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
-        this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
+        this.stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.endOvershootPivot = resources.getDimensionPixelSize(R.dimen.end_overshoot_pivot);
     }

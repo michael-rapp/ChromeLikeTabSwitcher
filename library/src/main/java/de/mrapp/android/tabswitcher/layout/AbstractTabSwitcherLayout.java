@@ -244,7 +244,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
          */
         private float calculateStartPosition(@NonNull final TabItem tabItem) {
             if (tabItem.getIndex() == 0) {
-                return getCount() > stackedTabCount ? stackedTabCount * stackedTabSpacing :
+                return getCount() > getStackedTabCount() ?
+                        getStackedTabCount() * stackedTabSpacing :
                         (getCount() - 1) * stackedTabSpacing;
 
             } else {
@@ -347,11 +348,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * The threshold, which must be reached until tabs are dragged, in pixels.
      */
     private final int dragThreshold;
-
-    /**
-     * The number of tabs, which are contained by a stack.
-     */
-    private final int stackedTabCount;
 
     /**
      * The space between tabs, which are part of a stack, in pixels.
@@ -608,9 +604,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
-            iterator =
-                    new TabItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).reverse(true)
-                            .start(start).create();
+            iterator = new TabItemIterator.Builder(getTabSwitcher(), getTabViewRecycler())
+                    .reverse(true).start(start).create();
 
             while ((tabItem = iterator.next()) != null) {
                 TabItem successor = iterator.previous();
@@ -755,15 +750,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     protected final int getDragThreshold() {
         return dragThreshold;
-    }
-
-    /**
-     * Returns the number of tabs, which are contained by a stack.
-     *
-     * @return The number of tabs, which are contained by a stack, as an {@link Integer} value
-     */
-    protected final int getStackedTabCount() {
-        return stackedTabCount;
     }
 
     /**
@@ -925,13 +911,13 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     private Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
                                                                            final int index,
                                                                            @Nullable final State predecessorState) {
-        if ((count - index) <= stackedTabCount) {
+        if ((count - index) <= getStackedTabCount()) {
             float position = stackedTabSpacing * (count - (index + 1));
             return Pair.create(position,
                     (predecessorState == null || predecessorState == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.STACKED_START);
         } else {
-            float position = stackedTabSpacing * stackedTabCount;
+            float position = stackedTabSpacing * getStackedTabCount();
             return Pair.create(position,
                     (predecessorState == null || predecessorState == State.FLOATING) ?
                             State.STACKED_START_ATOP : State.HIDDEN);
@@ -1045,7 +1031,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         this.arithmetics = arithmetics;
         Resources resources = tabSwitcher.getResources();
         this.dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
-        this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.logger = new Logger(model.getLogLevel());
         this.callback = null;
@@ -1113,6 +1098,14 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     protected abstract void inflateAndUpdateView(@NonNull final TabItem tabItem,
                                                  @Nullable final OnGlobalLayoutListener listener);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the number of
+     * tabs, which are contained by a stack.
+     *
+     * @return The number of tabs, which are contained by a stack, as an {@link Integer} value
+     */
+    protected abstract int getStackedTabCount();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the position and

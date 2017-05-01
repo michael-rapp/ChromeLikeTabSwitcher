@@ -176,7 +176,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
         this.overshootDragHelper = new DragHelper(0);
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
-        this.stackedTabCount = resources.getInteger(R.integer.stacked_tab_count);
+        this.stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         this.maxOvershootDistance = resources.getDimensionPixelSize(R.dimen.max_overshoot_distance);
         this.maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         this.maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);

@@ -112,6 +112,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     /**
+     * The number of tabs, which are contained by a stack.
+     */
+    private final int stackedTabCount;
+
+    /**
      * The maximum width of a tab in pixels.
      */
     private final int maxTabWidth;
@@ -381,6 +386,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                                    @NonNull final Arithmetics arithmetics) {
         super(tabSwitcher, model, arithmetics);
         Resources resources = tabSwitcher.getResources();
+        stackedTabCount = resources.getInteger(R.integer.tablet_stacked_tab_count);
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
         minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
@@ -439,6 +445,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     protected final void inflateAndUpdateView(@NonNull final TabItem tabItem,
                                               @Nullable final OnGlobalLayoutListener listener) {
         inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener));
+    }
+
+    @Override
+    protected final int getStackedTabCount() {
+        return stackedTabCount;
     }
 
     @NonNull

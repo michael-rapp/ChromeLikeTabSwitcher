@@ -135,6 +135,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private static final float MIN_TAB_SPACING_RATIO = 0.375f;
 
     /**
+     * The number of tabs, which are contained by a stack.
+     */
+    private final int stackedTabCount;
+
+    /**
      * The inset of tabs in pixels.
      */
     private final int tabInset;
@@ -2651,6 +2656,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                   @NonNull final PhoneArithmetics arithmetics) {
         super(tabSwitcher, model, arithmetics);
         Resources resources = tabSwitcher.getResources();
+        stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
         tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         tabTitleContainerHeight =
@@ -2779,6 +2785,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                               @Nullable final OnGlobalLayoutListener listener) {
         inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener),
                 tabViewBottomMargin);
+    }
+
+    @Override
+    protected final int getStackedTabCount() {
+        return stackedTabCount;
     }
 
     @NonNull
