@@ -287,6 +287,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
             obtainTabBackgroundColor(typedArray);
+            obtainTabContentBackgroundColor(typedArray);
             obtainTabTitleTextColor(typedArray);
             obtainTabCloseButtonIcon(typedArray);
             obtainToolbarTitle(typedArray);
@@ -361,6 +362,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         if (colorStateList != null) {
             setTabBackgroundColor(colorStateList);
         }
+    }
+
+    /**
+     * Obtains the background color of a tab's content from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the background color should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabContentBackgroundColor(@NonNull final TypedArray typedArray) {
+        setTabContentBackgroundColor(
+                typedArray.getColor(R.styleable.TabSwitcher_tab_content_background_color, -1));
     }
 
     /**
@@ -582,6 +595,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
             @Override
             public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+
+            }
+
+            @Override
+            public void onTabContentBackgroundColorChanged(@ColorInt final int color) {
 
             }
 
@@ -1287,6 +1305,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setTabBackgroundColor(@Nullable final ColorStateList colorStateList) {
         model.setTabBackgroundColor(colorStateList);
+    }
+
+    @ColorInt
+    @Override
+    public final int getTabContentBackgroundColor() {
+        return model.getTabContentBackgroundColor();
+    }
+
+    @Override
+    public final void setTabContentBackgroundColor(@ColorInt final int color) {
+        model.setTabContentBackgroundColor(color);
     }
 
     @Nullable

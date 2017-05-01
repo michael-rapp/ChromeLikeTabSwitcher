@@ -79,7 +79,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         Tab tab = tabItem.getTab();
 
         if (child == null) {
-            Pair<View, ?> pair = childViewRecycler.inflate(tab, viewHolder.childContainer);
+            Pair<View, ?> pair = childViewRecycler.inflate(tab, viewHolder.contentContainer);
             child = pair.first;
         } else {
             childViewRecycler.getAdapter().onShowView(getContext(), child, tab, false);

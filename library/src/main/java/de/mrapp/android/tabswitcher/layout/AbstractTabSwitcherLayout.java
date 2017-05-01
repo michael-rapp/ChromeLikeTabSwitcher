@@ -21,6 +21,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
+import android.support.annotation.ColorInt;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -1333,6 +1334,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
     @Override
     public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
+    public void onTabContentBackgroundColorChanged(@ColorInt final int color) {
 
     }
 

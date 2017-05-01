@@ -276,30 +276,6 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     }
 
     /**
-     * Returns the tab item, which corresponds to a specific tab.
-     *
-     * @param tab
-     *         The tab, whose tab item should be returned, as an instance of the class {@link Tab}.
-     *         The tab may not be null
-     * @return The tab item, which corresponds to the given tab, as an instance of the class {@link
-     * TabItem} or null, if no view, which visualizes the tab, is currently inflated
-     */
-    @Nullable
-    private TabItem getTabItem(@NonNull final Tab tab) {
-        int index = model.indexOf(tab);
-
-        if (index != -1) {
-            TabItem tabItem = TabItem.create(model, getViewRecyclerOrThrowException(), index);
-
-            if (tabItem.isInflated()) {
-                return tabItem;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Notifies all listeners, that a tab is about to be closed by clicking its close button.
      *
      * @param tab
@@ -337,6 +313,30 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     @NonNull
     protected final TabSwitcherModel getModel() {
         return model;
+    }
+
+    /**
+     * Returns the tab item, which corresponds to a specific tab.
+     *
+     * @param tab
+     *         The tab, whose tab item should be returned, as an instance of the class {@link Tab}.
+     *         The tab may not be null
+     * @return The tab item, which corresponds to the given tab, as an instance of the class {@link
+     * TabItem} or null, if no view, which visualizes the tab, is currently inflated
+     */
+    @Nullable
+    protected final TabItem getTabItem(@NonNull final Tab tab) {
+        int index = model.indexOf(tab);
+
+        if (index != -1) {
+            TabItem tabItem = TabItem.create(model, getViewRecyclerOrThrowException(), index);
+
+            if (tabItem.isInflated()) {
+                return tabItem;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -562,6 +562,11 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     }
 
     @Override
+    public void onTabContentBackgroundColorChanged(@ColorInt final int color) {
+
+    }
+
+    @Override
     public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
         TabItemIterator iterator =
                 new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
@@ -652,6 +657,11 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         if (tabItem != null) {
             adaptBackgroundColor(tabItem);
         }
+    }
+
+    @Override
+    public void onContentBackgroundColorChanged(@NonNull final Tab tab) {
+
     }
 
     @Override

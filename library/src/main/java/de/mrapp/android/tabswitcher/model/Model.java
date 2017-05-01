@@ -212,6 +212,16 @@ public interface Model extends Iterable<Tab> {
         void onTabBackgroundColorChanged(@Nullable ColorStateList colorStateList);
 
         /**
+         * The method, which is invoked, when the background color of a tab's content has been
+         * changed.
+         *
+         * @param color
+         *         The color, which has been set, as an {@link Integer} value or -1, if the default
+         *         color should be used
+         */
+        void onTabContentBackgroundColorChanged(@ColorInt int color);
+
+        /**
          * The method, which is invoked, when the text color of a tab's title has been changed.
          *
          * @param colorStateList
@@ -718,6 +728,23 @@ public interface Model extends Iterable<Tab> {
      *         null, if the default color should be used
      */
     void setTabBackgroundColor(@Nullable ColorStateList colorStateList);
+
+    /**
+     * Returns the default background color of a tab's content.
+     *
+     * @return The default background color of a tab's content as an {@link Integer} value
+     */
+    @ColorInt
+    int getTabContentBackgroundColor();
+
+    /**
+     * Sets the default background color of a tab's content.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
+     */
+    void setTabContentBackgroundColor(@ColorInt int color);
 
     /**
      * Returns the default text color of a tab's title.

@@ -14,8 +14,10 @@
 package de.mrapp.android.tabswitcher.layout.tablet;
 
 import android.content.res.Resources;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -47,7 +49,8 @@ import de.mrapp.android.util.view.ViewRecycler;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
+public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
+        implements Tab.Callback {
 
     /**
      * A comparator, which allows to compare two instances of the class {@link TabItem}. The tab
@@ -95,6 +98,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
      * The offset between two neighboring tabs in pixels.
      */
     private final int tabOffset;
+
+    /**
+     * The default background color of a tab's content.
+     */
+    private final int tabContentBackgroundColor;
 
     /**
      * The drag handler, which is used by the layout.
@@ -152,6 +160,20 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                 (FrameLayout.LayoutParams) secondaryToolbar.getLayoutParams();
         secondaryToolbarLayoutParams
                 .setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(), 0);
+    }
+
+    /**
+     * Adapts the background color of the currently selected tab's content.
+     */
+    private void adaptTabContentBackgroundColor() {
+        Tab selectedTab = getModel().getSelectedTab();
+        int color = selectedTab != null ? selectedTab.getContentBackgroundColor() : -1;
+
+        if (color == -1) {
+            color = getModel().getTabContentBackgroundColor();
+        }
+
+        contentContainer.setBackgroundColor(color != -1 ? color : tabContentBackgroundColor);
     }
 
     /**
@@ -317,6 +339,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
         minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        tabContentBackgroundColor =
+                ContextCompat.getColor(getContext(), R.color.tablet_tab_content_background_color);
     }
 
     @Override
@@ -340,6 +364,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
         recyclerAdapter.setViewRecycler(viewRecycler);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
         adaptTabContainerAndToolbarMargins();
+        adaptTabContentBackgroundColor();
     }
 
     @Override
@@ -474,6 +499,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
+        tab.addCallback(this);
         // TODO: Implement
     }
 
@@ -481,6 +507,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
                                      @NonNull final Animation animation) {
+        for (Tab tab : tabs) {
+            tab.addCallback(this);
+        }
         // TODO: Implement
     }
 
@@ -488,12 +517,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
                                    @NonNull final Animation animation) {
+        tab.removeCallback(this);
         // TODO: Implement
     }
 
     @Override
     public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
                                        @NonNull final Animation animation) {
+        for (Tab tab : tabs) {
+            tab.removeCallback(this);
+        }
         // TODO: Implement
     }
 
@@ -501,6 +534,48 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void> {
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
         adaptTabContainerAndToolbarMargins();
+    }
+
+    @Override
+    public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
+        adaptTabContentBackgroundColor();
+    }
+
+    @Override
+    public final void onTitleChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onIconChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onCloseableChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onCloseButtonIconChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onBackgroundColorChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
+    public final void onContentBackgroundColorChanged(@NonNull final Tab tab) {
+        if (getModel().getSelectedTab() == tab) {
+            adaptTabContentBackgroundColor();
+        }
+    }
+
+    @Override
+    public final void onTitleTextColorChanged(@NonNull final Tab tab) {
+
     }
 
 }

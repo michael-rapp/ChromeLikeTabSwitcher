@@ -30,6 +30,7 @@ License.
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
+        <attr name="tab_content_background_color" format="color"/>
     </declare-styleable>
 
 </resources>

@@ -115,6 +115,16 @@ public class Tab implements Parcelable {
         void onBackgroundColorChanged(@NonNull Tab tab);
 
         /**
+         * The method, which is invoked, when the background color of the tab's content has been
+         * changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
+         */
+        void onContentBackgroundColorChanged(@NonNull Tab tab);
+
+        /**
          * The method, which is invoked, when the text color of the tab's title has been changed.
          *
          * @param tab
@@ -165,6 +175,11 @@ public class Tab implements Parcelable {
      * The background color of the tab.
      */
     private ColorStateList backgroundColor;
+
+    /**
+     * The background color of the tab's content.
+     */
+    private int contentBackgroundColor;
 
     /**
      * The text color of the tab's title.
@@ -222,6 +237,15 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Notifies all callbacks, that the background color of the tab's content has been changed.
+     */
+    private void notifyOnContentBackgroundColorChanged() {
+        for (Callback callback : callbacks) {
+            callback.onContentBackgroundColorChanged(this);
+        }
+    }
+
+    /**
      * Notifies all callbacks, that the text color of the tab has been changed.
      */
     private void notifyOnTitleTextColorChanged() {
@@ -245,6 +269,7 @@ public class Tab implements Parcelable {
         this.closeButtonIconId = source.readInt();
         this.closeButtonIconBitmap = source.readParcelable(getClass().getClassLoader());
         this.backgroundColor = source.readParcelable(getClass().getClassLoader());
+        this.contentBackgroundColor = source.readInt();
         this.titleTextColor = source.readParcelable(getClass().getClassLoader());
         this.parameters = source.readBundle(getClass().getClassLoader());
     }
@@ -264,6 +289,7 @@ public class Tab implements Parcelable {
         this.iconId = -1;
         this.iconBitmap = null;
         this.backgroundColor = null;
+        this.contentBackgroundColor = -1;
         this.titleTextColor = null;
         this.parameters = null;
     }
@@ -470,6 +496,29 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Returns the background color of the tab's content.
+     *
+     * @return The background color of the tab's content as an {@link Integer} value or -1, if no
+     * custom color is set
+     */
+    @ColorInt
+    public final int getContentBackgroundColor() {
+        return contentBackgroundColor;
+    }
+
+    /**
+     * Sets the background color of the tab's content.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if no custom color
+     *         should be set
+     */
+    public final void setContentBackgroundColor(@ColorInt final int color) {
+        this.contentBackgroundColor = color;
+        notifyOnContentBackgroundColorChanged();
+    }
+
+    /**
      * Returns the text color of the tab's title.
      *
      * @return The text color of the tab's title as an instance of the class {@link ColorStateList}
@@ -566,6 +615,7 @@ public class Tab implements Parcelable {
         parcel.writeInt(closeButtonIconId);
         parcel.writeParcelable(closeButtonIconBitmap, flags);
         parcel.writeParcelable(backgroundColor, flags);
+        parcel.writeInt(contentBackgroundColor);
         parcel.writeParcelable(titleTextColor, flags);
         parcel.writeBundle(parameters);
     }

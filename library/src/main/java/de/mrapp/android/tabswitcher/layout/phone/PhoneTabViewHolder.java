@@ -35,9 +35,9 @@ public class PhoneTabViewHolder extends AbstractTabViewHolder {
     public ViewGroup titleContainer;
 
     /**
-     * The view group, which contains the child view of a tab.
+     * The view group, which contains the view, which is associated with a tab.
      */
-    public ViewGroup childContainer;
+    public ViewGroup contentContainer;
 
     /**
      * The child view, which contains the tab's content.

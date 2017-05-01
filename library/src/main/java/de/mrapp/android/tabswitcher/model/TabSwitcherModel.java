@@ -124,6 +124,13 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::TabBackgroundColor";
 
     /**
+     * The name of the extra, which is used to store the background color of a tab's content within
+     * a bundle.
+     */
+    private static final String TAB_CONTENT_BACKGROUND_COLOR_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabContentBackgroundColor";
+
+    /**
      * The name of the extra, which is used to store the text color of a tab's title within a
      * bundle.
      */
@@ -226,6 +233,11 @@ public class TabSwitcherModel implements Model, Restorable {
      * The background color of a tab;
      */
     private ColorStateList tabBackgroundColor;
+
+    /**
+     * The background color of a tab's content.
+     */
+    private int tabContentBackgroundColor;
 
     /**
      * The text color of a tab's title.
@@ -532,6 +544,18 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Notifies the listeners, the the default background color of a tab's content has been changed.
+     *
+     * @param color
+     *         The color, which has been set, as an {@link Integer} value
+     */
+    private void notifyOnTabContentBackgroundColorChanged(@ColorInt final int color) {
+        for (Listener listener : listeners) {
+            listener.onTabContentBackgroundColorChanged(color);
+        }
+    }
+
+    /**
      * Notifies the listeners, that the default text color of a tab's title has been changed.
      *
      * @param colorStateList
@@ -646,6 +670,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabIconId = -1;
         this.tabIconBitmap = null;
         this.tabBackgroundColor = null;
+        this.tabContentBackgroundColor = -1;
         this.tabTitleTextColor = null;
         this.tabCloseButtonIconId = -1;
         this.tabCloseButtonIconBitmap = null;
@@ -1108,6 +1133,18 @@ public class TabSwitcherModel implements Model, Restorable {
         notifyOnTabBackgroundColorChanged(colorStateList);
     }
 
+    @ColorInt
+    @Override
+    public final int getTabContentBackgroundColor() {
+        return tabContentBackgroundColor;
+    }
+
+    @Override
+    public final void setTabContentBackgroundColor(@ColorInt final int color) {
+        this.tabContentBackgroundColor = color;
+        notifyOnTabContentBackgroundColorChanged(color);
+    }
+
     @Nullable
     @Override
     public final ColorStateList getTabTitleTextColor() {
@@ -1241,6 +1278,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
         outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
         outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
+        outState.putInt(TAB_CONTENT_BACKGROUND_COLOR_EXTRA, tabContentBackgroundColor);
         outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
         outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
@@ -1263,6 +1301,8 @@ public class TabSwitcherModel implements Model, Restorable {
             tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
             tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
             tabBackgroundColor = savedInstanceState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
+            tabContentBackgroundColor =
+                    savedInstanceState.getInt(TAB_CONTENT_BACKGROUND_COLOR_EXTRA);
             tabTitleTextColor = savedInstanceState.getParcelable(TAB_TITLE_TEXT_COLOR_EXTRA);
             tabCloseButtonIconId = savedInstanceState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
             tabCloseButtonIconBitmap =

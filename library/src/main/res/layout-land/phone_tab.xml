@@ -47,10 +47,10 @@ License.
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/child_container"
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?android:attr/windowBackground">
+        android:background="@color/phone_tab_content_background_color">
 
         <ImageView
             android:id="@+id/preview_image_view"

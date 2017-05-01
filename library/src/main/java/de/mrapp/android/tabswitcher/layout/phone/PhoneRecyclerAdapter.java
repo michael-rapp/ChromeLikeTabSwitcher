@@ -81,6 +81,11 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     private final int tabTitleContainerHeight;
 
     /**
+     * The background color of a tab's content.
+     */
+    private final int tabContentBackgroundColor;
+
+    /**
      * Inflates the child view of a tab and adds it to the view hierarchy.
      *
      * @param tabItem
@@ -93,7 +98,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         Tab tab = tabItem.getTab();
 
         if (view == null) {
-            ViewGroup parent = viewHolder.childContainer;
+            ViewGroup parent = viewHolder.contentContainer;
             Pair<View, ?> pair = tabViewRecycler.inflate(tab, parent);
             view = pair.first;
             LayoutParams layoutParams =
@@ -144,12 +149,32 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
      */
     private void removeChildView(@NonNull final PhoneTabViewHolder viewHolder,
                                  @NonNull final Tab tab) {
-        if (viewHolder.childContainer.getChildCount() > 2) {
-            viewHolder.childContainer.removeViewAt(0);
+        if (viewHolder.contentContainer.getChildCount() > 2) {
+            viewHolder.contentContainer.removeViewAt(0);
         }
 
         viewHolder.child = null;
         tabViewRecycler.remove(tab);
+    }
+
+    /**
+     * Adapts the background color of a tab's content.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose content's background should be
+     *         adapted, as an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    private void adaptContentBackgroundColor(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        int color = tab.getContentBackgroundColor() != -1 ? tab.getContentBackgroundColor() :
+                getModel().getTabContentBackgroundColor();
+
+        if (color == -1) {
+            color = tabContentBackgroundColor;
+        }
+
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
+        viewHolder.contentContainer.setBackgroundColor(color);
     }
 
     /**
@@ -208,6 +233,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
+        this.tabContentBackgroundColor = ContextCompat
+                .getColor(tabSwitcher.getContext(), R.color.phone_tab_content_background_color);
         adaptLogLevel();
     }
 
@@ -239,8 +266,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         view.setPadding(padding, tabInset, padding, padding);
         ((PhoneTabViewHolder) viewHolder).titleContainer =
                 (ViewGroup) view.findViewById(R.id.tab_title_container);
-        ((PhoneTabViewHolder) viewHolder).childContainer =
-                (ViewGroup) view.findViewById(R.id.child_container);
+        ((PhoneTabViewHolder) viewHolder).contentContainer =
+                (ViewGroup) view.findViewById(R.id.content_container);
         ((PhoneTabViewHolder) viewHolder).previewImageView =
                 (ImageView) view.findViewById(R.id.preview_image_view);
         adaptPadding((PhoneTabViewHolder) viewHolder);
@@ -263,6 +290,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         layoutParams.rightMargin = borderMargin;
         layoutParams.bottomMargin = bottomMargin;
         view.setLayoutParams(layoutParams);
+        adaptContentBackgroundColor(tabItem);
 
         if (!getModel().isSwitcherShown()) {
             if (tabItem.getTab() == getModel().getSelectedTab()) {
@@ -319,6 +347,28 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
             if (tabItem.isInflated()) {
                 adaptPadding((PhoneTabViewHolder) tabItem.getViewHolder());
             }
+        }
+    }
+
+    @Override
+    public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
+        TabItemIterator iterator =
+                new TabItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
+        TabItem tabItem;
+
+        while ((tabItem = iterator.next()) != null) {
+            if (tabItem.isInflated()) {
+                adaptContentBackgroundColor(tabItem);
+            }
+        }
+    }
+
+    @Override
+    public final void onContentBackgroundColorChanged(@NonNull final Tab tab) {
+        TabItem tabItem = getTabItem(tab);
+
+        if (tabItem != null) {
+            adaptContentBackgroundColor(tabItem);
         }
     }
 
