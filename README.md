@@ -79,6 +79,7 @@ Tab tab = new Tab("Title");
 tab.setCloseable(true);
 tab.setIcon(R.drawable.ic_file_outline_18dp);
 tab.setBackgroundColor(ContextCompat.getColor(context, R.color.tab_background_color));
+tab.setContentBackgroundColor(ContextCompat.getColor(context, R.color.tab_content_background_color));
 tab.setTitleTextColor(ContextCompat.getColor(context, R.color.tab_title_text_color));
 tab.setParameters(new Bundle());
 tab.addCallback(new Tab.Callback() { /* ... */ });
