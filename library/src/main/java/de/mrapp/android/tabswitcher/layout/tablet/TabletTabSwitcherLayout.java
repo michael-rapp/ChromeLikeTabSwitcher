@@ -445,16 +445,39 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float tabContainerWidth = calculateTabContainerWidth();
+        int tabWidth = calculateTabWidth();
+        int selectedTabIndex = getModel().getSelectedTabIndex();
+        float position;
+        State state;
 
-        if (index < getStackedTabCount()) {
-            float position = tabContainerWidth - calculateTabWidth() -
-                    (getStackedTabSpacing() * (index + 1));
-            return Pair.create(position, State.STACKED_END);
+        if (index == selectedTabIndex) {
+            position = tabContainerWidth - tabWidth -
+                    (getStackedTabSpacing() * Math.min(getStackedTabCount(), index));
+            state = State.STACKED_END;
+        } else if (index < selectedTabIndex) {
+            if (index < getStackedTabCount()) {
+                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() * index);
+                state = State.STACKED_END;
+            } else {
+                position = tabContainerWidth - tabWidth -
+                        (getStackedTabSpacing() * getStackedTabCount());
+                state = State.HIDDEN;
+            }
         } else {
-            float position = tabContainerWidth - calculateTabWidth() -
-                    (getStackedTabSpacing() * getStackedTabCount());
-            return Pair.create(position, State.HIDDEN);
+            if (index < selectedTabIndex + getStackedTabCount() + 1) {
+                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() *
+                        Math.min(getStackedTabCount(), selectedTabIndex)) -
+                        (getStackedTabSpacing() * (index - selectedTabIndex));
+                state = State.STACKED_END;
+            } else {
+                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() *
+                        Math.min(getStackedTabCount(), selectedTabIndex)) -
+                        (getStackedTabSpacing() * getStackedTabCount());
+                state = State.HIDDEN;
+            }
         }
+
+        return Pair.create(position, state);
     }
 
     @Override
