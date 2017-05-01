@@ -43,6 +43,8 @@ import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
+import static de.mrapp.android.util.Condition.ensureNotEqual;
+
 /**
  * A layout, which implements the functionality of a {@link TabSwitcher} on tablets.
  *
@@ -75,13 +77,38 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
 
         @Override
         public int compare(final TabItem o1, final TabItem o2) {
-            if (o1.getTab() == getTabSwitcher().getSelectedTab()) {
-                return -1;
+            Tab tab1 = o1.getTab();
+            Tab tab2 = o2.getTab();
+            int index1 = getTabSwitcher().indexOf(tab1);
+            index1 = index1 == -1 ? o1.getIndex() : index1;
+            int index2 = getTabSwitcher().indexOf(tab2);
+            index2 = index2 == -1 ? o2.getIndex() : index2;
+            ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
+                    RuntimeException.class);
+            ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
+                    RuntimeException.class);
+            int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
+
+            if (index1 < selectedTabIndex) {
+                if (index2 == selectedTabIndex) {
+                    return 1;
+                } else if (index2 > selectedTabIndex) {
+                    return -1;
+                } else {
+                    return index1 >= index2 ? -1 : 1;
+                }
+            } else if (index1 > selectedTabIndex) {
+                if (index2 == selectedTabIndex) {
+                    return 1;
+                } else if (index2 > selectedTabIndex) {
+                    return index1 < index2 ? -1 : 1;
+                } else {
+                    return 1;
+                }
             } else {
-                return super.compare(o1, o2);
+                return -1;
             }
         }
-
     }
 
     /**
