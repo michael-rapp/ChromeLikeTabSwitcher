@@ -437,6 +437,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         return contentViewRecycler;
     }
 
+    @Override
     protected final AttachedViewRecycler<TabItem, Void> getTabViewRecycler() {
         return tabViewRecycler;
     }
