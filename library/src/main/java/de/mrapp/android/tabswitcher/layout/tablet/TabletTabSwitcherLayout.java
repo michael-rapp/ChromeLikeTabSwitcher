@@ -112,7 +112,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     /**
      * The view recycler, which allows to recycler the views, which are associated with of tabs.
      */
-    private ViewRecycler<Tab, Void> tabViewRecycler;
+    private ViewRecycler<Tab, Void> contentViewRecycler;
 
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
@@ -122,7 +122,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
      */
-    private AttachedViewRecycler<TabItem, Void> viewRecycler;
+    private AttachedViewRecycler<TabItem, Void> tabViewRecycler;
 
     /**
      * The layout's primary toolbar.
@@ -174,6 +174,24 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         }
 
         contentContainer.setBackgroundColor(color != -1 ? color : tabContentBackgroundColor);
+    }
+
+    /**
+     * Inflates the content, which is associated with a specific tab.
+     *
+     * @param tab
+     *         The tab, whose content should be inflated, as an instance of the class {@link Tab}.
+     *         The tab may not be null
+     */
+    private void inflateContent(@NonNull final Tab tab) {
+        Pair<View, ?> pair = contentViewRecycler.inflate(tab, contentContainer);
+        View view = pair.first;
+        FrameLayout.LayoutParams layoutParams =
+                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT);
+        layoutParams.setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(),
+                getModel().getPaddingBottom());
+        contentContainer.addView(view, layoutParams);
     }
 
     /**
@@ -355,14 +373,14 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
-        tabViewRecycler = new ViewRecycler<>(inflater);
+        contentViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel());
         getModel().addListener(recyclerAdapter);
-        viewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
+        tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
-        viewRecycler.setAdapter(recyclerAdapter);
-        recyclerAdapter.setViewRecycler(viewRecycler);
-        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), viewRecycler);
+        tabViewRecycler.setAdapter(recyclerAdapter);
+        recyclerAdapter.setViewRecycler(tabViewRecycler);
+        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
         adaptTabContentBackgroundColor();
     }
@@ -382,13 +400,12 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    protected final ViewRecycler<Tab, Void> getTabViewRecycler() {
-        return tabViewRecycler;
+    protected final ViewRecycler<Tab, Void> getContentViewRecycler() {
+        return contentViewRecycler;
     }
 
-    @Override
-    protected final AttachedViewRecycler<TabItem, Void> getViewRecycler() {
-        return viewRecycler;
+    protected final AttachedViewRecycler<TabItem, Void> getTabViewRecycler() {
+        return tabViewRecycler;
     }
 
     @Override
@@ -460,14 +477,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         Tab selectedTab = getModel().getSelectedTab();
 
         if (selectedTab != null) {
-            Pair<View, ?> pair = tabViewRecycler.inflate(selectedTab, contentContainer);
-            View view = pair.first;
-            FrameLayout.LayoutParams layoutParams =
-                    new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(),
-                    getModel().getPaddingBottom());
-            contentContainer.addView(view, layoutParams);
+            inflateContent(selectedTab);
         }
     }
 
@@ -488,9 +498,15 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
-        if (previousIndex != index && selectedTab != null) {
-            viewRecycler.setComparator(
-                    Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
+        if (previousIndex != index) {
+            contentContainer.removeAllViews();
+            contentViewRecycler.removeAll();
+
+            if (selectedTab != null) {
+                tabViewRecycler.setComparator(
+                        Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
+                inflateContent(selectedTab);
+            }
         }
     }
 

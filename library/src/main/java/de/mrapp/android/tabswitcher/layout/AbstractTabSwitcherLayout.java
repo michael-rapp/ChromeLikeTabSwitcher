@@ -289,7 +289,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             TabItem tabItem = backingArray[index];
 
             if (tabItem == null) {
-                tabItem = TabItem.create(getModel(), getViewRecycler(), index);
+                tabItem = TabItem.create(getModel(), getTabViewRecycler(), index);
                 calculateAndClipStartPosition(tabItem, index > 0 ? getItem(index - 1) : null);
                 backingArray[index] = tabItem;
             }
@@ -427,15 +427,15 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        getTabViewRecycler().setAdapter(getModel().getChildRecyclerAdapter());
+        getContentViewRecycler().setAdapter(getModel().getChildRecyclerAdapter());
     }
 
     /**
      * Adapts the log level.
      */
     private void adaptLogLevel() {
-        getViewRecycler().setLogLevel(getModel().getLogLevel());
         getTabViewRecycler().setLogLevel(getModel().getLogLevel());
+        getContentViewRecycler().setLogLevel(getModel().getLogLevel());
     }
 
     /**
@@ -501,7 +501,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     private void calculatePositionsWhenDraggingToEnd(final float dragDistance) {
         firstVisibleIndex = -1;
         AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).create();
+                new TabItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).create();
         TabItem tabItem;
         boolean abort = false;
 
@@ -586,7 +586,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     private void calculatePositionsWhenDraggingToStart(final float dragDistance) {
         AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler())
+                new TabItemIterator.Builder(getTabSwitcher(), getTabViewRecycler())
                         .start(Math.max(0, firstVisibleIndex)).create();
         TabItem tabItem;
         boolean abort = false;
@@ -609,7 +609,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         if (firstVisibleIndex > 0) {
             int start = firstVisibleIndex - 1;
             iterator =
-                    new TabItemIterator.Builder(getTabSwitcher(), getViewRecycler()).reverse(true)
+                    new TabItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).reverse(true)
                             .start(start).create();
 
             while ((tabItem = iterator.next()) != null) {
@@ -948,7 +948,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     protected final void inflateOrRemoveView(@NonNull final TabItem tabItem) {
         if (tabItem.isInflated() && !tabItem.isVisible()) {
-            getViewRecycler().remove(tabItem);
+            getTabViewRecycler().remove(tabItem);
         } else if (tabItem.isVisible()) {
             if (!tabItem.isInflated()) {
                 inflateAndUpdateView(tabItem, null);
@@ -977,7 +977,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     protected final void inflateView(@NonNull final TabItem tabItem,
                                      @Nullable final OnGlobalLayoutListener listener,
                                      @NonNull final ViewRecyclerParamType... params) {
-        Pair<View, Boolean> pair = getViewRecycler().inflate(tabItem, params);
+        Pair<View, Boolean> pair = getTabViewRecycler().inflate(tabItem, params);
 
         if (listener != null) {
             boolean inflated = pair.second;
@@ -1087,7 +1087,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * as an instance of the class {@link ViewRecycler} or null, if the view recycler has not been
      * initialized yet
      */
-    protected abstract ViewRecycler<Tab, Void> getTabViewRecycler();
+    protected abstract ViewRecycler<Tab, Void> getContentViewRecycler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view
@@ -1097,7 +1097,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * tabs, as an instance of the class {@link AttachedViewRecycler} or null, if the view recycler
      * has not been initialized yet
      */
-    protected abstract AttachedViewRecycler<TabItem, ViewRecyclerParamType> getViewRecycler();
+    protected abstract AttachedViewRecycler<TabItem, ViewRecyclerParamType> getTabViewRecycler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to inflate and update the
@@ -1248,12 +1248,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         Pair<Integer, Float> result = null;
 
         if (getTabSwitcher().isSwitcherShown() && firstVisibleIndex != -1) {
-            TabItem tabItem = TabItem.create(getModel(), getViewRecycler(), firstVisibleIndex);
+            TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), firstVisibleIndex);
             result = Pair.create(firstVisibleIndex, tabItem.getTag().getPosition());
         }
 
-        getViewRecycler().removeAll();
-        getViewRecycler().clearCache();
+        getTabViewRecycler().removeAll();
+        getTabViewRecycler().clearCache();
         onDetachLayout(tabsOnly);
 
         if (!tabsOnly) {
