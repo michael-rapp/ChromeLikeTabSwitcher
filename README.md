@@ -48,6 +48,7 @@ The library's tab switcher is implemented as a custom view `TabSwitcher`. It can
         custom:layoutPolicy="auto"
         custom:tabIcon="@drawable/ic_file_outline_18dp"
         custom:tabBackgroundColor="@color/tab_background_color"
+        custom:tabContentBackgroundColor="@color/tab_content_background_color"
         custom:tabTitleTextColor="@color/tab_title_text_color"
         custom:tabCloseButtonIcon="@ic_close_18dp"
         custom:toolbarTitle="@string/tab_switcher_toolbar_title"
@@ -63,6 +64,7 @@ tabSwitcher.setBackground(ContextCompat.getColor(context, R.color.tab_switcher_b
 tabSwitcher.setLayoutPolicy(LayoutPolicy.AUTO);
 tabSwitcher.setTabIcon(R.drawable.ic_file_outline_18dp);
 tabSwitcher.setTabBackgroundColor(ContextCompat.getColor(context, R.color.tab_background_color);
+tabSwitcher.setTabContentBackgroundColor(ContextCompat.getColor(context, R.color.tab_content_background_color);
 tabSwitcher.setTabTitleTextColor(ContextCompat.getColor(context, R.color.tab_title_text_color);
 tabSwitcher.setTabCloseButtonIcon(R.drawable.ic_close_18dp);
 tabSwitcher.setToolbarTitle(context.getString(R.string.tab_switcher_toolbar_title));
