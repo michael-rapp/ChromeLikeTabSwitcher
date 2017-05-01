@@ -2741,7 +2741,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
     @Override
     protected final void updateView(@NonNull final TabItem tabItem) {
-        super.updateView(tabItem);
         View view = tabItem.getView();
         view.setAlpha(1f);
         view.setVisibility(View.VISIBLE);
@@ -2751,6 +2750,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         getArithmetics().setPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view, getArithmetics()
                 .getPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view,
                         AbstractDragHandler.DragState.NONE));
+        super.updateView(tabItem);
         getArithmetics().setRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
