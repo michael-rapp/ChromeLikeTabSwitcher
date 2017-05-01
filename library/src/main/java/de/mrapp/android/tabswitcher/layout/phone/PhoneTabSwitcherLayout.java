@@ -304,7 +304,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                              final float maxTabSpacing) {
         float ratio = Math.min(1,
                 predecessorPosition / calculateAttachedPosition(getTabSwitcher().getCount()));
-        float minTabSpacing = calculateMinTabSpacing(getTabSwitcher().getCount());
+        float minTabSpacing = calculateMinTabSpacing();
         return predecessorPosition - minTabSpacing - (ratio * (maxTabSpacing - minTabSpacing));
     }
 
@@ -321,9 +321,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Calculates and returns the maximum space between a specific tab and its predecessor. The
      * maximum space is greater for the currently selected tab.
      *
-     * @param count
-     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
-     *         Integer} value
      * @param tabItem
      *         The tab item, which corresponds to the tab, the maximum space should be returned for,
      *         as an instance of the class {@link TabItem} or null, if the default maximum space
@@ -331,11 +328,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * @return The maximum space between the given tab and its predecessor in pixels as a {@link
      * Float} value
      */
-    private float calculateMaxTabSpacing(final int count, @Nullable final TabItem tabItem) {
+    private float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
         float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
                 (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
                         getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
         float maxTabSpacing;
+        int count = getModel().getCount();
 
         if (count <= 2) {
             maxTabSpacing = totalSpace * 0.66f;
@@ -355,13 +353,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Calculates and returns the minimum space between two neighboring tabs.
      *
-     * @param count
-     *         The total number of tabs, which are contained by the tabs switcher, as an {@link
-     *         Integer} value
      * @return The minimum space between two neighboring tabs in pixels as a {@link Float} value
      */
-    private float calculateMinTabSpacing(final int count) {
-        return calculateMaxTabSpacing(count, null) * MIN_TAB_SPACING_RATIO;
+    private float calculateMinTabSpacing() {
+        return calculateMaxTabSpacing(null) * MIN_TAB_SPACING_RATIO;
     }
 
     /**
@@ -528,17 +523,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             boolean overshooting =
                     referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd();
             iterator = new InitialTabItemIterator(tabItems, false, 0);
-            float minTabSpacing = calculateMinTabSpacing(getModel().getCount());
-            float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
+            float minTabSpacing = calculateMinTabSpacing();
+            float defaultTabSpacing = calculateMaxTabSpacing(null);
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
-            float maxTabSpacing = calculateMaxTabSpacing(getModel().getCount(), selectedTabItem);
+            float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
             TabItem currentReferenceTabItem = iterator.getItem(referenceIndex);
 
             while ((tabItem = iterator.next()) != null &&
                     (overshooting || tabItem.getIndex() < referenceIndex)) {
-                float currentTabSpacing =
-                        calculateMaxTabSpacing(getModel().getCount(), currentReferenceTabItem);
+                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceTabItem);
                 TabItem predecessor = iterator.peek();
                 Pair<Float, State> pair;
 
@@ -1977,8 +1971,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                                  boolean attachedPositionChanged) {
         AbstractTabItemIterator iterator;
         TabItem tabItem;
-        float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
-        float minTabSpacing = calculateMinTabSpacing(getModel().getCount());
+        float defaultTabSpacing = calculateMaxTabSpacing(null);
+        float minTabSpacing = calculateMinTabSpacing();
         int referenceIndex = removedTabItem.getIndex();
         TabItem currentReferenceTabItem = removedTabItem;
         float referencePosition = removedTabItem.getTag().getPosition();
@@ -1999,14 +1993,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             int selectedTabIndex = getModel().getSelectedTabIndex();
             TabItem selectedTabItem =
                     TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
-            float maxTabSpacing = calculateMaxTabSpacing(getModel().getCount(), selectedTabItem);
+            float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
             iterator = new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
                     .start(removedTabItem.getIndex() - 1).reverse(true).create();
 
             while ((tabItem = iterator.next()) != null) {
                 TabItem predecessor = iterator.peek();
-                float currentTabSpacing =
-                        calculateMaxTabSpacing(getModel().getCount(), currentReferenceTabItem);
+                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceTabItem);
                 Pair<Float, State> pair;
 
                 if (tabItem.getIndex() == removedTabItem.getIndex() - 1) {
@@ -2073,7 +2066,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             while ((tabItem = iterator.next()) != null &&
                     tabItem.getIndex() < getModel().getCount() - 1) {
                 float position = calculateSuccessorPosition(previousPosition,
-                        calculateMaxTabSpacing(getModel().getCount(), tabItem));
+                        calculateMaxTabSpacing(tabItem));
                 Pair<Float, State> pair =
                         clipTabPosition(tabItem.getIndex(), position, previousTag.getState());
                 Tag tag = tabItem.getTag().clone();
@@ -2195,9 +2188,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         int selectedTabIndex = getModel().getSelectedTabIndex();
         TabItem selectedTabItem =
                 TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
-        float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
-        float maxTabSpacing = calculateMaxTabSpacing(getModel().getCount(), selectedTabItem);
-        float minTabSpacing = calculateMinTabSpacing(getModel().getCount());
+        float defaultTabSpacing = calculateMaxTabSpacing(null);
+        float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
+        float minTabSpacing = calculateMinTabSpacing();
         TabItem currentReferenceTabItem = referenceTabItem;
         int referenceIndex = referenceTabItem.getIndex();
         AbstractTabItemIterator.AbstractBuilder builder =
@@ -2214,8 +2207,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             while ((tabItem = iterator.next()) != null) {
                 TabItem predecessor = iterator.peek();
                 Pair<Float, State> pair;
-                float currentTabSpacing =
-                        calculateMaxTabSpacing(getModel().getCount(), iterationReferenceTabItem);
+                float currentTabSpacing = calculateMaxTabSpacing(iterationReferenceTabItem);
 
                 if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
                     State predecessorState =
@@ -2303,7 +2295,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             while ((tabItem = iterator.next()) != null &&
                     tabItem.getIndex() < getModel().getCount() - 1) {
                 float position = calculateSuccessorPosition(previousPosition,
-                        calculateMaxTabSpacing(getModel().getCount(), tabItem));
+                        calculateMaxTabSpacing(tabItem));
                 Pair<Float, State> pair =
                         clipTabPosition(tabItem.getIndex(), position, previousTag.getState());
                 Tag tag = tabItem.getTag().clone();
@@ -2373,7 +2365,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 float predecessorPosition = predecessor.getTag().getPosition();
                 float distance = predecessorPosition - pair.first;
 
-                if (distance > calculateMinTabSpacing(getModel().getCount())) {
+                if (distance > calculateMinTabSpacing()) {
                     float position = calculateSuccessorPosition(tabItem, predecessor);
                     pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
                 }
@@ -2834,21 +2826,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             TabItem lastTabItem = iterator.getItem(getTabSwitcher().getCount() - 1);
             TabItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);
             return Math.round(predecessor.getTag().getPosition()) >=
-                    Math.round(calculateMaxTabSpacing(getTabSwitcher().getCount(), lastTabItem));
+                    Math.round(calculateMaxTabSpacing(lastTabItem));
         }
     }
 
     @Override
     protected final float calculateMaxEndPosition(final int index) {
-        float defaultMaxTabSpacing = calculateMaxTabSpacing(getTabSwitcher().getCount(), null);
+        float defaultMaxTabSpacing = calculateMaxTabSpacing(null);
         int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
 
         if (selectedTabIndex > index) {
             AbstractTabItemIterator iterator =
                     new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
             TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
-            float selectedTabSpacing =
-                    calculateMaxTabSpacing(getTabSwitcher().getCount(), selectedTabItem);
+            float selectedTabSpacing = calculateMaxTabSpacing(selectedTabItem);
             return (getTabSwitcher().getCount() - 2 - index) * defaultMaxTabSpacing +
                     selectedTabSpacing;
         }
@@ -2860,7 +2851,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
                                                      @NonNull final TabItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        float maxTabSpacing = calculateMaxTabSpacing(getTabSwitcher().getCount(), tabItem);
+        float maxTabSpacing = calculateMaxTabSpacing(tabItem);
         return calculateSuccessorPosition(predecessorPosition, maxTabSpacing);
     }
 
@@ -2868,7 +2859,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
                                                        @NonNull final TabItem successor) {
         float successorPosition = successor.getTag().getPosition();
-        return successorPosition + calculateMaxTabSpacing(getTabSwitcher().getCount(), successor);
+        return successorPosition + calculateMaxTabSpacing(successor);
     }
 
     @Nullable
