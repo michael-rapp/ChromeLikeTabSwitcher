@@ -15,11 +15,11 @@ License.
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="TabSwitcher">
+    <style name="TabSwitcher" parent="@style/ThemeOverlay.AppCompat.Dark">
         <item name="tabTitleTextColor">@color/tab_title_text_color_dark</item>
     </style>
 
-    <style name="TabSwitcher.Light">
+    <style name="TabSwitcher.Light" parent="@style/ThemeOverlay.AppCompat.Light">
         <item name="tabTitleTextColor">@color/tab_title_text_color_light</item>
     </style>
 
