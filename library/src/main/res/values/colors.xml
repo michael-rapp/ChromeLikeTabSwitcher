@@ -16,19 +16,26 @@ License.
 <resources>
 
     <!-- Common -->
-    <color name="tab_title_text_color">#a8000000</color>
+    <color name="tab_title_text_color_light">#a8000000</color>
+    <color name="tab_title_text_color_dark">@android:color/white</color>
 
     <!-- Phone layout -->
-    <color name="phone_tab_background_color">#fff2f2f2</color>
-    <color name="phone_tab_background_color_selected">#fff2f2f2</color>
     <color name="phone_tab_switcher_background_color">#ff14181c</color>
-    <color name="phone_tab_content_background_color">#fffafafa</color>
+    <color name="phone_tab_background_color_light">#fff2f2f2</color>
+    <color name="phone_tab_background_color_light_selected">#fff2f2f2</color>
+    <color name="phone_tab_background_color_dark">#ff505050</color>
+    <color name="phone_tab_background_color_dark_selected">#ff505050</color>
+    <color name="phone_tab_content_background_color_light">#fffafafa</color>
+    <color name="phone_tab_content_background_color_dark">#ff232323</color>
 
     <!-- Tablet layout -->
-    <color name="tablet_tab_background_color">#ffdadada</color>
-    <color name="tablet_tab_background_color_selected">#fff2f2f2</color>
     <color name="tablet_tab_switcher_background_color">@android:color/black</color>
+    <color name="tablet_tab_background_color_light">#ffdadada</color>
+    <color name="tablet_tab_background_color_light_selected">#fff2f2f2</color>
+    <color name="tablet_tab_background_color_dark">#ff3c3c3c</color>
+    <color name="tablet_tab_background_color_dark_selected">#ff505050</color>
+    <color name="tablet_tab_content_background_color_light">#fff2f2f2</color>
+    <color name="tablet_tab_content_background_color_dark">#ff505050</color>
     <color name="tablet_tab_border_color">#ffaeaeae</color>
-    <color name="tablet_tab_content_background_color">#fff2f2f2</color>
 
 </resources>

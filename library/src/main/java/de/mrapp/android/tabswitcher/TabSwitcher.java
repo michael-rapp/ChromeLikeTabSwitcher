@@ -373,7 +373,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     private void obtainTabContentBackgroundColor(@NonNull final TypedArray typedArray) {
         setTabContentBackgroundColor(
-                typedArray.getColor(R.styleable.TabSwitcher_tab_content_background_color, -1));
+                typedArray.getColor(R.styleable.TabSwitcher_tabContentBackgroundColor, -1));
     }
 
     /**

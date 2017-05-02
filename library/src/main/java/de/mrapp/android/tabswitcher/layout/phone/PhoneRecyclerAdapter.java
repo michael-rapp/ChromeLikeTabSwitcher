@@ -221,9 +221,9 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherModel model,
                                 @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
-        super(tabSwitcher, model, R.color.phone_tab_background_color,
-                R.color.phone_tab_background_color_selected,
-                R.drawable.phone_tab_close_button_icon);
+        super(tabSwitcher, model, R.color.phone_tab_background_color_light,
+                R.color.phone_tab_background_color_light_selected,
+                R.drawable.phone_tab_close_button_icon_light);
         ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler);
@@ -234,7 +234,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
         this.tabContentBackgroundColor = ContextCompat
-                .getColor(tabSwitcher.getContext(), R.color.phone_tab_content_background_color);
+                .getColor(tabSwitcher.getContext(), R.color.phone_tab_content_background_color_light);
         adaptLogLevel();
     }
 

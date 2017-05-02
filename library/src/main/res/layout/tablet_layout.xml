@@ -45,6 +45,7 @@ License.
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         <View
+            android:id="@+id/border_view"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_gravity="bottom"
@@ -62,6 +63,6 @@ License.
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/phone_tab_content_background_color"/>
+        android:background="@color/phone_tab_content_background_color_light"/>
 
 </LinearLayout>

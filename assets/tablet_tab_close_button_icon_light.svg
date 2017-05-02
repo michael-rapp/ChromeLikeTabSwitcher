@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    id="svg2"
+    version="1.1"
+    inkscape:version="0.92.1 r"
+    sodipodi:docname="tablet_tab_close_button_icon.svg"
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tablet_tab_close_button_icon.png"
+    inkscape:export-xdpi="384"
+    inkscape:export-ydpi="384">
+  <metadata
+     id="metadata12">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs10" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1052"
+     id="namedview8"
+     showgrid="false"
+     inkscape:zoom="52.444444"
+     inkscape:cx="2.6935051"
+     inkscape:cy="9.2319557"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <path
+     d="M0 0h18v18h-18zm0 0h18v18h-18z"
+     fill="none"
+     id="path4" />
+  <path
+     d="M14.53 4.53l-1.06-1.06-4.47 4.47-4.47-4.47-1.06 1.06 4.47 4.47-4.47 4.47 1.06 1.06 4.47-4.47 4.47 4.47 1.06-1.06-4.47-4.47z"
+     id="path6"
+     style="fill:#808080;fill-opacity:1" />
+</svg>

@@ -13,7 +13,10 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -132,6 +135,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     private final int tabOffset;
 
     /**
+     * The default background color of a tab, when it is selected.
+     */
+    private final int tabBackgroundColorSelected;
+
+    /**
      * The default background color of a tab's content.
      */
     private final int tabContentBackgroundColor;
@@ -172,6 +180,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     private ViewGroup tabContainer;
 
     /**
+     * The view, which is used to display a border below the tab switcher's tabs.
+     */
+    private View borderView;
+
+    /**
      * The view group, which contains the children of the tab switcher's tabs.
      */
     private ViewGroup contentContainer;
@@ -192,6 +205,30 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                 (FrameLayout.LayoutParams) secondaryToolbar.getLayoutParams();
         secondaryToolbarLayoutParams
                 .setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(), 0);
+    }
+
+    /**
+     * Adapts the color of the border, which is shown below the tab switcher's tabs.
+     */
+    private void adaptBorderColor() {
+        Tab selectedTab = getModel().getSelectedTab();
+        int color;
+        ColorStateList colorStateList =
+                selectedTab != null ? selectedTab.getBackgroundColor() : null;
+
+        if (colorStateList == null) {
+            colorStateList = getModel().getTabBackgroundColor();
+        }
+
+        if (colorStateList != null) {
+            int[] stateSet = new int[]{android.R.attr.state_selected};
+            color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
+        } else {
+            color = tabBackgroundColorSelected;
+        }
+
+        Drawable background = borderView.getBackground();
+        background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 
     /**
@@ -388,8 +425,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
         minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
-        tabContentBackgroundColor =
-                ContextCompat.getColor(getContext(), R.color.tablet_tab_content_background_color);
+        tabBackgroundColorSelected = ContextCompat
+                .getColor(getContext(), R.color.tablet_tab_background_color_light_selected);
+        tabContentBackgroundColor = ContextCompat
+                .getColor(getContext(), R.color.tablet_tab_content_background_color_light);
     }
 
     @Override
@@ -403,6 +442,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         primaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
         secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
+        borderView = getTabSwitcher().findViewById(R.id.border_view);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
         contentViewRecycler = new ViewRecycler<>(inflater);
         recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel());
@@ -413,6 +453,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         recyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
+        adaptBorderColor();
         adaptTabContentBackgroundColor();
     }
 
@@ -653,6 +694,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
+    public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+        adaptBorderColor();
+    }
+
+    @Override
     public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
         adaptTabContentBackgroundColor();
     }
@@ -679,7 +725,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
 
     @Override
     public final void onBackgroundColorChanged(@NonNull final Tab tab) {
-
+        if (getModel().getSelectedTab() == tab) {
+            adaptBorderColor();
+        }
     }
 
     @Override

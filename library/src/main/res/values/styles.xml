@@ -13,14 +13,47 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 implied. See the License for the specific language governing permissions and limitations under the
 License.
 -->
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="TabSwitcher"/>
+
+    <style name="TabSwitcher.Phone" parent="@style/TabSwitcher">
+        <item name="tabBackgroundColor">@color/phone_tab_background_color_dark</item>
+        <item name="tabTitleTextColor">@color/tab_title_text_color_dark</item>
+        <item name="tabCloseButtonIcon">@drawable/phone_tab_close_button_icon_dark</item>
+        <item name="tabContentBackgroundColor">@color/phone_tab_content_background_color_dark</item>
+    </style>
+
+    <style name="TabSwitcher.Phone.Light" parent="@style/TabSwitcher">
+        <item name="tabBackgroundColor">@color/phone_tab_background_color_light</item>
+        <item name="tabTitleTextColor">@color/tab_title_text_color_light</item>
+        <item name="tabCloseButtonIcon">@drawable/phone_tab_close_button_icon_light</item>
+        <item name="tabContentBackgroundColor">@color/phone_tab_content_background_color_light
+        </item>
+    </style>
+
+    <style name="TabSwitcher.Tablet" parent="@style/TabSwitcher">
+        <item name="tabBackgroundColor">@color/tablet_tab_background_dark</item>
+        <item name="tabTitleTextColor">@color/tab_title_text_color_dark</item>
+        <item name="tabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_dark</item>
+        <item name="tabContentBackgroundColor">@color/tablet_tab_content_background_color_dark
+        </item>
+    </style>
+
+    <style name="TabSwitcher.Tablet.Light" parent="@style/TabSwitcher">
+        <item name="tabBackgroundColor">@color/tablet_tab_background_light</item>
+        <item name="tabTitleTextColor">@color/tab_title_text_color_light</item>
+        <item name="tabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_light</item>
+        <item name="tabContentBackgroundColor">@color/tablet_tab_content_background_color_light
+        </item>
+    </style>
 
     <style name="Tab.Title.Base" parent="@style/TextAppearance.AppCompat.Small">
         <item name="android:ellipsize">none</item>
         <item name="android:singleLine">true</item>
         <item name="android:requiresFadingEdge">horizontal</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/tab_title_text_color</item>
+        <item name="android:textColor">@color/tab_title_text_color_light</item>
     </style>
 
     <style name="Tab.Title.Phone" parent="@style/Tab.Title.Base">

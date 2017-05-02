@@ -56,9 +56,9 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
      */
     public TabletRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                  @NonNull final TabSwitcherModel model) {
-        super(tabSwitcher, model, R.color.tablet_tab_background_color,
-                R.color.tablet_tab_background_color_selected,
-                R.drawable.tablet_tab_close_button_icon);
+        super(tabSwitcher, model, R.color.tablet_tab_background_light,
+                R.color.tablet_tab_background_color_light_selected,
+                R.drawable.tablet_tab_close_button_icon_light);
     }
 
     @NonNull

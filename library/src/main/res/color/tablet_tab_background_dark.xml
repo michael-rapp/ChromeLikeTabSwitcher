@@ -13,11 +13,9 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 implied. See the License for the specific language governing permissions and limitations under the
 License.
 -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Tab.Title.Phone" parent="@style/Tab.Title.Base">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:drawablePadding">@dimen/phone_tab_title_drawable_padding</item>
-    </style>
+    <item android:color="@color/tablet_tab_background_color_dark_selected" android:state_selected="true"/>
+    <item android:color="@color/tablet_tab_background_color_dark"/>
 
-</resources>
+</selector>

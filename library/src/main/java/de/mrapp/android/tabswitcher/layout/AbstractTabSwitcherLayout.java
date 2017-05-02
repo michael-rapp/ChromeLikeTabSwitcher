@@ -1296,7 +1296,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     @Override
-    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+    public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
 
     }
 

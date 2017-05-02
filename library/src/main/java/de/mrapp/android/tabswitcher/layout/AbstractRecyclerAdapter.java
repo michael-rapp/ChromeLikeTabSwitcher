@@ -447,7 +447,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.tabTitleTextColor =
-                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color);
+                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color_light);
         this.tabBackgroundColor =
                 ContextCompat.getColor(tabSwitcher.getContext(), tabBackgroundColorId);
         this.tabBackgroundColorSelected =

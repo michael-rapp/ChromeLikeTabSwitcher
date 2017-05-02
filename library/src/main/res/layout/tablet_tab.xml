@@ -38,6 +38,6 @@ License.
         android:layout_gravity="center_vertical"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
-        android:src="@drawable/tablet_tab_close_button_icon"/>
+        android:src="@drawable/tablet_tab_close_button_icon_light"/>
 
 </LinearLayout>
