@@ -41,6 +41,11 @@ public class ThemeHelper {
     private final Context context;
 
     /**
+     * The resource id of the theme, which is used regardless of the used layout.
+     */
+    private final int globalTheme;
+
+    /**
      * The resource id of the theme, which is used, when using the smartphone layout.
      */
     private final int phoneTheme;
@@ -62,6 +67,10 @@ public class ThemeHelper {
      */
     private int obtainThemeFromXmlAttributes(@NonNull final Layout layout) {
         int themeResourceId = layout == Layout.TABLET ? tabletTheme : phoneTheme;
+
+        if (themeResourceId == 0) {
+            themeResourceId = globalTheme;
+        }
 
         if (themeResourceId != 0) {
             int resourceId = layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone;
@@ -109,17 +118,21 @@ public class ThemeHelper {
      * @param context
      *         The context, which is used by the tab switcher, as an instance of the class {@link
      *         Context}. The context may not be null
+     * @param globalTheme
+     *         The resource id of the theme, which should be used regardless of the used layout, as
+     *         an {@link Integer} value or 0, if the theme is not specified
      * @param phoneTheme
-     *         The resource id of the theme, which is used, when using the smartphone layout, as an
-     *         {@link Integer} value or 0, if the theme is not specified
+     *         The resource id of the theme, which should be used, when using the smartphone layout,
+     *         as an {@link Integer} value or 0, if the theme is not specified
      * @param tabletTheme
-     *         The resource id of the theme, which is used, when using the tablet layout, as an
-     *         {@link Integer} value or 0, if the theme is not specified
+     *         The resource id of the theme, which should be used, when using the tablet layout, as
+     *         an {@link Integer} value or 0, if the theme is not specified
      */
-    public ThemeHelper(@NonNull final Context context, final int phoneTheme,
+    public ThemeHelper(@NonNull final Context context, final int globalTheme, final int phoneTheme,
                        final int tabletTheme) {
         ensureNotNull(context, "The context may not be null");
         this.context = context;
+        this.globalTheme = globalTheme;
         this.phoneTheme = phoneTheme;
         this.tabletTheme = tabletTheme;
     }

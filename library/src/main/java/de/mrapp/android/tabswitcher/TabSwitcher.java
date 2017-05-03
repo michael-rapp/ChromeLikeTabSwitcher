@@ -299,9 +299,10 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
             obtainToolbarMenu(typedArray);
+            int globalTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeGlobal, 0);
             int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
             int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
-            themeHelper = new ThemeHelper(getContext(), phoneTheme, tabletTheme);
+            themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
         } finally {
             typedArray.recycle();
         }
