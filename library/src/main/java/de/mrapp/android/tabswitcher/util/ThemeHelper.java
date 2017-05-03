@@ -16,7 +16,6 @@ package de.mrapp.android.tabswitcher.util;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
@@ -81,30 +80,10 @@ public class ThemeHelper {
      * Integer} value
      */
     private int obtainGlobalTheme(@NonNull final Layout layout) {
-        int themeResourceId = obtainGlobalTheme();
-        int[] attrs = new int[]{layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone};
-        int defaultValue = layout == Layout.TABLET ? R.style.TabSwitcher_Tablet_Light :
-                R.style.TabSwitcher_Phone_Light;
-        TypedArray typedArray = context.getTheme().obtainStyledAttributes(themeResourceId, attrs);
-        int resourceId = typedArray.getResourceId(0, defaultValue);
-        typedArray.recycle();
-        return resourceId;
-    }
-
-    /**
-     * Returns the resource id of the theme, which is used by the tab switcher. The theme
-     * is obtained from the context's theme attributes according to the attribute
-     * <code>tabSwitcherTheme</code>.
-     *
-     * @return The resource id of the theme, which is used when using the given layout, as an {@link
-     * Integer} value
-     */
-    private int obtainGlobalTheme() {
-        TypedArray typedArray =
-                context.getTheme().obtainStyledAttributes(new int[]{R.attr.tabSwitcherTheme});
-        int resourceId = typedArray.getResourceId(0, R.style.TabSwitcher_Light);
-        typedArray.recycle();
-        return resourceId;
+        // TODO Remove -1 parameter after updating AndroidUtil library
+        int themeResourceId = ThemeUtil.getResourceId(context, -1, R.attr.tabSwitcherTheme);
+        int resourceId = layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone;
+        return ThemeUtil.getResourceId(context, themeResourceId, resourceId);
     }
 
     /**
