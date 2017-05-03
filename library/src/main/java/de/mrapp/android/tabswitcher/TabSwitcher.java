@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -443,6 +444,15 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
         Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
+
+        if (icon == null) {
+            try {
+                icon = themeHelper
+                        .getDrawable(getLayout(), R.attr.tabSwitcherToolbarNavigationIcon);
+            } catch (NotFoundException e) {
+                icon = null;
+            }
+        }
 
         if (icon != null) {
             setToolbarNavigationIcon(icon, null);
