@@ -30,6 +30,8 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.TextUtils;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -1030,10 +1032,14 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     /**
      * The method, which is invoked on implementing subclasses in order to inflate the layout.
      *
+     * @param inflater
+     *         The layout inflater, which should be used, as an instance of the class {@link
+     *         LayoutInflater}. The layout inflater may not be null
      * @param tabsOnly
      *         True, if only the tabs should be inflated, false otherwise
      */
-    protected abstract void onInflateLayout(final boolean tabsOnly);
+    protected abstract void onInflateLayout(@NonNull final LayoutInflater inflater,
+                                            final boolean tabsOnly);
 
     /**
      * The method, which is invoked on implementing subclasses in order to detach the layout.
@@ -1224,7 +1230,10 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *         True, if only the tabs should be inflated, false otherwise
      */
     public final void inflateLayout(final boolean tabsOnly) {
-        onInflateLayout(tabsOnly);
+        int themeResourceId = getThemeHelper().getThemeResourceId(tabSwitcher.getLayout());
+        LayoutInflater inflater =
+                LayoutInflater.from(new ContextThemeWrapper(getContext(), themeResourceId));
+        onInflateLayout(inflater, tabsOnly);
         adaptDecorator();
         adaptLogLevel();
 

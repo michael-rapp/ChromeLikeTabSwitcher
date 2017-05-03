@@ -138,6 +138,25 @@ public class ThemeHelper {
     }
 
     /**
+     * Returns the resource id of the theme, which is used when using a specific layout.
+     *
+     * @param layout
+     *         The layout as a value of the enum {@link Layout}. The layout may not be null
+     * @return The resource id of the theme as an {@link Integer} value
+     */
+    public final int getThemeResourceId(@NonNull final Layout layout) {
+        int themeResourceId;
+
+        try {
+            themeResourceId = obtainThemeFromXmlAttributes(layout);
+        } catch (NotFoundException e) {
+            themeResourceId = obtainThemeFromThemeAttributes(layout);
+        }
+
+        return themeResourceId;
+    }
+
+    /**
      * Returns the color, which corresponds to a specific theme attribute, regarding the theme,
      * which is used when using a specific layout.
      *

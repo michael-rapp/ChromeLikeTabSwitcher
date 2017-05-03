@@ -2681,9 +2681,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final void onInflateLayout(final boolean tabsOnly) {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
+    protected final void onInflateLayout(@NonNull final LayoutInflater inflater,
+                                         final boolean tabsOnly) {
         if (tabsOnly) {
             toolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
             tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);

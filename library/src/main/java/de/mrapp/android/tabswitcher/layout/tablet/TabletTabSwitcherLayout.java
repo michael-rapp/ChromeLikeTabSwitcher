@@ -438,9 +438,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    protected final void onInflateLayout(final boolean tabsOnly) {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
+    protected final void onInflateLayout(@NonNull final LayoutInflater inflater,
+                                         final boolean tabsOnly) {
         if (!tabsOnly) {
             inflater.inflate(R.layout.tablet_layout, getTabSwitcher(), true);
         }
