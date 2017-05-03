@@ -18,6 +18,7 @@ License.
     <attr name="tabSwitcherThemeGlobal" format="reference"/>
     <attr name="tabSwitcherThemePhone" format="reference"/>
     <attr name="tabSwitcherThemeTablet" format="reference"/>
+    <attr name="tabSwitcherTabIcon" format="reference"/>
     <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabBackgroundColor" format="color"/>
     <attr name="tabSwitcherTabContentBackgroundColor" format="color"/>

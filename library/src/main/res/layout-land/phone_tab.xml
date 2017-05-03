@@ -38,9 +38,10 @@ License.
             android:id="@+id/tab_title_text_view"
             style="@style/Tab.Title.Phone"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:paddingLeft="@dimen/phone_tab_title_padding"
             android:paddingRight="@dimen/phone_tab_title_padding"/>
 

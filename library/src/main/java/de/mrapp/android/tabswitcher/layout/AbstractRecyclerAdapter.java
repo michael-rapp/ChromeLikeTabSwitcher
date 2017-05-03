@@ -120,9 +120,16 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         Tab tab = tabItem.getTab();
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         Drawable icon = tab.getIcon(model.getContext());
-        viewHolder.titleTextView
-                .setCompoundDrawablesWithIntrinsicBounds(icon != null ? icon : model.getTabIcon(),
-                        null, null, null);
+
+        if (icon == null) {
+            icon = model.getTabIcon();
+
+            if (icon == null) {
+                icon = getThemeHelper().getDrawable(getLayout(), R.attr.tabSwitcherTabIcon);
+            }
+        }
+
+        viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
     }
 
     /**
