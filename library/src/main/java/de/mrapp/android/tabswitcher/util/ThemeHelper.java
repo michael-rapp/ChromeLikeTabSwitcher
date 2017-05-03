@@ -60,14 +60,14 @@ public class ThemeHelper {
      * @return The resource id of the theme, which is used when using the given layout, as an {@link
      * Integer} value
      */
-    private int obtainLocalTheme(@NonNull final Layout layout) {
-        int resourceId = layout == Layout.TABLET ? tabletTheme : phoneTheme;
+    private int obtainThemeFromXmlAttributes(@NonNull final Layout layout) {
+        int themeResourceId = layout == Layout.TABLET ? tabletTheme : phoneTheme;
 
-        if (resourceId == 0) {
+        if (themeResourceId == 0) {
             throw new NotFoundException();
         }
 
-        return resourceId;
+        return themeResourceId;
     }
 
     /**
@@ -79,10 +79,21 @@ public class ThemeHelper {
      * @return The resource id of the theme, which is used when using the given layout, as an {@link
      * Integer} value
      */
-    private int obtainGlobalTheme(@NonNull final Layout layout) {
+    private int obtainThemeFromThemeAttributes(@NonNull final Layout layout) {
+        int resourceId = layout == Layout.TABLET ? R.attr.tabSwitcherThemeTablet :
+                R.attr.tabSwitcherThemePhone;
         // TODO Remove -1 parameter after updating AndroidUtil library
-        int themeResourceId = ThemeUtil.getResourceId(context, -1, R.attr.tabSwitcherTheme);
-        int resourceId = layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone;
+        int themeResourceId = ThemeUtil.getResourceId(context, -1, resourceId);
+
+        if (themeResourceId == 0) {
+            themeResourceId = ThemeUtil.getResourceId(context, -1, R.attr.tabSwitcherTheme);
+
+            if (themeResourceId == 0) {
+                themeResourceId = R.style.TabSwitcher_Light;
+            }
+        }
+
+        resourceId = layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone;
         return ThemeUtil.getResourceId(context, themeResourceId, resourceId);
     }
 
@@ -127,9 +138,9 @@ public class ThemeHelper {
             int themeResourceId;
 
             try {
-                themeResourceId = obtainLocalTheme(layout);
+                themeResourceId = obtainThemeFromXmlAttributes(layout);
             } catch (NotFoundException e2) {
-                themeResourceId = obtainGlobalTheme(layout);
+                themeResourceId = obtainThemeFromThemeAttributes(layout);
             }
 
             return ThemeUtil.getColor(context, themeResourceId, resourceId);
@@ -157,9 +168,9 @@ public class ThemeHelper {
             int themeResourceId;
 
             try {
-                themeResourceId = obtainLocalTheme(layout);
+                themeResourceId = obtainThemeFromXmlAttributes(layout);
             } catch (NotFoundException e2) {
-                themeResourceId = obtainGlobalTheme(layout);
+                themeResourceId = obtainThemeFromThemeAttributes(layout);
             }
 
             return ThemeUtil.getColorStateList(context, themeResourceId, resourceId);
@@ -185,9 +196,9 @@ public class ThemeHelper {
             int themeResourceId;
 
             try {
-                themeResourceId = obtainLocalTheme(layout);
+                themeResourceId = obtainThemeFromXmlAttributes(layout);
             } catch (NotFoundException e2) {
-                themeResourceId = obtainGlobalTheme(layout);
+                themeResourceId = obtainThemeFromThemeAttributes(layout);
             }
 
             return ThemeUtil.getDrawable(context, themeResourceId, resourceId);
