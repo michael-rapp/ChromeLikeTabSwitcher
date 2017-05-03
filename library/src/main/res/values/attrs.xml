@@ -19,10 +19,11 @@ License.
     <attr name="tabSwitcherThemePhone" format="reference"/>
     <attr name="tabSwitcherThemeTablet" format="reference"/>
     <attr name="tabSwitcherTabIcon" format="reference"/>
-    <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabBackgroundColor" format="color"/>
     <attr name="tabSwitcherTabContentBackgroundColor" format="color"/>
+    <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabCloseButtonIcon" format="reference"/>
+    <attr name="tabSwitcherToolbarTitle" format="string"/>
 
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>

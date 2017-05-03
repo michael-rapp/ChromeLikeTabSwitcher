@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -406,7 +407,14 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         Toolbar[] toolbars = getToolbars();
 
         if (toolbars != null) {
-            toolbars[0].setTitle(getModel().getToolbarTitle());
+            CharSequence title = getModel().getToolbarTitle();
+
+            if (TextUtils.isEmpty(title)) {
+                title = getThemeHelper()
+                        .getText(getTabSwitcher().getLayout(), R.attr.tabSwitcherToolbarTitle);
+            }
+
+            toolbars[0].setTitle(title);
         }
     }
 
