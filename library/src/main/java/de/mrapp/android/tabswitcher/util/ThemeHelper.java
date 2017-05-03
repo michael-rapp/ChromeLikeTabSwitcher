@@ -100,7 +100,7 @@ public class ThemeHelper {
         int themeResourceId = ThemeUtil.getResourceId(context, -1, resourceId);
 
         if (themeResourceId == 0) {
-            themeResourceId = ThemeUtil.getResourceId(context, -1, R.attr.tabSwitcherTheme);
+            themeResourceId = ThemeUtil.getResourceId(context, -1, R.attr.tabSwitcherThemeGlobal);
 
             if (themeResourceId == 0) {
                 themeResourceId = R.style.TabSwitcher_Light;
