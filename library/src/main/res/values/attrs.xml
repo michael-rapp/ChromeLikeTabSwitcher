@@ -15,6 +15,12 @@ License.
 -->
 <resources>
 
+    <attr name="tabSwitcherTheme" format="reference"/>
+    <attr name="tabSwitcherTabTitleTextColor" format="color"/>
+    <attr name="tabSwitcherTabBackgroundColor" format="color"/>
+    <attr name="tabSwitcherTabContentBackgroundColor" format="color"/>
+    <attr name="tabSwitcherTabCloseButtonIcon" format="reference"/>
+
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>
         <attr name="layoutPolicy" format="enum">
@@ -31,6 +37,8 @@ License.
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
+        <attr name="themePhone" format="reference"/>
+        <attr name="themeTablet" format="reference"/>
     </declare-styleable>
 
 </resources>

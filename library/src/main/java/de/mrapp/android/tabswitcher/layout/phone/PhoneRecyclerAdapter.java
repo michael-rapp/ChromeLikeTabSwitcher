@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
@@ -38,6 +39,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
@@ -214,16 +216,19 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      * @param tabViewRecycler
      *         The view recycler, which allows to inflate the views, which are associated with tabs,
      *         as an instance of the class ViewRecycler. The view recycler may not be null
      */
     public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                 @NonNull final TabSwitcherModel model,
+                                @NonNull final ThemeHelper themeHelper,
                                 @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
-        super(tabSwitcher, model, R.color.phone_tab_background_color_light,
-                R.color.phone_tab_background_color_light_selected,
-                R.drawable.phone_tab_close_button_icon_light);
+        super(tabSwitcher, model, themeHelper);
         ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler);
@@ -233,8 +238,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        this.tabContentBackgroundColor = ContextCompat
-                .getColor(tabSwitcher.getContext(), R.color.phone_tab_content_background_color_light);
+        this.tabContentBackgroundColor =
+                getThemeHelper().getColor(getLayout(), R.attr.tabSwitcherTabContentBackgroundColor);
         adaptLogLevel();
     }
 
@@ -305,6 +310,12 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     @Override
     protected final AbstractTabViewHolder onCreateViewHolder() {
         return new PhoneTabViewHolder();
+    }
+
+    @NonNull
+    @Override
+    protected final Layout getLayout() {
+        return Layout.PHONE_PORTRAIT;
     }
 
     @Override

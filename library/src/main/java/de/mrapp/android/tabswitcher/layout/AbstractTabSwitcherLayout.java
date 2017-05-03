@@ -48,6 +48,7 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
@@ -341,6 +342,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * The arithmetics, which are used by the layout.
      */
     private final Arithmetics arithmetics;
+
+    /**
+     * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
+     */
+    private final ThemeHelper themeHelper;
 
     /**
      * The threshold, which must be reached until tabs are dragged, in pixels.
@@ -732,6 +738,18 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Returns the theme helper, which allows to retrieve resources, depending on the tab switcher's
+     * theme.
+     *
+     * @return The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     * theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be null
+     */
+    @NonNull
+    protected final ThemeHelper getThemeHelper() {
+        return themeHelper;
+    }
+
+    /**
      * Returns the threshold, which must be reached until tabs are dragged.
      *
      * @return The threshold, which must be reached until tabs are dragged, in pixels as an {@link
@@ -969,16 +987,23 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the type
      *         {@link Arithmetics}. The arithmetics may not be null
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      */
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final TabSwitcherModel model,
-                                     @NonNull final Arithmetics arithmetics) {
+                                     @NonNull final Arithmetics arithmetics,
+                                     @NonNull final ThemeHelper themeHelper) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
+        ensureNotNull(themeHelper, "The theme helper may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
+        this.themeHelper = themeHelper;
         Resources resources = tabSwitcher.getResources();
         this.dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);

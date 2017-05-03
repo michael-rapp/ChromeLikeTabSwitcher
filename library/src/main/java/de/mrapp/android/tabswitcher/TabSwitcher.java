@@ -62,6 +62,7 @@ import de.mrapp.android.tabswitcher.layout.tablet.TabletArithmetics;
 import de.mrapp.android.tabswitcher.layout.tablet.TabletTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.DeviceType;
 import de.mrapp.android.util.DisplayUtil.Orientation;
@@ -185,6 +186,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private TabSwitcherModel model;
 
     /**
+     * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
+     */
+    private ThemeHelper themeHelper;
+
+    /**
      * The layout, which is used by the tab switcher, depending on whether the device is a
      * smartphone or tablet and the set layout policy.
      */
@@ -212,11 +218,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         listeners = new LinkedHashSet<>();
         model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
-        getViewTreeObserver().addOnGlobalLayoutListener(
-                new LayoutListenerWrapper(this, createGlobalLayoutListener(false)));
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new LayoutListenerWrapper(this, createGlobalLayoutListener(false)));
     }
 
     /**
@@ -230,11 +236,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     private void initializeLayout(@NonNull final Layout layout, final boolean inflatedTabsOnly) {
         if (layout == Layout.TABLET) {
-            TabletArithmetics arithmetics = new TabletArithmetics(TabSwitcher.this);
-            this.layout = new TabletTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
+            this.layout = new TabletTabSwitcherLayout(TabSwitcher.this, model,
+                    new TabletArithmetics(TabSwitcher.this), themeHelper);
         } else {
-            PhoneArithmetics arithmetics = new PhoneArithmetics(TabSwitcher.this);
-            this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model, arithmetics);
+            this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model,
+                    new PhoneArithmetics(TabSwitcher.this), themeHelper);
         }
 
         this.layout.setCallback(createLayoutCallback());
@@ -293,6 +299,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
             obtainToolbarMenu(typedArray);
+            int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
+            int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
+            themeHelper = new ThemeHelper(getContext(), phoneTheme, tabletTheme);
         } finally {
             typedArray.recycle();
         }

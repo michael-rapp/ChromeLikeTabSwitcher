@@ -20,6 +20,7 @@ License.
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="tabSwitcherTheme">@style/TabSwitcher</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="@style/AppTheme"/>

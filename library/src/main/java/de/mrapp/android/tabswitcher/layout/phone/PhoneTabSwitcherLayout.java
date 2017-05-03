@@ -60,6 +60,7 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -2635,11 +2636,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the class
      *         {@link PhoneArithmetics}. The arithmetics may not be null
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      */
     public PhoneTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                   @NonNull final TabSwitcherModel model,
-                                  @NonNull final PhoneArithmetics arithmetics) {
-        super(tabSwitcher, model, arithmetics);
+                                  @NonNull final PhoneArithmetics arithmetics,
+                                  @NonNull final ThemeHelper themeHelper) {
+        super(tabSwitcher, model, arithmetics, themeHelper);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
@@ -2692,8 +2698,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         }
 
         contentViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter =
-                new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), contentViewRecycler);
+        recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
+                contentViewRecycler);
         getModel().addListener(recyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));

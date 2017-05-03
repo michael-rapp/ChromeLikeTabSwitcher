@@ -19,12 +19,9 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +30,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
@@ -43,6 +41,7 @@ import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -72,25 +71,25 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      */
     private final TabSwitcherModel model;
 
+    /*
+     * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
+     */
+    private final ThemeHelper themeHelper;
+
     /**
      * The default text color of a tab's title.
      */
-    private final int tabTitleTextColor;
+    private final ColorStateList tabTitleTextColor;
 
     /**
      * The default background color of tabs.
      */
-    private final int tabBackgroundColor;
+    private final ColorStateList tabBackgroundColor;
 
     /**
-     * The default background color of tabs, when selected.
+     * The default icon of a tab's close button.
      */
-    private final int tabBackgroundColorSelected;
-
-    /**
-     * The resource id of the default icon of a tab's close button.
-     */
-    private final int closeButtonIconId;
+    private final Drawable closeButtonIcon;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -158,11 +157,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
             icon = model.getTabCloseButtonIcon();
         }
 
-        if (icon != null) {
-            viewHolder.closeButton.setImageDrawable(icon);
-        } else {
-            viewHolder.closeButton.setImageResource(closeButtonIconId);
-        }
+        viewHolder.closeButton.setImageDrawable(icon != null ? icon : closeButtonIcon);
     }
 
     /**
@@ -177,17 +172,14 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         ColorStateList colorStateList =
                 tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
                         model.getTabBackgroundColor();
-        int color;
 
-        if (colorStateList != null) {
-            int[] stateSet =
-                    model.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
-                            new int[]{};
-            color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
-        } else {
-            color = model.getSelectedTab() == tab ? tabBackgroundColorSelected : tabBackgroundColor;
+        if (colorStateList == null) {
+            colorStateList = tabBackgroundColor;
         }
 
+        int[] stateSet = model.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
+                new int[]{};
+        int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         View view = tabItem.getView();
         Drawable background = view.getBackground();
         background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
@@ -316,6 +308,18 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     }
 
     /**
+     * Returns the theme helper, which allows to retrieve resources, depending on the tab switcher's
+     * theme.
+     *
+     * @return The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     * theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be null
+     */
+    @NonNull
+    protected final ThemeHelper getThemeHelper() {
+        return themeHelper;
+    }
+
+    /**
      * Returns the tab item, which corresponds to a specific tab.
      *
      * @param tab
@@ -418,6 +422,16 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     protected abstract AbstractTabViewHolder onCreateViewHolder();
 
     /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the layout,
+     * which is used by the tab switcher.
+     *
+     * @return The layout, which is used by the tab switcher, as a value of the enum {@link Layout}.
+     * The layout may not be null
+     */
+    @NonNull
+    protected abstract Layout getLayout();
+
+    /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
      * visualize the tabs of a {@link TabSwitcher}.
      *
@@ -427,32 +441,26 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param tabBackgroundColorId
-     *         The resource id of the default background color of tabs as an {@link Integer} value.
-     *         The resource id must correspond to a valid color resource
-     * @param tabBackgroundColorSelectedId
-     *         The resource id of the default background color of tabs, when selected, as an {@link
-     *         Integer} value. The resource id must correspond to a valid color resource
-     * @param closeButtonIconId
-     *         The resource id of the default icon of a tab's close button as an {@link Integer}
-     *         value. The resource id must correspond to a valid drawable resource
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      */
     public AbstractRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
-                                   @ColorRes final int tabBackgroundColorId,
-                                   @ColorRes final int tabBackgroundColorSelectedId,
-                                   @DrawableRes final int closeButtonIconId) {
+                                   @NonNull final ThemeHelper themeHelper) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
+        ensureNotNull(themeHelper, "The theme helper may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
+        this.themeHelper = themeHelper;
         this.tabTitleTextColor =
-                ContextCompat.getColor(tabSwitcher.getContext(), R.color.tab_title_text_color_light);
+                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabTitleTextColor);
         this.tabBackgroundColor =
-                ContextCompat.getColor(tabSwitcher.getContext(), tabBackgroundColorId);
-        this.tabBackgroundColorSelected =
-                ContextCompat.getColor(tabSwitcher.getContext(), tabBackgroundColorSelectedId);
-        this.closeButtonIconId = closeButtonIconId;
+                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabBackgroundColor);
+        this.closeButtonIcon =
+                themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherTabCloseButtonIcon);
         this.viewRecycler = null;
     }
 

@@ -43,6 +43,7 @@ import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -415,11 +416,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the type
      *         {@link Arithmetics}. The arithmetics may not be null
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      */
     public TabletTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
-                                   @NonNull final Arithmetics arithmetics) {
-        super(tabSwitcher, model, arithmetics);
+                                   @NonNull final Arithmetics arithmetics,
+                                   @NonNull final ThemeHelper themeHelper) {
+        super(tabSwitcher, model, arithmetics, themeHelper);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.tablet_stacked_tab_count);
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
@@ -445,7 +451,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         borderView = getTabSwitcher().findViewById(R.id.border_view);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
         contentViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel());
+        recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
         getModel().addListener(recyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));

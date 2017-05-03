@@ -16,37 +16,49 @@ License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="TabSwitcher" parent="@style/ThemeOverlay.AppCompat.Dark">
-        <item name="tabTitleTextColor">@color/tab_title_text_color_dark</item>
+        <item name="themePhone">@style/TabSwitcher.Phone</item>
+        <item name="themeTablet">@style/TabSwitcher.Tablet</item>
+        <item name="tabSwitcherTabTitleTextColor">@color/tab_title_text_color_dark</item>
     </style>
 
     <style name="TabSwitcher.Light" parent="@style/ThemeOverlay.AppCompat.Light">
-        <item name="tabTitleTextColor">@color/tab_title_text_color_light</item>
+        <item name="themePhone">@style/TabSwitcher.Phone.Light</item>
+        <item name="themeTablet">@style/TabSwitcher.Tablet.Light</item>
+        <item name="tabSwitcherTabTitleTextColor">@color/tab_title_text_color_light</item>
     </style>
 
     <style name="TabSwitcher.Phone" parent="@style/TabSwitcher">
-        <item name="tabBackgroundColor">@color/phone_tab_background_color_dark</item>
-        <item name="tabCloseButtonIcon">@drawable/phone_tab_close_button_icon_dark</item>
-        <item name="tabContentBackgroundColor">@color/phone_tab_content_background_color_dark</item>
+        <item name="tabSwitcherTabBackgroundColor">@color/phone_tab_background_color_dark</item>
+        <item name="tabSwitcherTabContentBackgroundColor">
+            @color/phone_tab_content_background_color_dark
+        </item>
+        <item name="tabSwitcherTabCloseButtonIcon">@drawable/phone_tab_close_button_icon_dark</item>
     </style>
 
     <style name="TabSwitcher.Phone.Light" parent="@style/TabSwitcher.Light">
-        <item name="tabBackgroundColor">@color/phone_tab_background_color_light</item>
-        <item name="tabCloseButtonIcon">@drawable/phone_tab_close_button_icon_light</item>
-        <item name="tabContentBackgroundColor">@color/phone_tab_content_background_color_light
+        <item name="tabSwitcherTabBackgroundColor">@color/phone_tab_background_color_light</item>
+        <item name="tabSwitcherTabContentBackgroundColor">
+            @color/phone_tab_content_background_color_light
+        </item>
+        <item name="tabSwitcherTabCloseButtonIcon">@drawable/phone_tab_close_button_icon_light
         </item>
     </style>
 
     <style name="TabSwitcher.Tablet" parent="@style/TabSwitcher">
-        <item name="tabBackgroundColor">@color/tablet_tab_background_dark</item>
-        <item name="tabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_dark</item>
-        <item name="tabContentBackgroundColor">@color/tablet_tab_content_background_color_dark
+        <item name="tabSwitcherTabBackgroundColor">@color/tablet_tab_background_dark</item>
+        <item name="tabSwitcherTabContentBackgroundColor">
+            @color/tablet_tab_content_background_color_dark
+        </item>
+        <item name="tabSwitcherTabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_dark
         </item>
     </style>
 
     <style name="TabSwitcher.Tablet.Light" parent="@style/TabSwitcher.Light">
-        <item name="tabBackgroundColor">@color/tablet_tab_background_light</item>
-        <item name="tabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_light</item>
-        <item name="tabContentBackgroundColor">@color/tablet_tab_content_background_color_light
+        <item name="tabSwitcherTabBackgroundColor">@color/tablet_tab_background_light</item>
+        <item name="tabSwitcherTabContentBackgroundColor">
+            @color/tablet_tab_content_background_color_light
+        </item>
+        <item name="tabSwitcherTabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_light
         </item>
     </style>
 

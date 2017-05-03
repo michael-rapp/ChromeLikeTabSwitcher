@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -31,6 +32,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 
 /**
@@ -53,12 +55,15 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
+     * @param themeHelper
+     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
+     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
+     *         null
      */
     public TabletRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                 @NonNull final TabSwitcherModel model) {
-        super(tabSwitcher, model, R.color.tablet_tab_background_light,
-                R.color.tablet_tab_background_color_light_selected,
-                R.drawable.tablet_tab_close_button_icon_light);
+                                 @NonNull final TabSwitcherModel model,
+                                 @NonNull final ThemeHelper themeHelper) {
+        super(tabSwitcher, model, themeHelper);
     }
 
     @NonNull
@@ -88,6 +93,12 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     @Override
     protected final AbstractTabViewHolder onCreateViewHolder() {
         return new TabletTabViewHolder();
+    }
+
+    @NonNull
+    @Override
+    protected final Layout getLayout() {
+        return Layout.TABLET;
     }
 
 }
