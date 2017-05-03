@@ -21,7 +21,6 @@ License.
         <item name="colorAccent">@color/color_accent</item>
         <item name="android:windowBackground">@color/window_background</item>
         <item name="tabSwitcherTheme">@style/TabSwitcher.Light</item>
-        <item name="tabSwitcherThemePhone">@style/TabSwitcher</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="@style/AppTheme"/>

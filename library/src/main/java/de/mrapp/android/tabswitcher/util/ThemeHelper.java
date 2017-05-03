@@ -63,11 +63,16 @@ public class ThemeHelper {
     private int obtainThemeFromXmlAttributes(@NonNull final Layout layout) {
         int themeResourceId = layout == Layout.TABLET ? tabletTheme : phoneTheme;
 
-        if (themeResourceId == 0) {
-            throw new NotFoundException();
+        if (themeResourceId != 0) {
+            int resourceId = layout == Layout.TABLET ? R.attr.themeTablet : R.attr.themePhone;
+            themeResourceId = ThemeUtil.getResourceId(context, themeResourceId, resourceId);
+
+            if (themeResourceId != 0) {
+                return themeResourceId;
+            }
         }
 
-        return themeResourceId;
+        throw new NotFoundException();
     }
 
     /**
