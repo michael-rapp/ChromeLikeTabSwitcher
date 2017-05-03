@@ -24,6 +24,7 @@ License.
     <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabCloseButtonIcon" format="reference"/>
     <attr name="tabSwitcherToolbarTitle" format="string"/>
+    <attr name="tabSwitcherToolbarMenu" format="reference"/>
 
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>

@@ -289,6 +289,10 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                         defaultStyleResource);
 
         try {
+            int globalTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeGlobal, 0);
+            int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
+            int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
+            themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
@@ -299,10 +303,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
             obtainToolbarMenu(typedArray);
-            int globalTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeGlobal, 0);
-            int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
-            int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
-            themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
         } finally {
             typedArray.recycle();
         }
@@ -458,9 +458,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TypedArray}. The typed array may not be null
      */
     private void obtainToolbarMenu(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, -1);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, 0);
 
-        if (resourceId != -1) {
+        if (resourceId == 0) {
+            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherToolbarMenu);
+        }
+
+        if (resourceId != 0) {
             inflateToolbarMenu(resourceId, null);
         }
     }

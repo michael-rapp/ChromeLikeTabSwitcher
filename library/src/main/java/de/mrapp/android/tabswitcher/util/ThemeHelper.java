@@ -250,4 +250,34 @@ public class ThemeHelper {
         }
     }
 
+    /**
+     * Returns the resource id, which corresponds to a specific theme attribute, regarding the
+     * theme, which is used when using a specific layout.
+     *
+     * @param layout
+     *         The layout as a value of the enum {@link Layout}. The layout may not be null
+     * @param resourceId
+     *         The resource id of the theme attribute, the resource id should be obtained from, as
+     *         an {@link Integer} value. The resource id must correspond to a valid theme attribute
+     * @return The resource id, which has been obtained, as an {@link Integer} value
+     */
+    public int getResourceId(@NonNull final Layout layout, @AttrRes final int resourceId) {
+        // TODO: Remove -1 parameter after updating library "AndroidUtil"
+        int result = ThemeUtil.getResourceId(context, -1, resourceId);
+
+        if (result == 0) {
+            int themeResourceId;
+
+            try {
+                themeResourceId = obtainThemeFromXmlAttributes(layout);
+            } catch (NotFoundException e) {
+                themeResourceId = obtainThemeFromThemeAttributes(layout);
+            }
+
+            return ThemeUtil.getResourceId(context, themeResourceId, resourceId);
+        }
+
+        return result;
+    }
+
 }

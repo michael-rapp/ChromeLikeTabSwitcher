@@ -19,6 +19,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.ColorInt;
@@ -410,8 +411,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             CharSequence title = getModel().getToolbarTitle();
 
             if (TextUtils.isEmpty(title)) {
-                title = getThemeHelper()
-                        .getText(getTabSwitcher().getLayout(), R.attr.tabSwitcherToolbarTitle);
+                try {
+                    title = getThemeHelper()
+                            .getText(getTabSwitcher().getLayout(), R.attr.tabSwitcherToolbarTitle);
+                } catch (NotFoundException e) {
+                    title = null;
+                }
             }
 
             toolbars[0].setTitle(title);
