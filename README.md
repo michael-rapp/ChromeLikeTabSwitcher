@@ -227,6 +227,50 @@ tabSwitcher.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 });
 ```
 
+## Using Themes
+
+By default, a light theme is used by the library's `TabSwitcher`. However, the library comes with a predefined dark theme `TabSwitcher` in addition to the theme `TabSwitcher.Light`. It can be applied globally to all tab switchers by specifying the following attributes in the app's theme as shown below. The attributes `tabSwitcherThemePhone` and `tabSwitcherThemeTablet` allow to specify different themes for the smartphone and tablet layout. These attributes take priority over the attribute `tabSwitcherThemeGlobal`, which specifies the theme regardless of the used layout.
+
+```xml
+<style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="tabSwitcherThemeGlobal">@style/TabSwitcher</item>
+        <item name="tabSwitcherThemePhone">@style/TabSwitcher.Light</item>
+        <item name="tabSwitcherThemeTablet">@style/TabSwitcher</item>
+</style>
+```
+
+The same attributes are also available to be applied to a single tab switcher, when defined as part of a XML layout:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<de.mrapp.android.tabswitcher.TabSwitcher 
+        android:id="@+id/tab_switcher"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/tab_switcher_background_color"
+        custom:themeGlobal="@style/TabSwitcher"
+        custom:themePhone="@style/TabSwitcher.Light"
+        custom:themeTablet="@style/TabSwitcher"/>
+```
+
+The attributes, which are available when defining a tab switcher in a XML layout resource, can also be used when extending the predefined themes. All of them are shown in the following example. Alternatively, they can be included in the app's global theme. The attribute `tabSwitcherToolbarPopupTheme` enables to force the tab switcher's toolbar to use a dark theme for its popup menu.
+
+```xml
+<style name="MyTabSwitcher" parent="@style/TabSwitcher.Light">
+        <item name="tabSwitcherTabIcon">@drawable/tab_switcher_tab_icon</item>
+        <item name="tabSwitcherTabBackgroundColor">@color/tab_switcher_tab_background_color</item>
+        <item name="tabSwitcherTabContentBackgroundColor">@color/tab_switcher_tab_content_background_color</item>
+        <item name="tabSwitcherTabTitleTextColor">@color/tab_switcher_tab_title_text_color</item>
+        <item name="tabSwitcherTabCloseButtonIcon">@drawable/tab_switcher_tab_close_button_icon</item>
+        <item name="tabSwitcherToolbarTitle">@string/tab_switcher_toolbar_title</item>
+        <item name="tabSwitcherToolbarMenu">@menu/tab_switcher_toolbar_menu</item>
+        <item name="tabSwitcherToolbarNavigationIcon">@drawable/tab_switcher_toolbar_navigation_icon</item>
+        <item name="tabSwitcherToolbarPopupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+</style>
+```
+
 ## Padding
 
 The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWIndowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
