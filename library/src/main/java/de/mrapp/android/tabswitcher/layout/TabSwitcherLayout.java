@@ -48,8 +48,9 @@ public interface TabSwitcherLayout {
     /**
      * Returns the toolbars, which are shown, when the tab switcher is shown. When using the
      * smartphone layout, only one toolbar is shown. When using the tablet layout, a primary and
-     * secondary toolbar is shown. In such case, the first index of the returned array corresponds
-     * to the primary toolbar.
+     * secondary toolbar is shown. In such case, the index {@link TabSwitcher#PRIMARY_TOOLBAR_INDEX}
+     * of the returned array corresponds to the primary toolbar and the index {@link
+     * TabSwitcher#SECONDARY_TOOLBAR_INDEX} corresponds to the secondary toolbar.
      *
      * @return An array, which contains the toolbars, which are shown, when the tab switcher is
      * shown, as an array of the type Toolbar or null, if the view has not been laid out yet
