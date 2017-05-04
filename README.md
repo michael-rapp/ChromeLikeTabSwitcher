@@ -255,7 +255,7 @@ The same attributes are also available to be applied to a single tab switcher, w
         custom:themeTablet="@style/TabSwitcher"/>
 ```
 
-The attributes, which are available when defining a tab switcher in a XML layout resource, can also be used when extending the predefined themes. All of them are shown in the following example. Alternatively, they can be included in the app's global theme. The attribute `tabSwitcherToolbarPopupTheme` enables to force the tab switcher's toolbar to use a dark theme for its popup menu.
+The attributes, which are available when defining a tab switcher in a XML layout resource, can also be used when extending the predefined themes. All of them are shown in the following example. The attribute `tabSwitcherToolbarPopupTheme` enables to force the tab switcher's toolbar to use a dark theme for its popup menu.
 
 ```xml
 <style name="MyTabSwitcher" parent="@style/TabSwitcher.Light">
@@ -270,6 +270,8 @@ The attributes, which are available when defining a tab switcher in a XML layout
         <item name="tabSwitcherToolbarPopupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
 </style>
 ```
+
+As an alternative to creating a custom theme, the theme attribute shown above can also be applied globally by including them in the global app theme. This causes them to take priority over the attributes of the theme, which is applied to a tab switcher. 
 
 ## Padding
 
