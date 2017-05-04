@@ -229,7 +229,11 @@ tabSwitcher.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
 ## Using Themes
 
-By default, a light theme is used by the library's `TabSwitcher`. However, the library comes with a predefined dark theme `TabSwitcher` in addition to the theme `TabSwitcher.Light`. It can be applied globally to all tab switchers by specifying the following attributes in the app's theme as shown below. The attributes `tabSwitcherThemePhone` and `tabSwitcherThemeTablet` allow to specify different themes for the smartphone and tablet layout. These attributes take priority over the attribute `tabSwitcherThemeGlobal`, which specifies the theme regardless of the used layout.
+By default, a light theme is used by the library's `TabSwitcher`. However, the library comes with a predefined dark theme `TabSwitcher` in addition to the theme `TabSwitcher.Light`. The appearance of the dark theme (on a smartphone in landscape mode) is shown in the screenshot below. 
+
+![](doc/images/dark_theme.png)
+
+Themes can be applied globally to all tab switchers by specifying the following attributes in the app's theme as shown below. The attributes `tabSwitcherThemePhone` and `tabSwitcherThemeTablet` allow to specify different themes for the smartphone and tablet layout. These attributes take priority over the attribute `tabSwitcherThemeGlobal`, which specifies the theme regardless of the used layout.
 
 ```xml
 <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
