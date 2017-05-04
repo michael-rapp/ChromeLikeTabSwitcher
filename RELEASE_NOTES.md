@@ -7,6 +7,7 @@ The first stable release of the library. It introduces the following features:
 - A layout optimized for tablets is now provided.
 - Added predefined dark and light themes.
 - Added the `tabContentBackgroundColor` XML attribute and according setter methods for customizing the background color of a tab's content
+- Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode.
 
 ## Version 0.1.0 (Apr. 22th 2017)
 
