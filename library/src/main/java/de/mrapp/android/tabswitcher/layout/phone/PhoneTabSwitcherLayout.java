@@ -1323,7 +1323,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                         getTabSwitcher()) -
                                 (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
                                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                                        toolbars[0].getHeight() : 0)) * 0.66f;
+                                        toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() :
+                                        0)) * 0.66f;
                 animatePeek(tabItem, duration, interpolator, peekPosition, peekAnimation);
             }
 
@@ -2756,7 +2757,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
                 (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        toolbars[0].getHeight() + tabInset : 0);
+                        toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() + tabInset : 0);
         float attachedPosition;
 
         if (count == 3) {
@@ -2807,7 +2808,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         Toolbar[] toolbars = getTabSwitcher().getToolbars();
         int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                 getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                toolbars[0].getHeight() - tabInset : 0;
+                toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0;
         int padding = getArithmetics()
                 .getPadding(Arithmetics.Axis.DRAGGING_AXIS, Gravity.START, getTabSwitcher()) +
                 getArithmetics()

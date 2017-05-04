@@ -421,7 +421,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 }
             }
 
-            toolbars[0].setTitle(title);
+            toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].setTitle(title);
         }
     }
 
@@ -432,7 +432,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         Toolbar[] toolbars = getToolbars();
 
         if (toolbars != null) {
-            Toolbar toolbar = toolbars[0];
+            Toolbar toolbar = toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX];
             toolbar.setNavigationIcon(getModel().getToolbarNavigationIcon());
             toolbar.setNavigationOnClickListener(getModel().getToolbarNavigationIconListener());
         }
@@ -461,7 +461,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         int menuId = getModel().getToolbarMenuId();
 
         if (toolbars != null && menuId != -1) {
-            Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
+            Toolbar toolbar = toolbars.length > 1 ? toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX] :
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX];
             toolbar.inflateMenu(menuId);
             toolbar.setOnMenuItemClickListener(getModel().getToolbarMenuItemListener());
         }
@@ -1295,7 +1296,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         Toolbar[] toolbars = getToolbars();
 
         if (toolbars != null) {
-            Toolbar toolbar = toolbars.length > 1 ? toolbars[1] : toolbars[0];
+            Toolbar toolbar = toolbars.length > 1 ? toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX] :
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX];
             return toolbar.getMenu();
         }
 

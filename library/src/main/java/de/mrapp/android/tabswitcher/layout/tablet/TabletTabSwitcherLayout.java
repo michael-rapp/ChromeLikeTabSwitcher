@@ -293,8 +293,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
         Toolbar[] toolbars = getToolbars();
         float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
-                Math.max(0, toolbars[0].getWidth() - tabOffset) +
-                        Math.max(0, toolbars[1].getWidth() - tabOffset) : 0;
+                Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) +
+                        Math.max(0, toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX].getWidth() -
+                                tabOffset) : 0;
         return size - padding - toolbarSize;
     }
 

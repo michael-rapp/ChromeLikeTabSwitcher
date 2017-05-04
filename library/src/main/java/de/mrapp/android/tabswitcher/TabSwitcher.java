@@ -166,6 +166,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * The index of the primary toolbar as returned by the method {@link TabSwitcher#getToolbars()}.
+     */
+    public static final int PRIMARY_TOOLBAR_INDEX = 0;
+
+    /**
+     * The index of the secondary toolbar as returned by the method {@link
+     * TabSwitcher#getToolbars()}.
+     */
+    public static final int SECONDARY_TOOLBAR_INDEX = 1;
+
+    /**
      * A queue, which contains all pending actions.
      */
     private Queue<Runnable> pendingActions;
@@ -1388,7 +1399,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final CharSequence getToolbarTitle() {
         Toolbar[] toolbars = getToolbars();
-        return toolbars != null ? toolbars[0].getTitle() : model.getToolbarTitle();
+        return toolbars != null ? toolbars[PRIMARY_TOOLBAR_INDEX].getTitle() :
+                model.getToolbarTitle();
     }
 
     @Override
@@ -1405,7 +1417,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final Drawable getToolbarNavigationIcon() {
         Toolbar[] toolbars = getToolbars();
-        return toolbars != null ? toolbars[0].getNavigationIcon() :
+        return toolbars != null ? toolbars[PRIMARY_TOOLBAR_INDEX].getNavigationIcon() :
                 model.getToolbarNavigationIcon();
     }
 

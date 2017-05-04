@@ -95,8 +95,8 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            return view.getX() - (tabSwitcher.areToolbarsShown() && toolbars != null ?
-                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0);
+            return view.getX() - (tabSwitcher.areToolbarsShown() && toolbars != null ? Math.max(0,
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0);
         } else {
             return view.getY() - (tabContainerHeight - tabHeight);
         }
@@ -110,8 +110,9 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            view.setX((tabSwitcher.areToolbarsShown() && toolbars != null ?
-                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0) + position);
+            view.setX((tabSwitcher.areToolbarsShown() && toolbars != null ? Math.max(0,
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0) +
+                    position);
         } else {
             view.setY((tabContainerHeight - tabHeight) + position);
         }
@@ -128,8 +129,9 @@ public class TabletArithmetics implements Arithmetics {
 
         if (axis == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
-            animator.x((tabSwitcher.areToolbarsShown() && toolbars != null ?
-                    Math.max(0, toolbars[0].getWidth() - tabOffset) : 0) + position);
+            animator.x((tabSwitcher.areToolbarsShown() && toolbars != null ? Math.max(0,
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0) +
+                    position);
         } else {
             animator.y((tabContainerHeight - tabHeight) + position);
         }

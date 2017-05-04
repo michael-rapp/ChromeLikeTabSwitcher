@@ -92,7 +92,8 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
                 View view = tabItem.getView();
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarWidth = getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        Math.max(0, toolbars[0].getWidth() - tabOffset) : 0;
+                        Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
+                                tabOffset) : 0;
                 float viewPosition =
                         getArithmetics().getPosition(Arithmetics.Axis.DRAGGING_AXIS, view) +
                                 toolbarWidth + getArithmetics()

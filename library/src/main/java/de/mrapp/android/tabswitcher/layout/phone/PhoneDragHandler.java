@@ -196,7 +196,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        toolbars[0].getHeight() - tabInset : 0;
+                        toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0;
                 float viewPosition =
                         getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) + toolbarHeight +
                                 getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,

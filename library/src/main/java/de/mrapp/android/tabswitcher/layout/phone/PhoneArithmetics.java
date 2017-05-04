@@ -201,7 +201,8 @@ public class PhoneArithmetics implements Arithmetics {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
             return view.getY() - (tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
-                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) -
+                    toolbars != null ?
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) -
                     getPadding(axis, Gravity.START, tabSwitcher);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -223,7 +224,8 @@ public class PhoneArithmetics implements Arithmetics {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
             view.setY((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
-                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) +
+                    toolbars != null ?
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
                     getPadding(axis, Gravity.START, tabSwitcher) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
@@ -248,7 +250,8 @@ public class PhoneArithmetics implements Arithmetics {
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = tabSwitcher.getToolbars();
             animator.y((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
-                    toolbars != null ? toolbars[0].getHeight() - tabInset : 0) +
+                    toolbars != null ?
+                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
                     (includePadding ? getPadding(axis, Gravity.START, tabSwitcher) : 0) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
