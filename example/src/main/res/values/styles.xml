@@ -20,21 +20,28 @@ License.
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
         <item name="android:windowBackground">@color/window_background</item>
-        <item name="tabSwitcherThemeGlobal">@style/DarkTabSwitcher</item>
+        <item name="tabSwitcherThemeGlobal">@style/LightTabSwitcher</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="@style/AppTheme"/>
 
     <style name="LightTabSwitcher" parent="@style/TabSwitcher.Light">
         <item name="tabSwitcherTabIcon">@drawable/ic_file_outline_grey600_18dp</item>
+        <item name="toolbarTheme">@style/LightToolbar</item>
     </style>
 
     <style name="DarkTabSwitcher" parent="@style/TabSwitcher">
         <item name="tabSwitcherTabIcon">@drawable/ic_file_outline_white_18dp</item>
+        <item name="toolbarTheme">@style/DarkToolbar</item>
     </style>
 
-    <style name="Toolbar" parent="@style/ThemeOverlay.AppCompat.Light">
+    <style name="LightToolbar" parent="@style/ThemeOverlay.AppCompat.Light">
         <item name="android:textColorPrimary">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="DarkToolbar" parent="@style/ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
 </resources>
