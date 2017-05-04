@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher.layout;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -125,7 +126,11 @@ public abstract class AbstractRecyclerAdapter<ParamType>
             icon = model.getTabIcon();
 
             if (icon == null) {
-                icon = getThemeHelper().getDrawable(getLayout(), R.attr.tabSwitcherTabIcon);
+                try {
+                    icon = getThemeHelper().getDrawable(getLayout(), R.attr.tabSwitcherTabIcon);
+                } catch (NotFoundException e) {
+                    icon = null;
+                }
             }
         }
 
