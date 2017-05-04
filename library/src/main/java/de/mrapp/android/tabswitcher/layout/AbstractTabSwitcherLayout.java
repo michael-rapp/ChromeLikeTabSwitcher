@@ -396,7 +396,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         if (toolbars != null) {
             for (Toolbar toolbar : toolbars) {
                 toolbar.setVisibility(
-                        getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
+                        getTabSwitcher().isSwitcherShown() && getModel().areToolbarsShown() ?
+                                View.VISIBLE : View.INVISIBLE);
             }
         }
 

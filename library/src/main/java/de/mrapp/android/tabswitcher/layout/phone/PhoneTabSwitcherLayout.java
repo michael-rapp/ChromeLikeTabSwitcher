@@ -428,16 +428,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             toolbarAnimation.cancel();
         }
 
-        float targetAlpha = visible ? 1 : 0;
-
-        if (toolbar.getAlpha() != targetAlpha) {
-            toolbarAnimation = toolbar.animate();
-            toolbarAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-            toolbarAnimation.setDuration(toolbarVisibilityAnimationDuration);
-            toolbarAnimation.setStartDelay(delay);
-            toolbarAnimation.alpha(targetAlpha);
-            toolbarAnimation.start();
-        }
+        toolbarAnimation = toolbar.animate();
+        toolbarAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        toolbarAnimation.setDuration(toolbarVisibilityAnimationDuration);
+        toolbarAnimation.setListener(createToolbarAnimationListener(visible));
+        toolbarAnimation.setStartDelay(delay);
+        toolbarAnimation.alpha(visible ? 1 : 0);
+        toolbarAnimation.start();
     }
 
     /**
@@ -1485,6 +1482,41 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
+                }
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to adapt the visibility of the
+     * toolbar, when an animation, which is used to animate the alpha of the toolbar, has been
+     * started or ended, depending on whether the toolbar should be shown, or hidden.
+     *
+     * @param show
+     *         True, if the toolbar should be shown by the animation, false otherwise
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createToolbarAnimationListener(final boolean show) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+
+                if (!show) {
+                    toolbar.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void onAnimationStart(final Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (show) {
+                    toolbar.setVisibility(View.VISIBLE);
                 }
             }
 
