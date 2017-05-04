@@ -26,6 +26,7 @@ License.
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
     <attr name="tabSwitcherToolbarNavigationIcon" format="reference"/>
+    <attr name="tabSwitcherToolbarPopupTheme" format="reference"/>
 
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>

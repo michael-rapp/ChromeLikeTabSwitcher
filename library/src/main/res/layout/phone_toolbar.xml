@@ -22,4 +22,4 @@ License.
     android:background="@android:color/transparent"
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     android:visibility="invisible"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+    app:popupTheme="?attr/tabSwitcherToolbarPopupTheme"/>
