@@ -27,4 +27,9 @@ License.
         android:title="@string/add_tab_menu_item"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/settings_menu_item"
+        android:title="@string/settings_menu_item"
+        app:showAsAction="never"/>
+
 </menu>

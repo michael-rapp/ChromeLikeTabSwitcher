@@ -22,18 +22,27 @@ License.
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.Translucent"
+        android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity
             android:name="de.mrapp.android.tabswitcher.example.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="de.mrapp.android.tabswitcher.example.SettingsActivity"
+            android:label="@string/activity_settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.mrapp.android.tabswitcher.example.MainActivity"/>
+        </activity>
+
     </application>
 
 </manifest>

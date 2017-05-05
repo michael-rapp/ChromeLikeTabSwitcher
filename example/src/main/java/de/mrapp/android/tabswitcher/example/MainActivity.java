@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher.example;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -198,6 +199,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                     case R.id.clear_tabs_menu_item:
                         tabSwitcher.clear();
                         return true;
+                    case R.id.settings_menu_item:
+                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(intent);
                     default:
                         return false;
                 }

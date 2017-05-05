@@ -16,14 +16,31 @@ License.
 <resources>
 
     <string name="app_name">ChromeLikeTabSwitcher Example</string>
+    <string name="activity_settings">Settings</string>
     <string name="toggle_tab_switcher_menu_item">Toggle switcher</string>
     <string name="add_tab_menu_item">New tab</string>
     <string name="clear_tabs_menu_item">Clear all tabs</string>
+    <string name="settings_menu_item">Settings</string>
     <string name="tab_title">Tab %1$d</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</string>
     <string name="removed_tab_snackbar">Removed %1$s</string>
     <string name="cleared_tabs_snackbar">Removed all tabs</string>
     <string name="undo">Undo</string>
     <string name="edit_text_hint">Text</string>
+    <string name="theme_preference_category_title">Theme</string>
+    <string name="theme_preference_key">theme_preference_key</string>
+    <string name="theme_preference_title">Theme</string>
+    <string name="theme_preference_summary">Allows to choose the theme, which should be used by the example app</string>
+    <string name="theme_preference_default_value">0</string>
+
+    <string-array name="theme_entries">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
 
 </resources>
