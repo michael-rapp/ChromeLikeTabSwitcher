@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    width="3.9687722mm"
+    height="2.7119534mm"
+    viewBox="0 0 14.062578 9.6092847"
+    id="svg2"
+    version="1.1"
+    inkscape:version="0.92.1 r"
+    sodipodi:docname="tablet_add_tab_button.9.svg"
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tablet_tab_background.9.png"
+    inkscape:export-xdpi="1348.6957"
+    inkscape:export-ydpi="1348.6957">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="45.254834"
+     inkscape:cx="5.7388393"
+     inkscape:cy="6.0765599"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1025"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:measure-start="0,0"
+     inkscape:measure-end="0,0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4136"
+       originx="-9.3749985"
+       originy="-1035.8205" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-9.3749997,-6.9327211)">
+    <rect
+       style="opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.75;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4489"
+       width="15"
+       height="1.4062494"
+       x="9.0234365"
+       y="16.424654"
+       rx="0.3515625" />
+    <rect
+       style="opacity:0;fill:#14181c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.80000001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.41012663"
+       id="rect4142"
+       width="20"
+       height="20"
+       x="10"
+       y="7.3622046"
+       ry="5" />
+    <rect
+       style="opacity:0;fill:#14181c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.80000001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4144"
+       width="20"
+       height="20"
+       x="5"
+       y="7.3622046"
+       ry="5" />
+    <path
+       style="fill:#fffff5;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 1.5,1.25 C 1,1.25 0.9999984,1.875 1.125,2.125 L 3.625,8.5 C 3.7500005,8.75 4,9 4.5,9 h 9 C 14,9 14.000001,8.375 13.875,8.125 L 11.375,1.75 C 11.249999,1.5 11,1.25 10.5,1.25 Z"
+       transform="matrix(0.93750002,0,0,0.93750002,9.3749997,6.9327211)"
+       id="path4497"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccc" />
+  </g>
+</svg>
