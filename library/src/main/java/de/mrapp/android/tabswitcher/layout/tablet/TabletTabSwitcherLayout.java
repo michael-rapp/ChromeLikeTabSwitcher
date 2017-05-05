@@ -501,7 +501,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                                                                                    final int index,
                                                                                    @Nullable final State predecessorState) {
         int selectedTabIndex = getModel().getSelectedTabIndex();
-        int tabWidth = calculateTabWidth();
         float position;
         State state;
 
