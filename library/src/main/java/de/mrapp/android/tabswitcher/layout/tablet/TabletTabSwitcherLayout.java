@@ -20,7 +20,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -136,9 +135,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     private final int tabOffset;
 
     /**
-     * The default background color of a tab, when it is selected.
+     * The default background color of tabs.
      */
-    private final int tabBackgroundColorSelected;
+    private final ColorStateList tabBackgroundColor;
 
     /**
      * The default background color of a tab's content.
@@ -213,21 +212,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
      */
     private void adaptBorderColor() {
         Tab selectedTab = getModel().getSelectedTab();
-        int color;
         ColorStateList colorStateList =
                 selectedTab != null ? selectedTab.getBackgroundColor() : null;
 
         if (colorStateList == null) {
             colorStateList = getModel().getTabBackgroundColor();
+
+            if (colorStateList == null) {
+                colorStateList = tabBackgroundColor;
+            }
         }
 
-        if (colorStateList != null) {
-            int[] stateSet = new int[]{android.R.attr.state_selected};
-            color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
-        } else {
-            color = tabBackgroundColorSelected;
-        }
-
+        int[] stateSet = new int[]{android.R.attr.state_selected};
+        int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         Drawable background = borderView.getBackground();
         background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
@@ -432,10 +429,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
         minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
-        tabBackgroundColorSelected = ContextCompat
-                .getColor(getContext(), R.color.tablet_tab_background_color_light_selected);
-        tabContentBackgroundColor = ContextCompat
-                .getColor(getContext(), R.color.tablet_tab_content_background_color_light);
+        tabBackgroundColor = themeHelper.getColorStateList(getTabSwitcher().getLayout(),
+                R.attr.tabSwitcherTabBackgroundColor);
+        tabContentBackgroundColor = getThemeHelper().getColor(getTabSwitcher().getLayout(),
+                R.attr.tabSwitcherTabContentBackgroundColor);
     }
 
     @Override
