@@ -28,7 +28,7 @@ License.
         <activity
             android:name="de.mrapp.android.tabswitcher.example.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.Translucent">
+            android:theme="@style/AppTheme.Translucent.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

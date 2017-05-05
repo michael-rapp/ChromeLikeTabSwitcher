@@ -15,7 +15,9 @@ package de.mrapp.android.tabswitcher.example;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -42,6 +44,20 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public final void setTheme(final int resid) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String themeKey = getString(R.string.theme_preference_key);
+        String themeDefaultValue = getString(R.string.theme_preference_default_value);
+        int theme = Integer.valueOf(sharedPreferences.getString(themeKey, themeDefaultValue));
+
+        if (theme != 0) {
+            super.setTheme(R.style.AppTheme_Dark);
+        } else {
+            super.setTheme(R.style.AppTheme);
         }
     }
 

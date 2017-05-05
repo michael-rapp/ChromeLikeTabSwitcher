@@ -15,7 +15,9 @@ package de.mrapp.android.tabswitcher.example;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -421,6 +423,20 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                                        @NonNull final Animation animation) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         showUndoSnackbar(text, 0, tabs);
+    }
+
+    @Override
+    public final void setTheme(final int resid) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String themeKey = getString(R.string.theme_preference_key);
+        String themeDefaultValue = getString(R.string.theme_preference_default_value);
+        int theme = Integer.valueOf(sharedPreferences.getString(themeKey, themeDefaultValue));
+
+        if (theme != 0) {
+            super.setTheme(R.style.AppTheme_Translucent_Dark);
+        } else {
+            super.setTheme(R.style.AppTheme_Translucent_Light);
+        }
     }
 
     @Override

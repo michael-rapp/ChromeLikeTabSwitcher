@@ -19,11 +19,24 @@ License.
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
-        <item name="tabSwitcherThemeGlobal">@style/LightTabSwitcher</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="@style/AppTheme">
         <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <style name="AppTheme.Translucent.Light" parent="@style/AppTheme.Translucent">
+        <item name="tabSwitcherThemeGlobal">@style/LightTabSwitcher</item>
+    </style>
+
+    <style name="AppTheme.Translucent.Dark" parent="@style/AppTheme.Translucent">
+        <item name="tabSwitcherThemeGlobal">@style/DarkTabSwitcher</item>
     </style>
 
     <style name="LightTabSwitcher" parent="@style/TabSwitcher.Light">
