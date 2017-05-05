@@ -35,6 +35,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
@@ -646,9 +647,35 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
             contentViewRecycler.removeAll();
 
             if (selectedTab != null) {
+                inflateContent(selectedTab);
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
-                inflateContent(selectedTab);
+                int tabSpacing = calculateTabSpacing();
+                AbstractTabItemIterator iterator =
+                        new TabItemIterator.Builder(getModel(), getTabViewRecycler()).create();
+                float referencePosition = iterator.getItem(index).getTag().getPosition();
+                referencePosition =
+                        Math.max(Math.min(calculateMaxEndPosition(index), referencePosition),
+                                calculateMinStartPosition(index));
+                TabItem tabItem;
+
+                while ((tabItem = iterator.next()) != null) {
+                    float position;
+
+                    if (tabItem.getIndex() == index) {
+                        position = referencePosition;
+                    } else if (tabItem.getIndex() < index) {
+                        position = referencePosition + ((index - tabItem.getIndex()) * tabSpacing);
+                    } else {
+                        position = referencePosition - ((tabItem.getIndex() - index) * tabSpacing);
+                    }
+
+                    Pair<Float, State> pair =
+                            clipTabPosition(tabItem.getIndex(), position, iterator.previous());
+                    tabItem.getTag().setPosition(pair.first);
+                    tabItem.getTag().setState(pair.second);
+                    inflateOrRemoveView(tabItem);
+                }
             }
         }
     }
