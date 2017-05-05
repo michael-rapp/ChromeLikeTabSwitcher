@@ -16,7 +16,7 @@
     version="1.1"
     inkscape:version="0.92.1 r"
     sodipodi:docname="tablet_tab_background.9.svg"
-    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/raw.png"
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tablet_tab_background.9.png"
     inkscape:export-xdpi="1348.6957"
     inkscape:export-ydpi="1348.6957">
   <defs
@@ -63,15 +63,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="45.254834"
-     inkscape:cx="1.3399051"
-     inkscape:cy="4.0611099"
+     inkscape:cx="5.2822137"
+     inkscape:cy="2.4764369"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1025"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-height="1052"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -144,5 +144,14 @@
        id="path4497"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccc" />
+    <rect
+       style="opacity:1;fill:#aeaeae;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.234375;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4497"
+       width="14.062501"
+       height="0.23437533"
+       x="9.375001"
+       y="16.307795"
+       rx="0"
+       ry="0" />
   </g>
 </svg>
