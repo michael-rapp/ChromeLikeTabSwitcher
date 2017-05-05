@@ -554,7 +554,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
             } else {
                 position = tabContainerWidth - tabWidth -
                         (getStackedTabSpacing() * getStackedTabCount());
-                state = State.HIDDEN;
+                state = State.STACKED_END;
             }
         } else {
             if (index <= selectedTabIndex + getStackedTabCount()) {
