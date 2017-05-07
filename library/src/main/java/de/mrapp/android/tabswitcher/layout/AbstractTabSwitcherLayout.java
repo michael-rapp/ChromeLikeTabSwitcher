@@ -1411,6 +1411,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
             if (listener != null) {
                 listener.onAddTab(getTabSwitcher());
+                getLogger().logVerbose(getClass(), "Clicked add tab button");
             }
         }
     }
