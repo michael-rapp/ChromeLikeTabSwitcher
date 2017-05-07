@@ -3048,7 +3048,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                             new SwipeAnimation.Builder().create();
             AbstractItemIterator iterator =
-                    new ArrayItemIterator.Builder(tabViewRecycler, tabs).reverse(true).create();
+                    new ArrayItemIterator.Builder(tabViewRecycler, tabs, 0).reverse(true).create();
             AbstractItem item;
             int startDelay = 0;
 

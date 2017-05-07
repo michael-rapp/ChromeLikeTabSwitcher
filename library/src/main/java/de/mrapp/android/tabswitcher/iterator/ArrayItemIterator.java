@@ -20,6 +20,7 @@ import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -50,6 +51,12 @@ public class ArrayItemIterator extends AbstractItemIterator {
         private final Tab[] array;
 
         /**
+         * The index of the first tab, which is iterated by the iterator, which is created by the
+         * builder.
+         */
+        private final int firstIndex;
+
+        /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
          * ArrayItemIterator}.
          *
@@ -60,19 +67,24 @@ public class ArrayItemIterator extends AbstractItemIterator {
          * @param array
          *         The array, which contains the tabs, which should be iterated by the iterator, as
          *         an array of the type {@link Tab}. The array may not be null
+         * @param firstIndex
+         *         The index of the first tab, which should be iterated by the iterator, as an
+         *         {@link Integer} value. The index must be at least 0
          */
         public Builder(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
-                       @NonNull final Tab[] array) {
+                       @NonNull final Tab[] array, final int firstIndex) {
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(array, "The array may not be null");
+            ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
             this.viewRecycler = viewRecycler;
             this.array = array;
+            this.firstIndex = firstIndex;
         }
 
         @NonNull
         @Override
         public ArrayItemIterator create() {
-            return new ArrayItemIterator(viewRecycler, array, reverse, start);
+            return new ArrayItemIterator(viewRecycler, array, firstIndex, reverse, start);
         }
 
     }
@@ -89,6 +101,11 @@ public class ArrayItemIterator extends AbstractItemIterator {
     private final Tab[] array;
 
     /**
+     * The index of the first tab, which is iterated by the iterator.
+     */
+    private final int firstIndex;
+
+    /**
      * Creates a new iterator, which allows to iterate the items, which correspond to the tabs,
      * which are contained by an array.
      *
@@ -99,6 +116,9 @@ public class ArrayItemIterator extends AbstractItemIterator {
      * @param array
      *         The array, which contains the tabs, which should be iterated by the iterator, as an
      *         array of the type {@link Tab}. The array may not be null
+     * @param firstIndex
+     *         The index of the first tab, which should be iterated by the iterator, as an {@link
+     *         Integer} value. The index must be at least 0
      * @param reverse
      *         True, if the items should be iterated in reverse order, false otherwise
      * @param start
@@ -106,12 +126,14 @@ public class ArrayItemIterator extends AbstractItemIterator {
      *         -1, if all items should be iterated
      */
     private ArrayItemIterator(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
-                              @NonNull final Tab[] array, final boolean reverse,
-                              final int start) {
+                              @NonNull final Tab[] array, final int firstIndex,
+                              final boolean reverse, final int start) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(array, "The array may not be null");
+        ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
         this.viewRecycler = viewRecycler;
         this.array = array;
+        this.firstIndex = firstIndex;
         initialize(reverse, start);
     }
 
@@ -123,7 +145,7 @@ public class ArrayItemIterator extends AbstractItemIterator {
     @NonNull
     @Override
     public final AbstractItem getItem(final int index) {
-        return TabItem.create(viewRecycler, index, array[index]);
+        return TabItem.create(viewRecycler, firstIndex + index, array[index]);
     }
 
 }
