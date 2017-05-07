@@ -13,7 +13,12 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
+import android.support.annotation.NonNull;
+import android.view.View;
+
+import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.util.view.AttachedViewRecycler;
 
 /**
  * An item, which contains information about a button a {@link TabSwitcher}, which allows to add a
@@ -25,13 +30,46 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 public class AddTabItem extends AbstractItem {
 
     /**
-     * Creates a new item, which contains information about a child view of a {@link TabSwitcher}.
+     * Creates a new item, which contains information about a button of a {@link TabSwitcher}, which
+     * allows to add a new tab. By default, the item is neither associated with a view, nor with a
+     * view holder.
      *
      * @param index
      *         The index of the item as an {@link Integer} value. The index must be at least 0
      */
-    public AddTabItem(final int index) {
+    private AddTabItem(final int index) {
         super(index);
+    }
+
+    /**
+     * Creates a new item, which contains information about a button of a {@link TabSwitcher}, which
+     * allows to add a new tab.
+     *
+     * @param viewRecycler
+     *         The view recycler, which is used to reuse the views, which are used to visualize
+     *         tabs, as an instance of the class AttachedViewRecycler. The view recycler may not be
+     *         null
+     * @param index
+     *         The index of the item as an {@link Integer} value. The index must be at least 0
+     * @return The item, which has been created, as an instance of the class {@link AddTabItem}. The
+     * item may not be null
+     */
+    @NonNull
+    public static AddTabItem create(
+            @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler, final int index) {
+        AddTabItem addTabItem = new AddTabItem(index);
+        View view = viewRecycler.getView(addTabItem);
+
+        if (view != null) {
+            addTabItem.setView(view);
+            Tag tag = (Tag) view.getTag(R.id.tag_properties);
+
+            if (tag != null) {
+                addTabItem.setTag(tag);
+            }
+        }
+
+        return addTabItem;
     }
 
     @Override

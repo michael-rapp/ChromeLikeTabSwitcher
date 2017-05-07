@@ -615,7 +615,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
                 for (int i = 0; i < tabs.length; i++) {
                     Tab tab = tabs[i];
-                    AbstractItem item = new TabItem(index + i, tab);
+                    AbstractItem item = TabItem.create(index + i, tab);
                     items[i] = item;
                     inflateView(item, compoundListener);
                 }
@@ -2966,10 +2966,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
-            AbstractItem item = new TabItem(0, tab);
+            AbstractItem item = TabItem.create(0, tab);
             inflateView(item, createPeekLayoutListener(item, peekAnimation));
         } else if (animation instanceof RevealAnimation && switcherVisibilityChanged) {
-            AbstractItem item = new TabItem(0, tab);
+            AbstractItem item = TabItem.create(0, tab);
             RevealAnimation revealAnimation = (RevealAnimation) animation;
             inflateView(item, createRevealLayoutListener(item, revealAnimation));
         } else {

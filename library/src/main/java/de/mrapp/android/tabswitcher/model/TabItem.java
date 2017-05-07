@@ -52,7 +52,7 @@ public class TabItem extends AbstractItem {
      * @param tab
      *         The tab as an instance of the class {@link Tab}. The tab may not be null
      */
-    public TabItem(final int index, @NonNull final Tab tab) {
+    private TabItem(final int index, @NonNull final Tab tab) {
         super(index);
         ensureNotNull(tab, "The tab may not be null");
         this.tab = tab;
@@ -60,8 +60,22 @@ public class TabItem extends AbstractItem {
     }
 
     /**
-     * Creates a new item, which contains information about a tab of a tab switcher. By
-     * default, the item is neither associated with a view, nor with a view holder.
+     * Creates a new item, which contains information about a tab of a tab switcher.
+     *
+     * @param index
+     *         The index of the tab as an {@link Integer} value. The index must be at least 0
+     * @param tab
+     *         The tab as an instance of the class {@link Tab}. The tab may not be null
+     * @return The item, which has been created, as an instance of the class {@link TabItem}. The
+     * item may not be null
+     */
+    @NonNull
+    public static TabItem create(final int index, @NonNull final Tab tab) {
+        return new TabItem(index, tab);
+    }
+
+    /**
+     * Creates a new item, which contains information about a tab of a tab switcher.
      *
      * @param model
      *         The model, the tab belongs to, as an instance of the type {@link Model}. The model
@@ -84,8 +98,7 @@ public class TabItem extends AbstractItem {
     }
 
     /**
-     * Creates a new item, which contains information about a specific tab. By default, the item is
-     * neither associated with a view, nor with a view holder.
+     * Creates a new item, which contains information about a specific tab.
      *
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
