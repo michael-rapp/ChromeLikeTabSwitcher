@@ -34,12 +34,15 @@ import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.AddTabItem;
+import de.mrapp.android.tabswitcher.model.ItemComparator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -59,58 +62,68 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         implements Tab.Callback {
 
     /**
-     * A comparator, which allows to compare two instances of the class {@link TabItem}. The tab
-     * item, which corresponds to the currently selected tab, is always sorted before all other tab
+     * A comparator, which allows to compare two instances of the class {@link AbstractItem}. The
+     * item, which corresponds to the currently selected tab, is always sorted before all other
      * items.
      */
-    private static class TabletTabItemComparator extends TabItem.Comparator {
+    private static class TabletItemComparator extends ItemComparator {
 
         /**
          * Creates a new comparator, which allows to compare two instances of the class {@link
-         * TabItem}. The tab item, which corresponds to the currently selected tab, is always sorted
-         * before all other tab items.
+         * AbstractItem}. The item, which corresponds to the currently selected tab, is always
+         * sorted before all other items.
          *
          * @param tabSwitcher
-         *         The tab switcher, the tab items, which should be compared by the comparator,
-         *         belong to, as a instance of the class {@link TabSwitcher}. The tab switcher may
-         *         not be null
+         *         The tab switcher, the items, which should be compared by the comparator, belong
+         *         to, as a instance of the class {@link TabSwitcher}. The tab switcher may not be
+         *         null
          */
-        TabletTabItemComparator(@NonNull final TabSwitcher tabSwitcher) {
+        TabletItemComparator(@NonNull final TabSwitcher tabSwitcher) {
             super(tabSwitcher);
         }
 
         @Override
-        public int compare(final TabItem o1, final TabItem o2) {
-            Tab tab1 = o1.getTab();
-            Tab tab2 = o2.getTab();
-            int index1 = getTabSwitcher().indexOf(tab1);
-            index1 = index1 == -1 ? o1.getIndex() : index1;
-            int index2 = getTabSwitcher().indexOf(tab2);
-            index2 = index2 == -1 ? o2.getIndex() : index2;
-            ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
-                    RuntimeException.class);
-            ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
-                    RuntimeException.class);
-            int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
-
-            if (index1 < selectedTabIndex) {
-                if (index2 == selectedTabIndex) {
-                    return 1;
-                } else if (index2 > selectedTabIndex) {
-                    return -1;
-                } else {
-                    return index1 >= index2 ? -1 : 1;
-                }
-            } else if (index1 > selectedTabIndex) {
-                if (index2 == selectedTabIndex) {
-                    return 1;
-                } else if (index2 > selectedTabIndex) {
-                    return index1 < index2 ? -1 : 1;
-                } else {
-                    return 1;
-                }
-            } else {
+        public int compare(final AbstractItem o1, final AbstractItem o2) {
+            if (o1 instanceof AddTabItem && o2 instanceof AddTabItem) {
+                return 0;
+            } else if (o1 instanceof AddTabItem) {
                 return -1;
+            } else if (o2 instanceof AddTabItem) {
+                return 1;
+            } else {
+                TabItem tabItem1 = (TabItem) o1;
+                TabItem tabItem2 = (TabItem) o2;
+                Tab tab1 = tabItem1.getTab();
+                Tab tab2 = tabItem2.getTab();
+                int index1 = getTabSwitcher().indexOf(tab1);
+                index1 = index1 == -1 ? o1.getIndex() : index1;
+                int index2 = getTabSwitcher().indexOf(tab2);
+                index2 = index2 == -1 ? o2.getIndex() : index2;
+                ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
+                        RuntimeException.class);
+                ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
+                        RuntimeException.class);
+                int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
+
+                if (index1 < selectedTabIndex) {
+                    if (index2 == selectedTabIndex) {
+                        return 1;
+                    } else if (index2 > selectedTabIndex) {
+                        return -1;
+                    } else {
+                        return index1 >= index2 ? -1 : 1;
+                    }
+                } else if (index1 > selectedTabIndex) {
+                    if (index2 == selectedTabIndex) {
+                        return 1;
+                    } else if (index2 > selectedTabIndex) {
+                        return index1 < index2 ? -1 : 1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    return -1;
+                }
             }
         }
     }
@@ -151,7 +164,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     private TabletDragHandler dragHandler;
 
     /**
-     * The view recycler, which allows to recycler the views, which are associated with of tabs.
+     * The view recycler, which allows to recycle the views, which are associated with of tabs.
      */
     private ViewRecycler<Tab, Void> contentViewRecycler;
 
@@ -163,7 +176,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
      */
-    private AttachedViewRecycler<TabItem, Void> tabViewRecycler;
+    private AttachedViewRecycler<AbstractItem, Void> tabViewRecycler;
 
     /**
      * The layout's primary toolbar.
@@ -298,8 +311,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     /**
-     * Calculates and returns the tab items, which correspond to the tabs, when the tab switcher is
-     * shown initially.
+     * Calculates and returns the items when the tab switcher is shown initially.
      *
      * @param firstVisibleTabIndex
      *         The index of the first visible tab as an {@link Integer} value or -1, if the index is
@@ -307,15 +319,15 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
      * @param firstVisibleTabPosition
      *         The position of the first visible tab in pixels as a {@link Float} value or -1, if
      *         the position is unknown
-     * @return An array, which contains the tab items, as an array of the type {@link TabItem}. The
-     * array may not be null
+     * @return An array, which contains the tab items, as an array of the type {@link AbstractItem}.
+     * The array may not be null
      */
     @NonNull
-    private TabItem[] calculateInitialTabItems(final int firstVisibleTabIndex,
-                                               final float firstVisibleTabPosition) {
+    private AbstractItem[] calculateInitialItems(final int firstVisibleTabIndex,
+                                                 final float firstVisibleTabPosition) {
         dragHandler.reset(getDragThreshold());
         setFirstVisibleIndex(-1);
-        TabItem[] tabItems = new TabItem[getModel().getCount()];
+        AbstractItem[] items = new AbstractItem[getModel().getCount()];
 
         if (!getModel().isEmpty()) {
             int tabSpacing = calculateTabSpacing();
@@ -323,62 +335,59 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                     firstVisibleTabIndex : 0;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : -1;
-            TabItem referenceTabItem = null;
-            AbstractTabItemIterator iterator =
-                    new InitialTabItemIterator(tabItems, false, referenceIndex);
-            TabItem tabItem;
+            AbstractItem referenceItem = null;
+            AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);
+            AbstractItem item;
 
-            while ((tabItem = iterator.next()) != null) {
-                TabItem predecessor = iterator.previous();
+            while ((item = iterator.next()) != null) {
+                AbstractItem predecessor = iterator.previous();
                 float position;
 
-                if (tabItem.getIndex() == referenceIndex && referencePosition != -1) {
-                    referenceTabItem = tabItem;
+                if (item.getIndex() == referenceIndex && referencePosition != -1) {
+                    referenceItem = item;
                     position = referencePosition;
                 } else {
-                    position = (getModel().getCount() - tabItem.getIndex() - 1) * tabSpacing;
+                    position = (getModel().getCount() - item.getIndex() - 1) * tabSpacing;
                 }
 
-                Pair<Float, State> pair =
-                        clipTabPosition(tabItem.getIndex(), position, predecessor);
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
+                Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
+                item.getTag().setPosition(pair.first);
+                item.getTag().setState(pair.second);
 
                 if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
-                    setFirstVisibleIndex(tabItem.getIndex());
+                    setFirstVisibleIndex(item.getIndex());
                 }
             }
 
-            if (referenceIndex > 0 && referenceTabItem != null) {
-                iterator = new InitialTabItemIterator(tabItems, true, referenceIndex - 1);
+            if (referenceIndex > 0 && referenceItem != null) {
+                iterator = new InitialItemIterator(items, true, referenceIndex - 1);
 
-                while ((tabItem = iterator.next()) != null && tabItem.getIndex() < referenceIndex) {
-                    TabItem predecessor = iterator.peek();
-                    float position = referenceTabItem.getTag().getPosition() +
-                            ((tabItem.getIndex() - referenceIndex) * tabSpacing);
-                    Pair<Float, State> pair =
-                            clipTabPosition(tabItem.getIndex(), position, predecessor);
-                    tabItem.getTag().setPosition(pair.first);
-                    tabItem.getTag().setState(pair.second);
+                while ((item = iterator.next()) != null && item.getIndex() < referenceIndex) {
+                    AbstractItem predecessor = iterator.peek();
+                    float position = referenceItem.getTag().getPosition() +
+                            ((item.getIndex() - referenceIndex) * tabSpacing);
+                    Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
 
                     if (pair.second == State.FLOATING) {
-                        setFirstVisibleIndex(tabItem.getIndex());
+                        setFirstVisibleIndex(item.getIndex());
                     }
                 }
             }
         }
 
         dragHandler.setCallback(this);
-        return tabItems;
+        return items;
     }
 
     /**
-     * Creates and returns a layout listener, which allows to adapt the size and position of a tab,
-     * once its view has been inflated.
+     * Creates and returns a layout listener, which allows to adapt the size and position of an
+     * item, once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be adapted, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, whose view should be adapted, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param layoutListener
      *         The layout lister, which should be notified, when the created listener is invoked, as
      *         an instance of the type {@link OnGlobalLayoutListener} or null, if no listener should
@@ -387,13 +396,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
      * OnGlobalLayoutListener}. The layout listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final AbstractItem item,
                                                                    @Nullable final OnGlobalLayoutListener layoutListener) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                updateView(tabItem);
+                updateView(item);
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
@@ -452,7 +461,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
         getModel().addListener(recyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
-                Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
+                Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
@@ -481,14 +490,14 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    protected final AttachedViewRecycler<TabItem, Void> getTabViewRecycler() {
+    protected final AttachedViewRecycler<AbstractItem, Void> getTabViewRecycler() {
         return tabViewRecycler;
     }
 
     @Override
-    protected final void inflateAndUpdateView(@NonNull final TabItem tabItem,
+    protected final void inflateAndUpdateView(@NonNull final AbstractItem item,
                                               @Nullable final OnGlobalLayoutListener listener) {
-        inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener));
+        inflateView(item, createInflateViewLayoutListener(item, listener));
     }
 
     @Override
@@ -592,29 +601,29 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
-                                                     @NonNull final TabItem predecessor) {
+    protected final float calculateSuccessorPosition(@NonNull final AbstractItem item,
+                                                     @NonNull final AbstractItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
         return predecessorPosition - calculateTabSpacing();
     }
 
     @Override
-    protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
-                                                       @NonNull final TabItem successor) {
+    protected final float calculatePredecessorPosition(@NonNull final AbstractItem item,
+                                                       @NonNull final AbstractItem successor) {
         float successorPosition = successor.getTag().getPosition();
         return successorPosition + calculateTabSpacing();
     }
 
     @Override
     public final void onGlobalLayout() {
-        TabItem[] tabItems = calculateInitialTabItems(getModel().getFirstVisibleTabIndex(),
+        AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
                 getModel().getFirstVisibleTabPosition());
-        AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
-        TabItem tabItem;
+        AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isVisible()) {
-                inflateAndUpdateView(tabItem, null);
+        while ((item = iterator.next()) != null) {
+            if (item.isVisible()) {
+                inflateAndUpdateView(item, null);
             }
         }
 
@@ -649,32 +658,32 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
             if (selectedTab != null) {
                 inflateContent(selectedTab);
                 tabViewRecycler.setComparator(
-                        Collections.reverseOrder(new TabletTabItemComparator(getTabSwitcher())));
+                        Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
                 int tabSpacing = calculateTabSpacing();
-                AbstractTabItemIterator iterator =
-                        new TabItemIterator.Builder(getModel(), getTabViewRecycler()).create();
+                AbstractItemIterator iterator =
+                        new ItemIterator.Builder(getModel(), getTabViewRecycler()).create();
                 float referencePosition = iterator.getItem(index).getTag().getPosition();
                 referencePosition =
                         Math.max(Math.min(calculateMaxEndPosition(index), referencePosition),
                                 calculateMinStartPosition(index));
-                TabItem tabItem;
+                AbstractItem item;
 
-                while ((tabItem = iterator.next()) != null) {
+                while ((item = iterator.next()) != null) {
                     float position;
 
-                    if (tabItem.getIndex() == index) {
+                    if (item.getIndex() == index) {
                         position = referencePosition;
-                    } else if (tabItem.getIndex() < index) {
-                        position = referencePosition + ((index - tabItem.getIndex()) * tabSpacing);
+                    } else if (item.getIndex() < index) {
+                        position = referencePosition + ((index - item.getIndex()) * tabSpacing);
                     } else {
-                        position = referencePosition - ((tabItem.getIndex() - index) * tabSpacing);
+                        position = referencePosition - ((item.getIndex() - index) * tabSpacing);
                     }
 
                     Pair<Float, State> pair =
-                            clipTabPosition(tabItem.getIndex(), position, iterator.previous());
-                    tabItem.getTag().setPosition(pair.first);
-                    tabItem.getTag().setState(pair.second);
-                    inflateOrRemoveView(tabItem);
+                            clipPosition(item.getIndex(), position, iterator.previous());
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+                    inflateOrRemoveView(item);
                 }
             }
         }
@@ -730,6 +739,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     @Override
     public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
         adaptTabContentBackgroundColor();
+    }
+
+    @Override
+    public final void onAddTabButtonVisibilityChanged(final boolean visible) {
+        // TODO: Implement
     }
 
     @Override

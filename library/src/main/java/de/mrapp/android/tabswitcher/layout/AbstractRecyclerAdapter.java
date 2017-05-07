@@ -37,8 +37,9 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -59,8 +60,13 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public abstract class AbstractRecyclerAdapter<ParamType>
-        extends AbstractViewRecycler.Adapter<TabItem, ParamType>
+        extends AbstractViewRecycler.Adapter<AbstractItem, ParamType>
         implements Tab.Callback, Model.Listener {
+
+    /**
+     * The view type of a tab.
+     */
+    private static final int TAB_VIEW_TYPE = 0;
 
     /**
      * The tab switcher, the tabs belong to.
@@ -95,7 +101,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * The view recycler, the adapter is bound to.
      */
-    private AttachedViewRecycler<TabItem, ParamType> viewRecycler;
+    private AttachedViewRecycler<AbstractItem, ParamType> viewRecycler;
 
     /**
      * Adapts the title of a tab.
@@ -238,12 +244,13 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * selected, or not.
      */
     private void adaptAllSelectionStates() {
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                TabItem tabItem = (TabItem) item;
                 adaptSelectionState(tabItem);
                 adaptBackgroundColor(tabItem);
             }
@@ -363,7 +370,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * AttachedViewRecycler}. The view recycler may not be null
      */
     @NonNull
-    protected final AttachedViewRecycler<TabItem, ParamType> getViewRecyclerOrThrowException() {
+    protected final AttachedViewRecycler<AbstractItem, ParamType> getViewRecyclerOrThrowException() {
         ensureNotNull(viewRecycler, "No view recycler has been set", IllegalStateException.class);
         return viewRecycler;
     }
@@ -401,9 +408,9 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * may not be null
      */
     @NonNull
-    protected abstract View onInflateView(@NonNull final LayoutInflater inflater,
-                                          @Nullable final ViewGroup parent,
-                                          @NonNull final AbstractTabViewHolder viewHolder);
+    protected abstract View onInflateTabView(@NonNull final LayoutInflater inflater,
+                                             @Nullable final ViewGroup parent,
+                                             @NonNull final AbstractTabViewHolder viewHolder);
 
     /**
      * The method, which is invoked on implementing subclasses in order to adapt the appearance of a
@@ -420,18 +427,18 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      *         ParamType or an empty array, if no optional parameters are available
      */
     @SuppressWarnings("unchecked")
-    protected abstract void onShowView(@NonNull final View view, @NonNull final TabItem tabItem,
-                                       @NonNull final ParamType... params);
+    protected abstract void onShowTabView(@NonNull final View view, @NonNull final TabItem tabItem,
+                                          @NonNull final ParamType... params);
 
     /**
      * The method, which is invoked on implementing subclasses in order to create the view holder,
-     * which shold be associated with an inflated view.
+     * which should be associated with an inflated view.
      *
      * @return The view holder, which has been created, as an instance of the class {@link
      * AbstractTabViewHolder}. The view holder may not be null
      */
     @NonNull
-    protected abstract AbstractTabViewHolder onCreateViewHolder();
+    protected abstract AbstractTabViewHolder onCreateTabViewHolder();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the layout,
@@ -484,7 +491,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      *         AttachedViewRecycler. The view recycler may not be null
      */
     public final void setViewRecycler(
-            @NonNull final AttachedViewRecycler<TabItem, ParamType> viewRecycler) {
+            @NonNull final AttachedViewRecycler<AbstractItem, ParamType> viewRecycler) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
     }
@@ -557,26 +564,26 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
     @Override
     public final void onTabIconChanged(@Nullable final Drawable icon) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptIcon(tabItem);
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptIcon((TabItem) item);
             }
         }
     }
 
     @Override
     public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptBackgroundColor(tabItem);
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptBackgroundColor((TabItem) item);
             }
         }
     }
@@ -588,28 +595,33 @@ public abstract class AbstractRecyclerAdapter<ParamType>
 
     @Override
     public final void onTabTitleColorChanged(@Nullable final ColorStateList colorStateList) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptTitleTextColor(tabItem);
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptTitleTextColor((TabItem) item);
             }
         }
     }
 
     @Override
     public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptCloseButtonIcon(tabItem);
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptCloseButtonIcon((TabItem) item);
             }
         }
+    }
+
+    @Override
+    public final void onAddTabButtonVisibilityChanged(final boolean visible) {
+
     }
 
     @Override
@@ -693,56 +705,82 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         }
     }
 
-    @SafeVarargs
-    @NonNull
+    @CallSuper
     @Override
-    public final View onInflateView(@NonNull final LayoutInflater inflater,
-                                    @Nullable final ViewGroup parent,
-                                    @NonNull final TabItem tabItem, final int viewType,
-                                    @NonNull final ParamType... params) {
-        AbstractTabViewHolder viewHolder = onCreateViewHolder();
-        View view = onInflateView(inflater, parent, viewHolder);
-        viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
-        viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
-        view.setTag(R.id.tag_view_holder, viewHolder);
-        tabItem.setView(view);
-        tabItem.setViewHolder(viewHolder);
-        view.setTag(R.id.tag_properties, tabItem.getTag());
-        return view;
+    public int getViewType(@NonNull final AbstractItem item) {
+        if (item instanceof TabItem) {
+            return TAB_VIEW_TYPE;
+        } else {
+            throw new IllegalArgumentException("Unknown item type");
+        }
     }
 
-    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    @CallSuper
+    @NonNull
     @Override
-    public final void onShowView(@NonNull final Context context, @NonNull final View view,
-                                 @NonNull final TabItem tabItem, final boolean inflated,
-                                 @NonNull final ParamType... params) {
-        AbstractTabViewHolder viewHolder =
-                (AbstractTabViewHolder) view.getTag(R.id.tag_view_holder);
-
-        if (!tabItem.isInflated()) {
-            tabItem.setView(view);
+    public View onInflateView(@NonNull final LayoutInflater inflater,
+                              @Nullable final ViewGroup parent, @NonNull final AbstractItem item,
+                              final int viewType, @NonNull final ParamType... params) {
+        if (viewType == TAB_VIEW_TYPE) {
+            TabItem tabItem = (TabItem) item;
+            AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
+            View view = onInflateTabView(inflater, parent, viewHolder);
+            viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
+            viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
+            view.setTag(R.id.tag_view_holder, viewHolder);
             tabItem.setViewHolder(viewHolder);
-            view.setTag(R.id.tag_properties, tabItem.getTag());
+            item.setView(view);
+            view.setTag(R.id.tag_properties, item.getTag());
+            return view;
+        } else {
+            throw new IllegalArgumentException("Unknown view type");
         }
+    }
 
-        Tab tab = tabItem.getTab();
-        tab.addCallback(this);
-        adaptTitle(tabItem);
-        adaptIcon(tabItem);
-        adaptCloseButton(tabItem);
-        adaptCloseButtonIcon(tabItem);
-        adaptBackgroundColor(tabItem);
-        adaptTitleTextColor(tabItem);
-        adaptSelectionState(tabItem);
-        onShowView(view, tabItem, params);
+    @SuppressWarnings("unchecked")
+    @CallSuper
+    @Override
+    public void onShowView(@NonNull final Context context, @NonNull final View view,
+                           @NonNull final AbstractItem item, final boolean inflated,
+                           @NonNull final ParamType... params) {
+        if (item instanceof TabItem) {
+            TabItem tabItem = (TabItem) item;
+            AbstractTabViewHolder viewHolder =
+                    (AbstractTabViewHolder) view.getTag(R.id.tag_view_holder);
+
+            if (!tabItem.isInflated()) {
+                tabItem.setView(view);
+                tabItem.setViewHolder(viewHolder);
+                view.setTag(R.id.tag_properties, tabItem.getTag());
+            }
+
+            Tab tab = tabItem.getTab();
+            tab.addCallback(this);
+            adaptTitle(tabItem);
+            adaptIcon(tabItem);
+            adaptCloseButton(tabItem);
+            adaptCloseButtonIcon(tabItem);
+            adaptBackgroundColor(tabItem);
+            adaptTitleTextColor(tabItem);
+            adaptSelectionState(tabItem);
+            onShowTabView(view, tabItem, params);
+        } else {
+            throw new IllegalArgumentException("Unknown item type");
+        }
     }
 
     @CallSuper
     @Override
-    public void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
-        Tab tab = tabItem.getTab();
-        tab.removeCallback(this);
-        view.setTag(R.id.tag_properties, null);
+    public void onRemoveView(@NonNull final View view, @NonNull final AbstractItem item) {
+        if (item instanceof TabItem) {
+            TabItem tabItem = (TabItem) item;
+            Tab tab = tabItem.getTab();
+            tab.removeCallback(this);
+            view.setTag(R.id.tag_properties, null);
+        } else {
+            throw new IllegalArgumentException("Unknown item type");
+        }
     }
 
 }

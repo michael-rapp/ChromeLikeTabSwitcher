@@ -21,12 +21,12 @@ import android.view.View;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.State;
-import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -44,7 +44,7 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
      * The view recycler, which allows to inflate the views, which are used to visualize the tabs,
      * whose positions and states are calculated by the drag handler.
      */
-    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+    private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
     /**
      * The offset between two neighboring tabs in pixels.
@@ -70,7 +70,7 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
      */
     public TabletDragHandler(@NonNull final TabSwitcher tabSwitcher,
                              @NonNull final Arithmetics arithmetics,
-                             @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
+                             @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
@@ -80,16 +80,15 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
 
     @Override
     @Nullable
-    protected final TabItem getFocusedTab(final float position) {
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-        TabItem tabItem;
+    protected final AbstractItem getFocusedItem(final float position) {
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getTag().getState() == State.FLOATING ||
-                    tabItem.getTag().getState() == State.STACKED_START_ATOP ||
-                    tabItem.getIndex() == 0) {
-                View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            if (item.getTag().getState() == State.FLOATING ||
+                    item.getTag().getState() == State.STACKED_START_ATOP) {
+                View view = item.getView();
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarWidth = getTabSwitcher().areToolbarsShown() && toolbars != null ?
                         Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
@@ -101,7 +100,7 @@ public class TabletDragHandler extends AbstractDragHandler<AbstractDragHandler.C
                                         getTabSwitcher());
 
                 if (viewPosition <= position) {
-                    return tabItem;
+                    return item;
                 }
             }
         }

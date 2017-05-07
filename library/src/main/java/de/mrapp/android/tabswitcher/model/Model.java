@@ -29,6 +29,7 @@ import android.view.View.OnClickListener;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
@@ -238,6 +239,16 @@ public interface Model extends Iterable<Tab> {
          *         null, if the default icon should be used
          */
         void onTabCloseButtonIconChanged(@Nullable Drawable icon);
+
+        /**
+         * The method, which is invoked, when it has been changed, whether the button, which allows
+         * to add a new tab, should be shonw, or not.
+         *
+         * @param visible
+         *         True, if the button, which allows to add a new tab, should be shown, false
+         *         otherwise
+         */
+        void onAddTabButtonVisibilityChanged(boolean visible);
 
         /**
          * The method, which is invoked, when it has been changed, whether the toolbars should be
@@ -799,6 +810,27 @@ public interface Model extends Iterable<Tab> {
      *         the default icon should be used
      */
     void setTabCloseButtonIcon(@Nullable final Bitmap icon);
+
+    /**
+     * Returns, whether a button, which allows to add a new tab, is shown. When using the smartphone
+     * layout, such a button is never shown. When using the talet layout, the button is shown next
+     * to the tabs.
+     *
+     * @return True, if a button, which allows to add a new tab, is shown, false otherwise
+     */
+    boolean isAddTabButtonShown();
+
+    /**
+     * Sets, whether a button, which allows to add a new tab, should be shown. This method does not
+     * have any effect when using the smartphone layout. When using the tablet layout, the button is
+     * shown next to the tabs.
+     *
+     * @param listener
+     *         The listener, which should be notified, when the button has been clicked, as an
+     *         instance of the type {@link AddTabButtonListener} or null, if the button should not
+     *         be shown
+     */
+    void showAddTabButton(@Nullable AddTabButtonListener listener);
 
     /**
      * Returns, whether the toolbars are shown, when the tab switcher is shown, or not. When using

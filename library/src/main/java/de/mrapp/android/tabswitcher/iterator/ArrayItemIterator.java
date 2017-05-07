@@ -16,31 +16,32 @@ package de.mrapp.android.tabswitcher.iterator;
 import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An iterator, which allows to iterate the tab items, which correspond to the tabs, which are
+ * An iterator, which allows to iterate the items, which correspond to the tabs, which are
  * contained by an array.
  *
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class ArrayTabItemIterator extends AbstractTabItemIterator {
+public class ArrayItemIterator extends AbstractItemIterator {
 
     /**
      * A builder, which allows to configure an create instances of the class {@link
-     * ArrayTabItemIterator}.
+     * ArrayItemIterator}.
      */
-    public static class Builder extends AbstractBuilder<Builder, ArrayTabItemIterator> {
+    public static class Builder extends AbstractBuilder<Builder, ArrayItemIterator> {
 
         /**
          * The view recycler, which allows to inflate the views, which are used to visualize the
          * tabs, which are iterated by the iterator, which is created by the builder.
          */
-        private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+        private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
         /**
          * The array, which contains the tabs, which are iterated by the iterator, which is created
@@ -50,7 +51,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * ArrayTabItemIterator}.
+         * ArrayItemIterator}.
          *
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
@@ -60,7 +61,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
          *         The array, which contains the tabs, which should be iterated by the iterator, as
          *         an array of the type {@link Tab}. The array may not be null
          */
-        public Builder(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
+        public Builder(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                        @NonNull final Tab[] array) {
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(array, "The array may not be null");
@@ -70,8 +71,8 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
 
         @NonNull
         @Override
-        public ArrayTabItemIterator create() {
-            return new ArrayTabItemIterator(viewRecycler, array, reverse, start);
+        public ArrayItemIterator create() {
+            return new ArrayItemIterator(viewRecycler, array, reverse, start);
         }
 
     }
@@ -80,7 +81,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
      * The view recycler, which allows to inflate the views, which are used to visualize the
      * iterated tabs.
      */
-    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+    private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
     /**
      * The array, which contains the tabs, which are iterated by the iterator.
@@ -88,7 +89,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
     private final Tab[] array;
 
     /**
-     * Creates a new iterator, which allows to iterate the tab items, whcih correspond to the tabs,
+     * Creates a new iterator, which allows to iterate the items, which correspond to the tabs,
      * which are contained by an array.
      *
      * @param viewRecycler
@@ -99,14 +100,14 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
      *         The array, which contains the tabs, which should be iterated by the iterator, as an
      *         array of the type {@link Tab}. The array may not be null
      * @param reverse
-     *         True, if the tabs should be iterated in reverse order, false otherwise
+     *         True, if the items should be iterated in reverse order, false otherwise
      * @param start
-     *         The index of the first tab, which should be iterated, as an {@link Integer} value or
-     *         -1, if all tabs should be iterated
+     *         The index of the first item, which should be iterated, as an {@link Integer} value or
+     *         -1, if all items should be iterated
      */
-    private ArrayTabItemIterator(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                                 @NonNull final Tab[] array, final boolean reverse,
-                                 final int start) {
+    private ArrayItemIterator(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
+                              @NonNull final Tab[] array, final boolean reverse,
+                              final int start) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(array, "The array may not be null");
         this.viewRecycler = viewRecycler;
@@ -121,7 +122,7 @@ public class ArrayTabItemIterator extends AbstractTabItemIterator {
 
     @NonNull
     @Override
-    public final TabItem getItem(final int index) {
+    public final AbstractItem getItem(final int index) {
         return TabItem.create(viewRecycler, index, array[index]);
     }
 

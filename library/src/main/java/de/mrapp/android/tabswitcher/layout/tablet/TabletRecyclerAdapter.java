@@ -13,8 +13,10 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +31,8 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -44,6 +48,11 @@ import de.mrapp.android.util.ViewUtil;
  */
 public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
         implements Tab.Callback, Model.Listener {
+
+    /**
+     * The view type of a button, which allows to add a new tab.
+     */
+    private static final int ADD_TAB_BUTTON_VIEW_TYPE = 1;
 
     /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
@@ -66,11 +75,64 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
         super(tabSwitcher, model, themeHelper);
     }
 
+    @Override
+    public final int getViewTypeCount() {
+        return super.getViewTypeCount() + 1;
+    }
+
+    @Override
+    public final int getViewType(@NonNull final AbstractItem item) {
+        if (item instanceof AddTabItem) {
+            return ADD_TAB_BUTTON_VIEW_TYPE;
+        } else {
+            return super.getViewType(item);
+        }
+    }
+
     @NonNull
     @Override
-    protected final View onInflateView(@NonNull final LayoutInflater inflater,
-                                       @Nullable final ViewGroup parent,
-                                       @NonNull final AbstractTabViewHolder viewHolder) {
+    public final View onInflateView(@NonNull final LayoutInflater inflater,
+                                    @Nullable final ViewGroup parent,
+                                    @NonNull final AbstractItem item, final int viewType,
+                                    @NonNull final Void... params) {
+        if (viewType == ADD_TAB_BUTTON_VIEW_TYPE) {
+            // TODO: Inflate proper view
+            View view = new View(getModel().getContext());
+            item.setView(view);
+            view.setTag(R.id.tag_properties, item.getTag());
+            return view;
+        } else {
+            return super.onInflateView(inflater, parent, item, viewType, params);
+        }
+    }
+
+    @Override
+    public final void onShowView(@NonNull final Context context, @NonNull final View view,
+                                 @NonNull final AbstractItem item, final boolean inflated,
+                                 @NonNull final Void... params) {
+        if (item instanceof AddTabItem) {
+            // TODO: Adapt view appearance if necessary
+        } else {
+            super.onShowView(context, view, item, inflated, params);
+        }
+    }
+
+    @CallSuper
+    @Override
+    public final void onRemoveView(@NonNull final View view, @NonNull final AbstractItem item) {
+        if (item instanceof AddTabItem) {
+            view.setTag(R.id.tag_properties, null);
+            // TODO Cleanup if necessary
+        } else {
+            super.onRemoveView(view, item);
+        }
+    }
+
+    @NonNull
+    @Override
+    protected final View onInflateTabView(@NonNull final LayoutInflater inflater,
+                                          @Nullable final ViewGroup parent,
+                                          @NonNull final AbstractTabViewHolder viewHolder) {
         View view = inflater.inflate(R.layout.tablet_tab, parent, false);
         StateListDrawable backgroundDrawable = new StateListDrawable();
         Drawable defaultDrawable = ContextCompat
@@ -84,14 +146,14 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     }
 
     @Override
-    protected final void onShowView(@NonNull final View view, @NonNull final TabItem tabItem,
-                                    @NonNull final Void... params) {
+    protected final void onShowTabView(@NonNull final View view, @NonNull final TabItem tabItem,
+                                       @NonNull final Void... params) {
 
     }
 
     @NonNull
     @Override
-    protected final AbstractTabViewHolder onCreateViewHolder() {
+    protected final AbstractTabViewHolder onCreateTabViewHolder() {
         return new TabletTabViewHolder();
     }
 

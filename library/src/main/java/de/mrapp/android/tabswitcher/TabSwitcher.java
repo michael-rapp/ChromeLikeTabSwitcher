@@ -649,6 +649,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             }
 
             @Override
+            public void onAddTabButtonVisibilityChanged(final boolean visible) {
+
+            }
+
+            @Override
             public void onToolbarVisibilityChanged(final boolean visible) {
 
             }
@@ -1383,6 +1388,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setTabCloseButtonIcon(@Nullable final Bitmap icon) {
         model.setTabCloseButtonIcon(icon);
+    }
+
+    @Override
+    public final boolean isAddTabButtonShown() {
+        return getLayout() == Layout.TABLET && model.isAddTabButtonShown();
+    }
+
+    @Override
+    public final void showAddTabButton(@Nullable final AddTabButtonListener listener) {
+        if (getLayout() == Layout.TABLET) {
+            model.showAddTabButton(listener);
+        }
     }
 
     @Override

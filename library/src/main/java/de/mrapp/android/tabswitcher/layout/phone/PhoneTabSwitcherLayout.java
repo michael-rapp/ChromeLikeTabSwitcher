@@ -48,14 +48,16 @@ import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.ArrayTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ArrayItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.ItemComparator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
@@ -253,7 +255,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
      */
-    private AttachedViewRecycler<TabItem, Integer> tabViewRecycler;
+    private AttachedViewRecycler<AbstractItem, Integer> tabViewRecycler;
 
     /**
      * The view group, which contains the tab switcher's tabs.
@@ -322,14 +324,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Calculates and returns the maximum space between a specific tab and its predecessor. The
      * maximum space is greater for the currently selected tab.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, the maximum space should be returned for,
-     *         as an instance of the class {@link TabItem} or null, if the default maximum space
+     * @param item
+     *         The item, which corresponds to the tab, the maximum space should be returned for, as
+     *         an instance of the class {@link AbstractItem} or null, if the default maximum space
      *         should be returned
      * @return The maximum space between the given tab and its predecessor in pixels as a {@link
      * Float} value
      */
-    private float calculateMaxTabSpacing(@Nullable final TabItem tabItem) {
+    private float calculateMaxTabSpacing(@Nullable final AbstractItem item) {
         float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
                 (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
                         getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
@@ -346,8 +348,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             maxTabSpacing = totalSpace * 0.25f;
         }
 
-        return count > 4 && tabItem != null &&
-                tabItem.getTab() == getTabSwitcher().getSelectedTab() ?
+        return count > 4 && item != null &&
+                ((TabItem) item).getTab() == getTabSwitcher().getSelectedTab() ?
                 maxTabSpacing * SELECTED_TAB_SPACING_RATIO : maxTabSpacing;
     }
 
@@ -441,21 +443,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Shows the tab switcher in an animated manner.
      */
     private void animateShowSwitcher() {
-        TabItem[] tabItems = calculateInitialTabItems(-1, -1);
-        AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
-        TabItem tabItem;
+        AbstractItem[] items = calculateInitialItems(-1, -1);
+        AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getTab() == getModel().getSelectedTab() || tabItem.isVisible()) {
-                tabViewRecycler.inflate(tabItem);
-                View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            if (((TabItem) item).getTab() == getModel().getSelectedTab() || item.isVisible()) {
+                tabViewRecycler.inflate(item);
+                View view = item.getView();
 
                 if (!ViewCompat.isLaidOut(view)) {
                     view.getViewTreeObserver().addOnGlobalLayoutListener(
                             new LayoutListenerWrapper(view,
-                                    createShowSwitcherLayoutListener(tabItem)));
+                                    createShowSwitcherLayoutListener(item)));
                 } else {
-                    animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
+                    animateShowSwitcher(item, createUpdateViewAnimationListener(item));
                 }
             }
         }
@@ -464,7 +466,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     /**
-     * Calculates and returns the tab items, which correspond to the tabs, when the tab switcher is
+     * Calculates and returns the items, which correspond to the tabs, when the tab switcher is
      * shown initially.
      *
      * @param firstVisibleTabIndex
@@ -473,15 +475,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * @param firstVisibleTabPosition
      *         The position of the first visible tab in pixels as a {@link Float} value or -1, if
      *         the position is unknown
-     * @return An array, which contains the tab items, as an array of the type {@link TabItem}. The
+     * @return An array, which contains the items, as an array of the type {@link AbstractItem}. The
      * array may not be null
      */
     @NonNull
-    private TabItem[] calculateInitialTabItems(final int firstVisibleTabIndex,
-                                               final float firstVisibleTabPosition) {
+    private AbstractItem[] calculateInitialItems(final int firstVisibleTabIndex,
+                                                 final float firstVisibleTabPosition) {
         dragHandler.reset(getDragThreshold());
         setFirstVisibleIndex(-1);
-        TabItem[] tabItems = new TabItem[getModel().getCount()];
+        AbstractItem[] items = new AbstractItem[getModel().getCount()];
 
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
@@ -492,26 +494,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     firstVisibleTabPosition : attachedPosition;
             referencePosition =
                     Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
-            AbstractTabItemIterator iterator =
-                    new InitialTabItemIterator(tabItems, false, referenceIndex);
-            TabItem tabItem;
+            AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);
+            AbstractItem item;
 
-            while ((tabItem = iterator.next()) != null) {
-                TabItem predecessor = iterator.previous();
+            while ((item = iterator.next()) != null) {
+                AbstractItem predecessor = iterator.previous();
                 float position;
 
-                if (tabItem.getIndex() == getModel().getCount() - 1) {
+                if (item.getIndex() == getModel().getCount() - 1) {
                     position = 0;
-                } else if (tabItem.getIndex() == referenceIndex) {
+                } else if (item.getIndex() == referenceIndex) {
                     position = referencePosition;
                 } else {
-                    position = calculateSuccessorPosition(tabItem, predecessor);
+                    position = calculateSuccessorPosition(item, predecessor);
                 }
 
-                Pair<Float, State> pair =
-                        clipTabPosition(tabItem.getIndex(), position, predecessor);
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
+                Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
+                item.getTag().setPosition(pair.first);
+                item.getTag().setState(pair.second);
 
                 if (pair.second != State.FLOATING) {
                     break;
@@ -520,65 +520,64 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
             boolean overshooting =
                     referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
-            iterator = new InitialTabItemIterator(tabItems, false, 0);
+            iterator = new InitialItemIterator(items, false, 0);
             float minTabSpacing = calculateMinTabSpacing();
             float defaultTabSpacing = calculateMaxTabSpacing(null);
-            TabItem selectedTabItem =
-                    TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
-            float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
-            TabItem currentReferenceTabItem = iterator.getItem(referenceIndex);
+            AbstractItem selectedItem =
+                    TabItem.create(getModel(), tabViewRecycler, selectedTabIndex);
+            float maxTabSpacing = calculateMaxTabSpacing(selectedItem);
+            AbstractItem currentReferenceItem = iterator.getItem(referenceIndex);
 
-            while ((tabItem = iterator.next()) != null &&
-                    (overshooting || tabItem.getIndex() < referenceIndex)) {
-                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceTabItem);
-                TabItem predecessor = iterator.peek();
+            while ((item = iterator.next()) != null &&
+                    (overshooting || item.getIndex() < referenceIndex)) {
+                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceItem);
+                AbstractItem predecessor = iterator.peek();
                 Pair<Float, State> pair;
 
                 if (overshooting) {
                     float position;
 
-                    if (referenceIndex > tabItem.getIndex()) {
+                    if (referenceIndex > item.getIndex()) {
                         position = maxTabSpacing +
-                                ((getModel().getCount() - 1 - tabItem.getIndex() - 1) *
+                                ((getModel().getCount() - 1 - item.getIndex() - 1) *
                                         defaultTabSpacing);
                     } else {
-                        position = (getModel().getCount() - 1 - tabItem.getIndex()) *
-                                defaultTabSpacing;
+                        position =
+                                (getModel().getCount() - 1 - item.getIndex()) * defaultTabSpacing;
                     }
 
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
                 } else if (referencePosition >= attachedPosition - currentTabSpacing) {
                     float position;
 
-                    if (selectedTabIndex > tabItem.getIndex() &&
-                            selectedTabIndex <= referenceIndex) {
+                    if (selectedTabIndex > item.getIndex() && selectedTabIndex <= referenceIndex) {
                         position = referencePosition + maxTabSpacing +
-                                ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
+                                ((referenceIndex - item.getIndex() - 1) * defaultTabSpacing);
                     } else {
                         position = referencePosition +
-                                ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
+                                ((referenceIndex - item.getIndex()) * defaultTabSpacing);
                     }
 
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
                 } else {
-                    TabItem successor = iterator.previous();
+                    AbstractItem successor = iterator.previous();
                     float successorPosition = successor.getTag().getPosition();
                     float position = (attachedPosition * (successorPosition + minTabSpacing)) /
                             (minTabSpacing + attachedPosition - currentTabSpacing);
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
 
                     if (pair.first >= attachedPosition - currentTabSpacing) {
-                        currentReferenceTabItem = tabItem;
+                        currentReferenceItem = item;
                         referencePosition = pair.first;
-                        referenceIndex = tabItem.getIndex();
+                        referenceIndex = item.getIndex();
                     }
                 }
 
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
+                item.getTag().setPosition(pair.first);
+                item.getTag().setState(pair.second);
 
                 if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
-                    setFirstVisibleIndex(tabItem.getIndex());
+                    setFirstVisibleIndex(item.getIndex());
                 }
             }
 
@@ -588,7 +587,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         }
 
         dragHandler.setCallback(this);
-        return tabItems;
+        return items;
     }
 
     /**
@@ -610,49 +609,49 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 SwipeAnimation swipeAnimation =
                         animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                                 new SwipeAnimation.Builder().create();
-                TabItem[] tabItems = new TabItem[tabs.length];
+                AbstractItem[] items = new AbstractItem[tabs.length];
                 OnGlobalLayoutListener compoundListener = new CompoundLayoutListener(tabs.length,
-                        createSwipeLayoutListener(tabItems, swipeAnimation));
+                        createSwipeLayoutListener(items, swipeAnimation));
 
                 for (int i = 0; i < tabs.length; i++) {
                     Tab tab = tabs[i];
-                    TabItem tabItem = new TabItem(index + i, tab);
-                    tabItems[i] = tabItem;
-                    inflateView(tabItem, compoundListener);
+                    AbstractItem item = new TabItem(index + i, tab);
+                    items[i] = item;
+                    inflateView(item, compoundListener);
                 }
             } else if (!getModel().isSwitcherShown()) {
                 toolbar.setAlpha(0);
 
                 if (getModel().getSelectedTab() == tabs[0]) {
-                    TabItem tabItem = TabItem.create(getTabSwitcher(), tabViewRecycler, index);
-                    inflateView(tabItem, createAddSelectedTabLayoutListener(tabItem));
+                    AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, index);
+                    inflateView(item, createAddSelectedTabLayoutListener(item));
                 }
             }
         }
     }
 
     /**
-     * Animates the position and size of a specific tab item in order to show the tab switcher.
+     * Animates the position and size of a specific tab in order to show the tab switcher.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be animated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param listener
      *         The listener, which should be notified about the animation's progress, as an instance
      *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateShowSwitcher(@NonNull final TabItem tabItem,
+    private void animateShowSwitcher(@NonNull final AbstractItem item,
                                      @Nullable final AnimatorListener listener) {
-        animateShowSwitcher(tabItem, showSwitcherAnimationDuration,
+        animateShowSwitcher(item, showSwitcherAnimationDuration,
                 new AccelerateDecelerateInterpolator(), listener);
     }
 
     /**
      * Animates the position and size of a specific tab in order to show the tab switcher.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be animated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param duration
      *         The duration of the animation in milliseconds as a {@link Long} value
      * @param interpolator
@@ -662,10 +661,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The listener, which should be notified about the animation's progress, as an instance
      *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateShowSwitcher(@NonNull final TabItem tabItem, final long duration,
+    private void animateShowSwitcher(@NonNull final AbstractItem item, final long duration,
                                      @NonNull final Interpolator interpolator,
                                      @Nullable final AnimatorListener listener) {
-        View view = tabItem.getView();
+        View view = item.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         view.setX(layoutParams.leftMargin);
         view.setY(layoutParams.topMargin);
@@ -678,10 +677,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         float scale = getArithmetics().getScale(view, true);
         int selectedTabIndex = getModel().getSelectedTabIndex();
 
-        if (tabItem.getIndex() < selectedTabIndex) {
+        if (item.getIndex() < selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
                     getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer));
-        } else if (tabItem.getIndex() > selectedTabIndex) {
+        } else if (item.getIndex() > selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                             layoutParams.topMargin);
@@ -698,8 +697,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         animation.setListener(new AnimationListenerWrapper(listener));
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, scale);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                tabItem.getTag().getPosition(), true);
+        getArithmetics()
+                .animatePosition(Axis.DRAGGING_AXIS, animation, view, item.getTag().getPosition(),
+                        true);
         getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
         animation.setStartDelay(0);
         animation.start();
@@ -710,17 +710,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      */
     private void animateHideSwitcher() {
         dragHandler.setCallback(null);
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                animateHideSwitcher(tabItem,
-                        tabItem.getIndex() == getModel().getSelectedTabIndex() ?
-                                createHideSwitcherAnimationListener() : null);
-            } else if (tabItem.getTab() == getModel().getSelectedTab()) {
-                inflateAndUpdateView(tabItem, createHideSwitcherLayoutListener(tabItem));
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated()) {
+                animateHideSwitcher(item, item.getIndex() == getModel().getSelectedTabIndex() ?
+                        createHideSwitcherAnimationListener() : null);
+            } else if (((TabItem) item).getTab() == getModel().getSelectedTab()) {
+                inflateAndUpdateView(item, createHideSwitcherLayoutListener(item));
             }
         }
 
@@ -728,27 +727,27 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     /**
-     * Animates the position and size of a specific tab item in order to hide the tab switcher.
+     * Animates the position and size of a specific tab in order to hide the tab switcher.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be animated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param listener
      *         The listener, which should be notified about the animation's progress, as an instance
      *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateHideSwitcher(@NonNull final TabItem tabItem,
+    private void animateHideSwitcher(@NonNull final AbstractItem item,
                                      @Nullable final AnimatorListener listener) {
-        animateHideSwitcher(tabItem, hideSwitcherAnimationDuration,
+        animateHideSwitcher(item, hideSwitcherAnimationDuration,
                 new AccelerateDecelerateInterpolator(), 0, listener);
     }
 
     /**
-     * Animates the position and size of a specific tab item in order to hide the tab switcher.
+     * Animates the position and size of a specific tab in order to hide the tab switcher.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be animated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param duration
      *         The duration of the animation in milliseconds as a {@link Long} value
      * @param interpolator
@@ -760,10 +759,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The listener, which should be notified about the animation's progress, as an instance
      *         of the type {@link AnimatorListener} or null, if no listener should be notified
      */
-    private void animateHideSwitcher(@NonNull final TabItem tabItem, final long duration,
+    private void animateHideSwitcher(@NonNull final AbstractItem item, final long duration,
                                      @NonNull final Interpolator interpolator, final long delay,
                                      @Nullable final AnimatorListener listener) {
-        View view = tabItem.getView();
+        View view = item.getView();
         animateBottomMargin(view, -(tabInset + tabBorderWidth), duration, delay);
         ViewPropertyAnimator animation = view.animate();
         animation.setDuration(duration);
@@ -777,10 +776,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 false);
         int selectedTabIndex = getModel().getSelectedTabIndex();
 
-        if (tabItem.getIndex() < selectedTabIndex) {
+        if (item.getIndex() < selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()), false);
-        } else if (tabItem.getIndex() > selectedTabIndex) {
+        } else if (item.getIndex() > selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                             layoutParams.topMargin, false);
@@ -795,12 +794,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     /**
-     * Animates the position, size and alpha of a specific tab item in order to swipe it
+     * Animates the position, size and alpha of a specific tab in order to swipe it
      * orthogonally.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, corresponds to the tab, which should be animated, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param remove
      *         True, if the tab should be removed after the animation has finished, false otherwise
      * @param delay
@@ -814,10 +813,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         instance of the type {@link AnimatorListener} or null, if no listener should be
      *         notified
      */
-    private void animateSwipe(@NonNull final TabItem tabItem, final boolean remove,
+    private void animateSwipe(@NonNull final AbstractItem item, final boolean remove,
                               final long delay, @NonNull final SwipeAnimation swipeAnimation,
                               @Nullable final AnimatorListener listener) {
-        View view = tabItem.getView();
+        View view = item.getView();
         float currentScale = getArithmetics().getScale(view, true);
         float swipePosition = calculateSwipePosition();
         float targetPosition = remove ?
@@ -845,36 +844,36 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     /**
-     * Animates the removal of a specific tab item.
+     * Animates the removal of a specific tab.
      *
-     * @param removedTabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param removedItem
+     *         The item, corresponds to the tab, which should be animated, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param swipeAnimation
      *         The animation, which should be used, as an instance of the class {@link
      *         SwipeAnimation}. The animation may not be null
      */
-    private void animateRemove(@NonNull final TabItem removedTabItem,
+    private void animateRemove(@NonNull final AbstractItem removedItem,
                                @NonNull final SwipeAnimation swipeAnimation) {
-        View view = removedTabItem.getView();
+        View view = removedItem.getView();
         getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
                 getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
                 getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-        animateSwipe(removedTabItem, true, 0, swipeAnimation,
-                createRemoveAnimationListener(removedTabItem));
+        animateSwipe(removedItem, true, 0, swipeAnimation,
+                createRemoveAnimationListener(removedItem));
     }
 
     /**
-     * Animates the position of a specific tab item in order to relocate it.
+     * Animates the position of a specific tab in order to relocate it.
      *
-     * @param tabItem
-     *         The tab item, which should be animated, as an instance of the class {@link TabItem}.
-     *         The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be animated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param position
      *         The position, the tab should be relocated to, in pixels as a {@link Float} value
      * @param tag
-     *         The tag, which should be applied to the given tab item, as an instance of the class
+     *         The tag, which should be applied to the given item, as an instance of the class
      *         {@link Tag} or null, if no tag should be applied
      * @param delay
      *         The delay of the relocate animation in milliseconds as a {@link Long} value
@@ -883,15 +882,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         as an instance of the type {@link AnimatorListener} or null, if no listener should be
      *         notified
      */
-    private void animateRelocate(@NonNull final TabItem tabItem, final float position,
+    private void animateRelocate(@NonNull final AbstractItem item, final float position,
                                  @Nullable final Tag tag, final long delay,
                                  @Nullable final AnimatorListener listener) {
         if (tag != null) {
-            tabItem.getView().setTag(R.id.tag_properties, tag);
-            tabItem.setTag(tag);
+            item.getView().setTag(R.id.tag_properties, tag);
+            item.setTag(tag);
         }
 
-        View view = tabItem.getView();
+        View view = item.getView();
         ViewPropertyAnimator animation = view.animate();
         animation.setListener(new AnimationListenerWrapper(listener));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -921,14 +920,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         {@link Interpolator}. The interpolator may not be null
      */
     private void animateRevertStartOvershoot(@NonNull final Interpolator interpolator) {
-        TabItem tabItem = TabItem.create(getTabSwitcher(), tabViewRecycler, 0);
-        View view = tabItem.getView();
+        AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, 0);
+        View view = item.getView();
         getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
                 getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
                 getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
         float position = getArithmetics().getPosition(Axis.DRAGGING_AXIS, view);
-        float targetPosition = tabItem.getTag().getPosition();
+        float targetPosition = item.getTag().getPosition();
         final float startPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, view);
         ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
         animation.setDuration(Math.round(revertOvershootAnimationDuration * Math.abs(
@@ -941,18 +940,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
             @Override
             public void onAnimationUpdate(final ValueAnimator animation) {
-                TabItemIterator iterator =
-                        new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-                TabItem tabItem;
+                ItemIterator iterator =
+                        new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+                AbstractItem item;
 
-                while ((tabItem = iterator.next()) != null) {
-                    if (tabItem.getIndex() == 0) {
-                        View view = tabItem.getView();
+                while ((item = iterator.next()) != null) {
+                    if (item.getIndex() == 0) {
+                        View view = item.getView();
                         getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
                                 startPosition + (float) animation.getAnimatedValue());
-                    } else if (tabItem.isInflated()) {
+                    } else if (item.isInflated()) {
                         View firstView = iterator.first().getView();
-                        View view = tabItem.getView();
+                        View view = item.getView();
                         view.setVisibility(
                                 getArithmetics().getPosition(Axis.DRAGGING_AXIS, firstView) <=
                                         getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) ?
@@ -989,15 +988,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      */
     private boolean animateTilt(@NonNull final Interpolator interpolator, final float maxAngle,
                                 @Nullable final AnimatorListener listener) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).reverse(true)
-                        .create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).reverse(true).create();
+        AbstractItem item;
         boolean result = false;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated()) {
+                View view = item.getView();
 
                 if (getArithmetics().getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
                     ViewPropertyAnimator animation = view.animate();
@@ -1022,19 +1020,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Starts a reveal animation to add a specific tab.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be added, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param revealAnimation
      *         The reveal animation, which should be started, as an instance of the class {@link
      *         RevealAnimation}. The reveal animation may not be null
      */
-    private void animateReveal(@NonNull final TabItem tabItem,
+    private void animateReveal(@NonNull final AbstractItem item,
                                @NonNull final RevealAnimation revealAnimation) {
         tabViewBottomMargin = -1;
         recyclerAdapter.clearCachedPreviews();
         dragHandler.setCallback(null);
-        View view = tabItem.getView();
+        View view = item.getView();
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(
                 revealAnimation.getInterpolator() != null ? revealAnimation.getInterpolator() :
@@ -1052,9 +1050,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Starts a peek animation to add a specific tab.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be added, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param duration
      *         The duration of the animation in milliseconds as a {@link Long} value
      * @param interpolator
@@ -1067,12 +1065,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The peek animation, which has been used to add the tab, as an instance of the class
      *         {@link PeekAnimation}. The peek animation may not be null
      */
-    private void animatePeek(@NonNull final TabItem tabItem, final long duration,
+    private void animatePeek(@NonNull final AbstractItem item, final long duration,
                              @NonNull final Interpolator interpolator, final float peekPosition,
                              @NonNull final PeekAnimation peekAnimation) {
-        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) ((TabItem) item).getViewHolder();
         viewHolder.closeButton.setVisibility(View.GONE);
-        View view = tabItem.getView();
+        View view = item.getView();
         float x = peekAnimation.getX();
         float y = peekAnimation.getY() + tabTitleContainerHeight;
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -1086,7 +1084,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(interpolator);
         animation.setListener(
-                new AnimationListenerWrapper(createPeekAnimationListener(tabItem, peekAnimation)));
+                new AnimationListenerWrapper(createPeekAnimationListener(item, peekAnimation)));
         animation.setStartDelay(0);
         animation.setDuration(duration);
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
@@ -1094,34 +1092,34 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, peekPosition, true);
         animation.start();
         int selectedTabIndex = getModel().getSelectedTabIndex();
-        TabItem selectedTabItem = TabItem.create(getModel(), tabViewRecycler, selectedTabIndex);
-        tabViewRecycler.inflate(selectedTabItem);
-        selectedTabItem.getTag().setPosition(0);
+        TabItem selectedItem = TabItem.create(getModel(), tabViewRecycler, selectedTabIndex);
+        tabViewRecycler.inflate(selectedItem);
+        selectedItem.getTag().setPosition(0);
         PhoneTabViewHolder selectedTabViewHolder =
-                (PhoneTabViewHolder) selectedTabItem.getViewHolder();
+                (PhoneTabViewHolder) selectedItem.getViewHolder();
         selectedTabViewHolder.closeButton.setVisibility(View.GONE);
-        animateShowSwitcher(selectedTabItem, duration, interpolator,
-                createZoomOutAnimationListener(selectedTabItem, peekAnimation));
+        animateShowSwitcher(selectedItem, duration, interpolator,
+                createZoomOutAnimationListener(selectedItem, peekAnimation));
     }
 
     /**
      * Creates and returns a layout listener, which allows to animate the position and size of a tab
      * in order to show the tab switcher, once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be animated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be animated, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
     private OnGlobalLayoutListener createShowSwitcherLayoutListener(
-            @NonNull final TabItem tabItem) {
+            @NonNull final AbstractItem item) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateShowSwitcher(tabItem, createUpdateViewAnimationListener(tabItem));
+                animateShowSwitcher(item, createUpdateViewAnimationListener(item));
             }
 
         };
@@ -1131,22 +1129,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to animate the position and size of a tab
      * in order to hide the tab switcher, once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be animated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be animated, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
     private OnGlobalLayoutListener createHideSwitcherLayoutListener(
-            @NonNull final TabItem tabItem) {
+            @NonNull final AbstractItem item) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateHideSwitcher(tabItem,
-                        tabItem.getIndex() == getModel().getSelectedTabIndex() ?
-                                createHideSwitcherAnimationListener() : null);
+                animateHideSwitcher(item, item.getIndex() == getModel().getSelectedTabIndex() ?
+                        createHideSwitcherAnimationListener() : null);
             }
 
         };
@@ -1156,9 +1153,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to remove a tab, once its view has been
      * inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be removed, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be removed, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param swipeAnimation
      *         The animation, which should be used, as an instance of the class {@link
      *         SwipeAnimation}. The animation may not be null
@@ -1166,13 +1163,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createRemoveLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createRemoveLayoutListener(@NonNull final AbstractItem item,
                                                               @NonNull final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateRemove(tabItem, swipeAnimation);
+                animateRemove(item, swipeAnimation);
             }
 
         };
@@ -1182,13 +1179,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to relocate a tab, once its view has been
      * inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be relocated, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be relocated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param position
      *         The position, the tab should be relocated to, in pixels as a {@link Float} value
      * @param tag
-     *         The tag, which should be applied to the given tab item, as an instance of the class
+     *         The tag, which should be applied to the given item, as an instance of the class
      *         {@link Tag} or null, if no tag should be applied
      * @param delay
      *         The delay of the relocate animation in milliseconds as a {@link Long} value
@@ -1200,7 +1197,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createRelocateLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createRelocateLayoutListener(@NonNull final AbstractItem item,
                                                                 final float position,
                                                                 @Nullable final Tag tag,
                                                                 final long delay,
@@ -1209,7 +1206,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
             @Override
             public void onGlobalLayout() {
-                animateRelocate(tabItem, position, tag, delay, listener);
+                animateRelocate(item, position, tag, delay, listener);
             }
 
         };
@@ -1219,20 +1216,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to show a tab as the currently selected
      * one, once it view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been added, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
     private OnGlobalLayoutListener createAddSelectedTabLayoutListener(
-            @NonNull final TabItem tabItem) {
+            @NonNull final AbstractItem item) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                View view = tabItem.getView();
+                View view = item.getView();
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
                 view.setAlpha(1f);
@@ -1253,9 +1250,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to start a reveal animation to add a tab,
      * once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be added, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param revealAnimation
      *         The reveal animation, which should be started, as an instance of the class {@link
      *         RevealAnimation}. The reveal animation may not be null
@@ -1263,13 +1260,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createRevealLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createRevealLayoutListener(@NonNull final AbstractItem item,
                                                               @NonNull final RevealAnimation revealAnimation) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                View view = tabItem.getView();
+                View view = item.getView();
                 float x = revealAnimation.getX();
                 float y = revealAnimation.getY() + tabTitleContainerHeight;
                 FrameLayout.LayoutParams layoutParams =
@@ -1281,7 +1278,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 view.setY(layoutParams.topMargin);
                 getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 0);
                 getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 0);
-                animateReveal(tabItem, revealAnimation);
+                animateReveal(item, revealAnimation);
             }
 
         };
@@ -1291,16 +1288,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to start a peek animation to add a tab,
      * once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be added, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be added, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param peekAnimation
      *         The peek animation, which should be started, as an instance of the class {@link
      *         PeekAnimation}. The peek animation may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
-    private OnGlobalLayoutListener createPeekLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createPeekLayoutListener(@NonNull final AbstractItem item,
                                                             @NonNull final PeekAnimation peekAnimation) {
         return new OnGlobalLayoutListener() {
 
@@ -1322,7 +1319,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
                                         toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() :
                                         0)) * 0.66f;
-                animatePeek(tabItem, duration, interpolator, peekPosition, peekAnimation);
+                animatePeek(item, duration, interpolator, peekPosition, peekAnimation);
             }
 
         };
@@ -1332,9 +1329,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to start a swipe animations to add
      * several tabs, once their views have been inflated.
      *
-     * @param addedTabItems
-     *         An array, which contains the tab items, which correspond to the tabs, which should be
-     *         added, as an array of the type {@link TabItem}. The array may not be null
+     * @param addedItems
+     *         An array, which contains the items, which correspond to the tabs, which should be
+     *         added, as an array of the type {@link AbstractItem}. The array may not be null
      * @param swipeAnimation
      *         The swipe animation, which should be started, as an instance of the class {@link
      *         SwipeAnimation}. The swipe animation may not be null
@@ -1342,55 +1339,55 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * OnGlobalLayoutListener}. The listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createSwipeLayoutListener(@NonNull final TabItem[] addedTabItems,
-                                                             @NonNull final SwipeAnimation swipeAnimation) {
+    private OnGlobalLayoutListener createSwipeLayoutListener(
+            @NonNull final AbstractItem[] addedItems,
+            @NonNull final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
                 int count = getModel().getCount();
                 float previousAttachedPosition =
-                        calculateAttachedPosition(count - addedTabItems.length);
+                        calculateAttachedPosition(count - addedItems.length);
                 float attachedPosition = calculateAttachedPosition(count);
-                TabItem[] tabItems;
+                AbstractItem[] items;
 
-                if (count - addedTabItems.length == 0) {
-                    tabItems = calculateInitialTabItems(-1, -1);
+                if (count - addedItems.length == 0) {
+                    items = calculateInitialItems(-1, -1);
                 } else {
-                    TabItem firstAddedTabItem = addedTabItems[0];
-                    int index = firstAddedTabItem.getIndex();
+                    AbstractItem firstAddedItem = addedItems[0];
+                    int index = firstAddedItem.getIndex();
                     boolean isReferencingPredecessor = index > 0;
                     int referenceIndex = isReferencingPredecessor ? index - 1 :
-                            (index + addedTabItems.length - 1 < count - 1 ?
-                                    index + addedTabItems.length : -1);
-                    TabItem referenceTabItem = referenceIndex != -1 ?
+                            (index + addedItems.length - 1 < count - 1 ? index + addedItems.length :
+                                    -1);
+                    AbstractItem referenceItem = referenceIndex != -1 ?
                             TabItem.create(getTabSwitcher(), tabViewRecycler, referenceIndex) :
                             null;
-                    State state =
-                            referenceTabItem != null ? referenceTabItem.getTag().getState() : null;
+                    State state = referenceItem != null ? referenceItem.getTag().getState() : null;
 
                     if (state == null || state == State.STACKED_START) {
-                        tabItems = relocateWhenAddingStackedTabs(true, addedTabItems);
+                        items = relocateWhenAddingStackedTabs(true, addedItems);
                     } else if (state == State.STACKED_END) {
-                        tabItems = relocateWhenAddingStackedTabs(false, addedTabItems);
+                        items = relocateWhenAddingStackedTabs(false, addedItems);
                     } else if (state == State.FLOATING ||
                             (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
-                        tabItems = relocateWhenAddingFloatingTabs(addedTabItems, referenceTabItem,
+                        items = relocateWhenAddingFloatingTabs(addedItems, referenceItem,
                                 isReferencingPredecessor, attachedPosition,
                                 attachedPosition != previousAttachedPosition);
                     } else {
-                        tabItems = relocateWhenAddingHiddenTabs(addedTabItems, referenceTabItem);
+                        items = relocateWhenAddingHiddenTabs(addedItems, referenceItem);
                     }
                 }
 
                 Tag previousTag = null;
 
-                for (TabItem tabItem : tabItems) {
-                    Tag tag = tabItem.getTag();
+                for (AbstractItem item : items) {
+                    Tag tag = item.getTag();
 
                     if (previousTag == null || tag.getPosition() != previousTag.getPosition()) {
-                        createBottomMarginLayoutListener(tabItem).onGlobalLayout();
-                        View view = tabItem.getView();
+                        createBottomMarginLayoutListener(item).onGlobalLayout();
+                        View view = item.getView();
                         view.setTag(R.id.tag_properties, tag);
                         view.setAlpha(swipedTabAlpha);
                         float swipePosition = calculateSwipePosition();
@@ -1412,10 +1409,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                         getArithmetics().setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
                         getArithmetics()
                                 .setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
-                        animateSwipe(tabItem, false, 0, swipeAnimation,
-                                createSwipeAnimationListener(tabItem));
+                        animateSwipe(item, false, 0, swipeAnimation,
+                                createSwipeAnimationListener(item));
                     } else {
-                        tabViewRecycler.remove(tabItem);
+                        tabViewRecycler.remove(item);
                     }
 
                     previousTag = tag;
@@ -1429,19 +1426,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to adapt the bottom margin of a tab, once
      * its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be adapted, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be adapted, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @return The layout listener, which has been created, as an instance of the type {@link
      * OnGlobalLayoutListener}. The layout listener may not be null
      */
     private OnGlobalLayoutListener createBottomMarginLayoutListener(
-            @NonNull final TabItem tabItem) {
+            @NonNull final AbstractItem item) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                View view = tabItem.getView();
+                View view = item.getView();
 
                 if (tabViewBottomMargin == -1) {
                     tabViewBottomMargin = calculateBottomMargin(view);
@@ -1460,9 +1457,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a layout listener, which allows to adapt the size and position of a tab,
      * once its view has been inflated.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be adapted, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be adapted, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @param layoutListener
      *         The layout lister, which should be notified, when the created listener is invoked, as
      *         an instance of the type {@link OnGlobalLayoutListener} or null, if no listener should
@@ -1471,14 +1468,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * OnGlobalLayoutListener}. The layout listener may not be null
      */
     @NonNull
-    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final TabItem tabItem,
+    private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final AbstractItem item,
                                                                    @Nullable final OnGlobalLayoutListener layoutListener) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                adaptViewSize(tabItem);
-                updateView(tabItem);
+                adaptViewSize(item);
+                updateView(item);
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
@@ -1527,20 +1524,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns an animation listener, which allows to update the view, which is used to
      * visualize a specific tab, when an animation has been finished.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be updated, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be updated, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @return The animation listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createUpdateViewAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createUpdateViewAnimationListener(@NonNull final AbstractItem item) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                inflateOrRemoveView(tabItem);
+                inflateOrRemoveView(item);
             }
 
         };
@@ -1561,13 +1558,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                AbstractTabItemIterator iterator =
-                        new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-                TabItem tabItem;
+                AbstractItemIterator iterator =
+                        new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+                AbstractItem item;
 
-                while ((tabItem = iterator.next()) != null) {
-                    if (tabItem.getTab() == getModel().getSelectedTab()) {
-                        Pair<View, Boolean> pair = tabViewRecycler.inflate(tabItem);
+                while ((item = iterator.next()) != null) {
+                    if (((TabItem) item).getTab() == getModel().getSelectedTab()) {
+                        Pair<View, Boolean> pair = tabViewRecycler.inflate(item);
                         View view = pair.first;
                         FrameLayout.LayoutParams layoutParams =
                                 (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -1577,7 +1574,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                         view.setX(layoutParams.leftMargin);
                         view.setY(layoutParams.topMargin);
                     } else {
-                        tabViewRecycler.remove(tabItem);
+                        tabViewRecycler.remove(item);
                     }
                 }
 
@@ -1614,23 +1611,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a listener, which allows to handle, when a tab has been swiped, but was
      * not removed.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been swiped, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been swiped, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createSwipeAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createSwipeAnimationListener(@NonNull final AbstractItem item) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                inflateOrRemoveView(tabItem);
-                View view = tabItem.getView();
-                adaptStackOnSwipeAborted(tabItem, tabItem.getIndex() + 1);
-                tabItem.getTag().setClosing(false);
+                inflateOrRemoveView(item);
+                View view = item.getView();
+                adaptStackOnSwipeAborted(item, item.getIndex() + 1);
+                item.getTag().setClosing(false);
                 getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
                         getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
                 animateToolbarVisibility(true, 0);
@@ -1643,14 +1640,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns a listener, which allows to relocate all previous tabs, when a tab has
      * been removed.
      *
-     * @param removedTabItem
-     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param removedItem
+     *         The item, which corresponds to the tab, which has been removed, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRemoveAnimationListener(@NonNull final TabItem removedTabItem) {
+    private AnimatorListener createRemoveAnimationListener(
+            @NonNull final AbstractItem removedItem) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1664,14 +1662,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 float previousAttachedPosition =
                         calculateAttachedPosition(getModel().getCount() + 1);
                 float attachedPosition = calculateAttachedPosition(getModel().getCount());
-                State state = removedTabItem.getTag().getState();
+                State state = removedItem.getTag().getState();
 
                 if (state == State.STACKED_END) {
-                    relocateWhenRemovingStackedTab(removedTabItem, false);
+                    relocateWhenRemovingStackedTab(removedItem, false);
                 } else if (state == State.STACKED_START) {
-                    relocateWhenRemovingStackedTab(removedTabItem, true);
+                    relocateWhenRemovingStackedTab(removedItem, true);
                 } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
-                    relocateWhenRemovingFloatingTab(removedTabItem, attachedPosition,
+                    relocateWhenRemovingFloatingTab(removedItem, attachedPosition,
                             previousAttachedPosition != attachedPosition);
                 }
             }
@@ -1679,7 +1677,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                tabViewRecycler.remove(removedTabItem);
+                tabViewRecycler.remove(removedItem);
             }
 
         };
@@ -1690,34 +1688,34 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * is used to visualize a tab, when the animation, which has been used to relocate it, has been
      * ended.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been relocated, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been relocated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRelocateAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createRelocateAnimationListener(@NonNull final AbstractItem item) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationStart(final Animator animation) {
                 super.onAnimationStart(animation);
-                tabItem.getView().setVisibility(View.VISIBLE);
+                item.getView().setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
 
-                if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
-                    adaptStackOnSwipeAborted(tabItem, tabItem.getIndex() + 1);
+                if (item.getTag().getState() == State.STACKED_START_ATOP) {
+                    adaptStackOnSwipeAborted(item, item.getIndex() + 1);
                 }
 
-                if (tabItem.isVisible()) {
-                    updateView(tabItem);
+                if (item.isVisible()) {
+                    updateView(item);
                 } else {
-                    tabViewRecycler.remove(tabItem);
+                    tabViewRecycler.remove(item);
                 }
             }
 
@@ -1782,9 +1780,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns an animation listener, which allows to hide a tab, which has been added
      * by using a peek animation, when the animation has been ended.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been added by using the peek
-     *         animation, as an instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been added by using the peek
+     *         animation, as an instance of the class {@link AbstractItem}. The item may not be
+     *         null
      * @param peekAnimation
      *         The peek animation as an instance of the class {@link PeekAnimation}. The peek
      *         animation may not be null
@@ -1792,7 +1791,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createPeekAnimationListener(@NonNull final TabItem tabItem,
+    private AnimatorListener createPeekAnimationListener(@NonNull final AbstractItem item,
                                                          @NonNull final PeekAnimation peekAnimation) {
         return new AnimatorListenerAdapter() {
 
@@ -1806,7 +1805,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 Interpolator interpolator =
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
-                View view = tabItem.getView();
+                View view = item.getView();
                 getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, tabTitleContainerHeight);
                 getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
                         getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
@@ -1815,7 +1814,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 animator.setStartDelay(duration);
                 animator.setInterpolator(interpolator);
                 animator.setListener(
-                        new AnimationListenerWrapper(createRevertPeekAnimationListener(tabItem)));
+                        new AnimationListenerWrapper(createRevertPeekAnimationListener(item)));
                 animator.alpha(0);
                 getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animator, view,
                         getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) * 1.5f, false);
@@ -1832,20 +1831,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * has been added by using a peek animation, when the animation, which reverts the peek
      * animation, has been ended.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been added by using the peek
-     *         animation, as an instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been added by using the peek
+     *         animation, as an instance of the class {@link AbstractItem}. The item may not be
+     *         null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRevertPeekAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createRevertPeekAnimationListener(@NonNull final AbstractItem item) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                tabViewRecycler.remove(tabItem);
+                tabViewRecycler.remove(item);
             }
 
         };
@@ -1855,9 +1855,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns an animation listener, which allows to zoom in the currently selected
      * tab, when a peek animation has been ended.
      *
-     * @param selectedTabItem
-     *         The tab item, which corresponds to the currently selected tab, as an instance of the
-     *         class {@link TabItem}. The tab item may not be null
+     * @param selectedItem
+     *         The item, which corresponds to the currently selected tab, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param peekAnimation
      *         The peek animation as an instance of the class {@link PeekAnimation}. The peek
      *         animation may not be null
@@ -1865,8 +1865,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createZoomOutAnimationListener(@NonNull final TabItem selectedTabItem,
-                                                            @NonNull final PeekAnimation peekAnimation) {
+    private AnimatorListener createZoomOutAnimationListener(
+            @NonNull final AbstractItem selectedItem, @NonNull final PeekAnimation peekAnimation) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1881,8 +1881,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 Interpolator interpolator =
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
-                animateHideSwitcher(selectedTabItem, duration, interpolator, duration,
-                        createZoomInAnimationListener(selectedTabItem));
+                animateHideSwitcher(selectedItem, duration, interpolator, duration,
+                        createZoomInAnimationListener(selectedItem));
             }
 
         };
@@ -1892,20 +1892,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * Creates and returns an animation listener, which allows to restore the original state of a
      * tab, when an animation, which zooms in the tab, has been ended.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been zoomed in, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which has been zoomed in, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
-    private AnimatorListener createZoomInAnimationListener(@NonNull final TabItem tabItem) {
+    private AnimatorListener createZoomInAnimationListener(@NonNull final AbstractItem item) {
         return new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 getModel().addListener(PhoneTabSwitcherLayout.this);
-                tabViewRecycler.inflate(tabItem);
+                tabViewRecycler.inflate(item);
                 tabViewRecycler.clearCache();
                 recyclerAdapter.clearCachedPreviews();
                 tabViewBottomMargin = -1;
@@ -1917,9 +1917,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Adapts the stack, which is located at the start, when swiping a tab.
      *
-     * @param swipedTabItem
-     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
+     * @param swipedItem
+     *         The item, which corresponds to the swiped tab, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param successorIndex
      *         The index of the tab, which is located after the swiped tab, as an {@link Integer}
      *         value
@@ -1927,20 +1927,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The number of tabs, which are contained by the tab switcher, excluding the swiped
      *         tab, as an {@link Integer} value
      */
-    private void adaptStackOnSwipe(@NonNull final TabItem swipedTabItem, final int successorIndex,
+    private void adaptStackOnSwipe(@NonNull final AbstractItem swipedItem, final int successorIndex,
                                    final int count) {
-        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
+        if (swipedItem.getTag().getState() == State.STACKED_START_ATOP &&
                 successorIndex < getModel().getCount()) {
-            TabItem tabItem = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
-            State state = tabItem.getTag().getState();
+            AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
+            State state = item.getTag().getState();
 
             if (state == State.HIDDEN || state == State.STACKED_START) {
                 Pair<Float, State> pair =
-                        calculatePositionAndStateWhenStackedAtStart(count, swipedTabItem.getIndex(),
+                        calculatePositionAndStateWhenStackedAtStart(count, swipedItem.getIndex(),
                                 (State) null);
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
-                inflateOrRemoveView(tabItem);
+                item.getTag().setPosition(pair.first);
+                item.getTag().setState(pair.second);
+                inflateOrRemoveView(item);
             }
         }
     }
@@ -1948,26 +1948,26 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Adapts the stack, which located at the start, when swiping a tab has been aborted.
      *
-     * @param swipedTabItem
-     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
+     * @param swipedItem
+     *         The item, which corresponds to the swiped tab, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param successorIndex
      *         The index of the the tab, which is located after the swiped tab, as an {@link
      *         Integer} value
      */
-    private void adaptStackOnSwipeAborted(@NonNull final TabItem swipedTabItem,
+    private void adaptStackOnSwipeAborted(@NonNull final AbstractItem swipedItem,
                                           final int successorIndex) {
-        if (swipedTabItem.getTag().getState() == State.STACKED_START_ATOP &&
+        if (swipedItem.getTag().getState() == State.STACKED_START_ATOP &&
                 successorIndex < getModel().getCount()) {
-            TabItem tabItem = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
+            AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
 
-            if (tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+            if (item.getTag().getState() == State.STACKED_START_ATOP) {
                 Pair<Float, State> pair =
                         calculatePositionAndStateWhenStackedAtStart(getTabSwitcher().getCount(),
-                                tabItem.getIndex(), swipedTabItem);
-                tabItem.getTag().setPosition(pair.first);
-                tabItem.getTag().setState(pair.second);
-                inflateOrRemoveView(tabItem);
+                                item.getIndex(), swipedItem);
+                item.getTag().setPosition(pair.first);
+                item.getTag().setState(pair.second);
+                inflateOrRemoveView(item);
             }
         }
     }
@@ -1975,12 +1975,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Adapts the size of the view, which is used to visualize a specific tab.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, whose view should be adapted, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, whose view should be adapted, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      */
-    private void adaptViewSize(@NonNull final TabItem tabItem) {
-        View view = tabItem.getView();
+    private void adaptViewSize(@NonNull final AbstractItem item) {
+        View view = item.getView();
         getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
                 getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
@@ -1993,97 +1993,95 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Relocates all previous tabs, when a floating tab has been removed from the tab switcher.
      *
-     * @param removedTabItem
-     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param removedItem
+     *         The item, which corresponds to the tab, which has been removed, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param attachedPositionChanged
      *         True, if removing the tab caused the attached position to be changed, false
      *         otherwise
      */
-    private void relocateWhenRemovingFloatingTab(@NonNull final TabItem removedTabItem,
+    private void relocateWhenRemovingFloatingTab(@NonNull final AbstractItem removedItem,
                                                  final float attachedPosition,
                                                  boolean attachedPositionChanged) {
-        AbstractTabItemIterator iterator;
-        TabItem tabItem;
+        AbstractItemIterator iterator;
+        AbstractItem item;
         float defaultTabSpacing = calculateMaxTabSpacing(null);
         float minTabSpacing = calculateMinTabSpacing();
-        int referenceIndex = removedTabItem.getIndex();
-        TabItem currentReferenceTabItem = removedTabItem;
-        float referencePosition = removedTabItem.getTag().getPosition();
+        int referenceIndex = removedItem.getIndex();
+        AbstractItem currentReferenceItem = removedItem;
+        float referencePosition = removedItem.getTag().getPosition();
 
         if (attachedPositionChanged && getModel().getCount() > 0) {
-            int neighboringIndex =
-                    removedTabItem.getIndex() > 0 ? referenceIndex - 1 : referenceIndex;
+            int neighboringIndex = removedItem.getIndex() > 0 ? referenceIndex - 1 : referenceIndex;
             referencePosition += Math.abs(
                     TabItem.create(getTabSwitcher(), tabViewRecycler, neighboringIndex).getTag()
                             .getPosition() - referencePosition) / 2f;
         }
 
         referencePosition =
-                Math.min(calculateMaxEndPosition(removedTabItem.getIndex() - 1), referencePosition);
+                Math.min(calculateMaxEndPosition(removedItem.getIndex() - 1), referencePosition);
         float initialReferencePosition = referencePosition;
 
-        if (removedTabItem.getIndex() > 0) {
+        if (removedItem.getIndex() > 0) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
-            TabItem selectedTabItem =
+            AbstractItem selectedItem =
                     TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
-            float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
-            iterator = new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
-                    .start(removedTabItem.getIndex() - 1).reverse(true).create();
+            float maxTabSpacing = calculateMaxTabSpacing(selectedItem);
+            iterator = new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
+                    .start(removedItem.getIndex() - 1).reverse(true).create();
 
-            while ((tabItem = iterator.next()) != null) {
-                TabItem predecessor = iterator.peek();
-                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceTabItem);
+            while ((item = iterator.next()) != null) {
+                AbstractItem predecessor = iterator.peek();
+                float currentTabSpacing = calculateMaxTabSpacing(currentReferenceItem);
                 Pair<Float, State> pair;
 
-                if (tabItem.getIndex() == removedTabItem.getIndex() - 1) {
-                    pair = clipTabPosition(tabItem.getIndex(), referencePosition, predecessor);
-                    currentReferenceTabItem = tabItem;
+                if (item.getIndex() == removedItem.getIndex() - 1) {
+                    pair = clipPosition(item.getIndex(), referencePosition, predecessor);
+                    currentReferenceItem = item;
                     referencePosition = pair.first;
-                    referenceIndex = tabItem.getIndex();
+                    referenceIndex = item.getIndex();
                 } else if (referencePosition >= attachedPosition - currentTabSpacing) {
                     float position;
 
-                    if (selectedTabIndex > tabItem.getIndex() &&
-                            selectedTabIndex <= referenceIndex) {
+                    if (selectedTabIndex > item.getIndex() && selectedTabIndex <= referenceIndex) {
                         position = referencePosition + maxTabSpacing +
-                                ((referenceIndex - tabItem.getIndex() - 1) * defaultTabSpacing);
+                                ((referenceIndex - item.getIndex() - 1) * defaultTabSpacing);
                     } else {
                         position = referencePosition +
-                                ((referenceIndex - tabItem.getIndex()) * defaultTabSpacing);
+                                ((referenceIndex - item.getIndex()) * defaultTabSpacing);
                     }
 
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
                 } else {
-                    TabItem successor = iterator.previous();
+                    AbstractItem successor = iterator.previous();
                     float successorPosition = successor.getTag().getPosition();
                     float position = (attachedPosition * (successorPosition + minTabSpacing)) /
                             (minTabSpacing + attachedPosition - currentTabSpacing);
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
 
                     if (pair.first >= attachedPosition - currentTabSpacing) {
-                        currentReferenceTabItem = tabItem;
+                        currentReferenceItem = item;
                         referencePosition = pair.first;
-                        referenceIndex = tabItem.getIndex();
+                        referenceIndex = item.getIndex();
                     }
                 }
 
-                Tag tag = tabItem.getTag().clone();
+                Tag tag = item.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
 
                 if (tag.getState() != State.HIDDEN) {
-                    long startDelay = Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) *
+                    long startDelay = Math.abs(removedItem.getIndex() - item.getIndex()) *
                             relocateAnimationDelay;
 
-                    if (!tabItem.isInflated()) {
+                    if (!item.isInflated()) {
                         Pair<Float, State> pair2 =
-                                calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-                        tabItem.getTag().setPosition(pair2.first);
-                        tabItem.getTag().setState(pair2.second);
+                                calculatePositionAndStateWhenStackedAtEnd(item.getIndex());
+                        item.getTag().setPosition(pair2.first);
+                        item.getTag().setState(pair2.second);
                     }
 
-                    relocate(tabItem, tag.getPosition(), tag, startDelay);
+                    relocate(item, tag.getPosition(), tag, startDelay);
                 } else {
                     break;
                 }
@@ -2091,33 +2089,33 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         }
 
         if (attachedPositionChanged && getModel().getCount() > 2 &&
-                removedTabItem.getTag().getState() != State.STACKED_START_ATOP) {
-            iterator = new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
-                    .start(removedTabItem.getIndex()).create();
+                removedItem.getTag().getState() != State.STACKED_START_ATOP) {
+            iterator = new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
+                    .start(removedItem.getIndex()).create();
             float previousPosition = initialReferencePosition;
-            Tag previousTag = removedTabItem.getTag();
+            Tag previousTag = removedItem.getTag();
 
-            while ((tabItem = iterator.next()) != null &&
-                    tabItem.getIndex() < getModel().getCount() - 1) {
-                float position = calculateSuccessorPosition(previousPosition,
-                        calculateMaxTabSpacing(tabItem));
+            while ((item = iterator.next()) != null &&
+                    item.getIndex() < getModel().getCount() - 1) {
+                float position =
+                        calculateSuccessorPosition(previousPosition, calculateMaxTabSpacing(item));
                 Pair<Float, State> pair =
-                        clipTabPosition(tabItem.getIndex(), position, previousTag.getState());
-                Tag tag = tabItem.getTag().clone();
+                        clipPosition(item.getIndex(), position, previousTag.getState());
+                Tag tag = item.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                long startDelay = (Math.abs(removedTabItem.getIndex() - tabItem.getIndex()) + 1) *
+                long startDelay = (Math.abs(removedItem.getIndex() - item.getIndex()) + 1) *
                         relocateAnimationDelay;
 
-                if (!tabItem.isInflated()) {
+                if (!item.isInflated()) {
                     Pair<Float, State> pair2 =
                             calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
-                                    tabItem.getIndex(), iterator.previous());
-                    tabItem.getTag().setPosition(pair2.first);
-                    tabItem.getTag().setState(pair2.second);
+                                    item.getIndex(), iterator.previous());
+                    item.getTag().setPosition(pair2.first);
+                    item.getTag().setState(pair2.second);
                 }
 
-                relocate(tabItem, tag.getPosition(), tag, startDelay);
+                relocate(item, tag.getPosition(), tag, startDelay);
                 previousPosition = pair.first;
                 previousTag = tag;
 
@@ -2131,50 +2129,49 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Relocates all neighboring tabs, when a stacked tab has been removed from the tab switcher.
      *
-     * @param removedTabItem
-     *         The tab item, which corresponds to the tab, which has been removed, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param removedItem
+     *         The item, which corresponds to the tab, which has been removed, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param start
      *         True, if the removed tab was part of the stack, which is located at the start, false,
      *         if it was part of the stack, which is located at the end
      */
-    private void relocateWhenRemovingStackedTab(@NonNull final TabItem removedTabItem,
+    private void relocateWhenRemovingStackedTab(@NonNull final AbstractItem removedItem,
                                                 final boolean start) {
-        int startIndex = removedTabItem.getIndex() + (start ? -1 : 0);
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).reverse(start)
+        int startIndex = removedItem.getIndex() + (start ? -1 : 0);
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).reverse(start)
                         .start(startIndex).create();
-        TabItem tabItem;
-        float previousProjectedPosition = removedTabItem.getTag().getPosition();
+        AbstractItem item;
+        float previousProjectedPosition = removedItem.getTag().getPosition();
 
-        while ((tabItem = iterator.next()) != null &&
-                (tabItem.getTag().getState() == State.HIDDEN ||
-                        tabItem.getTag().getState() == State.STACKED_START ||
-                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
-                        tabItem.getTag().getState() == State.STACKED_END)) {
-            float projectedPosition = tabItem.getTag().getPosition();
+        while ((item = iterator.next()) != null && (item.getTag().getState() == State.HIDDEN ||
+                item.getTag().getState() == State.STACKED_START ||
+                item.getTag().getState() == State.STACKED_START_ATOP ||
+                item.getTag().getState() == State.STACKED_END)) {
+            float projectedPosition = item.getTag().getPosition();
 
-            if (tabItem.getTag().getState() == State.HIDDEN) {
-                TabItem previous = iterator.previous();
-                tabItem.getTag().setState(previous.getTag().getState());
+            if (item.getTag().getState() == State.HIDDEN) {
+                AbstractItem previous = iterator.previous();
+                item.getTag().setState(previous.getTag().getState());
 
-                if (tabItem.isVisible()) {
+                if (item.isVisible()) {
                     Pair<Float, State> pair = start ?
                             calculatePositionAndStateWhenStackedAtStart(getTabSwitcher().getCount(),
-                                    tabItem.getIndex(), tabItem) :
-                            calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-                    tabItem.getTag().setPosition(pair.first);
-                    tabItem.getTag().setState(pair.second);
-                    inflateAndUpdateView(tabItem, null);
+                                    item.getIndex(), item) :
+                            calculatePositionAndStateWhenStackedAtEnd(item.getIndex());
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+                    inflateAndUpdateView(item, null);
                 }
 
                 break;
             } else {
-                tabItem.getTag().setPosition(previousProjectedPosition);
+                item.getTag().setPosition(previousProjectedPosition);
                 long startDelay =
-                        (Math.abs(startIndex - tabItem.getIndex()) + 1) * relocateAnimationDelay;
-                animateRelocate(tabItem, previousProjectedPosition, null, startDelay,
-                        createRelocateAnimationListener(tabItem));
+                        (Math.abs(startIndex - item.getIndex()) + 1) * relocateAnimationDelay;
+                animateRelocate(item, previousProjectedPosition, null, startDelay,
+                        createRelocateAnimationListener(item));
             }
 
             previousProjectedPosition = projectedPosition;
@@ -2184,12 +2181,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * Relocates all previous tabs, when floating tabs have been added to the tab switcher.
      *
-     * @param addedTabItems
-     *         An array, which contains the tab items, which correspond to the tabs, which have been
-     *         added, as an array of the type {@link TabItem}. The array may not be null
-     * @param referenceTabItem
-     *         The tab item, which corresponds to the tab, which is used as a reference, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @param addedItems
+     *         An array, which contains the items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link AbstractItem}. The array may not be null
+     * @param referenceItem
+     *         The item, which corresponds to the tab, which is used as a reference, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
      * @param isReferencingPredecessor
      *         True, if the tab, which is used as a reference, is the predecessor of the added tab,
      *         false if it is the successor
@@ -2197,22 +2194,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The current attached position in pixels as a {@link Float} value
      * @param attachedPositionChanged
      *         True, if adding the tab caused the attached position to be changed, false otherwise
-     * @return An array, which contains the tab items, which correspond to the tabs, which have been
-     * added, as an array of the type {@link TabItem}. The array may not be null
+     * @return An array, which contains the items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link AbstractItem}. The array may not be null
      */
     @NonNull
-    private TabItem[] relocateWhenAddingFloatingTabs(@NonNull final TabItem[] addedTabItems,
-                                                     @NonNull final TabItem referenceTabItem,
-                                                     final boolean isReferencingPredecessor,
-                                                     final float attachedPosition,
-                                                     final boolean attachedPositionChanged) {
-        TabItem firstAddedTabItem = addedTabItems[0];
-        TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
-        float referencePosition = referenceTabItem.getTag().getPosition();
+    private AbstractItem[] relocateWhenAddingFloatingTabs(@NonNull final AbstractItem[] addedItems,
+                                                          @NonNull final AbstractItem referenceItem,
+                                                          final boolean isReferencingPredecessor,
+                                                          final float attachedPosition,
+                                                          final boolean attachedPositionChanged) {
+        AbstractItem firstAddedItem = addedItems[0];
+        AbstractItem lastAddedItem = addedItems[addedItems.length - 1];
+        float referencePosition = referenceItem.getTag().getPosition();
 
         if (isReferencingPredecessor && attachedPositionChanged &&
-                lastAddedTabItem.getIndex() < getModel().getCount() - 1) {
-            int neighboringIndex = lastAddedTabItem.getIndex() + 1;
+                lastAddedItem.getIndex() < getModel().getCount() - 1) {
+            int neighboringIndex = lastAddedItem.getIndex() + 1;
             referencePosition -= Math.abs(referencePosition -
                     TabItem.create(getTabSwitcher(), tabViewRecycler, neighboringIndex).getTag()
                             .getPosition()) / 2f;
@@ -2220,96 +2217,94 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
         float initialReferencePosition = referencePosition;
         int selectedTabIndex = getModel().getSelectedTabIndex();
-        TabItem selectedTabItem =
+        AbstractItem selectedItem =
                 TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex);
         float defaultTabSpacing = calculateMaxTabSpacing(null);
-        float maxTabSpacing = calculateMaxTabSpacing(selectedTabItem);
+        float maxTabSpacing = calculateMaxTabSpacing(selectedItem);
         float minTabSpacing = calculateMinTabSpacing();
-        TabItem currentReferenceTabItem = referenceTabItem;
-        int referenceIndex = referenceTabItem.getIndex();
-        AbstractTabItemIterator.AbstractBuilder builder =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler);
+        AbstractItem currentReferenceItem = referenceItem;
+        int referenceIndex = referenceItem.getIndex();
+        AbstractItemIterator.AbstractBuilder builder =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler);
 
-        for (TabItem addedTabItem : addedTabItems) {
+        for (AbstractItem addedItem : addedItems) {
             int iterationReferenceIndex = referenceIndex;
             float iterationReferencePosition = referencePosition;
-            TabItem iterationReferenceTabItem = currentReferenceTabItem;
-            AbstractTabItemIterator iterator =
-                    builder.start(addedTabItem.getIndex()).reverse(true).create();
-            TabItem tabItem;
+            AbstractItem iterationReferenceItem = currentReferenceItem;
+            AbstractItemIterator iterator =
+                    builder.start(addedItem.getIndex()).reverse(true).create();
+            AbstractItem item;
 
-            while ((tabItem = iterator.next()) != null) {
-                TabItem predecessor = iterator.peek();
+            while ((item = iterator.next()) != null) {
+                AbstractItem predecessor = iterator.peek();
                 Pair<Float, State> pair;
-                float currentTabSpacing = calculateMaxTabSpacing(iterationReferenceTabItem);
+                float currentTabSpacing = calculateMaxTabSpacing(iterationReferenceItem);
 
-                if (isReferencingPredecessor && tabItem.getIndex() == addedTabItem.getIndex()) {
+                if (isReferencingPredecessor && item.getIndex() == addedItem.getIndex()) {
                     State predecessorState =
                             predecessor != null ? predecessor.getTag().getState() : null;
-                    pair = clipTabPosition(tabItem.getIndex(), iterationReferencePosition,
+                    pair = clipPosition(item.getIndex(), iterationReferencePosition,
                             predecessorState == State.STACKED_START_ATOP ? State.FLOATING :
                                     predecessorState);
-                    currentReferenceTabItem = iterationReferenceTabItem = tabItem;
+                    currentReferenceItem = iterationReferenceItem = item;
                     initialReferencePosition =
                             referencePosition = iterationReferencePosition = pair.first;
-                    referenceIndex = iterationReferenceIndex = tabItem.getIndex();
+                    referenceIndex = iterationReferenceIndex = item.getIndex();
                 } else if (iterationReferencePosition >= attachedPosition - currentTabSpacing) {
                     float position;
 
-                    if (selectedTabIndex > tabItem.getIndex() &&
+                    if (selectedTabIndex > item.getIndex() &&
                             selectedTabIndex <= iterationReferenceIndex) {
                         position = iterationReferencePosition + maxTabSpacing +
-                                ((iterationReferenceIndex - tabItem.getIndex() - 1) *
+                                ((iterationReferenceIndex - item.getIndex() - 1) *
                                         defaultTabSpacing);
                     } else {
                         position = iterationReferencePosition +
-                                ((iterationReferenceIndex - tabItem.getIndex()) *
-                                        defaultTabSpacing);
+                                ((iterationReferenceIndex - item.getIndex()) * defaultTabSpacing);
                     }
 
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
                 } else {
-                    TabItem successor = iterator.previous();
+                    AbstractItem successor = iterator.previous();
                     float successorPosition = successor.getTag().getPosition();
                     float position = (attachedPosition * (successorPosition + minTabSpacing)) /
                             (minTabSpacing + attachedPosition - currentTabSpacing);
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
 
                     if (pair.first >= attachedPosition - currentTabSpacing) {
-                        iterationReferenceTabItem = tabItem;
+                        iterationReferenceItem = item;
                         iterationReferencePosition = pair.first;
-                        iterationReferenceIndex = tabItem.getIndex();
+                        iterationReferenceIndex = item.getIndex();
                     }
                 }
 
-                if (tabItem.getIndex() >= firstAddedTabItem.getIndex() &&
-                        tabItem.getIndex() <= lastAddedTabItem.getIndex()) {
+                if (item.getIndex() >= firstAddedItem.getIndex() &&
+                        item.getIndex() <= lastAddedItem.getIndex()) {
                     if (!isReferencingPredecessor && attachedPositionChanged &&
                             getModel().getCount() > 3) {
-                        TabItem successor = iterator.previous();
+                        AbstractItem successor = iterator.previous();
                         float successorPosition = successor.getTag().getPosition();
                         float position = pair.first - Math.abs(pair.first - successorPosition) / 2f;
-                        pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                        pair = clipPosition(item.getIndex(), position, predecessor);
                         initialReferencePosition = pair.first;
                     }
 
-                    Tag tag = addedTabItems[tabItem.getIndex() - firstAddedTabItem.getIndex()]
-                            .getTag();
+                    Tag tag = addedItems[item.getIndex() - firstAddedItem.getIndex()].getTag();
                     tag.setPosition(pair.first);
                     tag.setState(pair.second);
                 } else {
-                    Tag tag = tabItem.getTag().clone();
+                    Tag tag = item.getTag().clone();
                     tag.setPosition(pair.first);
                     tag.setState(pair.second);
 
-                    if (!tabItem.isInflated()) {
+                    if (!item.isInflated()) {
                         Pair<Float, State> pair2 =
-                                calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
-                        tabItem.getTag().setPosition(pair2.first);
-                        tabItem.getTag().setState(pair2.second);
+                                calculatePositionAndStateWhenStackedAtEnd(item.getIndex());
+                        item.getTag().setPosition(pair2.first);
+                        item.getTag().setState(pair2.second);
                     }
 
-                    relocate(tabItem, tag.getPosition(), tag, 0);
+                    relocate(item, tag.getPosition(), tag, 0);
                 }
 
                 if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
@@ -2320,31 +2315,31 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         }
 
         if (attachedPositionChanged && getModel().getCount() > 3) {
-            AbstractTabItemIterator iterator =
-                    builder.start(lastAddedTabItem.getIndex() + 1).reverse(false).create();
-            TabItem tabItem;
+            AbstractItemIterator iterator =
+                    builder.start(lastAddedItem.getIndex() + 1).reverse(false).create();
+            AbstractItem item;
             float previousPosition = initialReferencePosition;
-            Tag previousTag = lastAddedTabItem.getTag();
+            Tag previousTag = lastAddedItem.getTag();
 
-            while ((tabItem = iterator.next()) != null &&
-                    tabItem.getIndex() < getModel().getCount() - 1) {
-                float position = calculateSuccessorPosition(previousPosition,
-                        calculateMaxTabSpacing(tabItem));
+            while ((item = iterator.next()) != null &&
+                    item.getIndex() < getModel().getCount() - 1) {
+                float position =
+                        calculateSuccessorPosition(previousPosition, calculateMaxTabSpacing(item));
                 Pair<Float, State> pair =
-                        clipTabPosition(tabItem.getIndex(), position, previousTag.getState());
-                Tag tag = tabItem.getTag().clone();
+                        clipPosition(item.getIndex(), position, previousTag.getState());
+                Tag tag = item.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
 
-                if (!tabItem.isInflated()) {
+                if (!item.isInflated()) {
                     Pair<Float, State> pair2 =
                             calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
-                                    tabItem.getIndex(), iterator.previous());
-                    tabItem.getTag().setPosition(pair2.first);
-                    tabItem.getTag().setState(pair2.second);
+                                    item.getIndex(), iterator.previous());
+                    item.getTag().setPosition(pair2.first);
+                    item.getTag().setState(pair2.second);
                 }
 
-                relocate(tabItem, tag.getPosition(), tag, 0);
+                relocate(item, tag.getPosition(), tag, 0);
                 previousPosition = pair.first;
                 previousTag = tag;
 
@@ -2354,7 +2349,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             }
         }
 
-        return addedTabItems;
+        return addedItems;
     }
 
     /**
@@ -2363,111 +2358,110 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * @param start
      *         True, if the added tab was part of the stack, which is located at the start, false,
      *         if it was part of the stack, which is located at the end
-     * @param addedTabItems
-     *         An array, which contains the tab items, which correspond to the tabs, which have been
-     *         added, as an array of the type {@link TabItem}. The array may not be null
-     * @return An array, which contains the tab items, which correspond to the tabs, which have been
-     * added, as an array of the type {@link TabItem}. The array may not be null
+     * @param addedItems
+     *         An array, which contains the items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link AbstractItem}. The array may not be null
+     * @return An array, which contains the items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link AbstractItem}. The array may not be null
      */
     @NonNull
-    private TabItem[] relocateWhenAddingStackedTabs(final boolean start,
-                                                    @NonNull final TabItem[] addedTabItems) {
+    private AbstractItem[] relocateWhenAddingStackedTabs(final boolean start,
+                                                         @NonNull final AbstractItem[] addedItems) {
         if (!start) {
-            setFirstVisibleIndex(getFirstVisibleIndex() + addedTabItems.length);
+            setFirstVisibleIndex(getFirstVisibleIndex() + addedItems.length);
         }
 
-        TabItem firstAddedTabItem = addedTabItems[0];
-        TabItem lastAddedTabItem = addedTabItems[addedTabItems.length - 1];
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
-                        .start(start ? lastAddedTabItem.getIndex() : firstAddedTabItem.getIndex())
-                        .reverse(start).create();
-        TabItem tabItem;
+        AbstractItem firstAddedItem = addedItems[0];
+        AbstractItem lastAddedItem = addedItems[addedItems.length - 1];
+        AbstractItemIterator iterator = new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
+                .start(start ? lastAddedItem.getIndex() : firstAddedItem.getIndex()).reverse(start)
+                .create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null &&
-                (tabItem.getTag().getState() == State.STACKED_START ||
-                        tabItem.getTag().getState() == State.STACKED_START_ATOP ||
-                        tabItem.getTag().getState() == State.STACKED_END ||
-                        tabItem.getTag().getState() == State.HIDDEN)) {
-            TabItem predecessor = start ? iterator.peek() : iterator.previous();
+        while ((item = iterator.next()) != null &&
+                (item.getTag().getState() == State.STACKED_START ||
+                        item.getTag().getState() == State.STACKED_START_ATOP ||
+                        item.getTag().getState() == State.STACKED_END ||
+                        item.getTag().getState() == State.HIDDEN)) {
+            AbstractItem predecessor = start ? iterator.peek() : iterator.previous();
             Pair<Float, State> pair = start ?
                     calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
-                            tabItem.getIndex(), predecessor) :
-                    calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                            item.getIndex(), predecessor) :
+                    calculatePositionAndStateWhenStackedAtEnd(item.getIndex());
 
             if (start && predecessor != null && predecessor.getTag().getState() == State.FLOATING) {
                 float predecessorPosition = predecessor.getTag().getPosition();
                 float distance = predecessorPosition - pair.first;
 
                 if (distance > calculateMinTabSpacing()) {
-                    float position = calculateSuccessorPosition(tabItem, predecessor);
-                    pair = clipTabPosition(tabItem.getIndex(), position, predecessor);
+                    float position = calculateSuccessorPosition(item, predecessor);
+                    pair = clipPosition(item.getIndex(), position, predecessor);
                 }
             }
 
-            if (tabItem.getIndex() >= firstAddedTabItem.getIndex() &&
-                    tabItem.getIndex() <= lastAddedTabItem.getIndex()) {
-                Tag tag = addedTabItems[tabItem.getIndex() - firstAddedTabItem.getIndex()].getTag();
+            if (item.getIndex() >= firstAddedItem.getIndex() &&
+                    item.getIndex() <= lastAddedItem.getIndex()) {
+                Tag tag = addedItems[item.getIndex() - firstAddedItem.getIndex()].getTag();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-            } else if (tabItem.isInflated()) {
-                Tag tag = tabItem.getTag().clone();
+            } else if (item.isInflated()) {
+                Tag tag = item.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                animateRelocate(tabItem, tag.getPosition(), tag, 0,
-                        createRelocateAnimationListener(tabItem));
+                animateRelocate(item, tag.getPosition(), tag, 0,
+                        createRelocateAnimationListener(item));
             } else {
                 break;
             }
         }
 
-        return addedTabItems;
+        return addedItems;
     }
 
     /**
      * Calculates the position and state of hidden tabs, which have been added to the tab switcher.
      *
-     * @param addedTabItems
-     *         An array, which contains the tab items, which correspond to the tabs, which have been
-     *         added, as an array of the type {@link TabItem}. The array may not be null
-     * @param referenceTabItem
-     *         The tab item, which corresponds to the tab, which is used as a reference, as an
-     *         instance of the class {@link TabItem}. The tab item may not be null
-     * @return An array, which contains the tab items, which correspond to the tabs, which have been
-     * added, as an array of the type {@link TabItem}. The array may not be null
+     * @param addedItems
+     *         An array, which contains the items, which correspond to the tabs, which have been
+     *         added, as an array of the type {@link AbstractItem}. The array may not be null
+     * @param referenceItem
+     *         The item, which corresponds to the tab, which is used as a reference, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
+     * @return An array, which contains the items, which correspond to the tabs, which have been
+     * added, as an array of the type {@link AbstractItem}. The array may not be null
      */
     @NonNull
-    private TabItem[] relocateWhenAddingHiddenTabs(@NonNull final TabItem[] addedTabItems,
-                                                   @NonNull final TabItem referenceTabItem) {
-        boolean stackedAtStart = isStackedAtStart(referenceTabItem.getIndex());
+    private AbstractItem[] relocateWhenAddingHiddenTabs(@NonNull final AbstractItem[] addedItems,
+                                                        @NonNull final AbstractItem referenceItem) {
+        boolean stackedAtStart = isStackedAtStart(referenceItem.getIndex());
 
-        for (TabItem tabItem : addedTabItems) {
+        for (AbstractItem item : addedItems) {
             Pair<Float, State> pair;
 
             if (stackedAtStart) {
-                TabItem predecessor = tabItem.getIndex() > 0 ?
-                        TabItem.create(getTabSwitcher(), tabViewRecycler, tabItem.getIndex() - 1) :
+                AbstractItem predecessor = item.getIndex() > 0 ?
+                        TabItem.create(getTabSwitcher(), tabViewRecycler, item.getIndex() - 1) :
                         null;
                 pair = calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
-                        tabItem.getIndex(), predecessor);
+                        item.getIndex(), predecessor);
             } else {
-                pair = calculatePositionAndStateWhenStackedAtEnd(tabItem.getIndex());
+                pair = calculatePositionAndStateWhenStackedAtEnd(item.getIndex());
             }
 
-            Tag tag = tabItem.getTag();
+            Tag tag = item.getTag();
             tag.setPosition(pair.first);
             tag.setState(pair.second);
         }
 
-        return addedTabItems;
+        return addedItems;
     }
 
     /**
      * Relocates a specific tab. If its view is now yet inflated, it is inflated first.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be relocated, as an instance
-     *         of the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be relocated, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      * @param relocatePosition
      *         The position, the tab should be moved to, in pixels as an {@link Float} value
      * @param tag
@@ -2476,39 +2470,39 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      * @param startDelay
      *         The start delay of the relocate animation in milliseconds as a {@link Long} value
      */
-    private void relocate(@NonNull final TabItem tabItem, final float relocatePosition,
+    private void relocate(@NonNull final AbstractItem item, final float relocatePosition,
                           @Nullable final Tag tag, final long startDelay) {
-        if (tabItem.isInflated()) {
-            animateRelocate(tabItem, relocatePosition, tag, startDelay,
-                    createRelocateAnimationListener(tabItem));
+        if (item.isInflated()) {
+            animateRelocate(item, relocatePosition, tag, startDelay,
+                    createRelocateAnimationListener(item));
         } else {
-            inflateAndUpdateView(tabItem,
-                    createRelocateLayoutListener(tabItem, relocatePosition, tag, startDelay,
-                            createRelocateAnimationListener(tabItem)));
-            tabItem.getView().setVisibility(View.INVISIBLE);
+            inflateAndUpdateView(item,
+                    createRelocateLayoutListener(item, relocatePosition, tag, startDelay,
+                            createRelocateAnimationListener(item)));
+            item.getView().setVisibility(View.INVISIBLE);
         }
     }
 
     /**
      * Swipes a specific tab.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which should be swiped, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the tab, which should be swiped, as an instance of the
+     *         class {@link AbstractItem}. The item may not be null
      * @param distance
      *         The distance, the tab should be swiped by, in pixels as a {@link Float} value
      */
-    private void swipe(@NonNull final TabItem tabItem, final float distance) {
-        View view = tabItem.getView();
+    private void swipe(@NonNull final AbstractItem item, final float distance) {
+        View view = item.getView();
 
-        if (!tabItem.getTag().isClosing()) {
-            adaptStackOnSwipe(tabItem, tabItem.getIndex() + 1, getModel().getCount() - 1);
+        if (!item.getTag().isClosing()) {
+            adaptStackOnSwipe(item, item.getIndex() + 1, getModel().getCount() - 1);
         }
 
-        tabItem.getTag().setClosing(true);
+        item.getTag().setClosing(true);
         float dragDistance = distance;
 
-        if (!tabItem.getTab().isCloseable()) {
+        if (!((TabItem) item).getTab().isCloseable()) {
             dragDistance = (float) Math.pow(Math.abs(distance), 0.75);
             dragDistance = distance < 0 ? dragDistance * -1 : dragDistance;
         }
@@ -2534,21 +2528,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The position of the first tab in pixels as a {@link Float} value
      */
     private void startOvershoot(final float position) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getIndex() == 0) {
-                View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            if (item.getIndex() == 0) {
+                View view = item.getView();
                 getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
                         getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
                 getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
                         getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
                 getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, position);
-            } else if (tabItem.isInflated()) {
+            } else if (item.isInflated()) {
                 View firstView = iterator.first().getView();
-                View view = tabItem.getView();
+                View view = item.getView();
                 view.setVisibility(getArithmetics().getPosition(Axis.DRAGGING_AXIS, firstView) <=
                         getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
                         View.VISIBLE);
@@ -2563,22 +2557,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The angle, the tabs should be rotated by, in degrees as a {@link Float} value
      */
     private void tiltOnStartOvershoot(final float angle) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            View view = item.getView();
 
-            if (tabItem.getIndex() == 0) {
+            if (item.getIndex() == 0) {
                 view.setCameraDistance(maxCameraDistance);
                 getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
                         .getPivot(Axis.DRAGGING_AXIS, view, DragState.OVERSHOOT_START));
                 getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
                         .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.OVERSHOOT_START));
                 getArithmetics().setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
-            } else if (tabItem.isInflated()) {
-                tabItem.getView().setVisibility(View.INVISIBLE);
+            } else if (item.isInflated()) {
+                item.getView().setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -2592,24 +2586,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     private void tiltOnEndOvershoot(final float angle) {
         float minCameraDistance = maxCameraDistance / 2f;
         int firstVisibleIndex = -1;
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                View view = tabItem.getView();
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated()) {
+                View view = item.getView();
 
                 if (!iterator.hasNext()) {
                     view.setCameraDistance(maxCameraDistance);
                 } else if (firstVisibleIndex == -1) {
                     view.setCameraDistance(minCameraDistance);
 
-                    if (tabItem.getTag().getState() == State.FLOATING) {
-                        firstVisibleIndex = tabItem.getIndex();
+                    if (item.getTag().getState() == State.FLOATING) {
+                        firstVisibleIndex = item.getIndex();
                     }
                 } else {
-                    int diff = tabItem.getIndex() - firstVisibleIndex;
+                    int diff = item.getIndex() - firstVisibleIndex;
                     float ratio =
                             (float) diff / (float) (getModel().getCount() - firstVisibleIndex);
                     view.setCameraDistance(
@@ -2636,13 +2630,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      */
     private boolean isStackedAtStart(final int index) {
         boolean start = true;
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).start(index + 1)
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).start(index + 1)
                         .create();
-        TabItem tabItem;
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            State state = tabItem.getTag().getState();
+        while ((item = iterator.next()) != null) {
+            State state = item.getTag().getState();
 
             if (state == State.STACKED_START) {
                 start = true;
@@ -2734,7 +2728,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 contentViewRecycler);
         getModel().addListener(recyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
-                Collections.reverseOrder(new TabItem.Comparator(getTabSwitcher())));
+                Collections.reverseOrder(new ItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
@@ -2764,13 +2758,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final AttachedViewRecycler<TabItem, Integer> getTabViewRecycler() {
+    protected final AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler() {
         return tabViewRecycler;
     }
 
     @Override
-    protected final void updateView(@NonNull final TabItem tabItem) {
-        View view = tabItem.getView();
+    protected final void updateView(@NonNull final AbstractItem item) {
+        View view = item.getView();
         view.setAlpha(1f);
         view.setVisibility(View.VISIBLE);
         getArithmetics().setPivot(Arithmetics.Axis.DRAGGING_AXIS, view, getArithmetics()
@@ -2779,7 +2773,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         getArithmetics().setPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view, getArithmetics()
                 .getPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view,
                         AbstractDragHandler.DragState.NONE));
-        super.updateView(tabItem);
+        super.updateView(item);
         getArithmetics().setRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
@@ -2804,10 +2798,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final void inflateAndUpdateView(@NonNull final TabItem tabItem,
+    protected final void inflateAndUpdateView(@NonNull final AbstractItem item,
                                               @Nullable final OnGlobalLayoutListener listener) {
-        inflateView(tabItem, createInflateViewLayoutListener(tabItem, listener),
-                tabViewBottomMargin);
+        inflateView(item, createInflateViewLayoutListener(item, listener), tabViewBottomMargin);
     }
 
     @Override
@@ -2865,22 +2858,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         if (getTabSwitcher().getCount() <= 1) {
             return true;
         } else {
-            AbstractTabItemIterator iterator =
-                    new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-            TabItem tabItem = iterator.getItem(0);
-            return tabItem.getTag().getState() == State.STACKED_START_ATOP;
+            AbstractItemIterator iterator =
+                    new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+            AbstractItem item = iterator.getItem(0);
+            return item.getTag().getState() == State.STACKED_START_ATOP;
         }
     }
 
     @Override
-    protected final boolean isOvershootingAtEnd(@NonNull final AbstractTabItemIterator iterator) {
+    protected final boolean isOvershootingAtEnd(@NonNull final AbstractItemIterator iterator) {
         if (getTabSwitcher().getCount() <= 1) {
             return true;
         } else {
-            TabItem lastTabItem = iterator.getItem(getTabSwitcher().getCount() - 1);
-            TabItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);
+            AbstractItem lastItem = iterator.getItem(getTabSwitcher().getCount() - 1);
+            AbstractItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);
             return Math.round(predecessor.getTag().getPosition()) >=
-                    Math.round(calculateMaxTabSpacing(lastTabItem));
+                    Math.round(calculateMaxTabSpacing(lastItem));
         }
     }
 
@@ -2890,10 +2883,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
 
         if (selectedTabIndex > index) {
-            AbstractTabItemIterator iterator =
-                    new TabItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
-            TabItem selectedTabItem = iterator.getItem(selectedTabIndex);
-            float selectedTabSpacing = calculateMaxTabSpacing(selectedTabItem);
+            AbstractItemIterator iterator =
+                    new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
+            AbstractItem selectedItem = iterator.getItem(selectedTabIndex);
+            float selectedTabSpacing = calculateMaxTabSpacing(selectedItem);
             return (getTabSwitcher().getCount() - 2 - index) * defaultMaxTabSpacing +
                     selectedTabSpacing;
         }
@@ -2902,16 +2895,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    protected final float calculateSuccessorPosition(@NonNull final TabItem tabItem,
-                                                     @NonNull final TabItem predecessor) {
+    protected final float calculateSuccessorPosition(@NonNull final AbstractItem item,
+                                                     @NonNull final AbstractItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        float maxTabSpacing = calculateMaxTabSpacing(tabItem);
+        float maxTabSpacing = calculateMaxTabSpacing(item);
         return calculateSuccessorPosition(predecessorPosition, maxTabSpacing);
     }
 
     @Override
-    protected final float calculatePredecessorPosition(@NonNull final TabItem tabItem,
-                                                       @NonNull final TabItem successor) {
+    protected final float calculatePredecessorPosition(@NonNull final AbstractItem item,
+                                                       @NonNull final AbstractItem successor) {
         float successorPosition = successor.getTag().getPosition();
         return successorPosition + calculateMaxTabSpacing(successor);
     }
@@ -2973,12 +2966,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
-            TabItem tabItem = new TabItem(0, tab);
-            inflateView(tabItem, createPeekLayoutListener(tabItem, peekAnimation));
+            AbstractItem item = new TabItem(0, tab);
+            inflateView(item, createPeekLayoutListener(item, peekAnimation));
         } else if (animation instanceof RevealAnimation && switcherVisibilityChanged) {
-            TabItem tabItem = new TabItem(0, tab);
+            AbstractItem item = new TabItem(0, tab);
             RevealAnimation revealAnimation = (RevealAnimation) animation;
-            inflateView(tabItem, createRevealLayoutListener(tabItem, revealAnimation));
+            inflateView(item, createRevealLayoutListener(item, revealAnimation));
         } else {
             addAllTabs(index, new Tab[]{tab}, animation);
         }
@@ -3004,10 +2997,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 animation.getClass().getSimpleName() + " not supported for removing tabs");
         getLogger().logInfo(getClass(), "Removed tab at index " + index + " using a " +
                 animation.getClass().getSimpleName());
-        TabItem removedTabItem = TabItem.create(tabViewRecycler, index, tab);
+        AbstractItem removedItem = TabItem.create(tabViewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
-            tabViewRecycler.remove(removedTabItem);
+            tabViewRecycler.remove(removedItem);
 
             if (getModel().isEmpty()) {
                 toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
@@ -3016,24 +3009,25 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                         TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex));
             }
         } else {
-            adaptStackOnSwipe(removedTabItem, removedTabItem.getIndex(), getModel().getCount());
-            removedTabItem.getTag().setClosing(true);
+            adaptStackOnSwipe(removedItem, removedItem.getIndex(), getModel().getCount());
+            removedItem.getTag().setClosing(true);
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                             new SwipeAnimation.Builder().create();
 
-            if (removedTabItem.isInflated()) {
-                animateRemove(removedTabItem, swipeAnimation);
+            if (removedItem.isInflated()) {
+                animateRemove(removedItem, swipeAnimation);
             } else {
                 boolean start = isStackedAtStart(index);
-                TabItem predecessor = TabItem.create(getTabSwitcher(), tabViewRecycler, index - 1);
+                AbstractItem predecessor =
+                        TabItem.create(getTabSwitcher(), tabViewRecycler, index - 1);
                 Pair<Float, State> pair = start ?
                         calculatePositionAndStateWhenStackedAtStart(getModel().getCount(), index,
                                 predecessor) : calculatePositionAndStateWhenStackedAtEnd(index);
-                removedTabItem.getTag().setPosition(pair.first);
-                removedTabItem.getTag().setState(pair.second);
-                inflateAndUpdateView(removedTabItem,
-                        createRemoveLayoutListener(removedTabItem, swipeAnimation));
+                removedItem.getTag().setPosition(pair.first);
+                removedItem.getTag().setState(pair.second);
+                inflateAndUpdateView(removedItem,
+                        createRemoveLayoutListener(removedItem, swipeAnimation));
             }
         }
     }
@@ -3053,21 +3047,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             SwipeAnimation swipeAnimation =
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                             new SwipeAnimation.Builder().create();
-            AbstractTabItemIterator iterator =
-                    new ArrayTabItemIterator.Builder(tabViewRecycler, tabs).reverse(true).create();
-            TabItem tabItem;
+            AbstractItemIterator iterator =
+                    new ArrayItemIterator.Builder(tabViewRecycler, tabs).reverse(true).create();
+            AbstractItem item;
             int startDelay = 0;
 
-            while ((tabItem = iterator.next()) != null) {
-                TabItem previous = iterator.previous();
+            while ((item = iterator.next()) != null) {
+                AbstractItem previous = iterator.previous();
 
-                if (tabItem.getTag().getState() == State.FLOATING ||
+                if (item.getTag().getState() == State.FLOATING ||
                         (previous != null && previous.getTag().getState() == State.FLOATING)) {
                     startDelay += clearAnimationDelay;
                 }
 
-                if (tabItem.isInflated()) {
-                    animateSwipe(tabItem, true, startDelay, swipeAnimation,
+                if (item.isInflated()) {
+                    animateSwipe(item, true, startDelay, swipeAnimation,
                             !iterator.hasNext() ? createClearAnimationListener() : null);
                 }
             }
@@ -3084,22 +3078,22 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     @Override
     public final void onGlobalLayout() {
         if (getModel().isSwitcherShown()) {
-            TabItem[] tabItems = calculateInitialTabItems(getModel().getFirstVisibleTabIndex(),
+            AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
                     getModel().getFirstVisibleTabPosition());
-            AbstractTabItemIterator iterator = new InitialTabItemIterator(tabItems, false, 0);
-            TabItem tabItem;
+            AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+            AbstractItem item;
 
-            while ((tabItem = iterator.next()) != null) {
-                if (tabItem.isVisible()) {
-                    inflateAndUpdateView(tabItem, createBottomMarginLayoutListener(tabItem));
+            while ((item = iterator.next()) != null) {
+                if (item.isVisible()) {
+                    inflateAndUpdateView(item, createBottomMarginLayoutListener(item));
                 }
             }
 
             toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
         } else if (getModel().getSelectedTab() != null) {
-            TabItem tabItem = TabItem.create(getTabSwitcher(), tabViewRecycler,
+            AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler,
                     getModel().getSelectedTabIndex());
-            tabViewRecycler.inflate(tabItem);
+            tabViewRecycler.inflate(item);
         }
     }
 

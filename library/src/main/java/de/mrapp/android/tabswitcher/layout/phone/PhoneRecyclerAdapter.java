@@ -34,9 +34,10 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
@@ -260,9 +261,9 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
 
     @NonNull
     @Override
-    protected final View onInflateView(@NonNull final LayoutInflater inflater,
-                                       @Nullable final ViewGroup parent,
-                                       @NonNull final AbstractTabViewHolder viewHolder) {
+    protected final View onInflateTabView(@NonNull final LayoutInflater inflater,
+                                          @Nullable final ViewGroup parent,
+                                          @NonNull final AbstractTabViewHolder viewHolder) {
         View view = inflater.inflate(R.layout.phone_tab, parent, false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(getModel().getContext(), R.drawable.phone_tab_background);
@@ -284,8 +285,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     }
 
     @Override
-    protected final void onShowView(@NonNull final View view, @NonNull final TabItem tabItem,
-                                    @NonNull final Integer... params) {
+    protected final void onShowTabView(@NonNull final View view, @NonNull final TabItem tabItem,
+                                       @NonNull final Integer... params) {
         LayoutParams layoutParams =
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         int borderMargin = -(tabInset + tabBorderWidth);
@@ -308,7 +309,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
 
     @NonNull
     @Override
-    protected final AbstractTabViewHolder onCreateViewHolder() {
+    protected final AbstractTabViewHolder onCreateTabViewHolder() {
         return new PhoneTabViewHolder();
     }
 
@@ -319,27 +320,32 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     }
 
     @Override
-    public final void onRemoveView(@NonNull final View view, @NonNull final TabItem tabItem) {
-        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) view.getTag(R.id.tag_view_holder);
-        Tab tab = tabItem.getTab();
-        removeChildView(viewHolder, tab);
+    public final void onRemoveView(@NonNull final View view, @NonNull final AbstractItem item) {
+        if (item instanceof TabItem) {
+            TabItem tabItem = (TabItem) item;
+            PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) view.getTag(R.id.tag_view_holder);
+            Tab tab = tabItem.getTab();
+            removeChildView(viewHolder, tab);
 
-        if (!dataBinder.isCached(tab)) {
-            Drawable drawable = viewHolder.previewImageView.getDrawable();
-            viewHolder.previewImageView.setImageBitmap(null);
+            if (!dataBinder.isCached(tab)) {
+                Drawable drawable = viewHolder.previewImageView.getDrawable();
+                viewHolder.previewImageView.setImageBitmap(null);
 
-            if (drawable instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                if (drawable instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    bitmap.recycle();
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
                 }
+            } else {
+                viewHolder.previewImageView.setImageBitmap(null);
             }
-        } else {
-            viewHolder.previewImageView.setImageBitmap(null);
-        }
 
-        super.onRemoveView(view, tabItem);
+            super.onRemoveView(view, tabItem);
+        } else {
+            throw new IllegalArgumentException("Unknown item type");
+        }
     }
 
     @Override
@@ -350,26 +356,27 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
     @Override
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptPadding((PhoneTabViewHolder) tabItem.getViewHolder());
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                AbstractTabViewHolder viewHolder = ((TabItem) item).getViewHolder();
+                adaptPadding((PhoneTabViewHolder) viewHolder);
             }
         }
     }
 
     @Override
     public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
-        TabItemIterator iterator =
-                new TabItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
-        TabItem tabItem;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
 
-        while ((tabItem = iterator.next()) != null) {
-            if (tabItem.isInflated()) {
-                adaptContentBackgroundColor(tabItem);
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptContentBackgroundColor((TabItem) item);
             }
         }
     }

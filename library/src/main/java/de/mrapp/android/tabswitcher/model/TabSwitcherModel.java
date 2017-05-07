@@ -39,6 +39,7 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
@@ -253,6 +254,12 @@ public class TabSwitcherModel implements Model, Restorable {
      * The bitmap of the icon of a tab's close button.
      */
     private Bitmap tabCloseButtonIconBitmap;
+
+    /**
+     * The listener, which is notified, when the button, which allows to add a tab, has been
+     * clicked.
+     */
+    private AddTabButtonListener addTabButtonListener;
 
     /**
      * True, if the toolbars should be shown, when the tab switcher is shown, false otherwise.
@@ -582,6 +589,19 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Notifies the listeners, that is has been changed, whether the button, which allows to add a
+     * new tab, should be shown, or not.
+     *
+     * @param visible
+     *         True, if the button, which allows to add a new tab, should be shown, false otherwise
+     */
+    private void notifyOnAddTabButtonVisibilityChanged(final boolean visible) {
+        for (Listener listener : listeners) {
+            listener.onAddTabButtonVisibilityChanged(visible);
+        }
+    }
+
+    /**
      * Notifies the listeners, that it has been changed, whether the toolbars should be shown, when
      * the tab switcher is shown, or not.
      *
@@ -674,6 +694,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabTitleTextColor = null;
         this.tabCloseButtonIconId = -1;
         this.tabCloseButtonIconBitmap = null;
+        this.addTabButtonListener = null;
         this.showToolbars = false;
         this.toolbarTitle = null;
         this.toolbarNavigationIcon = null;
@@ -726,6 +747,19 @@ public class TabSwitcherModel implements Model, Restorable {
      */
     public final float getFirstVisibleTabPosition() {
         return firstVisibleTabPosition;
+    }
+
+    /**
+     * Returns the listener, which is notified, when the button, which allows to add a new tab, has
+     * been clicked.
+     *
+     * @return The listener, which is notified, when the button, which allows to add a new tab, has
+     * been clicked, as an instance of the type {@link AddTabButtonListener} or null, if the button
+     * is not shown
+     */
+    @Nullable
+    public final AddTabButtonListener getAddTabButtonListener() {
+        return addTabButtonListener;
     }
 
     /**
@@ -1186,6 +1220,17 @@ public class TabSwitcherModel implements Model, Restorable {
         tabCloseButtonIconId = -1;
         tabCloseButtonIconBitmap = icon;
         notifyOnTabCloseButtonIconChanged(getTabCloseButtonIcon());
+    }
+
+    @Override
+    public final boolean isAddTabButtonShown() {
+        return addTabButtonListener != null;
+    }
+
+    @Override
+    public final void showAddTabButton(@Nullable final AddTabButtonListener listener) {
+        this.addTabButtonListener = listener;
+        notifyOnAddTabButtonVisibilityChanged(listener != null);
     }
 
     @Override

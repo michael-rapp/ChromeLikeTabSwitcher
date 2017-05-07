@@ -23,8 +23,6 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -33,64 +31,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class TabItem {
-
-    /**
-     * A comparator, which allows to compare two instances of the class {@link TabItem}.
-     */
-    public static class Comparator implements java.util.Comparator<TabItem> {
-
-        /**
-         * The tab switcher, the tab items, which are compared by the comparator, belong to.
-         */
-        private final TabSwitcher tabSwitcher;
-
-        /**
-         * Returns the tab switcher, the tab items, which are compared by the comparator, belong to.
-         *
-         * @return The tab switcher, the tab items, which are compared by the comparator, belong to,
-         * as an instance of the class {@link TabSwitcher}. The tab switcher may not be null
-         */
-        @NonNull
-        protected final TabSwitcher getTabSwitcher() {
-            return tabSwitcher;
-        }
-
-        /**
-         * Creates a new comparator, which allows to compare two instances of the class {@link
-         * TabItem}.
-         *
-         * @param tabSwitcher
-         *         The tab switcher, the tab items, which should be compared by the comparator,
-         *         belong to, as a instance of the class {@link TabSwitcher}. The tab switcher may
-         *         not be null
-         */
-        public Comparator(@NonNull final TabSwitcher tabSwitcher) {
-            ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-            this.tabSwitcher = tabSwitcher;
-        }
-
-        @Override
-        public int compare(final TabItem o1, final TabItem o2) {
-            Tab tab1 = o1.getTab();
-            Tab tab2 = o2.getTab();
-            int index1 = tabSwitcher.indexOf(tab1);
-            index1 = index1 == -1 ? o1.getIndex() : index1;
-            int index2 = tabSwitcher.indexOf(tab2);
-            index2 = index2 == -1 ? o2.getIndex() : index2;
-            ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
-                    RuntimeException.class);
-            ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
-                    RuntimeException.class);
-            return index1 < index2 ? -1 : 1;
-        }
-
-    }
-
-    /**
-     * The index of the tab.
-     */
-    private final int index;
+public class TabItem extends AbstractItem {
 
     /**
      * The tab.
@@ -98,37 +39,24 @@ public class TabItem {
     private final Tab tab;
 
     /**
-     * The view, which is used to visualize the tab.
-     */
-    private View view;
-
-    /**
      * The view holder, which stores references the views, which belong to the tab.
      */
     private AbstractTabViewHolder viewHolder;
-
-    /**
-     * The tag, which is associated with the tab.
-     */
-    private Tag tag;
 
     /**
      * Creates a new item, which contains information about a tab of a {@link TabSwitcher}. By
      * default, the item is neither associated with a view, nor with a view holder.
      *
      * @param index
-     *         The index of the tab as an {@link Integer} value. The index must be at least 0
+     *         The index of the item as an {@link Integer} value. The index must be at least 0
      * @param tab
      *         The tab as an instance of the class {@link Tab}. The tab may not be null
      */
     public TabItem(final int index, @NonNull final Tab tab) {
-        ensureAtLeast(index, 0, "The index must be at least 0");
+        super(index);
         ensureNotNull(tab, "The tab may not be null");
-        this.index = index;
         this.tab = tab;
-        this.view = null;
         this.viewHolder = null;
-        this.tag = new Tag();
     }
 
     /**
@@ -149,7 +77,7 @@ public class TabItem {
      */
     @NonNull
     public static TabItem create(@NonNull final Model model,
-                                 @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
+                                 @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                                  final int index) {
         Tab tab = model.getTab(index);
         return create(viewRecycler, index, tab);
@@ -171,7 +99,7 @@ public class TabItem {
      * item may not be null
      */
     @NonNull
-    public static TabItem create(@NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
+    public static TabItem create(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                                  final int index, @NonNull final Tab tab) {
         TabItem tabItem = new TabItem(index, tab);
         View view = viewRecycler.getView(tabItem);
@@ -190,15 +118,6 @@ public class TabItem {
     }
 
     /**
-     * Returns the index of the tab.
-     *
-     * @return The index of the tab as an {@link Integer} value. The index must be at least 0
-     */
-    public final int getIndex() {
-        return index;
-    }
-
-    /**
      * Returns the tab.
      *
      * @return The tab as an instance of the class {@link Tab}. The tab may not be null
@@ -206,27 +125,6 @@ public class TabItem {
     @NonNull
     public final Tab getTab() {
         return tab;
-    }
-
-    /**
-     * Returns the view, which is used to visualize the tab.
-     *
-     * @return The view, which is used to visualize the tab, as an instance of the class {@link
-     * View} or null, if no such view is currently inflated
-     */
-    public final View getView() {
-        return view;
-    }
-
-    /**
-     * Sets the view, which is used to visualize the tab.
-     *
-     * @param view
-     *         The view, which should be set, as an instance of the class {@link View} or null, if
-     *         no view should be set
-     */
-    public final void setView(@Nullable final View view) {
-        this.view = view;
     }
 
     /**
@@ -250,50 +148,14 @@ public class TabItem {
         this.viewHolder = viewHolder;
     }
 
-    /**
-     * Returns the tag, which is associated with the tab.
-     *
-     * @return The tag as an instance of the class {@link Tag}. The tag may not be null
-     */
-    @NonNull
-    public final Tag getTag() {
-        return tag;
-    }
-
-    /**
-     * Sets the tag, which is associated with the tab.
-     *
-     * @param tag
-     *         The tag, which should be set, as an instance of the class {@link Tag}. The tag may
-     *         not be null
-     */
-    public final void setTag(@NonNull final Tag tag) {
-        ensureNotNull(tag, "The tag may not be null");
-        this.tag = tag;
-    }
-
-    /**
-     * Returns, whether a view, which is used to visualize the tab, is currently inflated, or not.
-     *
-     * @return True, if a view, which is used to visualize the tab, is currently inflated, false
-     * otherwise
-     */
+    @Override
     public final boolean isInflated() {
-        return view != null && viewHolder != null;
-    }
-
-    /**
-     * Returns, whether the tab is currently visible, or not.
-     *
-     * @return True, if the tab is currently visible, false otherwise
-     */
-    public final boolean isVisible() {
-        return tag.getState() != State.HIDDEN || tag.isClosing();
+        return super.isInflated() && viewHolder != null;
     }
 
     @Override
     public final String toString() {
-        return "TabItem [index = " + index + "]";
+        return "TabItem [index = " + getIndex() + "]";
     }
 
     @Override

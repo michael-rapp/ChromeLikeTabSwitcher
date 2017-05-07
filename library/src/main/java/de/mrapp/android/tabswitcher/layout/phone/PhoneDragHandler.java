@@ -23,11 +23,12 @@ import android.view.View;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.iterator.AbstractTabItemIterator;
-import de.mrapp.android.tabswitcher.iterator.TabItemIterator;
+import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
@@ -82,7 +83,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      * The view recycler, which allows to inflate the views, which are used to visualize the tabs,
      * whose positions and states are calculated by the drag handler.
      */
-    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+    private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
     /**
      * The drag helper, which is used to recognize drag gestures when overshooting.
@@ -169,7 +170,7 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
      */
     public PhoneDragHandler(@NonNull final TabSwitcher tabSwitcher,
                             @NonNull final Arithmetics arithmetics,
-                            @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
+                            @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
@@ -184,10 +185,10 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
 
     @Override
     @Nullable
-    protected final TabItem getFocusedTab(final float position) {
-        AbstractTabItemIterator iterator =
-                new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-        TabItem tabItem;
+    protected final AbstractItem getFocusedItem(final float position) {
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+        AbstractItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.getTag().getState() == State.FLOATING ||
@@ -228,9 +229,9 @@ public class PhoneDragHandler extends AbstractDragHandler<PhoneDragHandler.Callb
             if (absOvershootDistance <= startOvershootDistance) {
                 float ratio =
                         Math.max(0, Math.min(1, absOvershootDistance / startOvershootDistance));
-                AbstractTabItemIterator iterator =
-                        new TabItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
-                TabItem tabItem = iterator.getItem(0);
+                AbstractItemIterator iterator =
+                        new ItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+                AbstractItem tabItem = iterator.getItem(0);
                 float currentPosition = tabItem.getTag().getPosition();
                 float position = currentPosition - (currentPosition * ratio);
                 notifyOnStartOvershoot(position);

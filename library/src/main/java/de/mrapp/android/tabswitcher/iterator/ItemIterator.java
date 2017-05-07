@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.iterator;
 import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -23,47 +24,48 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An iterator, which allows to iterate the tab items, which correspond to the tabs of a {@link
+ * An iterator, which allows to iterate the items, which correspond to the child views of a {@link
  * TabSwitcher}.
  *
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class TabItemIterator extends AbstractTabItemIterator {
+public class ItemIterator extends AbstractItemIterator {
 
     /**
      * A builder, which allows to configure and create instances of the class {@link
-     * TabItemIterator}.
+     * ItemIterator}.
      */
-    public static class Builder extends AbstractBuilder<Builder, TabItemIterator> {
+    public static class Builder extends AbstractBuilder<Builder, ItemIterator> {
 
         /**
-         * The model, which belongs to the tab switcher, whose tabs should be iterated by the
+         * The model, which belongs to the tab switcher, whose items should be iterated by the
          * iterator, which is created by the builder.
          */
         private final Model model;
 
         /**
          * The view recycler, which allows to inflate the views, which are used to visualize the
-         * tabs, which are iterated by the iterator, which is created by the builder.
+         * items, which are iterated by the iterator, which is created by the builder.
          */
-        private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+        private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * TabItemIterator}.
+         * ItemIterator}.
          *
          * @param model
-         *         The model, which belongs to the tab switcher, whose tabs should be iterated by
+         *         The model, which belongs to the tab switcher, whose items should be iterated by
          *         the iterator, which is created by the builder, as an instance of the type {@link
          *         Model}. The model may not be null
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
-         *         the tabs, which are iterated by the iterator, which is created by the builder, as
-         *         an instance of the class AttachedViewRecycler. The view recycler may not be null
+         *         the items, which are iterated by the iterator, which is created by the builder,
+         *         as an instance of the class AttachedViewRecycler. The view recycler may not be
+         *         null
          */
         public Builder(@NonNull final Model model,
-                       @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler) {
+                       @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
             ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             this.model = model;
@@ -72,8 +74,8 @@ public class TabItemIterator extends AbstractTabItemIterator {
 
         @NonNull
         @Override
-        public TabItemIterator create() {
-            return new TabItemIterator(model, viewRecycler, reverse, start);
+        public ItemIterator create() {
+            return new ItemIterator(model, viewRecycler, reverse, start);
         }
 
     }
@@ -85,30 +87,30 @@ public class TabItemIterator extends AbstractTabItemIterator {
 
     /**
      * The view recycler, which allows to inflated the views, which are used to visualize the
-     * iterated tabs.
+     * iterated items.
      */
-    private final AttachedViewRecycler<TabItem, ?> viewRecycler;
+    private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
     /**
-     * Creates a new iterator, which allows to iterate the tab items, which correspond to the tabs
-     * of a {@link TabSwitcher}.
+     * Creates a new iterator, which allows to iterate the items, which correspond to the child
+     * views of a {@link TabSwitcher}.
      *
      * @param model
-     *         The model, which belongs to the tab switcher, whose tabs should be iterated, as an
+     *         The model, which belongs to the tab switcher, whose items should be iterated, as an
      *         instance of the type {@link Model}. The model may not be null
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
-     *         iterated tabs, as an instance of the class AttachedViewRecycler. The view recycler
+     *         iterated items, as an instance of the class AttachedViewRecycler. The view recycler
      *         may not be null
      * @param reverse
-     *         True, if the tabs should be iterated in reverse order, false otherwise
+     *         True, if the items should be iterated in reverse order, false otherwise
      * @param start
-     *         The index of the first tab, which should be iterated, as an {@link Integer} value or
-     *         -1, if all tabs should be iterated
+     *         The index of the first item, which should be iterated, as an {@link Integer} value or
+     *         -1, if all items should be iterated
      */
-    private TabItemIterator(@NonNull final Model model,
-                            @NonNull final AttachedViewRecycler<TabItem, ?> viewRecycler,
-                            final boolean reverse, final int start) {
+    private ItemIterator(@NonNull final Model model,
+                         @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
+                         final boolean reverse, final int start) {
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.model = model;
@@ -123,7 +125,7 @@ public class TabItemIterator extends AbstractTabItemIterator {
 
     @NonNull
     @Override
-    public final TabItem getItem(final int index) {
+    public final AbstractItem getItem(final int index) {
         return TabItem.create(model, viewRecycler, index);
     }
 

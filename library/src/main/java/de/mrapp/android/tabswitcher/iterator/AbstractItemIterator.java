@@ -15,32 +15,34 @@ package de.mrapp.android.tabswitcher.iterator;
 
 import android.support.annotation.NonNull;
 
-import de.mrapp.android.tabswitcher.model.TabItem;
+import java.util.Iterator;
+
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 
 /**
  * An abstract base class for all iterators, which allow to iterate items of the type {@link
- * TabItem}.
+ * AbstractItem}.
  *
  * @author Michael Rapp
  * @since 0.1.0
  */
-public abstract class AbstractTabItemIterator implements java.util.Iterator<TabItem> {
+public abstract class AbstractItemIterator implements Iterator<AbstractItem> {
 
     /**
      * An abstract base class of all builders, which allows to configure and create instances of the
-     * class {@link AbstractTabItemIterator}.
+     * class {@link AbstractItemIterator}.
      */
-    public static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractTabItemIterator> {
+    public static abstract class AbstractBuilder<BuilderType extends AbstractBuilder<?, ProductType>, ProductType extends AbstractItemIterator> {
 
         /**
-         * True, if the tabs should be iterated in reverse order, false otherwise.
+         * True, if the items should be iterated in reverse order, false otherwise.
          */
         protected boolean reverse;
 
         /**
-         * The index of the first tab, which should be iterated.
+         * The index of the first item, which should be iterated.
          */
         protected int start;
 
@@ -57,7 +59,7 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
 
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
-         * AbstractTabItemIterator}.
+         * AbstractItemIterator}.
          */
         protected AbstractBuilder() {
             reverse(false);
@@ -68,16 +70,16 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
          * Creates the iterator, which has been configured by using the builder.
          *
          * @return The iterator, which has been created, as an instance of the class {@link
-         * TabItemIterator}. The iterator may not be null
+         * ItemIterator}. The iterator may not be null
          */
         @NonNull
         public abstract ProductType create();
 
         /**
-         * Sets, whether the tabs should be iterated in reverse order, or not.
+         * Sets, whether the items should be iterated in reverse order, or not.
          *
          * @param reverse
-         *         True, if the tabs should be iterated in reverse order, false otherwise
+         *         True, if the items should be iterated in reverse order, false otherwise
          * @return The builder, this method has been called upon, as an instance of the generic type
          * BuilderType. The builder may not be null
          */
@@ -88,11 +90,11 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
         }
 
         /**
-         * Sets the index of the first tab, which should be iterated.
+         * Sets the index of the first item, which should be iterated.
          *
          * @param start
-         *         The index, which should be set, as an {@link Integer} value or -1, if all tabs
-         *         should be iterated Builder}. The builder may not be null
+         *         The index, which should be set, as an {@link Integer} value or -1, if all items
+         *         should be iterated
          * @return The builder, this method has been called upon, as an instance of the generic type
          * BuilderType. The builder may not be null
          */
@@ -106,29 +108,29 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
     }
 
     /**
-     * True, if the tabs should be iterated in reverse order, false otherwise.
+     * True, if the items should be iterated in reverse order, false otherwise.
      */
     private boolean reverse;
 
     /**
-     * The index of the next tab.
+     * The index of the next item.
      */
     private int index;
 
     /**
-     * The current tab item.
+     * The current item.
      */
-    private TabItem current;
+    private AbstractItem current;
 
     /**
-     * The previous tab item.
+     * The previous item.
      */
-    private TabItem previous;
+    private AbstractItem previous;
 
     /**
-     * The first tab item.
+     * The first item.
      */
-    private TabItem first;
+    private AbstractItem first;
 
     /**
      * The method, which is invoked on subclasses in order to retrieve the total number of available
@@ -145,19 +147,19 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
      * @param index
      *         The index of the item, which should be returned, as an {@link Integer} value
      * @return The item, which corresponds to the given index, as an instance of the class {@link
-     * TabItem}. The tab item may not be null
+     * AbstractItem}. The item may not be null
      */
     @NonNull
-    public abstract TabItem getItem(final int index);
+    public abstract AbstractItem getItem(final int index);
 
     /**
      * Initializes the iterator.
      *
      * @param reverse
-     *         True, if the tabs should be iterated in reverse order, false otherwise
+     *         True, if the items should be iterated in reverse order, false otherwise
      * @param start
-     *         The index of the first tab, which should be iterated, as an {@link Integer} value or
-     *         -1, if all tabs should be iterated
+     *         The index of the first item, which should be iterated, as an {@link Integer} value or
+     *         -1, if all items should be iterated
      */
     protected final void initialize(final boolean reverse, final int start) {
         ensureAtLeast(start, -1, "The start must be at least -1");
@@ -174,32 +176,35 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
     }
 
     /**
-     * Returns the tab item, which corresponds to the first tab.
+     * Returns the first item. Calling this method does not alter the current position of the
+     * iterator.
      *
-     * @return The tab item, which corresponds to the first tab, as an instance of the class {@link
-     * TabItem} or null, if no tabs are available
+     * @return The first item as an instance of the class {@link AbstractItem} or null, if no items
+     * are available
      */
-    public final TabItem first() {
+    public final AbstractItem first() {
         return first;
     }
 
     /**
-     * Returns the tab item, which corresponds to the previous tab.
+     * Returns the previous item. Calling this method does not alter the current position of the
+     * iterator.
      *
-     * @return The tab item, which corresponds to the previous tab, as an instance of the class
-     * {@link TabItem} or null, if no previous tab is available
+     * @return The previous item as an instance of the class {@link AbstractItem} or null, if no
+     * previous item is available
      */
-    public final TabItem previous() {
+    public final AbstractItem previous() {
         return previous;
     }
 
     /**
-     * Returns the tab item, which corresponds to the next tab.
+     * Returns the next item. Calling this method does not alter the current position of the
+     * iterator.
      *
-     * @return The tab item, which corresponds to the next tab, as an instance of the class {@link
-     * TabItem} or null, if no next tab is available
+     * @return The next item as an instance of the class {@link AbstractItem} or null, if no next
+     * item is available
      */
-    public final TabItem peek() {
+    public final AbstractItem peek() {
         return index >= 0 && index < getCount() ? getItem(index) : null;
     }
 
@@ -213,7 +218,7 @@ public abstract class AbstractTabItemIterator implements java.util.Iterator<TabI
     }
 
     @Override
-    public final TabItem next() {
+    public final AbstractItem next() {
         if (hasNext()) {
             previous = current;
 

@@ -23,6 +23,7 @@ import android.view.ViewConfiguration;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
 
@@ -100,13 +101,13 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
         DragState onDrag(@NonNull DragState dragState, float dragDistance);
 
         /**
-         * The method, which is invoked, when a tab has been clicked.
+         * The method, which is invoked, when a view has been clicked.
          *
-         * @param tabItem
-         *         The tab item, which corresponds to the tab, which has been clicked, as an
-         *         instance of the class {@link TabItem}. The tab item may not be null
+         * @param item
+         *         The item, which corresponds to the view, which has been clicked, as an instance
+         *         of the class {@link AbstractItem}. The item may not be null
          */
-        void onClick(@NonNull TabItem tabItem);
+        void onClick(@NonNull AbstractItem item);
 
         /**
          * The method, which is invoked, when a fling has been triggered.
@@ -295,10 +296,10 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      *         MotionEvent}. The motion event may not be null
      */
     private void handleClick(@NonNull final MotionEvent event) {
-        TabItem tabItem = getFocusedTab(arithmetics.getPosition(Axis.DRAGGING_AXIS, event));
+        AbstractItem item = getFocusedItem(arithmetics.getPosition(Axis.DRAGGING_AXIS, event));
 
-        if (tabItem != null) {
-            notifyOnClick(tabItem);
+        if (item != null) {
+            notifyOnClick(item);
         }
     }
 
@@ -361,15 +362,15 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     /**
-     * Notifies the callback, that a tab has been clicked.
+     * Notifies the callback, that a view has been clicked.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the tab, which has been clicked, as an instance of
-     *         the class {@link TabItem}. The tab item may not be null
+     * @param item
+     *         The item, which corresponds to the view, which has been clicked, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
      */
-    private void notifyOnClick(@NonNull final TabItem tabItem) {
+    private void notifyOnClick(@NonNull final AbstractItem item) {
         if (callback != null) {
-            callback.onClick(tabItem);
+            callback.onClick(item);
         }
     }
 
@@ -517,15 +518,15 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     /**
-     * The method, which is invoked on implementing subclasses in order to retrieve the tab item,
-     * which corresponds to the tab, which is focused when clicking/dragging at a specific position.
+     * The method, which is invoked on implementing subclasses in order to retrieve the item, which
+     * corresponds to the view, which is focused when clicking/dragging at a specific position.
      *
      * @param position
      *         The position on the dragging axis in pixels as a {@link Float} value
-     * @return The tab item, which corresponds to the focused tab, as an instance of the class
-     * {@link TabItem} or null, if no tab is focused
+     * @return The item, which corresponds to the focused view, as an instance of the class {@link
+     * AbstractItem} or null, if no view is focused
      */
-    protected abstract TabItem getFocusedTab(final float position);
+    protected abstract AbstractItem getFocusedItem(final float position);
 
     /**
      * The method, which is invoked on implementing subclasses, when the tabs are overshooting at
@@ -672,11 +673,11 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
                 swipeDragHelper.update(orthogonalPosition);
 
                 if (dragState == DragState.NONE && swipeDragHelper.hasThresholdBeenReached()) {
-                    TabItem tabItem = getFocusedTab(dragHelper.getDragStartPosition());
+                    AbstractItem focusedItem = getFocusedItem(dragHelper.getDragStartPosition());
 
-                    if (tabItem != null) {
+                    if (focusedItem != null && focusedItem instanceof TabItem) {
                         dragState = DragState.SWIPE;
-                        swipedTabItem = tabItem;
+                        swipedTabItem = (TabItem) focusedItem;
                     }
                 }
             }
