@@ -347,10 +347,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         Drawable background = typedArray.getDrawable(R.styleable.TabSwitcher_android_background);
 
         if (background == null) {
-            background = themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherBackground);
+            try {
+                background = themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherBackground);
+            } catch (NotFoundException e) {
+                background = null;
+            }
         }
 
-        ViewUtil.setBackground(this, background);
+        if (background != null) {
+            ViewUtil.setBackground(this, background);
+        }
     }
 
     /**
