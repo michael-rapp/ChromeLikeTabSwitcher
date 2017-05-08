@@ -263,6 +263,7 @@ The attributes, which are available when defining a tab switcher in a XML layout
 
 ```xml
 <style name="MyTabSwitcher" parent="@style/TabSwitcher.Light">
+        <item name="tabSwitcherBackground">@color/tab_switcher_background_color</item>
         <item name="tabSwitcherTabIcon">@drawable/tab_switcher_tab_icon</item>
         <item name="tabSwitcherTabBackgroundColor">@color/tab_switcher_tab_background_color</item>
         <item name="tabSwitcherTabContentBackgroundColor">@color/tab_switcher_tab_content_background_color</item>
