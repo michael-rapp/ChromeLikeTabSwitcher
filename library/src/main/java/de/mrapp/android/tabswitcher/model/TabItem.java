@@ -181,7 +181,10 @@ public class TabItem extends AbstractItem {
 
     @Override
     public final int hashCode() {
-        return tab.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + tab.hashCode();
+        return result;
     }
 
     @Override

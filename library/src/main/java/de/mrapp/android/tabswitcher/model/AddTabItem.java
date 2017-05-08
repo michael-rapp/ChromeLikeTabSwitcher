@@ -75,4 +75,22 @@ public class AddTabItem extends AbstractItem {
         return "AddTabItem [index = " + getIndex() + "]";
     }
 
+    @Override
+    public final int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + getIndex();
+        return result;
+    }
+
+    @Override
+    public final boolean equals(final Object obj) {
+        if (obj == null)
+            return false;
+        if (obj.getClass() != getClass())
+            return false;
+        TabItem other = (TabItem) obj;
+        return getIndex() == other.getIndex();
+    }
+
 }
