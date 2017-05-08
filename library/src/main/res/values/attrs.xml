@@ -19,6 +19,12 @@ License.
     <attr name="tabSwitcherThemePhone" format="reference"/>
     <attr name="tabSwitcherThemeTablet" format="reference"/>
     <attr name="tabSwitcherBackground" format="reference|color"/>
+    <attr name="tabSwitcherLayoutPolicy" format="enum">
+        <enum name="auto" value="1"/>
+        <enum name="phone" value="2"/>
+        <enum name="tablet" value="3"/>
+        <enum name="tablet_landscape" value="4"/>
+    </attr>
     <attr name="tabSwitcherTabIcon" format="reference"/>
     <attr name="tabSwitcherTabBackgroundColor" format="color"/>
     <attr name="tabSwitcherTabContentBackgroundColor" format="color"/>
@@ -32,10 +38,10 @@ License.
     <declare-styleable name="TabSwitcher">
         <attr name="android:background"/>
         <attr name="layoutPolicy" format="enum">
-            <enum name="auto" value="0"/>
-            <enum name="phone" value="1"/>
-            <enum name="tablet" value="2"/>
-            <enum name="tablet_landscape" value="3"/>
+            <enum name="auto" value="1"/>
+            <enum name="phone" value="2"/>
+            <enum name="tablet" value="3"/>
+            <enum name="tablet_landscape" value="4"/>
         </attr>
         <attr name="tabIcon" format="reference"/>
         <attr name="tabBackgroundColor" format="color"/>

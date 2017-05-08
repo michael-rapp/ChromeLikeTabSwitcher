@@ -327,9 +327,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainLayoutPolicy(@NonNull final TypedArray typedArray) {
-        int defaultValue = LayoutPolicy.AUTO.getValue();
-        int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, defaultValue);
-        setLayoutPolicy(LayoutPolicy.fromValue(value));
+        int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, 0);
+
+        if (value == 0) {
+            value = themeHelper.getInteger(getLayout(), R.attr.tabSwitcherLayoutPolicy);
+        }
+
+        setLayoutPolicy(value == 0 ? LayoutPolicy.AUTO : LayoutPolicy.fromValue(value));
     }
 
     /**
