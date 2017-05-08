@@ -206,7 +206,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      * The layout, which is used by the tab switcher, depending on whether the device is a
      * smartphone or tablet and the set layout policy.
      */
-    private AbstractTabSwitcherLayout layout;
+    private AbstractTabSwitcherLayout<?> layout;
 
     /**
      * Initializes the view.
