@@ -89,7 +89,7 @@ public class AddTabItem extends AbstractItem {
             return false;
         if (obj.getClass() != getClass())
             return false;
-        TabItem other = (TabItem) obj;
+        AddTabItem other = (AddTabItem) obj;
         return getIndex() == other.getIndex();
     }
 
