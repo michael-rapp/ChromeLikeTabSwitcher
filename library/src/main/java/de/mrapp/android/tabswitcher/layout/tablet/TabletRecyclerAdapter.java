@@ -96,8 +96,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
                                     @NonNull final AbstractItem item, final int viewType,
                                     @NonNull final Void... params) {
         if (viewType == ADD_TAB_BUTTON_VIEW_TYPE) {
-            // TODO: Inflate proper view
-            View view = new View(getModel().getContext());
+            View view = inflater.inflate(R.layout.tablet_add_tab_button, parent, false);
             item.setView(view);
             view.setTag(R.id.tag_properties, item.getTag());
             return view;
