@@ -60,9 +60,10 @@ public abstract class AbstractItem {
     }
 
     /**
-     * Returns the index of the tab.
+     * Returns the index of the item. The index allows to identify the item's view among all child
+     * views, which are contained by the tab switcher.
      *
-     * @return The index of the tab as an {@link Integer} value. The index must be at least 0
+     * @return The index of the item as an {@link Integer} value. The index must be at least 0
      */
     public final int getIndex() {
         return index;

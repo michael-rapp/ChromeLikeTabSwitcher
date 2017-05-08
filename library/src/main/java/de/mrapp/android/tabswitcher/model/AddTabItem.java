@@ -49,15 +49,13 @@ public class AddTabItem extends AbstractItem {
      *         The view recycler, which is used to reuse the views, which are used to visualize
      *         tabs, as an instance of the class AttachedViewRecycler. The view recycler may not be
      *         null
-     * @param index
-     *         The index of the item as an {@link Integer} value. The index must be at least 0
      * @return The item, which has been created, as an instance of the class {@link AddTabItem}. The
      * item may not be null
      */
     @NonNull
     public static AddTabItem create(
-            @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler, final int index) {
-        AddTabItem addTabItem = new AddTabItem(index);
+            @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
+        AddTabItem addTabItem = new AddTabItem(0);
         View view = viewRecycler.getView(addTabItem);
 
         if (view != null) {

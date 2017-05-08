@@ -62,6 +62,9 @@ public class TabItem extends AbstractItem {
     /**
      * Creates a new item, which contains information about a tab of a tab switcher.
      *
+     * @param model
+     *         The model, the tab belongs to, as an instance of the type {@link Model}. The model
+     *         may not be null
      * @param index
      *         The index of the tab as an {@link Integer} value. The index must be at least 0
      * @param tab
@@ -70,8 +73,9 @@ public class TabItem extends AbstractItem {
      * item may not be null
      */
     @NonNull
-    public static TabItem create(final int index, @NonNull final Tab tab) {
-        return new TabItem(index, tab);
+    public static TabItem create(@NonNull final Model model, final int index,
+                                 @NonNull final Tab tab) {
+        return new TabItem(index + (model.isAddTabButtonShown() ? 1 : 0), tab);
     }
 
     /**
@@ -94,12 +98,15 @@ public class TabItem extends AbstractItem {
                                  @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                                  final int index) {
         Tab tab = model.getTab(index);
-        return create(viewRecycler, index, tab);
+        return create(model, viewRecycler, index, tab);
     }
 
     /**
      * Creates a new item, which contains information about a specific tab.
      *
+     * @param model
+     *         The model, the tab belongs to, as an instance of the type {@link Model}. The model
+     *         may not be null
      * @param viewRecycler
      *         The view recycler, which is used to reuse the views, which are used to visualize
      *         tabs, as an instance of the class AttachedViewRecycler. The view recycler may not be
@@ -112,9 +119,10 @@ public class TabItem extends AbstractItem {
      * item may not be null
      */
     @NonNull
-    public static TabItem create(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
+    public static TabItem create(@NonNull final Model model,
+                                 @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                                  final int index, @NonNull final Tab tab) {
-        TabItem tabItem = new TabItem(index, tab);
+        TabItem tabItem = new TabItem(index + (model.isAddTabButtonShown() ? 1 : 0), tab);
         View view = viewRecycler.getView(tabItem);
 
         if (view != null) {

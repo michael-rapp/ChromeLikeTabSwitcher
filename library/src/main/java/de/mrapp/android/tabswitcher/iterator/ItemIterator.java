@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -120,13 +121,18 @@ public class ItemIterator extends AbstractItemIterator {
 
     @Override
     public final int getCount() {
-        return model.getCount();
+        return model.getCount() + (model.isAddTabButtonShown() ? 1 : 0);
     }
 
     @NonNull
     @Override
     public final AbstractItem getItem(final int index) {
-        return TabItem.create(model, viewRecycler, index);
+        if (index == 0 && model.isAddTabButtonShown()) {
+            return AddTabItem.create(viewRecycler);
+        } else {
+            return TabItem
+                    .create(model, viewRecycler, index - (model.isAddTabButtonShown() ? 1 : 0));
+        }
     }
 
 }

@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
@@ -37,6 +38,12 @@ public class ArrayItemIterator extends AbstractItemIterator {
      * ArrayItemIterator}.
      */
     public static class Builder extends AbstractBuilder<Builder, ArrayItemIterator> {
+
+        /**
+         * The model, which belongs to the tab switcher, whose items should be iterated by the
+         * iterator, which is created by the builder.
+         */
+        private final Model model;
 
         /**
          * The view recycler, which allows to inflate the views, which are used to visualize the
@@ -60,6 +67,10 @@ public class ArrayItemIterator extends AbstractItemIterator {
          * Creates a new builder, which allows to configure and create instances of the class {@link
          * ArrayItemIterator}.
          *
+         * @param model
+         *         The model, which belongs to the tab switcher, whose items should be iterated by
+         *         the iterator, which is created by the builder, as an instance of the type {@link
+         *         Model}. The model may not be null
          * @param viewRecycler
          *         The view recycler, which allows to inflate the views, which are used to visualize
          *         the tabs, which should be iterated by the iterator, as an instance of the class
@@ -71,11 +82,14 @@ public class ArrayItemIterator extends AbstractItemIterator {
          *         The index of the first tab, which should be iterated by the iterator, as an
          *         {@link Integer} value. The index must be at least 0
          */
-        public Builder(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
+        public Builder(@NonNull final Model model,
+                       @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                        @NonNull final Tab[] array, final int firstIndex) {
+            ensureNotNull(model, "The model may not be null");
             ensureNotNull(viewRecycler, "The view recycler may not be null");
             ensureNotNull(array, "The array may not be null");
             ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
+            this.model = model;
             this.viewRecycler = viewRecycler;
             this.array = array;
             this.firstIndex = firstIndex;
@@ -84,10 +98,15 @@ public class ArrayItemIterator extends AbstractItemIterator {
         @NonNull
         @Override
         public ArrayItemIterator create() {
-            return new ArrayItemIterator(viewRecycler, array, firstIndex, reverse, start);
+            return new ArrayItemIterator(model, viewRecycler, array, firstIndex, reverse, start);
         }
 
     }
+
+    /**
+     * The model, which belongs to the tab switcher, whose tabs are iterated.
+     */
+    private final Model model;
 
     /**
      * The view recycler, which allows to inflate the views, which are used to visualize the
@@ -109,6 +128,9 @@ public class ArrayItemIterator extends AbstractItemIterator {
      * Creates a new iterator, which allows to iterate the items, which correspond to the tabs,
      * which are contained by an array.
      *
+     * @param model
+     *         The model, which belongs to the tab switcher, whose items should be iterated, as an
+     *         instance of the type {@link Model}. The model may not be null
      * @param viewRecycler
      *         The view recycler, which allows to inflate the views, which are used to visualize the
      *         iterated tabs, as an instance of the class AttachedViewRecycler. The view recycler
@@ -125,12 +147,15 @@ public class ArrayItemIterator extends AbstractItemIterator {
      *         The index of the first item, which should be iterated, as an {@link Integer} value or
      *         -1, if all items should be iterated
      */
-    private ArrayItemIterator(@NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
+    private ArrayItemIterator(@NonNull final Model model,
+                              @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                               @NonNull final Tab[] array, final int firstIndex,
                               final boolean reverse, final int start) {
+        ensureNotNull(model, "The model may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(array, "The array may not be null");
         ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
+        this.model = model;
         this.viewRecycler = viewRecycler;
         this.array = array;
         this.firstIndex = firstIndex;
@@ -145,7 +170,7 @@ public class ArrayItemIterator extends AbstractItemIterator {
     @NonNull
     @Override
     public final AbstractItem getItem(final int index) {
-        return TabItem.create(viewRecycler, firstIndex + index, array[index]);
+        return TabItem.create(model, viewRecycler, firstIndex + index, array[index]);
     }
 
 }

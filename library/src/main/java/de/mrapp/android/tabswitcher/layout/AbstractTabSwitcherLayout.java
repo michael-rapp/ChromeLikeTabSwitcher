@@ -252,7 +252,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                 return getCount() > getStackedTabCount() ?
                         getStackedTabCount() * stackedTabSpacing :
                         (getCount() - 1) * stackedTabSpacing;
-
             } else {
                 return -1;
             }
@@ -292,7 +291,13 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
             AbstractItem item = backingArray[index];
 
             if (item == null) {
-                item = TabItem.create(getModel(), getTabViewRecycler(), index);
+                if (index == 0 && getModel().isAddTabButtonShown()) {
+                    item = AddTabItem.create(getTabViewRecycler());
+                } else {
+                    item = TabItem.create(getModel(), getTabViewRecycler(),
+                            index - (getModel().isAddTabButtonShown() ? 1 : 0));
+                }
+
                 calculateAndClipStartPosition(item, index > 0 ? getItem(index - 1) : null);
                 backingArray[index] = item;
             }
@@ -509,6 +514,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Returns the number of child views, which are contained by the tab switcher.
+     *
+     * @return The number of child views, which are contained by the tab switcher, as an {@link
+     * Integer} value
+     */
+    private int getItemCount() {
+        return getModel().getCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
+    }
+
+    /**
      * Calculates the positions of all items, when dragging towards the start.
      *
      * @param dragDistance
@@ -522,7 +537,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         boolean abort = false;
 
         while ((item = iterator.next()) != null && !abort) {
-            if (getTabSwitcher().getCount() - item.getIndex() > 1) {
+            if (getItemCount() - item.getIndex() > 1) {
                 abort = calculatePositionWhenDraggingToEnd(dragDistance, item, iterator.previous());
 
                 if (firstVisibleIndex == -1 && item.getTag().getState() == State.FLOATING) {
@@ -602,7 +617,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         boolean abort = false;
 
         while ((item = iterator.next()) != null && !abort) {
-            if (getTabSwitcher().getCount() - item.getIndex() > 1) {
+            if (getItemCount() - item.getIndex() > 1) {
                 abort = calculatePositionWhenDraggingToStart(dragDistance, item,
                         iterator.previous());
             } else {
@@ -1259,7 +1274,15 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         Pair<Integer, Float> result = null;
 
         if (getTabSwitcher().isSwitcherShown() && firstVisibleIndex != -1) {
-            AbstractItem item = TabItem.create(getModel(), getTabViewRecycler(), firstVisibleIndex);
+            AbstractItem item;
+
+            if (firstVisibleIndex == 0 && getModel().isAddTabButtonShown()) {
+                item = AddTabItem.create(getTabViewRecycler());
+            } else {
+                item = TabItem.create(getModel(), getTabViewRecycler(),
+                        firstVisibleIndex - (getModel().isAddTabButtonShown() ? 1 : 0));
+            }
+
             result = Pair.create(firstVisibleIndex, item.getTag().getPosition());
         }
 
@@ -1405,7 +1428,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         if (item instanceof TabItem) {
             TabItem tabItem = (TabItem) item;
             getModel().selectTab(tabItem.getTab());
-            getLogger().logVerbose(getClass(), "Clicked tab at index " + tabItem.getIndex());
+            getLogger().logVerbose(getClass(), "Clicked tab at index " +
+                    (tabItem.getIndex() - (getModel().isAddTabButtonShown() ? 1 : 0)));
         } else if (item instanceof AddTabItem) {
             AddTabButtonListener listener = getModel().getAddTabButtonListener();
 

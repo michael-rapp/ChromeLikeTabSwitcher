@@ -615,7 +615,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
 
                 for (int i = 0; i < tabs.length; i++) {
                     Tab tab = tabs[i];
-                    AbstractItem item = TabItem.create(index + i, tab);
+                    AbstractItem item = TabItem.create(getModel(), index + i, tab);
                     items[i] = item;
                     inflateView(item, compoundListener);
                 }
@@ -2966,10 +2966,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
             ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
-            AbstractItem item = TabItem.create(0, tab);
+            AbstractItem item = TabItem.create(getModel(), 0, tab);
             inflateView(item, createPeekLayoutListener(item, peekAnimation));
         } else if (animation instanceof RevealAnimation && switcherVisibilityChanged) {
-            AbstractItem item = TabItem.create(0, tab);
+            AbstractItem item = TabItem.create(getModel(), 0, tab);
             RevealAnimation revealAnimation = (RevealAnimation) animation;
             inflateView(item, createRevealLayoutListener(item, revealAnimation));
         } else {
@@ -2997,7 +2997,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 animation.getClass().getSimpleName() + " not supported for removing tabs");
         getLogger().logInfo(getClass(), "Removed tab at index " + index + " using a " +
                 animation.getClass().getSimpleName());
-        AbstractItem removedItem = TabItem.create(tabViewRecycler, index, tab);
+        AbstractItem removedItem = TabItem.create(getModel(), tabViewRecycler, index, tab);
 
         if (!getModel().isSwitcherShown()) {
             tabViewRecycler.remove(removedItem);
@@ -3048,7 +3048,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                     animation instanceof SwipeAnimation ? (SwipeAnimation) animation :
                             new SwipeAnimation.Builder().create();
             AbstractItemIterator iterator =
-                    new ArrayItemIterator.Builder(tabViewRecycler, tabs, 0).reverse(true).create();
+                    new ArrayItemIterator.Builder(getModel(), tabViewRecycler, tabs, 0)
+                            .reverse(true).create();
             AbstractItem item;
             int startDelay = 0;
 
