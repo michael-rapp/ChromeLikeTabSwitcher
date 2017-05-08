@@ -32,7 +32,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -341,18 +340,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         {@link TypedArray}. The typed array may not be null
      */
     private void obtainBackground(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_android_background, 0);
+        Drawable background = typedArray.getDrawable(R.styleable.TabSwitcher_android_background);
 
-        if (resourceId != 0) {
-            ViewUtil.setBackground(this, ContextCompat.getDrawable(getContext(), resourceId));
-        } else {
-            int defaultValue = ContextCompat.getColor(getContext(),
-                    getLayout() == Layout.TABLET ? R.color.tablet_tab_switcher_background_color :
-                            R.color.phone_tab_switcher_background_color);
-            int color =
-                    typedArray.getColor(R.styleable.TabSwitcher_android_background, defaultValue);
-            setBackgroundColor(color);
+        if (background == null) {
+            background = themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherBackground);
         }
+
+        ViewUtil.setBackground(this, background);
     }
 
     /**

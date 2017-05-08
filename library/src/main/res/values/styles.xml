@@ -30,6 +30,7 @@ License.
     </style>
 
     <style name="TabSwitcher.Phone" parent="@style/TabSwitcher">
+        <item name="tabSwitcherBackground">@color/phone_tab_switcher_background_color</item>
         <item name="tabSwitcherTabBackgroundColor">@color/phone_tab_background_color_dark</item>
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/phone_tab_content_background_color_dark
@@ -38,6 +39,7 @@ License.
     </style>
 
     <style name="TabSwitcher.Phone.Light" parent="@style/TabSwitcher.Light">
+        <item name="tabSwitcherBackground">@color/phone_tab_switcher_background_color</item>
         <item name="tabSwitcherTabBackgroundColor">@color/phone_tab_background_color_light</item>
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/phone_tab_content_background_color_light
@@ -47,6 +49,7 @@ License.
     </style>
 
     <style name="TabSwitcher.Tablet" parent="@style/TabSwitcher">
+        <item name="tabSwitcherBackground">@color/tablet_tab_switcher_background_color</item>
         <item name="tabSwitcherTabBackgroundColor">@color/tablet_tab_background_dark</item>
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/tablet_tab_content_background_color_dark
@@ -56,6 +59,7 @@ License.
     </style>
 
     <style name="TabSwitcher.Tablet.Light" parent="@style/TabSwitcher.Light">
+        <item name="tabSwitcherBackground">@color/tablet_tab_switcher_background_color</item>
         <item name="tabSwitcherTabBackgroundColor">@color/tablet_tab_background_light</item>
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/tablet_tab_content_background_color_light
