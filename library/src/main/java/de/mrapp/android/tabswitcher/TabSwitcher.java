@@ -1214,49 +1214,43 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean isSwitcherShown() {
-        return getLayout() == Layout.TABLET || model.isSwitcherShown();
+        return model.isSwitcherShown();
     }
 
     @Override
     public final void showSwitcher() {
-        if (getLayout() != Layout.TABLET) {
-            enqueuePendingAction(new Runnable() {
+        enqueuePendingAction(new Runnable() {
 
-                @Override
-                public void run() {
-                    model.showSwitcher();
-                }
+            @Override
+            public void run() {
+                model.showSwitcher();
+            }
 
-            });
-        }
+        });
     }
 
     @Override
     public final void hideSwitcher() {
-        if (getLayout() != Layout.TABLET) {
-            enqueuePendingAction(new Runnable() {
+        enqueuePendingAction(new Runnable() {
 
-                @Override
-                public void run() {
-                    model.hideSwitcher();
-                }
+            @Override
+            public void run() {
+                model.hideSwitcher();
+            }
 
-            });
-        }
+        });
     }
 
     @Override
     public final void toggleSwitcherVisibility() {
-        if (getLayout() != Layout.TABLET) {
-            enqueuePendingAction(new Runnable() {
+        enqueuePendingAction(new Runnable() {
 
-                @Override
-                public void run() {
-                    model.toggleSwitcherVisibility();
-                }
+            @Override
+            public void run() {
+                model.toggleSwitcherVisibility();
+            }
 
-            });
-        }
+        });
     }
 
     @Override
@@ -1392,14 +1386,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean isAddTabButtonShown() {
-        return getLayout() == Layout.TABLET && model.isAddTabButtonShown();
+        return model.isAddTabButtonShown();
     }
 
     @Override
     public final void showAddTabButton(@Nullable final AddTabButtonListener listener) {
-        if (getLayout() == Layout.TABLET) {
-            model.showAddTabButton(listener);
-        }
+        model.showAddTabButton(listener);
     }
 
     @Override

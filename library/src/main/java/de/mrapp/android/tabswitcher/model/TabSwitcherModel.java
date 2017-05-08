@@ -41,6 +41,7 @@ import java.util.Set;
 
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeAnimation;
@@ -1029,7 +1030,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final boolean isSwitcherShown() {
-        return switcherShown;
+        return tabSwitcher.getLayout() == Layout.TABLET || switcherShown;
     }
 
     @Override
@@ -1224,7 +1225,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final boolean isAddTabButtonShown() {
-        return addTabButtonListener != null;
+        return tabSwitcher.getLayout() == Layout.TABLET && addTabButtonListener != null;
     }
 
     @Override
