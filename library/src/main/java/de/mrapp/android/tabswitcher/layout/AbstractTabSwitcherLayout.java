@@ -514,16 +514,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
-     * Returns the number of child views, which are contained by the tab switcher.
-     *
-     * @return The number of child views, which are contained by the tab switcher, as an {@link
-     * Integer} value
-     */
-    private int getItemCount() {
-        return getModel().getCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
-    }
-
-    /**
      * Calculates the positions of all items, when dragging towards the start.
      *
      * @param dragDistance
@@ -840,6 +830,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
+     * Returns the number of child views, which are contained by the tab switcher.
+     *
+     * @return The number of child views, which are contained by the tab switcher, as an {@link
+     * Integer} value
+     */
+    protected final int getItemCount() {
+        return getModel().getCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
+    }
+
+    /**
      * Clips the position of a specific item.
      *
      * @param index
@@ -875,7 +875,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     protected final Pair<Float, State> clipPosition(final int index, final float position,
                                                     @Nullable final State predecessorState) {
         Pair<Float, State> startPair =
-                calculatePositionAndStateWhenStackedAtStart(getModel().getCount(), index,
+                calculatePositionAndStateWhenStackedAtStart(getItemCount(), index,
                         predecessorState);
         float startPosition = startPair.first;
 
