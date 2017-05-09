@@ -39,6 +39,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
@@ -256,6 +257,27 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
+     * Creates and returns a listener, which allows to add a new tab to the tab switcher, when the
+     * corresponding button is clicked.
+     *
+     * @return The listener, which has been created, as an instance of the type {@link
+     * AddTabButtonListener}. The listener may not be null
+     */
+    @NonNull
+    private AddTabButtonListener createAddTabButtonListener() {
+        return new AddTabButtonListener() {
+
+            @Override
+            public void onAddTab(@NonNull final TabSwitcher tabSwitcher) {
+                int index = tabSwitcher.getCount();
+                Tab tab = createTab(index);
+                tabSwitcher.addTab(tab, 0);
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a listener, which allows to undo the removal of tabs from the tab
      * switcher, when the button of the activity's snackbar is clicked.
      *
@@ -448,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
         tabSwitcher.showToolbars(true);
+        tabSwitcher.showAddTabButton(createAddTabButtonListener());
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
         tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
