@@ -15,9 +15,9 @@
     version="1.1"
     inkscape:version="0.92.1 r"
     sodipodi:docname="tablet_add_tab_button.9.svg"
-    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tablet_tab_background.9.png"
-    inkscape:export-xdpi="1348.6957"
-    inkscape:export-ydpi="1348.6957">
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-mdpi/tablet_add_tab_button.9.png"
+    inkscape:export-xdpi="337.17392"
+    inkscape:export-ydpi="337.17392">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -27,16 +27,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="45.254834"
-     inkscape:cx="5.7388393"
-     inkscape:cy="6.0765599"
+     inkscape:zoom="64"
+     inkscape:cx="6.6881062"
+     inkscape:cy="4.0788447"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1025"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-height="1052"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -72,31 +72,30 @@
        id="rect4489"
        width="15"
        height="1.4062494"
-       x="9.0234365"
-       y="16.424654"
+       x="8.9062891"
+       y="11.034239"
        rx="0.3515625" />
     <rect
        style="opacity:0;fill:#14181c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.80000001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.41012663"
        id="rect4142"
        width="20"
        height="20"
-       x="10"
-       y="7.3622046"
+       x="6.4062891"
+       y="1.7373631"
        ry="5" />
     <rect
        style="opacity:0;fill:#14181c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.80000001;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect4144"
        width="20"
        height="20"
-       x="5"
-       y="7.3622046"
+       x="6.4062891"
+       y="1.7373631"
        ry="5" />
     <path
-       style="fill:#fffff5;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M 1.5,1.25 C 1,1.25 0.9999984,1.875 1.125,2.125 L 3.625,8.5 C 3.7500005,8.75 4,9 4.5,9 h 9 C 14,9 14.000001,8.375 13.875,8.125 L 11.375,1.75 C 11.249999,1.5 11,1.25 10.5,1.25 Z"
-       transform="matrix(0.93750002,0,0,0.93750002,9.3749997,6.9327211)"
+       style="fill:#fffffe;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.234375;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 11.102639,8.9248629 c -0.46875,0 -0.468751,0.5859376 -0.351563,0.8203126 l 1.70105,4.3359375 c 0.117188,0.234375 0.351563,0.46875 0.820313,0.46875 h 8.4375 c 0.46875,0 0.468751,-0.585938 0.351563,-0.820313 L 20.360452,9.393613 C 20.243264,9.1592379 20.008889,8.9248629 19.540139,8.9248629 Z"
        id="path4497"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccccc" />
+       sodipodi:nodetypes="sccssccss" />
   </g>
 </svg>
