@@ -58,6 +58,28 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     private static final int ADD_TAB_BUTTON_VIEW_TYPE = 1;
 
     /**
+     * Returns the item, which corresponds to the button, which allows to add a new tab.
+     *
+     * @return The item, which corresponds to the button, which allows to add a new tab, as an
+     * instance of the class {@link AddTabItem} or null, if the button is not shown
+     */
+    @Nullable
+    private AddTabItem getAddTabItem() {
+        if (!getModel().isEmpty()) {
+            ItemIterator itemIterator =
+                    new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException())
+                            .create();
+            AbstractItem firstItem = itemIterator.getItem(0);
+
+            if (firstItem instanceof AddTabItem) {
+                return (AddTabItem) firstItem;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Adapts the color of a button, which allows to add a new tab.
      *
      * @param addTabItem
@@ -102,16 +124,19 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     @Override
     public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
         super.onTabBackgroundColorChanged(colorStateList);
+        AddTabItem addTabItem = getAddTabItem();
 
-        if (!getModel().isEmpty()) {
-            ItemIterator iterator =
-                    new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException())
-                            .create();
-            AbstractItem firstItem = iterator.getItem(0);
+        if (addTabItem != null) {
+            adaptAddTabButtonColor(addTabItem);
+        }
+    }
 
-            if (firstItem instanceof AddTabItem) {
-                adaptAddTabButtonColor((AddTabItem) firstItem);
-            }
+    @Override
+    public final void onAddTabButtonColorChanged(@Nullable final ColorStateList colorStateList) {
+        AddTabItem addTabItem = getAddTabItem();
+
+        if (addTabItem != null) {
+            adaptAddTabButtonColor(addTabItem);
         }
     }
 

@@ -1346,6 +1346,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     @Override
+    public final void onAddTabButtonColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
     public final void onToolbarVisibilityChanged(final boolean visible) {
         adaptToolbarVisibility();
     }

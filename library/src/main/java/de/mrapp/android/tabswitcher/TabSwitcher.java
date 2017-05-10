@@ -658,6 +658,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             }
 
             @Override
+            public void onAddTabButtonColorChanged(@Nullable final ColorStateList colorStateList) {
+
+            }
+
+            @Override
             public void onToolbarVisibilityChanged(final boolean visible) {
 
             }
@@ -1396,6 +1401,22 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void showAddTabButton(@Nullable final AddTabButtonListener listener) {
         model.showAddTabButton(listener);
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getAddTabButtonColor() {
+        return model.getAddTabButtonColor();
+    }
+
+    @Override
+    public final void setAddTabButtonColor(@ColorInt final int color) {
+        model.setAddTabButtonColor(color);
+    }
+
+    @Override
+    public final void setAddTabButtonColor(@Nullable final ColorStateList colorStateList) {
+        model.setAddTabButtonColor(colorStateList);
     }
 
     @Override

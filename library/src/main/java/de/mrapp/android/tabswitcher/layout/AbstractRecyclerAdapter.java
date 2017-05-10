@@ -637,6 +637,11 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     }
 
     @Override
+    public void onAddTabButtonColorChanged(@Nullable final ColorStateList colorStateList) {
+
+    }
+
+    @Override
     public final void onToolbarVisibilityChanged(final boolean visible) {
 
     }

@@ -242,13 +242,23 @@ public interface Model extends Iterable<Tab> {
 
         /**
          * The method, which is invoked, when it has been changed, whether the button, which allows
-         * to add a new tab, should be shonw, or not.
+         * to add a new tab, should be shown, or not.
          *
          * @param visible
          *         True, if the button, which allows to add a new tab, should be shown, false
          *         otherwise
          */
         void onAddTabButtonVisibilityChanged(boolean visible);
+
+        /**
+         * The method, which is invoked, when the color of the button, which allows to add a new
+         * tab, has been changed.
+         *
+         * @param colorStateList
+         *         The color, which has been set, as an instance of the class {@link ColorStateList}
+         *         or null, if the default color should be used
+         */
+        void onAddTabButtonColorChanged(@Nullable ColorStateList colorStateList);
 
         /**
          * The method, which is invoked, when it has been changed, whether the toolbars should be
@@ -831,6 +841,33 @@ public interface Model extends Iterable<Tab> {
      *         be shown
      */
     void showAddTabButton(@Nullable AddTabButtonListener listener);
+
+    /**
+     * Returns the color of the button, which allows to add a new tab.
+     *
+     * @return The color of the button, which allows to add a new tab, as an instance of the class
+     * {@link ColorStateList} or null, if the default color is used
+     */
+    @Nullable
+    ColorStateList getAddTabButtonColor();
+
+    /**
+     * Sets the color of the button, which allows to add a new tab.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
+     */
+    void setAddTabButtonColor(@ColorInt int color);
+
+    /**
+     * Sets the color of the button, which allows to add a new tab.
+     *
+     * @param colorStateList
+     *         The color, which should be set, as an instance of the class {@link ColorStateList} or
+     *         null, if the default color should be used
+     */
+    void setAddTabButtonColor(@Nullable ColorStateList colorStateList);
 
     /**
      * Returns, whether the toolbars are shown, when the tab switcher is shown, or not. When using

@@ -263,6 +263,11 @@ public class TabSwitcherModel implements Model, Restorable {
     private AddTabButtonListener addTabButtonListener;
 
     /**
+     * The color of the button, which allows to add a new tab.
+     */
+    private ColorStateList addTabButtonColor;
+
+    /**
      * True, if the toolbars should be shown, when the tab switcher is shown, false otherwise.
      */
     private boolean showToolbars;
@@ -603,6 +608,20 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Notifies the listeners, that the color of the button, which allows to add a new tab, has been
+     * changed.
+     *
+     * @param colorStateList
+     *         The color, which has been set, as an instance of the class {@link ColorStateList} or
+     *         null, if the default color should be used
+     */
+    private void notifyOnAddTabButtonColorChanged(@Nullable final ColorStateList colorStateList) {
+        for (Listener listener : listeners) {
+            listener.onAddTabButtonColorChanged(colorStateList);
+        }
+    }
+
+    /**
      * Notifies the listeners, that it has been changed, whether the toolbars should be shown, when
      * the tab switcher is shown, or not.
      *
@@ -696,6 +715,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabCloseButtonIconId = -1;
         this.tabCloseButtonIconBitmap = null;
         this.addTabButtonListener = null;
+        this.addTabButtonColor = null;
         this.showToolbars = false;
         this.toolbarTitle = null;
         this.toolbarNavigationIcon = null;
@@ -1232,6 +1252,23 @@ public class TabSwitcherModel implements Model, Restorable {
     public final void showAddTabButton(@Nullable final AddTabButtonListener listener) {
         this.addTabButtonListener = listener;
         notifyOnAddTabButtonVisibilityChanged(listener != null);
+    }
+
+    @Nullable
+    @Override
+    public final ColorStateList getAddTabButtonColor() {
+        return addTabButtonColor;
+    }
+
+    @Override
+    public final void setAddTabButtonColor(@ColorInt final int color) {
+        setAddTabButtonColor(color != -1 ? ColorStateList.valueOf(color) : null);
+    }
+
+    @Override
+    public final void setAddTabButtonColor(@Nullable final ColorStateList colorStateList) {
+        this.addTabButtonColor = colorStateList;
+        notifyOnAddTabButtonColorChanged(colorStateList);
     }
 
     @Override
