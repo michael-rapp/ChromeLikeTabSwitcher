@@ -46,6 +46,7 @@ License.
         <attr name="tabIcon" format="reference"/>
         <attr name="tabBackgroundColor" format="color"/>
         <attr name="tabContentBackgroundColor" format="color"/>
+        <attr name="addTabButtonColor" format="color"/>
         <attr name="tabTitleTextColor" format="color"/>
         <attr name="tabCloseButtonIcon" format="reference"/>
         <attr name="toolbarTitle" format="string"/>

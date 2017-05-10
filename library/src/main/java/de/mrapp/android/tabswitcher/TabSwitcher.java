@@ -309,6 +309,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainTabIcon(typedArray);
             obtainTabBackgroundColor(typedArray);
             obtainTabContentBackgroundColor(typedArray);
+            obtainAddTabButtonColor(typedArray);
             obtainTabTitleTextColor(typedArray);
             obtainTabCloseButtonIcon(typedArray);
             obtainToolbarTitle(typedArray);
@@ -400,6 +401,23 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private void obtainTabContentBackgroundColor(@NonNull final TypedArray typedArray) {
         setTabContentBackgroundColor(
                 typedArray.getColor(R.styleable.TabSwitcher_tabContentBackgroundColor, -1));
+    }
+
+    /**
+     * Obtains the background color of the button, which allows to add a new tab, from a specific
+     * typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainAddTabButtonColor(@NonNull final TypedArray typedArray) {
+        ColorStateList colorStateList =
+                typedArray.getColorStateList(R.styleable.TabSwitcher_addTabButtonColor);
+
+        if (colorStateList != null) {
+            setAddTabButtonColor(colorStateList);
+        }
     }
 
     /**
