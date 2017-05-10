@@ -14,6 +14,8 @@
 package de.mrapp.android.tabswitcher.layout.tablet;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.support.annotation.CallSuper;
@@ -29,6 +31,7 @@ import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
@@ -55,6 +58,27 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     private static final int ADD_TAB_BUTTON_VIEW_TYPE = 1;
 
     /**
+     * Adapts the color of a button, which allows to add a new tab.
+     *
+     * @param addTabItem
+     *         The add tab item, which corresponds to the button, whose color should be adapted, as
+     *         an instance of the class {@link AddTabItem}. The add tab item may not be null
+     */
+    private void adaptAddTabButtonColor(@NonNull final AddTabItem addTabItem) {
+        ColorStateList colorStateList = getModel().getTabBackgroundColor();
+
+        if (colorStateList == null) {
+            colorStateList = getDefaultTabBackgroundColor();
+        }
+
+        int[] stateSet = new int[]{};
+        int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
+        View view = addTabItem.getView();
+        Drawable background = view.getBackground();
+        background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+    }
+
+    /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
      * visualize the tabs of a {@link TabSwitcher}.
      *
@@ -73,6 +97,22 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
                                  @NonNull final TabSwitcherModel model,
                                  @NonNull final ThemeHelper themeHelper) {
         super(tabSwitcher, model, themeHelper);
+    }
+
+    @Override
+    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+        super.onTabBackgroundColorChanged(colorStateList);
+
+        if (!getModel().isEmpty()) {
+            ItemIterator iterator =
+                    new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException())
+                            .create();
+            AbstractItem firstItem = iterator.getItem(0);
+
+            if (firstItem instanceof AddTabItem) {
+                adaptAddTabButtonColor((AddTabItem) firstItem);
+            }
+        }
     }
 
     @Override
@@ -110,7 +150,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
                                  @NonNull final AbstractItem item, final boolean inflated,
                                  @NonNull final Void... params) {
         if (item instanceof AddTabItem) {
-            // TODO: Adapt view appearance if necessary
+            adaptAddTabButtonColor((AddTabItem) item);
         } else {
             super.onShowView(context, view, item, inflated, params);
         }
@@ -121,7 +161,6 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     public final void onRemoveView(@NonNull final View view, @NonNull final AbstractItem item) {
         if (item instanceof AddTabItem) {
             view.setTag(R.id.tag_properties, null);
-            // TODO Cleanup if necessary
         } else {
             super.onRemoveView(view, item);
         }

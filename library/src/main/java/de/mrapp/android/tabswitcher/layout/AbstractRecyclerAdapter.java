@@ -363,6 +363,17 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     }
 
     /**
+     * Returns the default background color of tabs.
+     *
+     * @return The default background color of tabs as an instance of the class {@link
+     * ColorStateList}
+     */
+    @NonNull
+    protected final ColorStateList getDefaultTabBackgroundColor() {
+        return tabBackgroundColor;
+    }
+
+    /**
      * Returns the view recycler, the adapter is bound to, or throws an {@link
      * IllegalStateException}, if no view recycler has been set.
      *
@@ -575,8 +586,9 @@ public abstract class AbstractRecyclerAdapter<ParamType>
         }
     }
 
+    @CallSuper
     @Override
-    public final void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
+    public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
         ItemIterator iterator =
                 new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
         AbstractItem item;
