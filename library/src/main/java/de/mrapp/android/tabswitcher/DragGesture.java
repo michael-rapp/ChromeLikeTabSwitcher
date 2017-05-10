@@ -44,17 +44,20 @@ public abstract class DragGesture {
 
     }
 
+    /**
+     * A builder, which allows to configure and create instances of the class {@link DragGesture}.
+     *
+     * @param <GestureType>
+     *         The type of the drag gestures, which are created by the builder
+     * @param <BuilderType>
+     *         The type of the builder
+     */
     protected static abstract class Builder<GestureType, BuilderType> {
 
         /**
          * The threshold of the gestures, which are created by the builder.
          */
         protected int threshold;
-
-        /**
-         * The direction of the gestures, which are created by the builder.
-         */
-        protected DragDirection direction;
 
         /**
          * Returns a reference to the builder.
@@ -71,18 +74,9 @@ public abstract class DragGesture {
         /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
          * DragGesture}.
-         *
-         * @param threshold
-         *         The default threshold of the gestures, which are created by the builder, as an
-         *         {@link Integer} value. The threshold must be at least 0
-         * @param direction
-         *         The direction of the gestures, which are created by the builder, as a value of
-         *         the enum {@link DragDirection}. The direction may either be {@link
-         *         DragDirection#HORIZONTAL} or {@link DragDirection#VERTICAL}
          */
-        public Builder(final int threshold, @NonNull final DragDirection direction) {
-            setThreshold(threshold);
-            setDirection(direction);
+        public Builder() {
+            setThreshold(-1);
         }
 
         /**
@@ -98,30 +92,14 @@ public abstract class DragGesture {
          *
          * @param threshold
          *         The threshold, which should be set, in pixels as a {@link Integer} value. The
-         *         threshold must be at least 0
+         *         threshold must be at least 0 or -1, if the default threshold should be used
          * @return The builder, this method has been called upon, as an instance of the generic type
          * BuilderType. The builder may not be null
          */
         @NonNull
         public final BuilderType setThreshold(final int threshold) {
-            ensureAtLeast(threshold, 0, "The threshold must be at least 0");
+            ensureAtLeast(threshold, -1, "The threshold must be at least -1");
             this.threshold = threshold;
-            return self();
-        }
-
-        /**
-         * Sets the direction of the drag gestures, which are created by the builder.
-         *
-         * @param direction
-         *         The direction, which should be set, as a value of the enum {@link DragDirection}.
-         *         The direction may either be {@link DragDirection#HORIZONTAL} or {@link
-         *         DragDirection#VERTICAL}
-         * @return The builder, this method has been called upon, as an instance of the generic type
-         * BuilderType. The builder may not be null
-         */
-        @NonNull
-        public final BuilderType setDirection(@NonNull final DragDirection direction) {
-            this.direction = direction;
             return self();
         }
 
@@ -143,14 +121,15 @@ public abstract class DragGesture {
      *
      * @param threshold
      *         The distance in pixels, the gesture must last until it is recognized, as an {@link
-     *         Integer} value. The distance must be at least 0
+     *         Integer} value. The distance must be at least 0 or -1, if the default distance should
+     *         be used
      * @param direction
      *         The direction of the gesture as a value of the enum {@link DragDirection}. The
      *         direction may either be {@link DragDirection#HORIZONTAL} or {@link
      *         DragDirection#VERTICAL}
      */
     protected DragGesture(final int threshold, @NonNull final DragDirection direction) {
-        ensureAtLeast(threshold, 0, "The threshold must be at least 0");
+        ensureAtLeast(threshold, -1, "The threshold must be at least -1");
         ensureNotNull(direction, "The direction may not be null");
         this.threshold = threshold;
         this.direction = direction;
@@ -160,7 +139,7 @@ public abstract class DragGesture {
      * Returns the distance in pixels, the gesture must last until it is recognized.
      *
      * The distance in pixels, the gesture must last until it is recognized, as an {@link
-     * Integer} value. The distance must be at least 0
+     * Integer} value. The distance must be at least 0 or -1, if the default distance should be used
      */
     public final int getThreshold() {
         return threshold;

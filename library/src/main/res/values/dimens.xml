@@ -31,6 +31,9 @@ License.
     <item name="swiped_tab_scale" format="float" type="dimen">0.5</item>
     <item name="swiped_tab_alpha" format="float" type="dimen">0</item>
 
+    <!-- Common -->
+    <dimen name="swipe_gesture_threshold">24dp</dimen>
+
     <!-- Phone layout -->
     <dimen name="phone_tab_title_padding">12dp</dimen>
     <dimen name="phone_tab_title_drawable_padding">8dp</dimen>
