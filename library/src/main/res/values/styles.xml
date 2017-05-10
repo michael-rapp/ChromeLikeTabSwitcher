@@ -54,6 +54,7 @@ License.
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/tablet_tab_content_background_color_dark
         </item>
+        <item name="tabSwitcherAddTabButtonColor">@color/tablet_add_tab_button_dark</item>
         <item name="tabSwitcherTabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_dark
         </item>
     </style>
@@ -64,6 +65,7 @@ License.
         <item name="tabSwitcherTabContentBackgroundColor">
             @color/tablet_tab_content_background_color_light
         </item>
+        <item name="tabSwitcherAddTabButtonColor">@color/tablet_add_tab_button_light</item>
         <item name="tabSwitcherTabCloseButtonIcon">@drawable/tablet_tab_close_button_icon_light
         </item>
     </style>

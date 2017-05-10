@@ -58,6 +58,11 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     private static final int ADD_TAB_BUTTON_VIEW_TYPE = 1;
 
     /**
+     * The default color of the button, which allows to add a new tab.
+     */
+    private final ColorStateList addTabButtonColor;
+
+    /**
      * Returns the item, which corresponds to the button, which allows to add a new tab.
      *
      * @return The item, which corresponds to the button, which allows to add a new tab, as an
@@ -90,11 +95,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
         ColorStateList colorStateList = getModel().getAddTabButtonColor();
 
         if (colorStateList == null) {
-            colorStateList = getModel().getTabBackgroundColor();
-
-            if (colorStateList == null) {
-                colorStateList = getDefaultTabBackgroundColor();
-            }
+            colorStateList = addTabButtonColor;
         }
 
         int[] stateSet = new int[]{};
@@ -123,6 +124,8 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
                                  @NonNull final TabSwitcherModel model,
                                  @NonNull final ThemeHelper themeHelper) {
         super(tabSwitcher, model, themeHelper);
+        addTabButtonColor =
+                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherAddTabButtonColor);
     }
 
     @Override
