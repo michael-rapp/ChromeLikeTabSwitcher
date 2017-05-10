@@ -87,10 +87,14 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
      *         an instance of the class {@link AddTabItem}. The add tab item may not be null
      */
     private void adaptAddTabButtonColor(@NonNull final AddTabItem addTabItem) {
-        ColorStateList colorStateList = getModel().getTabBackgroundColor();
+        ColorStateList colorStateList = getModel().getAddTabButtonColor();
 
         if (colorStateList == null) {
-            colorStateList = getDefaultTabBackgroundColor();
+            colorStateList = getModel().getTabBackgroundColor();
+
+            if (colorStateList == null) {
+                colorStateList = getDefaultTabBackgroundColor();
+            }
         }
 
         int[] stateSet = new int[]{};
