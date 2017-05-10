@@ -607,7 +607,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * @return True, if the event has been handled, false otherwise
      */
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        ensureNotNull(event, "The motion event may not be null");
+        ensureNotNull(event, "The event may not be null");
 
         if (tabSwitcher.isSwitcherShown() && !tabSwitcher.isEmpty()) {
             notifyOnCancelFling();

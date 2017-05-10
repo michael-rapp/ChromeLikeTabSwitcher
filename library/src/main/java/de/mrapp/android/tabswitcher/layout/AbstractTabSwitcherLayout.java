@@ -46,6 +46,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
@@ -75,6 +76,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
+        extends AbstractTouchEventHandler
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         AbstractDragHandler.Callback {
 
@@ -1023,6 +1025,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                                      @NonNull final TabSwitcherModel model,
                                      @NonNull final Arithmetics arithmetics,
                                      @NonNull final ThemeHelper themeHelper) {
+        super(AbstractTouchEventHandler.MIN_PRIORITY);
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
@@ -1228,18 +1231,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
-     * Handles a touch event.
-     *
-     * @param event
-     *         The touch event as an instance of the class {@link MotionEvent}. The touch event may
-     *         not be null
-     * @return True, if the event has been handled, false otherwise
-     */
-    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        return getDragHandler().handleTouchEvent(event);
-    }
-
-    /**
      * Inflates the layout.
      *
      * @param tabsOnly
@@ -1306,6 +1297,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
+    }
+
+    @Override
+    public final boolean onHandleTouchEvent(@NonNull final MotionEvent event) {
+        return getDragHandler().handleTouchEvent(event);
     }
 
     @Override

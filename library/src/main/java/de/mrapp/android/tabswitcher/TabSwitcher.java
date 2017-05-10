@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
@@ -202,6 +203,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private ThemeHelper themeHelper;
 
     /**
+     * The dispatcher, which is used to dispatch touch events.
+     */
+    private TouchEventDispatcher eventDispatcher;
+
+    /**
      * The layout, which is used by the tab switcher, depending on whether the device is a
      * smartphone or tablet and the set layout policy.
      */
@@ -229,6 +235,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         listeners = new LinkedHashSet<>();
         model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
+        eventDispatcher = new TouchEventDispatcher();
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -257,6 +264,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         this.layout.setCallback(createLayoutCallback());
         this.model.addListener(this.layout);
         this.layout.inflateLayout(inflatedTabsOnly);
+        this.eventDispatcher.addEventHandler(this.layout);
         final ViewGroup tabContainer = getTabContainer();
         assert tabContainer != null;
 
@@ -1005,6 +1013,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 if (previousLayout != newLayout) {
                     layout.detachLayout(false);
                     model.removeListener(layout);
+                    eventDispatcher.removeEventHandler(layout);
                     initializeLayout(newLayout, false);
                 }
             }

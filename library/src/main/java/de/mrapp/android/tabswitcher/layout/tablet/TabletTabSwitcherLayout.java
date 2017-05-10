@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.layout.tablet;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -665,6 +666,12 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                                                        @NonNull final AbstractItem successor) {
         float successorPosition = successor.getTag().getPosition();
         return successorPosition + calculateTabSpacing();
+    }
+
+    @Override
+    public RectF getTouchableArea() {
+        // TODO: Implement
+        return null;
     }
 
     @Override
