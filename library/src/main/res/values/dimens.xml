@@ -44,6 +44,7 @@ License.
     <dimen name="tablet_tab_padding_right">12dp</dimen>
     <dimen name="tablet_tab_title_drawable_padding">4dp</dimen>
     <dimen name="tablet_tab_offset">24dp</dimen>
-    <dimen name="tablet_add_tab_button_width">64dp</dimen>
+    <dimen name="tablet_add_tab_button_width">54dp</dimen>
+    <dimen name="tablet_add_tab_button_offset">14dp</dimen>
 
 </resources>

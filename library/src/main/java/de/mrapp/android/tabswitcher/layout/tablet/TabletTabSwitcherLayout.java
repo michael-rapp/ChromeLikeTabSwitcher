@@ -149,6 +149,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     private final int tabOffset;
 
     /**
+     * The width of a button, which allows to add a new tab.
+     */
+    private final int addTabButtonWidth;
+
+    /**
+     * The offset between a button, which allows to add a new tab, and a neighboring tab.
+     */
+    private final int addTabButtonOffset;
+
+    /**
      * The default background color of tabs.
      */
     private final ColorStateList tabBackgroundColor;
@@ -295,6 +305,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     /**
+     * Calculates and returns the space between a button, which allows to add a new tab, and a
+     * neighboring tab.
+     *
+     * @return The space, which has been calculated, in pixels as an {@link Integer} value
+     */
+    private int calculateAddTabButtonSpacing() {
+        return getModel().isAddTabButtonShown() ? addTabButtonWidth + addTabButtonOffset : 0;
+    }
+
+    /**
      * Calculates and returns the width of the tab container.
      *
      * @return The width of the tab container in pixels as a {@link Float} value
@@ -303,11 +323,12 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
         int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
         Toolbar[] toolbars = getToolbars();
-        float toolbarSize = getModel().areToolbarsShown() && toolbars != null ?
-                Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) +
-                        Math.max(0, toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX].getWidth() -
-                                tabOffset) : 0;
-        return size - padding - toolbarSize;
+        float primaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ?
+                Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0;
+        float secondaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ? Math.max(0,
+                toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX].getWidth() -
+                        (getModel().isAddTabButtonShown() ? addTabButtonOffset : 0)) : 0;
+        return size - padding - primaryToolbarSize - secondaryToolbarSize;
     }
 
     /**
@@ -327,9 +348,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                                                  final float firstVisibleTabPosition) {
         dragHandler.reset(getDragThreshold());
         setFirstVisibleIndex(-1);
-        AbstractItem[] items = new AbstractItem[getModel().getCount()];
+        AbstractItem[] items = new AbstractItem[getItemCount()];
 
-        if (!getModel().isEmpty()) {
+        if (items.length > 0) {
             int tabSpacing = calculateTabSpacing();
             int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabIndex : 0;
@@ -347,7 +368,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                     referenceItem = item;
                     position = referencePosition;
                 } else {
-                    position = (getModel().getCount() - item.getIndex() - 1) * tabSpacing;
+                    position = calculateMaxEndPosition(item.getIndex());
                 }
 
                 Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
@@ -439,6 +460,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
         minTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_min_width);
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        addTabButtonWidth = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_width);
+        addTabButtonOffset = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_offset);
         tabBackgroundColor = themeHelper.getColorStateList(getTabSwitcher().getLayout(),
                 R.attr.tabSwitcherTabBackgroundColor);
         tabContentBackgroundColor = getThemeHelper().getColor(getTabSwitcher().getLayout(),
@@ -515,7 +538,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
         float position;
         State state;
 
-        if (index == selectedItemIndex) {
+        if (index == 0 && getModel().isAddTabButtonShown()) {
+            position = getStackedTabSpacing() * Math.min(count - 2, getStackedTabCount()) +
+                    calculateTabSpacing() + addTabButtonOffset;
+            state = State.FLOATING;
+        } else if (index == selectedItemIndex) {
             position = getStackedTabSpacing() * Math.min(count - (index + 1), getStackedTabCount());
             state = State.STACKED_START_ATOP;
         } else if (index < selectedItemIndex) {
@@ -549,35 +576,43 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
         float tabContainerWidth = calculateTabContainerWidth();
-        int tabWidth = calculateTabWidth();
-        int selectedItemIndex =
-                getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+        int selectedTabIndex = getModel().getSelectedTabIndex();
+        int selectedItemIndex = selectedTabIndex + (getModel().isAddTabButtonShown() ? 1 : 0);
+        int i = getModel().isAddTabButtonShown() ? index - 1 : index;
         float position;
         State state;
 
-        if (index == selectedItemIndex) {
-            position = tabContainerWidth - tabWidth -
-                    (getStackedTabSpacing() * Math.min(getStackedTabCount(), index + 1));
+        if (index == 0 && getModel().isAddTabButtonShown()) {
+            position = tabContainerWidth - addTabButtonWidth;
+            state = State.STACKED_END;
+        } else if (index == selectedItemIndex) {
+            position = tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
+                    (getStackedTabSpacing() * Math.min(getStackedTabCount(), i));
             state = State.STACKED_END;
         } else if (index < selectedItemIndex) {
-            if (index < getStackedTabCount()) {
-                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() * (index + 1));
+            if (i < getStackedTabCount()) {
+                position =
+                        tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
+                                (getStackedTabSpacing() * i);
                 state = State.STACKED_END;
             } else {
-                position = tabContainerWidth - tabWidth -
-                        (getStackedTabSpacing() * getStackedTabCount());
+                position =
+                        tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
+                                (getStackedTabSpacing() * getStackedTabCount());
                 state = State.STACKED_END;
             }
         } else {
+            float selectedItemPosition =
+                    tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
+                            (getStackedTabSpacing() *
+                                    Math.min(getStackedTabCount(), selectedTabIndex));
+
             if (index <= selectedItemIndex + getStackedTabCount()) {
-                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() *
-                        Math.min(getStackedTabCount(), selectedItemIndex + 1)) -
+                position = selectedItemPosition -
                         (getStackedTabSpacing() * (index - selectedItemIndex));
                 state = State.STACKED_END;
             } else {
-                position = tabContainerWidth - tabWidth - (getStackedTabSpacing() *
-                        Math.min(getStackedTabCount(), selectedItemIndex + 1)) -
-                        (getStackedTabSpacing() * getStackedTabCount());
+                position = selectedItemPosition - (getStackedTabSpacing() * getStackedTabCount());
                 state = State.HIDDEN;
             }
         }
@@ -587,26 +622,42 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
 
     @Override
     protected final float calculateMinStartPosition(final int index) {
-        int thresholdPosition = (getModel().getCount() - 1) * calculateTabSpacing();
+        int thresholdPosition = (getItemCount() - 1) * calculateTabSpacing();
         float tabContainerWidth = calculateTabContainerWidth();
 
         if (thresholdPosition < tabContainerWidth) {
-            return (getModel().getCount() - index - 1) * calculateTabSpacing();
+            return calculateMaxEndPosition(index);
         } else {
-            return tabContainerWidth - calculateTabWidth() - (index * calculateTabSpacing());
+            if (index == 0 && getModel().isAddTabButtonShown()) {
+                return tabContainerWidth - addTabButtonWidth;
+            } else {
+                int i = getModel().isAddTabButtonShown() ? index : index + 1;
+                return tabContainerWidth - calculateAddTabButtonSpacing() -
+                        (calculateTabSpacing() * i);
+            }
         }
     }
 
     @Override
     protected final float calculateMaxEndPosition(final int index) {
-        return (getModel().getCount() - index - 1) * calculateTabSpacing();
+        if (index == 0 && getModel().isAddTabButtonShown()) {
+            return getModel().getCount() * calculateTabSpacing() + addTabButtonOffset;
+        } else {
+            int i = getModel().isAddTabButtonShown() ? index : index + 1;
+            return (getModel().getCount() - i) * calculateTabSpacing();
+        }
     }
 
     @Override
     protected final float calculateSuccessorPosition(@NonNull final AbstractItem item,
                                                      @NonNull final AbstractItem predecessor) {
         float predecessorPosition = predecessor.getTag().getPosition();
-        return predecessorPosition - calculateTabSpacing();
+
+        if (predecessor instanceof AddTabItem) {
+            return predecessorPosition - addTabButtonOffset - calculateTabSpacing();
+        } else {
+            return predecessorPosition - calculateTabSpacing();
+        }
     }
 
     @Override
@@ -675,7 +726,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                 while ((item = iterator.next()) != null) {
                     float position;
 
-                    if (item.getIndex() == selectedItemIndex) {
+                    if (item.getIndex() == 0 && getModel().isAddTabButtonShown()) {
+                        position = referencePosition + ((selectedItemIndex - 1) * tabSpacing) +
+                                calculateTabSpacing() + addTabButtonOffset;
+                    } else if (item.getIndex() == selectedItemIndex) {
                         position = referencePosition;
                     } else if (item.getIndex() < selectedItemIndex) {
                         position = referencePosition +
