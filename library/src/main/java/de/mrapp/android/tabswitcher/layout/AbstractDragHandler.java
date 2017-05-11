@@ -713,8 +713,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             notifyOnRevertEndOvershoot();
         } else if (dragState == DragState.OVERSHOOT_START) {
             notifyOnRevertStartOvershoot();
-        } else if (event != null && !dragHelper.hasThresholdBeenReached() &&
-                !swipeDragHelper.hasThresholdBeenReached()) {
+        } else if (event != null) {
             handleClick(event);
         }
 

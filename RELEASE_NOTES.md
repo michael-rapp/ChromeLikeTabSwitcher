@@ -1,6 +1,6 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (May 2nd 2017)
+## Version 1.0.0 (May 11th 2017)
 
 The first stable release of the library. It introduces the following features:
 
@@ -9,6 +9,12 @@ The first stable release of the library. It introduces the following features:
 - Added the `tabContentBackgroundColor` XML attribute and according setter methods for customizing the background color of a tab's content
 - Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode
 - Fixed various minor issues
+
+## Version 0.1.1 (May 11th 2017)
+
+A bugfix release, which fixed the following issues:
+
+- Improved detection of click events
 
 ## Version 0.1.0 (Apr. 22th 2017)
 
