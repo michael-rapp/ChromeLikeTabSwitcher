@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.1 (May 11th 2017)
+
+A bugfix release, which fixed the following issues:
+
+- Improved detection of click events
+
 ## Version 0.1.0 (Apr. 22th 2017)
 
 The first unstable release of the library, which provides the following features:
