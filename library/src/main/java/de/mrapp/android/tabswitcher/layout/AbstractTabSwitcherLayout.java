@@ -33,7 +33,6 @@ import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -46,7 +45,6 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
@@ -76,7 +74,6 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
-        extends AbstractTouchEventHandler
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         AbstractDragHandler.Callback {
 
@@ -1025,7 +1022,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
                                      @NonNull final TabSwitcherModel model,
                                      @NonNull final Arithmetics arithmetics,
                                      @NonNull final ThemeHelper themeHelper) {
-        super(AbstractTouchEventHandler.MIN_PRIORITY);
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
@@ -1043,6 +1039,15 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         this.flingAnimation = null;
         this.firstVisibleIndex = -1;
     }
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the drag
+     * handler, which is used by the layout.
+     *
+     * @return The drag handler, which is used by the layout, as an instance of the class {@link
+     * AbstractDragHandler} or null, if the drag handler has not been initialized yet
+     */
+    public abstract AbstractDragHandler<?> getDragHandler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to inflate the layout.
@@ -1063,15 +1068,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *         True, if only the tabs should be detached, false otherwise
      */
     protected abstract void onDetachLayout(final boolean tabsOnly);
-
-    /**
-     * The method, which is invoked on implementing subclasses in order to retrieve the drag
-     * handler, which is used by the layout.
-     *
-     * @return The drag handler, which is used by the layout, as an instance of the class {@link
-     * AbstractDragHandler} or null, if the drag handler has not been initialized yet
-     */
-    protected abstract AbstractDragHandler<?> getDragHandler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view
@@ -1297,11 +1293,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
-    }
-
-    @Override
-    public final boolean onHandleTouchEvent(@NonNull final MotionEvent event) {
-        return getDragHandler().handleTouchEvent(event);
     }
 
     @Override

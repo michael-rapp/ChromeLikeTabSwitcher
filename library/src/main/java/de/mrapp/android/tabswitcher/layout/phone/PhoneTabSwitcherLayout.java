@@ -2708,6 +2708,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
+    public final AbstractDragHandler<?> getDragHandler() {
+        return dragHandler;
+    }
+
+    @Override
     protected final void onInflateLayout(@NonNull final LayoutInflater inflater,
                                          final boolean tabsOnly) {
         if (tabsOnly) {
@@ -2745,11 +2750,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         if (!tabsOnly) {
             getModel().removeListener(recyclerAdapter);
         }
-    }
-
-    @Override
-    protected final AbstractDragHandler<?> getDragHandler() {
-        return dragHandler;
     }
 
     @Override

@@ -266,7 +266,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         this.layout.setCallback(createLayoutCallback());
         this.model.addListener(this.layout);
         this.layout.inflateLayout(inflatedTabsOnly);
-        this.eventDispatcher.addEventHandler(this.layout);
+        this.eventDispatcher.addEventHandler(this.layout.getDragHandler());
         final ViewGroup tabContainer = getTabContainer();
         assert tabContainer != null;
 
@@ -1015,7 +1015,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 if (previousLayout != newLayout) {
                     layout.detachLayout(false);
                     model.removeListener(layout);
-                    eventDispatcher.removeEventHandler(layout);
+                    eventDispatcher.removeEventHandler(layout.getDragHandler());
                     initializeLayout(newLayout, false);
                 }
             }
@@ -1574,7 +1574,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
-        return (layout != null && layout.handleTouchEvent(event)) || super.onTouchEvent(event);
+        return (layout != null && layout.getDragHandler().handleTouchEvent(event)) ||
+                super.onTouchEvent(event);
     }
 
     @Override
