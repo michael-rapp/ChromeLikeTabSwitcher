@@ -25,8 +25,8 @@ import static de.mrapp.android.util.Condition.ensureAtMaximum;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * An abstract base class for all handlers, which can be managed by a {@link TouchEventDispatcher}
- * in order to dispatch touch events to them.
+ * An abstract base class for all event handlers, which can be managed by a {@link
+ * TouchEventDispatcher} in order to dispatch touch events to them.
  *
  * @author Michael Rapp
  * @since 1.0.0

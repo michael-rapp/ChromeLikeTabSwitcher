@@ -53,7 +53,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
+import de.mrapp.android.tabswitcher.gesture.TouchEventHandlerFactory;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
@@ -1038,6 +1040,34 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
                     Layout.PHONE_PORTRAIT;
         }
+    }
+
+    /**
+     * Adds a specific drag gesture to the tab switcher.
+     *
+     * @param dragGesture
+     *         The drag gesture, which should be added, as an instance of the class {@link
+     *         DragGesture}. The drag gesture may not be null
+     */
+    public final void addDragGesture(@NonNull final DragGesture dragGesture) {
+        ensureNotNull(dragGesture, "The drag gesture may not be null");
+        AbstractTouchEventHandler eventHandler =
+                new TouchEventHandlerFactory(this).fromGesture(dragGesture);
+        eventDispatcher.addEventHandler(eventHandler);
+    }
+
+    /**
+     * Removes a specific drag gesture from the tab switcher.
+     *
+     * @param dragGesture
+     *         The drag gesture, which should be removed, as an instance of the class {@link
+     *         DragGesture}. The drag gesture may not be null
+     */
+    public final void removeDragGesture(@NonNull final DragGesture dragGesture) {
+        ensureNotNull(dragGesture, "The drag gesture may not be null");
+        AbstractTouchEventHandler eventHandler =
+                new TouchEventHandlerFactory(this).fromGesture(dragGesture);
+        eventDispatcher.removeEventHandler(eventHandler);
     }
 
     @Override
