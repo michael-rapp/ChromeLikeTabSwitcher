@@ -17,12 +17,11 @@ import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
+import de.mrapp.android.tabswitcher.gesture.AbstractTempHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -40,7 +39,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandler.Callback>
-        extends AbstractTouchEventHandler {
+        extends AbstractTempHandler {
 
     /**
      * Contains all possible states of dragging gestures, which can be performed on a {@link
@@ -163,11 +162,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     /**
-     * The tab switcher, whose tabs' positions and states are calculated by the drag handler.
-     */
-    private final TabSwitcher tabSwitcher;
-
-    /**
      * The arithmetics, which are used to calculate the positions, size and rotation of tabs.
      */
     private final Arithmetics arithmetics;
@@ -176,11 +170,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * True, if tabs can be swiped on the orthogonal axis, false otherwise.
      */
     private final boolean swipeEnabled;
-
-    /**
-     * The drag helper, which is used to recognize drag gestures on the dragging axis.
-     */
-    private final DragHelper dragHelper;
 
     /**
      * The drag helper, which is used to recognize swipe gestures on the orthogonal axis.
@@ -201,21 +190,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * The velocity, which must be reached by a drag gesture in order to start a swipe animation.
      */
     private final float minSwipeVelocity;
-
-    /**
-     * The threshold, which must be reached until tabs are dragged, in pixels.
-     */
-    private int dragThreshold;
-
-    /**
-     * The velocity tracker, which is used to measure the velocity of dragging gestures.
-     */
-    private VelocityTracker velocityTracker;
-
-    /**
-     * The id of the pointer, which has been used to start the current drag gesture.
-     */
-    private int pointerId;
 
     /**
      * The currently swiped tab item.
@@ -255,39 +229,13 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      *         {@link Integer} value
      */
     private void resetDragging(final int dragThreshold) {
-        if (this.velocityTracker != null) {
-            this.velocityTracker.recycle();
-            this.velocityTracker = null;
-        }
-
-        this.pointerId = -1;
+        super.reset(dragThreshold);
         this.dragState = DragState.NONE;
         this.swipedTabItem = null;
         this.dragDistance = 0;
         this.startOvershootThreshold = -Float.MAX_VALUE;
         this.endOvershootThreshold = Float.MAX_VALUE;
-        this.dragThreshold = dragThreshold;
-        this.dragHelper.reset(dragThreshold);
         this.swipeDragHelper.reset();
-    }
-
-    /**
-     * Handles, when a drag gesture has been started.
-     *
-     * @param event
-     *         The motion event, which started the drag gesture, as an instance of the class {@link
-     *         MotionEvent}. The motion event may not be null
-     */
-    private void handleDown(@NonNull final MotionEvent event) {
-        pointerId = event.getPointerId(0);
-
-        if (velocityTracker == null) {
-            velocityTracker = VelocityTracker.obtain();
-        } else {
-            velocityTracker.clear();
-        }
-
-        velocityTracker.addMovement(event);
     }
 
     /**
@@ -316,19 +264,21 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      *         {@link DragState}. The drag state may not be null
      */
     private void handleFling(@NonNull final MotionEvent event, @NonNull final DragState dragState) {
-        int pointerId = event.getPointerId(0);
-        velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-        float flingVelocity = Math.abs(velocityTracker.getYVelocity(pointerId));
+        if (getVelocityTracker() != null) {
+            int pointerId = event.getPointerId(0);
+            getVelocityTracker().computeCurrentVelocity(1000, maxFlingVelocity);
+            float flingVelocity = Math.abs(getVelocityTracker().getYVelocity(pointerId));
 
-        if (flingVelocity > minFlingVelocity) {
-            float flingDistance = 0.25f * flingVelocity;
+            if (flingVelocity > minFlingVelocity) {
+                float flingDistance = 0.25f * flingVelocity;
 
-            if (dragState == DragState.DRAG_TO_START) {
-                flingDistance = -1 * flingDistance;
+                if (dragState == DragState.DRAG_TO_START) {
+                    flingDistance = -1 * flingDistance;
+                }
+
+                long duration = Math.round(Math.abs(flingDistance) / flingVelocity * 1000);
+                notifyOnFling(flingDistance, duration);
             }
-
-            long duration = Math.round(Math.abs(flingDistance) / flingVelocity * 1000);
-            notifyOnFling(flingDistance, duration);
         }
     }
 
@@ -336,8 +286,8 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      * Handles, when the tabs are overshooting.
      */
     private void handleOvershoot() {
-        if (!dragHelper.isReset()) {
-            dragHelper.reset(0);
+        if (!getDragHelper().isReset()) {
+            getDragHelper().reset(0);
             dragDistance = 0;
         }
     }
@@ -451,18 +401,6 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     /**
-     * Returns the tab switcher, whose tabs' positions and states are calculated by the drag
-     * handler.
-     *
-     * @return The tab switcher, whose tabs' positions and states are calculated by the drag
-     * handler, as an instance of the class {@link TabSwitcher}. The tab switcher may not be null
-     */
-    @NonNull
-    protected TabSwitcher getTabSwitcher() {
-        return tabSwitcher;
-    }
-
-    /**
      * Returns the arithmetics, which are used to calculate the positions, size and rotation of
      * tabs.
      *
@@ -502,13 +440,11 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
      */
     public AbstractDragHandler(@NonNull final TabSwitcher tabSwitcher,
                                @NonNull final Arithmetics arithmetics, final boolean swipeEnabled) {
-        super(MIN_PRIORITY);
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        super(MIN_PRIORITY, tabSwitcher,
+                tabSwitcher.getResources().getDimensionPixelSize(R.dimen.drag_threshold));
         ensureNotNull(arithmetics, "The arithmetics may not be null");
-        this.tabSwitcher = tabSwitcher;
         this.arithmetics = arithmetics;
         this.swipeEnabled = swipeEnabled;
-        this.dragHelper = new DragHelper(0);
         Resources resources = tabSwitcher.getResources();
         this.swipeDragHelper =
                 new DragHelper(resources.getDimensionPixelSize(R.dimen.swipe_threshold));
@@ -622,14 +558,16 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             endOvershootThreshold = onOvershootEnd(dragPosition, endOvershootThreshold);
         } else {
             onOvershootReverted();
-            float previousDistance = dragHelper.isReset() ? 0 : dragHelper.getDragDistance();
-            dragHelper.update(dragPosition);
+            float previousDistance =
+                    getDragHelper().isReset() ? 0 : getDragHelper().getDragDistance();
+            getDragHelper().update(dragPosition);
 
             if (swipeEnabled) {
                 swipeDragHelper.update(orthogonalPosition);
 
                 if (dragState == DragState.NONE && swipeDragHelper.hasThresholdBeenReached()) {
-                    AbstractItem focusedItem = getFocusedItem(dragHelper.getDragStartPosition());
+                    AbstractItem focusedItem =
+                            getFocusedItem(getDragHelper().getDragStartPosition());
 
                     if (focusedItem != null && focusedItem instanceof TabItem) {
                         dragState = DragState.SWIPE;
@@ -638,13 +576,13 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
                 }
             }
 
-            if (dragState != DragState.SWIPE && dragHelper.hasThresholdBeenReached()) {
+            if (dragState != DragState.SWIPE && getDragHelper().hasThresholdBeenReached()) {
                 if (dragState == DragState.OVERSHOOT_START) {
                     dragState = DragState.DRAG_TO_END;
                 } else if (dragState == DragState.OVERSHOOT_END) {
                     dragState = DragState.DRAG_TO_START;
                 } else {
-                    float dragDistance = dragHelper.getDragDistance();
+                    float dragDistance = getDragHelper().getDragDistance();
 
                     if (dragDistance == 0) {
                         dragState = DragState.NONE;
@@ -658,7 +596,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             if (dragState == DragState.SWIPE) {
                 notifyOnSwipe(swipedTabItem, swipeDragHelper.getDragDistance());
             } else if (dragState != DragState.NONE) {
-                float currentDragDistance = dragHelper.getDragDistance();
+                float currentDragDistance = getDragHelper().getDragDistance();
                 float distance = currentDragDistance - dragDistance;
                 dragDistance = currentDragDistance;
                 DragState overshoot = notifyOnDrag(dragState, distance);
@@ -695,10 +633,10 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
         if (dragState == DragState.SWIPE) {
             float swipeVelocity = 0;
 
-            if (event != null && velocityTracker != null) {
+            if (event != null && getVelocityTracker() != null) {
                 int pointerId = event.getPointerId(0);
-                velocityTracker.computeCurrentVelocity(1000, maxFlingVelocity);
-                swipeVelocity = Math.abs(velocityTracker.getXVelocity(pointerId));
+                getVelocityTracker().computeCurrentVelocity(1000, maxFlingVelocity);
+                swipeVelocity = Math.abs(getVelocityTracker().getXVelocity(pointerId));
             }
 
             boolean remove = swipedTabItem.getTab().isCloseable() &&
@@ -706,7 +644,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
             notifyOnSwipeEnded(swipedTabItem, remove,
                     swipeVelocity >= minSwipeVelocity ? swipeVelocity : 0);
         } else if (dragState == DragState.DRAG_TO_START || dragState == DragState.DRAG_TO_END) {
-            if (event != null && velocityTracker != null && dragHelper.hasThresholdBeenReached()) {
+            if (event != null && getDragHelper().hasThresholdBeenReached()) {
                 handleFling(event, dragState);
             }
         } else if (dragState == DragState.OVERSHOOT_END) {
@@ -733,41 +671,20 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
     }
 
     @Override
-    protected final boolean onHandleTouchEvent(@NonNull final MotionEvent event) {
-        if (tabSwitcher.isSwitcherShown() && !tabSwitcher.isEmpty()) {
-            notifyOnCancelFling();
+    protected final boolean isDraggingAllowed() {
+        return getTabSwitcher().isSwitcherShown() && !getTabSwitcher().isEmpty();
+    }
 
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    handleDown(event);
-                    return true;
-                case MotionEvent.ACTION_MOVE:
-                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
-                        if (velocityTracker == null) {
-                            velocityTracker = VelocityTracker.obtain();
-                        }
+    @Override
+    protected final void onHandleTouchEvent() {
+        notifyOnCancelFling();
+    }
 
-                        velocityTracker.addMovement(event);
-                        handleDrag(arithmetics.getPosition(Axis.DRAGGING_AXIS, event),
-                                arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event));
-                    } else {
-                        handleRelease(null, dragThreshold);
-                        handleDown(event);
-                    }
-
-                    return true;
-                case MotionEvent.ACTION_UP:
-                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
-                        handleRelease(event, dragThreshold);
-                    }
-
-                    return true;
-                default:
-                    break;
-            }
-        }
-
-        return false;
+    @Override
+    protected final void handleDrag(@NonNull final MotionEvent event) {
+        float dragPosition = arithmetics.getPosition(Axis.DRAGGING_AXIS, event);
+        float orthogonalPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event);
+        handleDrag(dragPosition, orthogonalPosition);
     }
 
 }

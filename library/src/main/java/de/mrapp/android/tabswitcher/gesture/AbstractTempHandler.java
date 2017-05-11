@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.util.gesture.DragHelper;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -21,12 +22,14 @@ public abstract class AbstractTempHandler extends AbstractTouchEventHandler {
      */
     private final TabSwitcher tabSwitcher;
 
-    private final int dragThreshold;
-
     /**
      * The velocity tracker, which is used to measure the velocity of dragging gestures.
      */
     private VelocityTracker velocityTracker;
+
+    private final DragHelper dragHelper;
+
+    private int dragThreshold;
 
     /**
      * The id of the pointer, which has been used to start the current drag gesture.
@@ -46,8 +49,29 @@ public abstract class AbstractTempHandler extends AbstractTouchEventHandler {
     }
 
     @NonNull
-    protected TabSwitcher getTabSwitcher() {
+    protected final TabSwitcher getTabSwitcher() {
         return tabSwitcher;
+    }
+
+    @NonNull
+    protected final DragHelper getDragHelper() {
+        return dragHelper;
+    }
+
+    @Nullable
+    protected final VelocityTracker getVelocityTracker() {
+        return velocityTracker;
+    }
+
+    protected void reset(final int dragThreshold) {
+        if (this.velocityTracker != null) {
+            this.velocityTracker.recycle();
+            this.velocityTracker = null;
+        }
+
+        this.pointerId = -1;
+        this.dragThreshold = dragThreshold;
+        this.dragHelper.reset(dragThreshold);
     }
 
     public AbstractTempHandler(final int priority, @NonNull final TabSwitcher tabSwitcher,
@@ -57,6 +81,7 @@ public abstract class AbstractTempHandler extends AbstractTouchEventHandler {
         ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.tabSwitcher = tabSwitcher;
         this.dragThreshold = dragThreshold;
+        this.dragHelper = new DragHelper(0);
         this.velocityTracker = null;
         this.pointerId = -1;
     }
