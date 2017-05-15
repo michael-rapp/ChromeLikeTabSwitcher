@@ -346,7 +346,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     @NonNull
     private AbstractItem[] calculateInitialItems(final int firstVisibleTabIndex,
                                                  final float firstVisibleTabPosition) {
-        dragHandler.reset(getDragThreshold());
+        dragHandler.reset();
         setFirstVisibleIndex(-1);
         AbstractItem[] items = new AbstractItem[getItemCount()];
 

@@ -223,13 +223,9 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
 
     /**
      * Resets the drag handler to its previous state, when a drag gesture has ended.
-     *
-     * @param dragThreshold
-     *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
-     *         {@link Integer} value
      */
-    private void resetDragging(final int dragThreshold) {
-        super.reset(dragThreshold);
+    private void resetDragging() {
+        super.reset();
         this.dragState = DragState.NONE;
         this.swipedTabItem = null;
         this.dragDistance = 0;
@@ -454,7 +450,7 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
         this.minFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         this.minSwipeVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
-        resetDragging(resources.getDimensionPixelSize(R.dimen.drag_threshold));
+        resetDragging();
     }
 
     /**
@@ -621,8 +617,8 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
     }
 
     @Override
-    public final void reset(final int dragThreshold) {
-        resetDragging(dragThreshold);
+    public final void reset() {
+        resetDragging();
         onReset();
     }
 
@@ -648,17 +644,8 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
         handleDrag(dragPosition, orthogonalPosition);
     }
 
-    /**
-     * Handles, when a drag gesture has been ended.
-     *
-     * @param event
-     *         The motion event, which ended the drag gesture, as an instance of the class {@link
-     *         MotionEvent} or null, if no fling animation should be triggered
-     * @param dragThreshold
-     *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
-     *         {@link Integer} value
-     */
-    public final void onUp(@Nullable final MotionEvent event, final int dragThreshold) {
+    @Override
+    public final void onUp(@Nullable final MotionEvent event) {
         if (dragState == DragState.SWIPE) {
             float swipeVelocity = 0;
 
@@ -684,7 +671,7 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
             handleClick(event);
         }
 
-        resetDragging(dragThreshold);
+        resetDragging();
     }
 
 }

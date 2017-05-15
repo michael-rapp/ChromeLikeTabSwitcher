@@ -70,7 +70,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
     }
 
     @Override
-    protected final void onUp(@Nullable final MotionEvent event, final int dragThreshold) {
+    protected final void onUp(@Nullable final MotionEvent event) {
 
     }
 

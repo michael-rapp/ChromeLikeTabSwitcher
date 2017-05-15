@@ -156,19 +156,14 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
 
     /**
      * Resets the event handler once a drag gesture has been ended.
-     *
-     * @param dragThreshold
-     *         The threshold of the drag helper, which should be used to recognize upcoming drag
-     *         gestures, in pixels as an {@link Integer} value
      */
-    protected void reset(final int dragThreshold) {
+    protected void reset() {
         if (this.velocityTracker != null) {
             this.velocityTracker.recycle();
             this.velocityTracker = null;
         }
 
         this.pointerId = -1;
-        this.dragThreshold = dragThreshold;
         this.dragHelper.reset(dragThreshold);
     }
 
@@ -211,11 +206,8 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      * @param event
      *         The touch event, which ended the drag gesture, as an instance of the class {@link
      *         MotionEvent} or null, if no fling animation should be triggered
-     * @param dragThreshold
-     *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
-     *         {@link Integer} value
      */
-    protected abstract void onUp(@Nullable final MotionEvent event, final int dragThreshold);
+    protected abstract void onUp(@Nullable final MotionEvent event);
 
     /**
      * Creates a new handler, which can be managed by a {@link TouchEventDispatcher} in order to
@@ -247,7 +239,8 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
         this.touchableArea = touchableArea;
         this.tabSwitcher = tabSwitcher;
         this.dragHelper = new DragHelper(0);
-        reset(dragThreshold);
+        this.dragThreshold = dragThreshold;
+        reset();
     }
 
     /**
@@ -301,14 +294,14 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
                         velocityTracker.addMovement(event);
                         onDrag(event);
                     } else {
-                        onUp(null, dragThreshold);
+                        onUp(null);
                         handleDown(event);
                     }
 
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
-                        onUp(event, dragThreshold);
+                        onUp(event);
                     }
 
                     return true;

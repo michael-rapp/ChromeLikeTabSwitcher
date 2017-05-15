@@ -481,7 +481,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     @NonNull
     private AbstractItem[] calculateInitialItems(final int firstVisibleTabIndex,
                                                  final float firstVisibleTabPosition) {
-        dragHandler.reset(getDragThreshold());
+        dragHandler.reset();
         setFirstVisibleIndex(-1);
         AbstractItem[] items = new AbstractItem[getModel().getCount()];
 
@@ -2736,7 +2736,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 Collections.reverseOrder(new ItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
-        dragHandler = new PhoneDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
+        dragHandler =
+                new PhoneDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptDecorator();
         adaptToolbarMargin();
     }

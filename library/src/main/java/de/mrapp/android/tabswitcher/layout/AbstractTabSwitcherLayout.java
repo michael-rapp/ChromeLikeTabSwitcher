@@ -356,11 +356,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     private final ThemeHelper themeHelper;
 
     /**
-     * The threshold, which must be reached until tabs are dragged, in pixels.
-     */
-    private final int dragThreshold;
-
-    /**
      * The space between tabs, which are part of a stack, in pixels.
      */
     private final int stackedTabSpacing;
@@ -490,7 +485,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
             @Override
             public void onAnimationEnd(final android.view.animation.Animation animation) {
-                getDragHandler().onUp(null, dragThreshold);
+                getDragHandler().onUp(null);
                 flingAnimation = null;
                 notifyOnAnimationsEnded();
             }
@@ -766,16 +761,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     /**
-     * Returns the threshold, which must be reached until tabs are dragged.
-     *
-     * @return The threshold, which must be reached until tabs are dragged, in pixels as an {@link
-     * Integer} value
-     */
-    protected final int getDragThreshold() {
-        return dragThreshold;
-    }
-
-    /**
      * Returns the space between tabs, which are part of a stack.
      *
      * @return The space between tabs, which are part of a stack, in pixels as an {@link Integer}
@@ -1031,7 +1016,6 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         this.arithmetics = arithmetics;
         this.themeHelper = themeHelper;
         Resources resources = tabSwitcher.getResources();
-        this.dragThreshold = resources.getDimensionPixelSize(R.dimen.drag_threshold);
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.logger = new Logger(model.getLogLevel());
         this.callback = null;
@@ -1452,7 +1436,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         if (flingAnimation != null) {
             flingAnimation.cancel();
             flingAnimation = null;
-            getDragHandler().onUp(null, dragThreshold);
+            getDragHandler().onUp(null);
             logger.logVerbose(getClass(), "Canceled fling animation");
         }
     }

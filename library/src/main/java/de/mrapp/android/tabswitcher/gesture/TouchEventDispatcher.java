@@ -92,7 +92,7 @@ public class TouchEventDispatcher {
         }
 
         if (handler.equals(activeEventHandler)) {
-            // TODO: activeEventHandler.handleRelease(null);
+            activeEventHandler.onUp(null);
             activeEventHandler = null;
         }
     }
