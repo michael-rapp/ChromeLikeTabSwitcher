@@ -43,11 +43,17 @@ public class TouchEventDispatcher {
     private final SortedMap<Integer, Set<AbstractTouchEventHandler>> eventHandlers;
 
     /**
+     * The event handler, which is currently active.
+     */
+    private AbstractTouchEventHandler activeEventHandler;
+
+    /**
      * Creates a new dispatcher, which allows to dispatch touch events to multiple event handlers in
      * the order of their priority.
      */
     public TouchEventDispatcher() {
-        eventHandlers = new TreeMap<>(Collections.reverseOrder());
+        this.eventHandlers = new TreeMap<>(Collections.reverseOrder());
+        this.activeEventHandler = null;
     }
 
     /**
@@ -83,6 +89,11 @@ public class TouchEventDispatcher {
 
         if (handlers != null) {
             handlers.remove(handler);
+        }
+
+        if (handler.equals(activeEventHandler)) {
+            // TODO: activeEventHandler.handleRelease(null);
+            activeEventHandler = null;
         }
     }
 
