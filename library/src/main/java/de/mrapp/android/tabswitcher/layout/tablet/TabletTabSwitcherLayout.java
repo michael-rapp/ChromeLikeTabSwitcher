@@ -34,6 +34,7 @@ import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
@@ -449,12 +450,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
      *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
+     * @param touchEventDispatcher
+     *         The dispatcher, which is used to dispatch touch events to event handlers, as an
+     *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
      */
     public TabletTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
                                    @NonNull final Arithmetics arithmetics,
-                                   @NonNull final ThemeHelper themeHelper) {
-        super(tabSwitcher, model, arithmetics, themeHelper);
+                                   @NonNull final ThemeHelper themeHelper,
+                                   @NonNull final TouchEventDispatcher touchEventDispatcher) {
+        super(tabSwitcher, model, arithmetics, themeHelper, touchEventDispatcher);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.tablet_stacked_tab_count);
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
@@ -492,7 +497,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                 Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
-        dragHandler = new TabletDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
+        dragHandler =
+                new TabletDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
         adaptBorderColor();
         adaptTabContentBackgroundColor();

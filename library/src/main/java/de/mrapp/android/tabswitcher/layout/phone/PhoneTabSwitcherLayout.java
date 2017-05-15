@@ -48,6 +48,7 @@ import de.mrapp.android.tabswitcher.SwipeAnimation.SwipeDirection;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
@@ -2667,12 +2668,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
      *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
+     * @param touchEventDispatcher
+     *         The dispatcher, which is used to dispatch touch events to event handlers, as an
+     *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
      */
     public PhoneTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                   @NonNull final TabSwitcherModel model,
                                   @NonNull final PhoneArithmetics arithmetics,
-                                  @NonNull final ThemeHelper themeHelper) {
-        super(tabSwitcher, model, arithmetics, themeHelper);
+                                  @NonNull final ThemeHelper themeHelper,
+                                  @NonNull final TouchEventDispatcher touchEventDispatcher) {
+        super(tabSwitcher, model, arithmetics, themeHelper, touchEventDispatcher);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);

@@ -45,7 +45,9 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.gesture.SwipeEventHandler;
+import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
@@ -76,7 +78,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  */
 public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
-        AbstractDragEventHandler.Callback, SwipeEventHandler.Callback {
+        TouchEventDispatcher.Callback, AbstractDragEventHandler.Callback,
+        SwipeEventHandler.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -357,6 +360,11 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     private final ThemeHelper themeHelper;
 
     /**
+     * The dispatcher, which is used to dispatch touch events to event handlers.
+     */
+    private final TouchEventDispatcher touchEventDispatcher;
+
+    /**
      * The space between tabs, which are part of a stack, in pixels.
      */
     private final int stackedTabSpacing;
@@ -385,6 +393,60 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * The index of the first visible tab.
      */
     private int firstVisibleIndex;
+
+    /**
+     * Registers the layout as the callback of all touch event handlers.
+     */
+    private void registerEventHandlerCallbacks() {
+        for (AbstractTouchEventHandler eventHandler : touchEventDispatcher) {
+            if (eventHandler instanceof SwipeEventHandler) {
+                ((SwipeEventHandler) eventHandler).setCallback(this);
+            }
+        }
+
+        touchEventDispatcher.setCallback(this);
+    }
+
+    /**
+     * Registers the layout as the callback of a specific event handler.
+     *
+     * @param eventHandler
+     *         The event handler as an instance of the class {@link AbstractTouchEventHandler}. The
+     *         event handler may not be null
+     */
+    private void registerEventHandlerCallback(
+            @NonNull final AbstractTouchEventHandler eventHandler) {
+        if (eventHandler instanceof SwipeEventHandler) {
+            ((SwipeEventHandler) eventHandler).setCallback(this);
+        }
+    }
+
+    /**
+     * Unregisters the layout as the callback of all touch event handlers.
+     */
+    private void unregisterEventHandlerCallbacks() {
+        for (AbstractTouchEventHandler eventHandler : touchEventDispatcher) {
+            if (eventHandler instanceof SwipeEventHandler) {
+                ((SwipeEventHandler) eventHandler).setCallback(null);
+            }
+        }
+
+        touchEventDispatcher.setCallback(null);
+    }
+
+    /**
+     * Unregisters the layout as the callback of a specific event handler.
+     *
+     * @param eventHandler
+     *         The event handler as an instance of the class {@link AbstractTouchEventHandler}. The
+     *         event handler may not be null
+     */
+    private void unregisterEventHandlerCallback(
+            @NonNull final AbstractTouchEventHandler eventHandler) {
+        if (eventHandler instanceof SwipeEventHandler) {
+            ((SwipeEventHandler) eventHandler).setCallback(null);
+        }
+    }
 
     /**
      * Adapts the visibility of the toolbars, which are shown, when the tab switcher is shown.
@@ -1003,19 +1065,25 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
+     * @param touchEventDispatcher
+     *         The dispatcher, which is used to dispatch touch events to event handlers, as an
+     *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
      */
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final TabSwitcherModel model,
                                      @NonNull final Arithmetics arithmetics,
-                                     @NonNull final ThemeHelper themeHelper) {
+                                     @NonNull final ThemeHelper themeHelper,
+                                     @NonNull final TouchEventDispatcher touchEventDispatcher) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
         ensureNotNull(themeHelper, "The theme helper may not be null");
+        ensureNotNull(touchEventDispatcher, "The dispatcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
         this.themeHelper = themeHelper;
+        this.touchEventDispatcher = touchEventDispatcher;
         Resources resources = tabSwitcher.getResources();
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.logger = new Logger(model.getLogLevel());
@@ -1222,6 +1290,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         LayoutInflater inflater =
                 LayoutInflater.from(new ContextThemeWrapper(getContext(), themeResourceId));
         onInflateLayout(inflater, tabsOnly);
+        registerEventHandlerCallbacks();
         adaptDecorator();
         adaptLogLevel();
 
@@ -1261,6 +1330,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         getTabViewRecycler().removeAll();
         getTabViewRecycler().clearCache();
         onDetachLayout(tabsOnly);
+        unregisterEventHandlerCallbacks();
 
         if (!tabsOnly) {
             getTabSwitcher().removeAllViews();
@@ -1377,6 +1447,18 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     @Override
     public void onSwitcherHidden() {
 
+    }
+
+    @Override
+    public final void onAddedEventHandler(@NonNull final TouchEventDispatcher dispatcher,
+                                          @NonNull final AbstractTouchEventHandler eventHandler) {
+        registerEventHandlerCallback(eventHandler);
+    }
+
+    @Override
+    public final void onRemovedEventHandler(@NonNull final TouchEventDispatcher dispatcher,
+                                            @NonNull final AbstractTouchEventHandler eventHandler) {
+        unregisterEventHandlerCallback(eventHandler);
     }
 
     @Nullable
