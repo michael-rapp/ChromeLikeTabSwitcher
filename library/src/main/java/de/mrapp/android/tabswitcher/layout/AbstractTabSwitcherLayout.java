@@ -1464,13 +1464,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     }
 
     @Override
-    public final void onSwitchingBetweenTabs(@NonNull final TabItem tabItem, final float distance) {
+    public final void onSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
+        TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
         // TODO: Implement
     }
 
     @Override
-    public final void onSwitchingBetweenTabsEnded(@NonNull final TabItem tabItem,
-                                                  final boolean switchTabs, final float velocity) {
+    public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
+                                                  final int previousSelectedTabIndex,
+                                                  final float velocity) {
+        TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
         // TODO: Implement
     }
 

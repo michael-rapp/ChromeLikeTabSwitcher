@@ -18,16 +18,10 @@ import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.model.AbstractItem;
-import de.mrapp.android.tabswitcher.model.TabItem;
-import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * An event handler, which allows to handle swipe gestures, which can be used to switch between
@@ -47,35 +41,28 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
         /**
          * The method, which is invoked, when switching between neighboring tabs.
          *
-         * @param tabItem
-         *         The tab item, which corresponds to the swiped tab, as an instance of the class
-         *         {@link TabItem}. The tab item may not be null
+         * @param selectedTabIndex
+         *         The index of the currently selected tab as an {@link Integer} value
          * @param distance
-         *         The distance, the tab is swiped by, in pixels as a {@link Float} value
+         *         The distance, the currently selected tab is swiped by, in pixels as a {@link
+         *         Float} value
          */
-        void onSwitchingBetweenTabs(@NonNull TabItem tabItem, final float distance);
+        void onSwitchingBetweenTabs(int selectedTabIndex, float distance);
 
         /**
          * The method, which is invoked, when switching between neighboring tabs ended.
          *
-         * @param tabItem
-         *         The tab item, which corresponds to the swiped tab, as an instance of the class
-         *         {@link TabItem}. The tab item may not be null
-         * @param switchTabs
-         *         True, if the selected tab should be switched, false otherwise
+         * @param selectedTabIndex
+         *         The index of the tab, which should become selected, as an {@link Integer} value
+         * @param previousSelectedTabIndex
+         *         The index of the previously selected tab as an {@link Integer} value
          * @param velocity
          *         The velocity of the swipe gesture in pixels per second as a {@link Float} value
          */
-        void onSwitchingBetweenTabsEnded(@NonNull TabItem tabItem, boolean switchTabs,
+        void onSwitchingBetweenTabsEnded(int selectedTabIndex, int previousSelectedTabIndex,
                                          float velocity);
 
     }
-
-    /**
-     * The view recycler, which allows to inflate the views, which are used to visualize the tabs of
-     * the tab switcher, the event handler belongs to.
-     */
-    private final AttachedViewRecycler<AbstractItem, ?> viewRecycler;
 
     /**
      * The velocity, which may be reached by a drag gesture at maximum to start a fling animation.
@@ -88,9 +75,9 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
     private final float minSwipeVelocity;
 
     /**
-     * The tab item, which corresponds to the tab, which is currently swiped.
+     * The index of the currently selected tab.
      */
-    private TabItem swipedTabItem;
+    private int selectedTabIndex;
 
     /**
      * The callback, which is notified about the event handler's events.
@@ -101,30 +88,25 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * Returns, whether the threshold of a swiped tab item, which causes the previous or next tab to
      * be selected, has been reached, or not.
      *
-     * @param swipedTabItem
-     *         The swiped tab item as an instance of the class {@link TabItem}. The tab item may not
-     *         be null
      * @return True, if the threshold has been reached, false otherwise
      */
-    private boolean isSwipeThresholdReached(@NonNull final TabItem swipedTabItem) {
-        View view = swipedTabItem.getView();
-        return Math.abs(view.getX()) > getTabSwitcher().getWidth() / 6f;
+    private boolean isSwipeThresholdReached() {
+        return Math.abs(getDragHelper().getDragDistance()) > getTabSwitcher().getWidth() / 6f;
     }
 
     /**
      * Notifies the callback about a swipe gesture, which is used to switch between neighboring
      * tabs.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
+     * @param selectedTabIndex
+     *         The index of the currently selected tab as an {@link Integer} value
      * @param distance
-     *         The distance, the tab is swiped by, in pixels as a {@link Float} value
+     *         The distance, the currently selected tab is swiped by, in pixels as a {@link Float}
+     *         value
      */
-    private void notifyOnSwitchingBetweenTabs(@NonNull final TabItem tabItem,
-                                              final float distance) {
+    private void notifyOnSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
         if (callback != null) {
-            callback.onSwitchingBetweenTabs(tabItem, distance);
+            callback.onSwitchingBetweenTabs(selectedTabIndex, distance);
         }
     }
 
@@ -132,18 +114,19 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * Notifies the callback, that a swipe gesture, which was used to switch between neighboring
      * tabs, has ended.
      *
-     * @param tabItem
-     *         The tab item, which corresponds to the swiped tab, as an instance of the class {@link
-     *         TabItem}. The tab item may not be null
-     * @param switchTabs
-     *         True, if the selected tab should be switched, false otherwise
+     * @param selectedTabIndex
+     *         The index of the tab, which should become selected, as an {@link Integer} value
+     * @param previousSelectedTabIndex
+     *         The index of the previously selected tab as an {@link Integer} value
      * @param velocity
      *         The velocity of the swipe gesture in pixels per second as a {@link Float} value
      */
-    private void notifyOnSwitchingBetweenTabsEnded(@NonNull final TabItem tabItem,
-                                                   final boolean switchTabs, final float velocity) {
+    private void notifyOnSwitchingBetweenTabsEnded(final int selectedTabIndex,
+                                                   final int previousSelectedTabIndex,
+                                                   final float velocity) {
         if (callback != null) {
-            callback.onSwitchingBetweenTabsEnded(tabItem, switchTabs, velocity);
+            callback.onSwitchingBetweenTabsEnded(selectedTabIndex, previousSelectedTabIndex,
+                    velocity);
         }
     }
 
@@ -154,10 +137,6 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * @param tabSwitcher
      *         The tab switcher, the event handler belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
-     * @param viewRecycler
-     *         The view recycler, which allows to inflate the views, which are used to visualize the
-     *         tabs of the tab switcher, the event handler belongs to, as an instance of the class
-     *         {@link AttachedViewRecycler}. The view recycler may not be null
      * @param dragThreshold
      *         The drag threshold in pixels as an {@link Integer} value. The drag threshold must be
      *         at least 0
@@ -167,16 +146,14 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      *         should not be restricted
      */
     public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher,
-                             @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                              final int dragThreshold, @Nullable final RectF touchableArea) {
         super(MAX_PRIORITY, touchableArea, tabSwitcher, dragThreshold);
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
-        this.viewRecycler = viewRecycler;
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         Resources resources = tabSwitcher.getResources();
         this.minSwipeVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
         this.callback = null;
+        this.selectedTabIndex = -1;
     }
 
     /**
@@ -210,15 +187,17 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
         getDragHelper().update(event.getX());
 
         if (getDragHelper().hasThresholdBeenReached()) {
-            int selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
-            swipedTabItem = TabItem.create(getTabSwitcher(), viewRecycler, selectedTabIndex);
-            notifyOnSwitchingBetweenTabs(swipedTabItem, getDragHelper().getDragDistance());
+            if (selectedTabIndex == -1) {
+                selectedTabIndex = getTabSwitcher().getSelectedTabIndex();
+            }
+
+            notifyOnSwitchingBetweenTabs(selectedTabIndex, getDragHelper().getDragDistance());
         }
     }
 
     @Override
     protected final void onUp(@Nullable final MotionEvent event) {
-        if (swipedTabItem != null) {
+        if (selectedTabIndex != -1) {
             float swipeVelocity = 0;
 
             if (event != null && getVelocityTracker() != null) {
@@ -227,13 +206,19 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
                 swipeVelocity = Math.abs(getVelocityTracker().getXVelocity(pointerId));
             }
 
-            boolean switchTabs =
-                    (swipeVelocity >= minSwipeVelocity || isSwipeThresholdReached(swipedTabItem));
-            notifyOnSwitchingBetweenTabsEnded(swipedTabItem, switchTabs,
+            int index = selectedTabIndex;
+
+            if (swipeVelocity >= minSwipeVelocity || isSwipeThresholdReached()) {
+                index = getDragHelper().getDragDistance() > 0 ? selectedTabIndex - 1 :
+                        selectedTabIndex + 1;
+                index = Math.max(Math.min(index, getTabSwitcher().getCount() - 1), 0);
+            }
+
+            notifyOnSwitchingBetweenTabsEnded(index, selectedTabIndex,
                     swipeVelocity >= minSwipeVelocity ? swipeVelocity : 0);
         }
 
-        swipedTabItem = null;
+        selectedTabIndex = -1;
         reset();
     }
 
