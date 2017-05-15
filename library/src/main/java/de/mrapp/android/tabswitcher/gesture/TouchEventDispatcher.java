@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -36,7 +35,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TouchEventDispatcher {
+public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler> {
 
     /**
      * Defines the interface, a class, which should be notified, when event handlers are added to or
@@ -69,6 +68,59 @@ public class TouchEventDispatcher {
          */
         void onRemovedEventHandler(@NonNull TouchEventDispatcher dispatcher,
                                    @NonNull AbstractTouchEventHandler eventHandler);
+
+    }
+
+    /**
+     * An iterator, which allows to iterate the event handlers of a {@link TouchEventDispatcher}.
+     */
+    private class EventHandlerIterator implements Iterator<AbstractTouchEventHandler> {
+
+        /**
+         * The iterator, which allows to iterate the priorities of the event handlers.
+         */
+        private Iterator<Integer> priorityIterator;
+
+        /**
+         * The iterator, which allows to iterate the event handlers with the current priority.
+         */
+        private Iterator<AbstractTouchEventHandler> eventHandlerIterator;
+
+        /**
+         * Creates a new iterator, which allows to iterate the event handlers of a {@link
+         * TouchEventDispatcher}.
+         */
+        public EventHandlerIterator() {
+            priorityIterator = eventHandlers.keySet().iterator();
+
+            if (priorityIterator.hasNext()) {
+                int key = priorityIterator.next();
+                Set<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
+                eventHandlerIterator = handlers.iterator();
+            } else {
+                eventHandlerIterator = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (eventHandlerIterator != null && eventHandlerIterator.hasNext()) ||
+                    priorityIterator.hasNext();
+        }
+
+        @Override
+        public AbstractTouchEventHandler next() {
+            if (eventHandlerIterator.hasNext()) {
+                return eventHandlerIterator.next();
+            } else if (priorityIterator.hasNext()) {
+                int key = priorityIterator.next();
+                Set<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
+                eventHandlerIterator = handlers.iterator();
+                return next();
+            }
+
+            return null;
+        }
 
     }
 
@@ -228,23 +280,22 @@ public class TouchEventDispatcher {
         }
 
         if (!handled) {
-            Iterator<Map.Entry<Integer, Set<AbstractTouchEventHandler>>> entryIterator =
-                    eventHandlers.entrySet().iterator();
-            Map.Entry<Integer, Set<AbstractTouchEventHandler>> entry;
+            Iterator<AbstractTouchEventHandler> iterator = iterator();
+            AbstractTouchEventHandler handler;
 
-            while ((entry = entryIterator.next()) != null && !handled) {
-                Iterator<AbstractTouchEventHandler> handlerIterator = entry.getValue().iterator();
-                AbstractTouchEventHandler handler;
-
-                while ((handler = handlerIterator.next()) != null && !handled) {
-                    if (isInsideTouchableArea(event, handler)) {
-                        handled = handler.handleTouchEvent(event);
-                    }
+            while ((handler = iterator.next()) != null && !handled) {
+                if (isInsideTouchableArea(event, handler)) {
+                    handled = handler.handleTouchEvent(event);
                 }
             }
         }
 
         return handled;
+    }
+
+    @Override
+    public final Iterator<AbstractTouchEventHandler> iterator() {
+        return new EventHandlerIterator();
     }
 
 }
