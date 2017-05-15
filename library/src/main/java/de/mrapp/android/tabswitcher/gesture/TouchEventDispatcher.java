@@ -15,6 +15,7 @@ package de.mrapp.android.tabswitcher.gesture;
 
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import java.util.Collection;
@@ -38,6 +39,40 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TouchEventDispatcher {
 
     /**
+     * Defines the interface, a class, which should be notified, when event handlers are added to or
+     * removed from a {@link TouchEventDispatcher}, must implement.
+     */
+    public interface Callback {
+
+        /**
+         * The method, which is invoked, when an event handler has been added.
+         *
+         * @param dispatcher
+         *         The dispatcher, the event handler has been added to, as an instance of the class
+         *         {@link TouchEventDispatcher}. The dispatcher may not be null
+         * @param eventHandler
+         *         The event handler, which has been added, as an instance of the class {@link
+         *         AbstractTouchEventHandler}. The event handler may not be null
+         */
+        void onAddedEventHandler(@NonNull TouchEventDispatcher dispatcher,
+                                 @NonNull AbstractTouchEventHandler eventHandler);
+
+        /**
+         * The method, which is invoked, when an event handler has been removed.
+         *
+         * @param dispatcher
+         *         The dispatcher, the event handler has been removed from, as an instance of the
+         *         class {@link TouchEventDispatcher}. The dispatcher may not be null
+         * @param eventHandler
+         *         The event handler, which has been removed, as an instance of the class {@link
+         *         AbstractTouchEventHandler}. The event handler may not be null
+         */
+        void onRemovedEventHandler(@NonNull TouchEventDispatcher dispatcher,
+                                   @NonNull AbstractTouchEventHandler eventHandler);
+
+    }
+
+    /**
      * A sorted map, which contains the event handlers, touch events can be dispatched to. The
      * handlers are sorted by decreasing priority.
      */
@@ -47,6 +82,11 @@ public class TouchEventDispatcher {
      * The event handler, which is currently active.
      */
     private AbstractTouchEventHandler activeEventHandler;
+
+    /**
+     * The callback, which is notified, when event handlers are added or removed.
+     */
+    private Callback callback;
 
     /**
      * Returns, whether a specific touch event occurred inside the touchable area of an event
@@ -69,12 +109,51 @@ public class TouchEventDispatcher {
     }
 
     /**
+     * Notifies the callback, that an event handler has been added to the dispatcher.
+     *
+     * @param eventHandler
+     *         The event handler, which has been added, as an instance of the class {@link
+     *         AbstractTouchEventHandler}. The event handler may not be null
+     */
+    private void notifyOnAddedEventHandler(@NonNull final AbstractTouchEventHandler eventHandler) {
+        if (callback != null) {
+            callback.onAddedEventHandler(this, eventHandler);
+        }
+    }
+
+    /**
+     * Notifies the callback, that an event handler has been removed from the dispatcher.
+     *
+     * @param eventHandler
+     *         The event handler, which has been removed, as an instance of the class {@link
+     *         AbstractTouchEventHandler}. The event handler may not be null
+     */
+    private void notifyOnRemovedEventHandler(
+            @NonNull final AbstractTouchEventHandler eventHandler) {
+        if (callback != null) {
+            callback.onRemovedEventHandler(this, eventHandler);
+        }
+    }
+
+    /**
      * Creates a new dispatcher, which allows to dispatch touch events to multiple event handlers in
      * the order of their priority.
      */
     public TouchEventDispatcher() {
         this.eventHandlers = new TreeMap<>(Collections.reverseOrder());
         this.activeEventHandler = null;
+        this.callback = null;
+    }
+
+    /**
+     * Sets the callback, which should be notified, when event handlers are added or removed.
+     *
+     * @param callback
+     *         The callback, which should be set, as an instance of the type {@link Callback} or
+     *         null, if no callback should be notified
+     */
+    public final void setCallback(@Nullable final Callback callback) {
+        this.callback = callback;
     }
 
     /**
@@ -95,6 +174,7 @@ public class TouchEventDispatcher {
         }
 
         handlers.add(handler);
+        notifyOnAddedEventHandler(handler);
     }
 
     /**
@@ -109,7 +189,15 @@ public class TouchEventDispatcher {
         Collection<AbstractTouchEventHandler> handlers = eventHandlers.get(handler.getPriority());
 
         if (handlers != null) {
-            handlers.remove(handler);
+            Iterator<AbstractTouchEventHandler> iterator = handlers.iterator();
+            AbstractTouchEventHandler eventHandler;
+
+            while ((eventHandler = iterator.next()) != null) {
+                if (handler.equals(eventHandler)) {
+                    iterator.remove();
+                    notifyOnRemovedEventHandler(eventHandler);
+                }
+            }
         }
 
         if (handler.equals(activeEventHandler)) {
