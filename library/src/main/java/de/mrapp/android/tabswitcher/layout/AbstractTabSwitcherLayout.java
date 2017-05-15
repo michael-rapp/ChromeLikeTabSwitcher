@@ -45,6 +45,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.gesture.SwipeEventHandler;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
@@ -75,7 +76,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  */
 public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
-        AbstractDragEventHandler.Callback {
+        AbstractDragEventHandler.Callback, SwipeEventHandler.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -1460,6 +1461,17 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     public void onSwipeEnded(@NonNull final TabItem tabItem, final boolean remove,
                              final float velocity) {
 
+    }
+
+    @Override
+    public final void onSwitchingBetweenTabs(@NonNull final TabItem tabItem, final float distance) {
+        // TODO: Implement
+    }
+
+    @Override
+    public final void onSwitchingBetweenTabsEnded(@NonNull final TabItem tabItem,
+                                                  final boolean switchTabs, final float velocity) {
+        // TODO: Implement
     }
 
 }
