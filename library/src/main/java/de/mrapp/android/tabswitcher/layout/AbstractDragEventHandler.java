@@ -620,6 +620,34 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
         return false;
     }
 
+    @Override
+    public final void reset(final int dragThreshold) {
+        resetDragging(dragThreshold);
+        onReset();
+    }
+
+    @Override
+    protected final boolean isDraggingAllowed() {
+        return getTabSwitcher().isSwitcherShown() && !getTabSwitcher().isEmpty();
+    }
+
+    @Override
+    protected final void onTouchEvent() {
+        notifyOnCancelFling();
+    }
+
+    @Override
+    protected final void onDown(@NonNull final MotionEvent event) {
+
+    }
+
+    @Override
+    protected final void onDrag(@NonNull final MotionEvent event) {
+        float dragPosition = arithmetics.getPosition(Axis.DRAGGING_AXIS, event);
+        float orthogonalPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event);
+        handleDrag(dragPosition, orthogonalPosition);
+    }
+
     /**
      * Handles, when a drag gesture has been ended.
      *
@@ -630,7 +658,7 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
      *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
      *         {@link Integer} value
      */
-    public final void handleRelease(@Nullable final MotionEvent event, final int dragThreshold) {
+    public final void onUp(@Nullable final MotionEvent event, final int dragThreshold) {
         if (dragState == DragState.SWIPE) {
             float swipeVelocity = 0;
 
@@ -657,29 +685,6 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
         }
 
         resetDragging(dragThreshold);
-    }
-
-    @Override
-    public final void reset(final int dragThreshold) {
-        resetDragging(dragThreshold);
-        onReset();
-    }
-
-    @Override
-    protected final boolean isDraggingAllowed() {
-        return getTabSwitcher().isSwitcherShown() && !getTabSwitcher().isEmpty();
-    }
-
-    @Override
-    protected final void onHandleTouchEvent() {
-        notifyOnCancelFling();
-    }
-
-    @Override
-    protected final void handleDrag(@NonNull final MotionEvent event) {
-        float dragPosition = arithmetics.getPosition(Axis.DRAGGING_AXIS, event);
-        float orthogonalPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event);
-        handleDrag(dragPosition, orthogonalPosition);
     }
 
 }

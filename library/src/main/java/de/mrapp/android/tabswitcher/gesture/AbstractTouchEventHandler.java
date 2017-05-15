@@ -116,6 +116,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
         }
 
         velocityTracker.addMovement(event);
+        onDown(event);
     }
 
     /**
@@ -182,17 +183,27 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      * The method, which is invoked on implementing subclasses, when a touch event is about to be
      * handled.
      */
-    protected abstract void onHandleTouchEvent();
+    protected abstract void onTouchEvent();
 
     /**
-     * The method, which is invoked on implementing subclasses in order to handle when a drag
+     * The method, which is invoked on implementing subclasses in order to handle, when a drag
+     * gesture has been started.
+     *
+     * @param event
+     *         The touch event, which started the drag gesture, as an instance of the class {@link
+     *         MotionEvent}. The touch event may not be null
+     */
+    protected abstract void onDown(@NonNull final MotionEvent event);
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to handle, when a drag
      * gesture is performed.
      *
      * @param event
      *         The last touch event of the drag gesture as an instance of the class {@link
      *         MotionEvent}. The touch event may not be null
      */
-    protected abstract void handleDrag(@NonNull final MotionEvent event);
+    protected abstract void onDrag(@NonNull final MotionEvent event);
 
     /**
      * Handles, when a drag gesture has been ended.
@@ -204,8 +215,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
      *         {@link Integer} value
      */
-    protected abstract void handleRelease(@Nullable final MotionEvent event,
-                                          final int dragThreshold);
+    protected abstract void onUp(@Nullable final MotionEvent event, final int dragThreshold);
 
     /**
      * Creates a new handler, which can be managed by a {@link TouchEventDispatcher} in order to
@@ -260,7 +270,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      */
     @Nullable
     public final RectF getTouchableArea() {
-        return null;
+        return touchableArea;
     }
 
     /**
@@ -276,7 +286,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
         ensureNotNull(event, "The event may not be null");
 
         if (isInsideTouchableArea(event) && isDraggingAllowed()) {
-            onHandleTouchEvent();
+            onTouchEvent();
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -289,16 +299,16 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
                         }
 
                         velocityTracker.addMovement(event);
-                        handleDrag(event);
+                        onDrag(event);
                     } else {
-                        handleRelease(null, dragThreshold);
+                        onUp(null, dragThreshold);
                         handleDown(event);
                     }
 
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
-                        handleRelease(event, dragThreshold);
+                        onUp(event, dragThreshold);
                     }
 
                     return true;

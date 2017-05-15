@@ -490,7 +490,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
 
             @Override
             public void onAnimationEnd(final android.view.animation.Animation animation) {
-                getDragHandler().handleRelease(null, dragThreshold);
+                getDragHandler().onUp(null, dragThreshold);
                 flingAnimation = null;
                 notifyOnAnimationsEnded();
             }
@@ -1452,7 +1452,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         if (flingAnimation != null) {
             flingAnimation.cancel();
             flingAnimation = null;
-            getDragHandler().handleRelease(null, dragThreshold);
+            getDragHandler().onUp(null, dragThreshold);
             logger.logVerbose(getClass(), "Canceled fling animation");
         }
     }

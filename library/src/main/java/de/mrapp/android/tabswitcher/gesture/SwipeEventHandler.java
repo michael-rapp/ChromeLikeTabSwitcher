@@ -55,17 +55,22 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
     }
 
     @Override
-    protected final void onHandleTouchEvent() {
+    protected final void onTouchEvent() {
         // notifyOnCancelFling();
     }
 
     @Override
-    protected final void handleDrag(@NonNull final MotionEvent event) {
+    protected final void onDown(@NonNull final MotionEvent event) {
 
     }
 
     @Override
-    protected final void handleRelease(@Nullable final MotionEvent event, final int dragThreshold) {
+    protected final void onDrag(@NonNull final MotionEvent event) {
+
+    }
+
+    @Override
+    protected final void onUp(@Nullable final MotionEvent event, final int dragThreshold) {
 
     }
 
