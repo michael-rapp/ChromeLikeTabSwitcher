@@ -43,7 +43,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneDragEventHandler extends AbstractDragEventHandler<PhoneDragHandler.Callback> {
+public class PhoneDragEventHandler
+        extends AbstractDragEventHandler<PhoneDragEventHandler.Callback> {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a drag handler,
