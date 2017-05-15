@@ -207,7 +207,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     /**
      * The dispatcher, which is used to dispatch touch events.
      */
-    private TouchEventDispatcher eventDispatcher;
+    private TouchEventDispatcher touchEventDispatcher;
 
     /**
      * The layout, which is used by the tab switcher, depending on whether the device is a
@@ -237,7 +237,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         listeners = new LinkedHashSet<>();
         model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
-        eventDispatcher = new TouchEventDispatcher();
+        touchEventDispatcher = new TouchEventDispatcher();
         setPadding(super.getPaddingLeft(), super.getPaddingTop(), super.getPaddingRight(),
                 super.getPaddingBottom());
         obtainStyledAttributes(attributeSet, defaultStyle, defaultStyleResource);
@@ -266,7 +266,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         this.layout.setCallback(createLayoutCallback());
         this.model.addListener(this.layout);
         this.layout.inflateLayout(inflatedTabsOnly);
-        this.eventDispatcher.addEventHandler(this.layout.getDragHandler());
+        this.touchEventDispatcher.addEventHandler(this.layout.getDragHandler());
         final ViewGroup tabContainer = getTabContainer();
         assert tabContainer != null;
 
@@ -1015,7 +1015,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                 if (previousLayout != newLayout) {
                     layout.detachLayout(false);
                     model.removeListener(layout);
-                    eventDispatcher.removeEventHandler(layout.getDragHandler());
+                    touchEventDispatcher.removeEventHandler(layout.getDragHandler());
                     initializeLayout(newLayout, false);
                 }
             }
@@ -1053,7 +1053,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
                 new TouchEventHandlerFactory(this).fromGesture(dragGesture);
-        eventDispatcher.addEventHandler(eventHandler);
+        touchEventDispatcher.addEventHandler(eventHandler);
     }
 
     /**
@@ -1067,7 +1067,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
                 new TouchEventHandlerFactory(this).fromGesture(dragGesture);
-        eventDispatcher.removeEventHandler(eventHandler);
+        touchEventDispatcher.removeEventHandler(eventHandler);
     }
 
     @Override
@@ -1574,7 +1574,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
-        return eventDispatcher.dispatchTouchEvent(event) || super.onTouchEvent(event);
+        return touchEventDispatcher.dispatchTouchEvent(event) || super.onTouchEvent(event);
     }
 
     @Override
