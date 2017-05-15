@@ -439,8 +439,9 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
      *         True, if tabs can be swiped on the orthogonal axis, false otherwise
      */
     public AbstractDragEventHandler(@NonNull final TabSwitcher tabSwitcher,
-                                    @NonNull final Arithmetics arithmetics, final boolean swipeEnabled) {
-        super(MIN_PRIORITY, tabSwitcher,
+                                    @NonNull final Arithmetics arithmetics,
+                                    final boolean swipeEnabled) {
+        super(MIN_PRIORITY, null, tabSwitcher,
                 tabSwitcher.getResources().getDimensionPixelSize(R.dimen.drag_threshold));
         ensureNotNull(arithmetics, "The arithmetics may not be null");
         this.arithmetics = arithmetics;

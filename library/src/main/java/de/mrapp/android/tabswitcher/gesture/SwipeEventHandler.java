@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.gesture;
 
+import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
@@ -38,9 +39,14 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * @param dragThreshold
      *         The drag threshold in pixels as an {@link Integer} value. The drag threshold must be
      *         at least 0
+     * @param touchableArea
+     *         The bounds of the onscreen area, the handler should take into consideration for
+     *         handling touch events, as an instance of the class {@link RectF} or null, if the are
+     *         should not be restricted
      */
-    public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold) {
-        super(MAX_PRIORITY, tabSwitcher, dragThreshold);
+    public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
+                             @Nullable final RectF touchableArea) {
+        super(MAX_PRIORITY, touchableArea, tabSwitcher, dragThreshold);
     }
 
     @Override
