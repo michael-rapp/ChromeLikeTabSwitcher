@@ -13,6 +13,9 @@
  */
 package de.mrapp.android.tabswitcher;
 
+import android.graphics.RectF;
+import android.support.annotation.Nullable;
+
 /**
  * A drag gesture, which allows to switch between tabs, when swiping horizontally.
  *
@@ -28,7 +31,7 @@ public class SwipeGesture extends DragGesture {
 
         @Override
         public final SwipeGesture create() {
-            return new SwipeGesture(threshold);
+            return new SwipeGesture(threshold, touchableArea);
         }
 
     }
@@ -40,9 +43,13 @@ public class SwipeGesture extends DragGesture {
      *         The distance in pixels, the gesture must last until it is recognized, as an {@link
      *         Integer} value. The distance must be at least 0 or -1, if the default distance should
      *         be used
+     * @param touchableArea
+     *         The bounds of the onscreen area, which should be taken into consideration for
+     *         recognizing the drag gesture, as an instance of the class {@link RectF} or null, if
+     *         the area should not be restricted
      */
-    private SwipeGesture(final int threshold) {
-        super(threshold);
+    private SwipeGesture(final int threshold, @Nullable final RectF touchableArea) {
+        super(threshold, touchableArea);
     }
 
 }
