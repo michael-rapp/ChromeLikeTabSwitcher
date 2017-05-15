@@ -277,7 +277,9 @@ public class PhoneDragEventHandler
 
     @Override
     protected final void onReset() {
-        overshootDragHelper.reset();
+        if (overshootDragHelper != null) {
+            overshootDragHelper.reset();
+        }
     }
 
     @Override

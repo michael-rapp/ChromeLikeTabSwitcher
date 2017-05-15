@@ -231,7 +231,10 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
         this.dragDistance = 0;
         this.startOvershootThreshold = -Float.MAX_VALUE;
         this.endOvershootThreshold = Float.MAX_VALUE;
-        this.swipeDragHelper.reset();
+
+        if (this.swipeDragHelper != null) {
+            this.swipeDragHelper.reset();
+        }
     }
 
     /**
