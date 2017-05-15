@@ -63,7 +63,8 @@ public class TouchEventHandlerFactory {
 
         if (dragGesture instanceof SwipeGesture) {
             int dragThreshold = dragGesture.getThreshold() != -1 ? dragGesture.getThreshold() :
-                    R.dimen.swipe_gesture_threshold;
+                    tabSwitcher.getResources()
+                            .getDimensionPixelSize(R.dimen.swipe_gesture_threshold);
             return new SwipeEventHandler(tabSwitcher, dragThreshold,
                     dragGesture.getTouchableArea());
         }
