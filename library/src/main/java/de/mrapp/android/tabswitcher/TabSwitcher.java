@@ -1574,8 +1574,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final boolean onTouchEvent(final MotionEvent event) {
-        return (layout != null && layout.getDragHandler().handleTouchEvent(event)) ||
-                super.onTouchEvent(event);
+        return eventDispatcher.dispatchTouchEvent(event) || super.onTouchEvent(event);
     }
 
     @Override
