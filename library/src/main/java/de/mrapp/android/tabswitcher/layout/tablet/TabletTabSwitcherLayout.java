@@ -36,7 +36,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
@@ -171,7 +171,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     /**
      * The drag handler, which is used by the layout.
      */
-    private TabletDragHandler dragHandler;
+    private TabletDragEventHandler dragHandler;
 
     /**
      * The view recycler, which allows to recycle the views, which are associated with of tabs.
@@ -469,7 +469,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    public final AbstractDragHandler<?> getDragHandler() {
+    public final AbstractDragEventHandler<?> getDragHandler() {
         return dragHandler;
     }
 
@@ -492,7 +492,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
                 Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
-        dragHandler = new TabletDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
+        dragHandler = new TabletDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
         adaptBorderColor();
         adaptTabContentBackgroundColor();

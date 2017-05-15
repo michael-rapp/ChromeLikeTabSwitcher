@@ -51,8 +51,8 @@ import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ArrayItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
@@ -76,7 +76,7 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * @since 0.1.0
  */
 public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
-        implements PhoneDragHandler.Callback {
+        implements PhoneDragEventHandler.Callback {
 
     /**
      * A layout listener, which encapsulates another listener, which is notified, when the listener
@@ -240,7 +240,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     /**
      * The drag handler, which is used by the layout.
      */
-    private PhoneDragHandler dragHandler;
+    private PhoneDragEventHandler dragHandler;
 
     /**
      * The view recycler, which allows to recycle the views, which are associated with tabs.
@@ -2708,7 +2708,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
     }
 
     @Override
-    public final AbstractDragHandler<?> getDragHandler() {
+    public final AbstractDragEventHandler<?> getDragHandler() {
         return dragHandler;
     }
 
@@ -2736,7 +2736,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
                 Collections.reverseOrder(new ItemComparator(getTabSwitcher())));
         tabViewRecycler.setAdapter(recyclerAdapter);
         recyclerAdapter.setViewRecycler(tabViewRecycler);
-        dragHandler = new PhoneDragHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
+        dragHandler = new PhoneDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptDecorator();
         adaptToolbarMargin();
     }
@@ -2769,10 +2769,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
         view.setVisibility(View.VISIBLE);
         getArithmetics().setPivot(Arithmetics.Axis.DRAGGING_AXIS, view, getArithmetics()
                 .getPivot(Arithmetics.Axis.DRAGGING_AXIS, view,
-                        AbstractDragHandler.DragState.NONE));
+                        AbstractDragEventHandler.DragState.NONE));
         getArithmetics().setPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view, getArithmetics()
                 .getPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view,
-                        AbstractDragHandler.DragState.NONE));
+                        AbstractDragEventHandler.DragState.NONE));
         super.updateView(item);
         getArithmetics().setRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
     }

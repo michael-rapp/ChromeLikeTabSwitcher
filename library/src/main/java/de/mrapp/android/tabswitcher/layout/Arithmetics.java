@@ -20,7 +20,7 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
 
 /**
  * Defines the interface, a class, which provides methods, which allow to calculate the position,

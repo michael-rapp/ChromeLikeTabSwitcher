@@ -47,7 +47,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
@@ -75,7 +75,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  */
 public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
-        AbstractDragHandler.Callback {
+        AbstractDragEventHandler.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -1045,9 +1045,9 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * handler, which is used by the layout.
      *
      * @return The drag handler, which is used by the layout, as an instance of the class {@link
-     * AbstractDragHandler} or null, if the drag handler has not been initialized yet
+     * AbstractDragEventHandler} or null, if the drag handler has not been initialized yet
      */
-    public abstract AbstractDragHandler<?> getDragHandler();
+    public abstract AbstractDragEventHandler<?> getDragHandler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to inflate the layout.
