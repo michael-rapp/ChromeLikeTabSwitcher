@@ -227,9 +227,9 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
                 swipeVelocity = Math.abs(getVelocityTracker().getXVelocity(pointerId));
             }
 
-            boolean remove =
+            boolean switchTabs =
                     (swipeVelocity >= minSwipeVelocity || isSwipeThresholdReached(swipedTabItem));
-            notifyOnSwitchingBetweenTabsEnded(swipedTabItem, remove,
+            notifyOnSwitchingBetweenTabsEnded(swipedTabItem, switchTabs,
                     swipeVelocity >= minSwipeVelocity ? swipeVelocity : 0);
         }
 
