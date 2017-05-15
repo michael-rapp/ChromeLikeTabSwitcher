@@ -21,7 +21,7 @@ import android.view.ViewConfiguration;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.gesture.AbstractTempHandler;
+import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -39,7 +39,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandler.Callback>
-        extends AbstractTempHandler {
+        extends AbstractTouchEventHandler {
 
     /**
      * Contains all possible states of dragging gestures, which can be performed on a {@link
@@ -658,13 +658,7 @@ public abstract class AbstractDragHandler<CallbackType extends AbstractDragHandl
         resetDragging(dragThreshold);
     }
 
-    /**
-     * Resets the drag handler to its initial state.
-     *
-     * @param dragThreshold
-     *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
-     *         {@link Integer} value
-     */
+    @Override
     public final void reset(final int dragThreshold) {
         resetDragging(dragThreshold);
         onReset();

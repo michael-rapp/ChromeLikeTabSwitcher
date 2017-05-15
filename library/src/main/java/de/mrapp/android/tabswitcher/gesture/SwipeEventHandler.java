@@ -26,7 +26,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class SwipeEventHandler extends AbstractTempHandler {
+public class SwipeEventHandler extends AbstractTouchEventHandler {
 
     /**
      * Creates a new event handler, which allows to handle swipe gestures, which can be used to

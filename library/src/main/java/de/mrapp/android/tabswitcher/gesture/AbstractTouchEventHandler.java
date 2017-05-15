@@ -17,8 +17,12 @@ import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 
 import java.util.Comparator;
+
+import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.util.gesture.DragHelper;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureAtMaximum;
@@ -36,12 +40,12 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     /**
      * The maximum priority of an event handler.
      */
-    public static final int MAX_PRIORITY = Integer.MAX_VALUE;
+    protected static final int MAX_PRIORITY = Integer.MAX_VALUE;
 
     /**
      * The minimum priority of an event handler.
      */
-    public static final int MIN_PRIORITY = Integer.MIN_VALUE;
+    protected static final int MIN_PRIORITY = Integer.MIN_VALUE;
 
     /**
      * The priority of the event handler.
@@ -49,15 +53,153 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     private final int priority;
 
     /**
-     * The method, which is invoked on implementing subclasses in order to handle a specific touch
-     * event.
+     * The tab switcher, the event handler belongs to.
+     */
+    private final TabSwitcher tabSwitcher;
+
+    /**
+     * The drag helper, which is used by the touch handler to recognize drag gestures.
+     */
+    private final DragHelper dragHelper;
+
+    /**
+     * The current threshold of the drag helper, which is used to recognize drag gestures.
+     */
+    private int dragThreshold;
+
+    /**
+     * The velocity tracker, which is used by the touch handler to measure the velocity of drag
+     * gestures.
+     */
+    private VelocityTracker velocityTracker;
+
+    /**
+     * The id of the pointer, which has been used to start the current drag gesture.
+     */
+    private int pointerId;
+
+    /**
+     * Returns, whether a specific touch event occurred inside the touchable area.
      *
      * @param event
-     *         The event, which should be handled, as an instance of the class {@link MotionEvent}.
-     *         The event may not be null
-     * @return True, if the event has been handled, false otherwise
+     *         The touch event, which should be checked, as an instance of the class {@link
+     *         MotionEvent}. The touch event may not be null
+     * @return True, if the given touch event occurred inside the touchable area, false otherwise
      */
-    protected abstract boolean onHandleTouchEvent(@NonNull final MotionEvent event);
+    private boolean isInsideTouchableArea(@NonNull final MotionEvent event) {
+        RectF touchableArea = getTouchableArea();
+        return touchableArea == null ||
+                (event.getX() >= touchableArea.left && event.getX() <= touchableArea.right &&
+                        event.getY() >= touchableArea.top && event.getY() <= touchableArea.bottom);
+    }
+
+    /**
+     * Handles, when a drag gesture has been started.
+     *
+     * @param event
+     *         The motion event, which started the drag gesture, as an instance of the class {@link
+     *         MotionEvent}. The motion event may not be null
+     */
+    private void handleDown(@NonNull final MotionEvent event) {
+        pointerId = event.getPointerId(0);
+
+        if (velocityTracker == null) {
+            velocityTracker = VelocityTracker.obtain();
+        } else {
+            velocityTracker.clear();
+        }
+
+        velocityTracker.addMovement(event);
+    }
+
+    /**
+     * Returns the tab switcher, the event handler belongs to.
+     *
+     * @return The tab switcher, the event handler belongs to, as an instance of the class {@link
+     * TabSwitcher}. The tab switcher may not be null
+     */
+    @NonNull
+    protected final TabSwitcher getTabSwitcher() {
+        return tabSwitcher;
+    }
+
+    /**
+     * Returns the drag helper, which is used by the event handler to recognize drag gestures.
+     *
+     * @return The drag helper, which is used by the event handler to recognize drag gestures, as an
+     * instance of the class {@link DragHelper}. The drag helper may not be null
+     */
+    @NonNull
+    protected final DragHelper getDragHelper() {
+        return dragHelper;
+    }
+
+    /**
+     * The velocity tracker, which is used by the touch handler to measure the velocity of drag
+     * gestures.
+     *
+     * @return The velocity tracker, which is used by the touch handler to measure the velocity of
+     * drag gestures as an instance of the class {@link VelocityTracker} or null, if the velocity
+     * tracker has not be initialized yet
+     */
+    @Nullable
+    protected final VelocityTracker getVelocityTracker() {
+        return velocityTracker;
+    }
+
+    /**
+     * Resets the event handler once a drag gesture has been ended.
+     *
+     * @param dragThreshold
+     *         The threshold of the drag helper, which should be used to recognize upcoming drag
+     *         gestures, in pixels as an {@link Integer} value
+     */
+    protected void reset(final int dragThreshold) {
+        if (this.velocityTracker != null) {
+            this.velocityTracker.recycle();
+            this.velocityTracker = null;
+        }
+
+        this.pointerId = -1;
+        this.dragThreshold = dragThreshold;
+        this.dragHelper.reset(dragThreshold);
+    }
+
+    /**
+     * Returns, whether performing a drag gesture is currently allowed, or not.
+     *
+     * @return True, if performing a drag gesture is currently allowed, false otherwise
+     */
+    protected abstract boolean isDraggingAllowed();
+
+    /**
+     * The method, which is invoked on implementing subclasses, when a touch event is about to be
+     * handled.
+     */
+    protected abstract void onHandleTouchEvent();
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to handle when a drag
+     * gesture is performed.
+     *
+     * @param event
+     *         The last touch event of the drag gesture as an instance of the class {@link
+     *         MotionEvent}. The touch event may not be null
+     */
+    protected abstract void handleDrag(@NonNull final MotionEvent event);
+
+    /**
+     * Handles, when a drag gesture has been ended.
+     *
+     * @param event
+     *         The touch event, which ended the drag gesture, as an instance of the class {@link
+     *         MotionEvent} or null, if no fling animation should be triggered
+     * @param dragThreshold
+     *         The drag threshold, which should be used to recognize drag gestures, in pixels as an
+     *         {@link Integer} value
+     */
+    protected abstract void handleRelease(@Nullable final MotionEvent event,
+                                          final int dragThreshold);
 
     /**
      * Creates a new handler, which can be managed by a {@link TouchEventDispatcher} in order to
@@ -68,10 +210,18 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         least {@link AbstractTouchEventHandler#MIN_PRIORITY} and at maximum {@link
      *         AbstractTouchEventHandler#MAX_PRIORITY}
      */
-    public AbstractTouchEventHandler(final int priority) {
+    public AbstractTouchEventHandler(final int priority, @NonNull final TabSwitcher tabSwitcher,
+                                     final int dragThreshold) {
         ensureAtLeast(priority, MIN_PRIORITY, "The priority must be at least" + MIN_PRIORITY);
         ensureAtMaximum(priority, MAX_PRIORITY, "The priority must be at maximum " + MAX_PRIORITY);
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.priority = priority;
+        this.tabSwitcher = tabSwitcher;
+        this.dragThreshold = dragThreshold;
+        this.dragHelper = new DragHelper(0);
+        this.velocityTracker = null;
+        this.pointerId = -1;
     }
 
     /**
@@ -86,7 +236,8 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
 
     /**
      * Returns the bounds of the onscreen area, the handler takes into consideration for handling
-     * touch events. Touch events that occur outside of the area are clipped.
+     * touch events. Touch events that occur outside of the area are clipped. By default, the area
+     * is not restricted. Subclasses may override this method in order to restrict the area.
      *
      * @return The bounds of the onscreen area, the handler takes into consideration for handling
      * touch events, as an instance of the class {@link RectF} or null, if the area should not be
@@ -108,15 +259,45 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      */
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
-        RectF touchableArea = getTouchableArea();
-        return (touchableArea == null ||
-                (event.getX() >= touchableArea.left && event.getX() <= touchableArea.right &&
-                        event.getY() >= touchableArea.top &&
-                        event.getY() <= touchableArea.bottom)) && onHandleTouchEvent(event);
+
+        if (isInsideTouchableArea(event) && isDraggingAllowed()) {
+            onHandleTouchEvent();
+
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    handleDown(event);
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                        if (velocityTracker == null) {
+                            velocityTracker = VelocityTracker.obtain();
+                        }
+
+                        velocityTracker.addMovement(event);
+                        handleDrag(event);
+                    } else {
+                        handleRelease(null, dragThreshold);
+                        handleDown(event);
+                    }
+
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                        handleRelease(event, dragThreshold);
+                    }
+
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        return false;
     }
 
     @Override
-    public int compare(final AbstractTouchEventHandler o1, final AbstractTouchEventHandler o2) {
+    public final int compare(final AbstractTouchEventHandler o1,
+                             final AbstractTouchEventHandler o2) {
         int priority1 = o1.getPriority();
         int priority2 = o2.getPriority();
         return priority1 > priority2 ? 1 : (priority1 < priority2 ? -1 : 0);
