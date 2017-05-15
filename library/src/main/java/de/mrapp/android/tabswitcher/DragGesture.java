@@ -16,7 +16,6 @@ package de.mrapp.android.tabswitcher;
 import android.support.annotation.NonNull;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * A drag gesture, which can be used to perform certain actions when dragging in a particular
@@ -26,23 +25,6 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 1.0.0
  */
 public abstract class DragGesture {
-
-    /**
-     * Contains all possible directions of drag gestures.
-     */
-    public enum DragDirection {
-
-        /**
-         * When dragging horizontally.
-         */
-        HORIZONTAL,
-
-        /**
-         * When dragging vertically.
-         */
-        VERTICAL
-
-    }
 
     /**
      * A builder, which allows to configure and create instances of the class {@link DragGesture}.
@@ -111,11 +93,6 @@ public abstract class DragGesture {
     private final int threshold;
 
     /**
-     * The direction of the gesture.
-     */
-    private final DragDirection direction;
-
-    /**
      * Creates a new drag gesture, which can be used to perform certain action when dragging in a
      * particular direction.
      *
@@ -123,16 +100,10 @@ public abstract class DragGesture {
      *         The distance in pixels, the gesture must last until it is recognized, as an {@link
      *         Integer} value. The distance must be at least 0 or -1, if the default distance should
      *         be used
-     * @param direction
-     *         The direction of the gesture as a value of the enum {@link DragDirection}. The
-     *         direction may either be {@link DragDirection#HORIZONTAL} or {@link
-     *         DragDirection#VERTICAL}
      */
-    protected DragGesture(final int threshold, @NonNull final DragDirection direction) {
+    protected DragGesture(final int threshold) {
         ensureAtLeast(threshold, -1, "The threshold must be at least -1");
-        ensureNotNull(direction, "The direction may not be null");
         this.threshold = threshold;
-        this.direction = direction;
     }
 
     /**
@@ -143,17 +114,6 @@ public abstract class DragGesture {
      */
     public final int getThreshold() {
         return threshold;
-    }
-
-    /**
-     * Returns the direction of the gesture.
-     *
-     * @return The direction of the gesture as a value of the enum {@link DragGesture}. The
-     * direction may either be {@link DragDirection#HORIZONTAL} or {@link DragDirection#VERTICAL}
-     */
-    @NonNull
-    public final DragDirection getDirection() {
-        return direction;
     }
 
 }

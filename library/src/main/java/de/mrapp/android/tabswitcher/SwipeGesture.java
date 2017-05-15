@@ -42,7 +42,7 @@ public class SwipeGesture extends DragGesture {
      *         be used
      */
     private SwipeGesture(final int threshold) {
-        super(threshold, DragDirection.HORIZONTAL);
+        super(threshold);
     }
 
 }
