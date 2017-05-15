@@ -286,6 +286,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
             while ((handler = iterator.next()) != null && !handled) {
                 if (isInsideTouchableArea(event, handler)) {
                     handled = handler.handleTouchEvent(event);
+                    activeEventHandler = handler;
                 }
             }
         }
