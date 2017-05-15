@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.gesture;
 
+import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
@@ -46,6 +47,26 @@ public class TouchEventDispatcher {
      * The event handler, which is currently active.
      */
     private AbstractTouchEventHandler activeEventHandler;
+
+    /**
+     * Returns, whether a specific touch event occurred inside the touchable area of an event
+     * handler.
+     *
+     * @param event
+     *         The touch event, which should be checked, as an instance of the class {@link
+     *         MotionEvent}. The touch event may not be null
+     * @param eventHandler
+     *         The event handler as an instance of the class {@link AbstractTouchEventHandler}. The
+     *         event handler may not be null
+     * @return True, if the given touch event occurred inside the touchable area, false otherwise
+     */
+    private boolean isInsideTouchableArea(@NonNull final MotionEvent event,
+                                          @NonNull final AbstractTouchEventHandler eventHandler) {
+        RectF touchableArea = eventHandler.getTouchableArea();
+        return touchableArea == null ||
+                (event.getX() >= touchableArea.left && event.getX() <= touchableArea.right &&
+                        event.getY() >= touchableArea.top && event.getY() <= touchableArea.bottom);
+    }
 
     /**
      * Creates a new dispatcher, which allows to dispatch touch events to multiple event handlers in
@@ -107,17 +128,31 @@ public class TouchEventDispatcher {
      */
     public final boolean dispatchTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
-        Iterator<Map.Entry<Integer, Set<AbstractTouchEventHandler>>> entryIterator =
-                eventHandlers.entrySet().iterator();
-        Map.Entry<Integer, Set<AbstractTouchEventHandler>> entry;
         boolean handled = false;
 
-        while ((entry = entryIterator.next()) != null && !handled) {
-            Iterator<AbstractTouchEventHandler> handlerIterator = entry.getValue().iterator();
-            AbstractTouchEventHandler handler;
+        if (activeEventHandler != null) {
+            if (isInsideTouchableArea(event, activeEventHandler)) {
+                handled = activeEventHandler.handleTouchEvent(event);
+            } else {
+                activeEventHandler.onUp(event);
+                activeEventHandler = null;
+            }
+        }
 
-            while ((handler = handlerIterator.next()) != null && !handled) {
-                handled = handler.handleTouchEvent(event);
+        if (!handled) {
+            Iterator<Map.Entry<Integer, Set<AbstractTouchEventHandler>>> entryIterator =
+                    eventHandlers.entrySet().iterator();
+            Map.Entry<Integer, Set<AbstractTouchEventHandler>> entry;
+
+            while ((entry = entryIterator.next()) != null && !handled) {
+                Iterator<AbstractTouchEventHandler> handlerIterator = entry.getValue().iterator();
+                AbstractTouchEventHandler handler;
+
+                while ((handler = handlerIterator.next()) != null && !handled) {
+                    if (isInsideTouchableArea(event, handler)) {
+                        handled = handler.handleTouchEvent(event);
+                    }
+                }
             }
         }
 

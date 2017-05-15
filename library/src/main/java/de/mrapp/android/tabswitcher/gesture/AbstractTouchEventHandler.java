@@ -85,21 +85,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     private int pointerId;
 
     /**
-     * Returns, whether a specific touch event occurred inside the touchable area.
-     *
-     * @param event
-     *         The touch event, which should be checked, as an instance of the class {@link
-     *         MotionEvent}. The touch event may not be null
-     * @return True, if the given touch event occurred inside the touchable area, false otherwise
-     */
-    private boolean isInsideTouchableArea(@NonNull final MotionEvent event) {
-        RectF touchableArea = getTouchableArea();
-        return touchableArea == null ||
-                (event.getX() >= touchableArea.left && event.getX() <= touchableArea.right &&
-                        event.getY() >= touchableArea.top && event.getY() <= touchableArea.bottom);
-    }
-
-    /**
      * Handles, when a drag gesture has been started.
      *
      * @param event
@@ -278,7 +263,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
 
-        if (isInsideTouchableArea(event) && isDraggingAllowed()) {
+        if (isDraggingAllowed()) {
             onTouchEvent();
 
             switch (event.getAction()) {
