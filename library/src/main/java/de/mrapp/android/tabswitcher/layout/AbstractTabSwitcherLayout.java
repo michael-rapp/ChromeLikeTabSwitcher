@@ -35,7 +35,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
@@ -51,6 +53,7 @@ import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
@@ -70,13 +73,10 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * An abstract base class for all layouts, which implement the functionality of a {@link
  * TabSwitcher}.
  *
- * @param <ViewRecyclerParamType>
- *         The type of the parameters, which can optionally be passed when inflating the views,
- *         which are used to visualize tabs
  * @author Michael Rapp
  * @since 0.1.0
  */
-public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
+public abstract class AbstractTabSwitcherLayout
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         TouchEventDispatcher.Callback, AbstractDragEventHandler.Callback,
         SwipeEventHandler.Callback {
@@ -368,6 +368,16 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * The space between tabs, which are part of a stack, in pixels.
      */
     private final int stackedTabSpacing;
+
+    /**
+     * The distance between two neighboring tabs when being swiped in pixels.
+     */
+    private final int swipedTabDistance;
+
+    /**
+     * The duration of a swipe animation in milliseconds.
+     */
+    private final long swipeAnimationDuration;
 
     /**
      * The logger, which is used for logging.
@@ -998,13 +1008,12 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      *         notified
      * @param params
      *         An array, which contains optional parameters, which should be passed to the view
-     *         recycler, which is used to inflate the view, as an array of the generic type
-     *         ViewRecyclerParamType. The array may not be null
+     *         recycler, which is used to inflate the view, as an {@link Integer} array or null, if
+     *         no optional parameters should be used
      */
-    @SafeVarargs
     protected final void inflateView(@NonNull final AbstractItem item,
                                      @Nullable final OnGlobalLayoutListener listener,
-                                     @NonNull final ViewRecyclerParamType... params) {
+                                     @NonNull final Integer... params) {
         Pair<View, Boolean> pair = getTabViewRecycler().inflate(item, params);
 
         if (listener != null) {
@@ -1031,8 +1040,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     protected void updateView(@NonNull final AbstractItem item) {
         float position = item.getTag().getPosition();
         View view = item.getView();
-        getArithmetics().setPosition(Arithmetics.Axis.DRAGGING_AXIS, view, position);
-        getArithmetics().setPosition(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
+        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, position);
+        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
     /**
@@ -1086,6 +1095,8 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
         this.touchEventDispatcher = touchEventDispatcher;
         Resources resources = tabSwitcher.getResources();
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        this.swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
+        this.swipeAnimationDuration = resources.getInteger(R.integer.swipe_animation_duration);
         this.logger = new Logger(model.getLogLevel());
         this.callback = null;
         this.runningAnimations = 0;
@@ -1140,7 +1151,7 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
      * tabs, as an instance of the class {@link AttachedViewRecycler} or null, if the view recycler
      * has not been initialized yet
      */
-    protected abstract AttachedViewRecycler<AbstractItem, ViewRecyclerParamType> getTabViewRecycler();
+    protected abstract AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to inflate and update the
@@ -1548,15 +1559,120 @@ public abstract class AbstractTabSwitcherLayout<ViewRecyclerParamType>
     @Override
     public final void onSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
         TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
-        // TODO: Implement
+        View view = tabItem.getView();
+
+        if (distance == 0 || (distance > 0 && selectedTabIndex < getModel().getCount() - 1) ||
+                (distance < 0 && selectedTabIndex > 0)) {
+            getArithmetics().setPosition(Axis.X_AXIS, view, distance);
+            float position = getArithmetics().getPosition(Axis.X_AXIS, view);
+
+            if (Math.abs(position) >= swipedTabDistance) {
+                TabItem neighbor = TabItem.create(getModel(), getTabViewRecycler(),
+                        position > 0 ? selectedTabIndex + 1 : selectedTabIndex - 1);
+                inflateView(neighbor,
+                        createSwipeNeighborLayoutListener(tabItem, neighbor, distance));
+            }
+        } else {
+            float position = (float) Math.pow(Math.abs(distance), 0.75);
+            position = distance < 0 ? position * -1 : position;
+            getArithmetics().setPosition(Axis.X_AXIS, view, position);
+        }
+
+        getLogger().logVerbose(getClass(),
+                "Swiping tab at index " + selectedTabIndex + ". Current swipe distance is " +
+                        distance + " pixels");
+    }
+
+    private OnGlobalLayoutListener createSwipeNeighborLayoutListener(
+            @NonNull final TabItem selectedTabItem, @NonNull final TabItem neighbor,
+            final float distance) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = neighbor.getView();
+                float position;
+
+                if (selectedTabItem.getIndex() < neighbor.getIndex()) {
+                    position = distance - swipedTabDistance -
+                            getArithmetics().getSize(Axis.X_AXIS, view);
+                } else {
+                    View selectedTabView = selectedTabItem.getView();
+                    position = distance + getArithmetics().getSize(Axis.X_AXIS, selectedTabView) +
+                            swipedTabDistance;
+                }
+
+                getArithmetics().setPosition(Axis.X_AXIS, view, position);
+            }
+
+        };
     }
 
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
                                                   final float velocity) {
-        TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
-        // TODO: Implement
+        TabItem selectedTabItem =
+                TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
+        animateSwipe(selectedTabItem, 0, true);
+
+        if (selectedTabIndex != previousSelectedTabIndex) {
+            TabItem neighbor =
+                    TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
+            float targetPosition;
+
+            if (selectedTabIndex > previousSelectedTabIndex) {
+                targetPosition = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView()) +
+                        swipedTabDistance;
+            } else {
+                targetPosition = -swipedTabDistance;
+            }
+
+            animateSwipe(neighbor, targetPosition, false);
+        }
+    }
+
+    private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
+                              final boolean selected) {
+        View view = tabItem.getView();
+        float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
+        float distance = Math.abs(targetPosition - currentPosition);
+        float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
+        long animationDuration = Math.round(swipeAnimationDuration * (distance / maxDistance));
+        ViewPropertyAnimator animation = view.animate();
+        animation.setListener(new AnimationListenerWrapper(
+                selected ? createSwipeSelectedTabAnimationListener(tabItem) :
+                        createSwipeNeighborAnimationListener(tabItem)));
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setDuration(animationDuration);
+        animation.setStartDelay(0);
+        getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
+        animation.start();
+    }
+
+    private AnimatorListener createSwipeSelectedTabAnimationListener(
+            @NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                getModel().selectTab(tabItem.getTab());
+            }
+
+        };
+    }
+
+    private AnimatorListener createSwipeNeighborAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                getTabViewRecycler().remove(tabItem);
+            }
+
+        };
     }
 
 }

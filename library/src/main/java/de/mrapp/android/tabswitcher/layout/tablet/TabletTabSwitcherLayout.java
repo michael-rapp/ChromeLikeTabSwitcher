@@ -59,8 +59,7 @@ import static de.mrapp.android.util.Condition.ensureNotEqual;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
-        implements Tab.Callback {
+public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implements Tab.Callback {
 
     /**
      * A comparator, which allows to compare two instances of the class {@link AbstractItem}. The
@@ -187,7 +186,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
      */
-    private AttachedViewRecycler<AbstractItem, Void> tabViewRecycler;
+    private AttachedViewRecycler<AbstractItem, Integer> tabViewRecycler;
 
     /**
      * The layout's primary toolbar.
@@ -519,7 +518,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout<Void>
     }
 
     @Override
-    protected final AttachedViewRecycler<AbstractItem, Void> getTabViewRecycler() {
+    protected final AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler() {
         return tabViewRecycler;
     }
 

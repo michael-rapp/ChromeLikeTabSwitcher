@@ -49,7 +49,7 @@ import de.mrapp.android.util.ViewUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
+public class TabletRecyclerAdapter extends AbstractRecyclerAdapter
         implements Tab.Callback, Model.Listener {
 
     /**
@@ -166,7 +166,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     public final View onInflateView(@NonNull final LayoutInflater inflater,
                                     @Nullable final ViewGroup parent,
                                     @NonNull final AbstractItem item, final int viewType,
-                                    @NonNull final Void... params) {
+                                    @NonNull final Integer... params) {
         if (viewType == ADD_TAB_BUTTON_VIEW_TYPE) {
             View view = inflater.inflate(R.layout.tablet_add_tab_button, parent, false);
             item.setView(view);
@@ -180,7 +180,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
     @Override
     public final void onShowView(@NonNull final Context context, @NonNull final View view,
                                  @NonNull final AbstractItem item, final boolean inflated,
-                                 @NonNull final Void... params) {
+                                 @NonNull final Integer... params) {
         if (item instanceof AddTabItem) {
             adaptAddTabButtonColor((AddTabItem) item);
         } else {
@@ -217,7 +217,7 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter<Void>
 
     @Override
     protected final void onShowTabView(@NonNull final View view, @NonNull final TabItem tabItem,
-                                       @NonNull final Void... params) {
+                                       @NonNull final Integer... params) {
 
     }
 

@@ -54,13 +54,11 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * An abstract base class for all view recycler adapters, which allow to inflate the views, which
  * are used to visualize the tabs of a {@link TabSwitcher}.
  *
- * @param <ParamType>
- *         The type of the optional parameters, which may be passed when inflating a view
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractRecyclerAdapter<ParamType>
-        extends AbstractViewRecycler.Adapter<AbstractItem, ParamType>
+public abstract class AbstractRecyclerAdapter
+        extends AbstractViewRecycler.Adapter<AbstractItem, Integer>
         implements Tab.Callback, Model.Listener {
 
     /**
@@ -101,7 +99,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     /**
      * The view recycler, the adapter is bound to.
      */
-    private AttachedViewRecycler<AbstractItem, ParamType> viewRecycler;
+    private AttachedViewRecycler<AbstractItem, Integer> viewRecycler;
 
     /**
      * Adapts the title of a tab.
@@ -370,7 +368,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      * AttachedViewRecycler}. The view recycler may not be null
      */
     @NonNull
-    protected final AttachedViewRecycler<AbstractItem, ParamType> getViewRecyclerOrThrowException() {
+    protected final AttachedViewRecycler<AbstractItem, Integer> getViewRecyclerOrThrowException() {
         ensureNotNull(viewRecycler, "No view recycler has been set", IllegalStateException.class);
         return viewRecycler;
     }
@@ -428,7 +426,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      */
     @SuppressWarnings("unchecked")
     protected abstract void onShowTabView(@NonNull final View view, @NonNull final TabItem tabItem,
-                                          @NonNull final ParamType... params);
+                                          @NonNull final Integer... params);
 
     /**
      * The method, which is invoked on implementing subclasses in order to create the view holder,
@@ -491,7 +489,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
      *         AttachedViewRecycler. The view recycler may not be null
      */
     public final void setViewRecycler(
-            @NonNull final AttachedViewRecycler<AbstractItem, ParamType> viewRecycler) {
+            @NonNull final AttachedViewRecycler<AbstractItem, Integer> viewRecycler) {
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
     }
@@ -727,7 +725,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     @Override
     public View onInflateView(@NonNull final LayoutInflater inflater,
                               @Nullable final ViewGroup parent, @NonNull final AbstractItem item,
-                              final int viewType, @NonNull final ParamType... params) {
+                              final int viewType, @NonNull final Integer... params) {
         if (viewType == TAB_VIEW_TYPE) {
             TabItem tabItem = (TabItem) item;
             AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
@@ -749,7 +747,7 @@ public abstract class AbstractRecyclerAdapter<ParamType>
     @Override
     public void onShowView(@NonNull final Context context, @NonNull final View view,
                            @NonNull final AbstractItem item, final boolean inflated,
-                           @NonNull final ParamType... params) {
+                           @NonNull final Integer... params) {
         if (item instanceof TabItem) {
             TabItem tabItem = (TabItem) item;
             AbstractTabViewHolder viewHolder =

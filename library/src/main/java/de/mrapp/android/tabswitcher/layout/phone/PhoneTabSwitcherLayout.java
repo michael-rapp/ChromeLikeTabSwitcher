@@ -76,7 +76,7 @@ import static de.mrapp.android.util.Condition.ensureTrue;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout<Integer>
+public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         implements PhoneDragEventHandler.Callback {
 
     /**

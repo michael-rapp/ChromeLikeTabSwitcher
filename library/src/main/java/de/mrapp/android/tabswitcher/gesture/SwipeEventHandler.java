@@ -209,8 +209,8 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
             int index = selectedTabIndex;
 
             if (swipeVelocity >= minSwipeVelocity || isSwipeThresholdReached()) {
-                index = getDragHelper().getDragDistance() > 0 ? selectedTabIndex - 1 :
-                        selectedTabIndex + 1;
+                index = getDragHelper().getDragDistance() > 0 ? selectedTabIndex + 1 :
+                        selectedTabIndex - 1;
                 index = Math.max(Math.min(index, getTabSwitcher().getCount() - 1), 0);
             }
 

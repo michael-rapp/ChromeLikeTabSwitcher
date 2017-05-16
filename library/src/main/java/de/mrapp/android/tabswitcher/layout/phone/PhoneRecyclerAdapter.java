@@ -55,7 +55,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter<Integer>
+public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
         implements AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
 
     /**
