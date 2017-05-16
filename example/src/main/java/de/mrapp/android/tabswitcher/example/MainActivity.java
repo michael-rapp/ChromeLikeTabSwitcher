@@ -43,11 +43,15 @@ import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
+import de.mrapp.android.tabswitcher.SwipeGesture;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
+import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.ViewUtil;
+
+import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
 
 /**
  * The example app's main activity.
@@ -144,9 +148,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public WindowInsetsCompat onApplyWindowInsets(final View v,
                                                           final WindowInsetsCompat insets) {
-                tabSwitcher.setPadding(insets.getSystemWindowInsetLeft(),
-                        insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(),
-                        insets.getSystemWindowInsetBottom());
+                int left = insets.getSystemWindowInsetLeft();
+                int top = insets.getSystemWindowInsetTop();
+                int right = insets.getSystemWindowInsetRight();
+                int bottom = insets.getSystemWindowInsetBottom();
+                tabSwitcher.setPadding(left, top, right, bottom);
+                tabSwitcher.addDragGesture(new SwipeGesture.Builder().setTouchableArea(left, top,
+                        left + (getDisplayWidth(MainActivity.this) - left - right), top + ThemeUtil
+                                .getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize))
+                        .create());
                 return insets;
             }
 
