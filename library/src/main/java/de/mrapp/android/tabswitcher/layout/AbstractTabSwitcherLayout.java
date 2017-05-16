@@ -1651,7 +1651,11 @@ public abstract class AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                getModel().selectTab(tabItem.getTab());
+                Tab tab = tabItem.getTab();
+
+                if (getModel().getSelectedTab() != tab) {
+                    getModel().selectTab(tab);
+                }
             }
 
         };
