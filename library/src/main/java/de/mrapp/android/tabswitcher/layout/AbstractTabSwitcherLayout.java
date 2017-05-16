@@ -375,11 +375,6 @@ public abstract class AbstractTabSwitcherLayout
     private final int swipedTabDistance;
 
     /**
-     * The duration of a swipe animation in milliseconds.
-     */
-    private final long swipeAnimationDuration;
-
-    /**
      * The logger, which is used for logging.
      */
     private final Logger logger;
@@ -1096,7 +1091,6 @@ public abstract class AbstractTabSwitcherLayout
         Resources resources = tabSwitcher.getResources();
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
         this.swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
-        this.swipeAnimationDuration = resources.getInteger(R.integer.swipe_animation_duration);
         this.logger = new Logger(model.getLogLevel());
         this.callback = null;
         this.runningAnimations = 0;
@@ -1611,10 +1605,11 @@ public abstract class AbstractTabSwitcherLayout
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
-                                                  final float velocity) {
+                                                  final float velocity,
+                                                  final long animationDuration) {
         TabItem selectedTabItem =
                 TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
-        animateSwipe(selectedTabItem, 0, true);
+        animateSwipe(selectedTabItem, 0, true, animationDuration);
 
         if (selectedTabIndex != previousSelectedTabIndex) {
             TabItem neighbor =
@@ -1628,23 +1623,22 @@ public abstract class AbstractTabSwitcherLayout
                 targetPosition = -swipedTabDistance;
             }
 
-            animateSwipe(neighbor, targetPosition, false);
+            animateSwipe(neighbor, targetPosition, false, animationDuration);
         }
     }
 
     private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
-                              final boolean selected) {
+                              final boolean selected, final long animationDuration) {
         View view = tabItem.getView();
         float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
         float distance = Math.abs(targetPosition - currentPosition);
         float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
-        long animationDuration = Math.round(swipeAnimationDuration * (distance / maxDistance));
         ViewPropertyAnimator animation = view.animate();
         animation.setListener(new AnimationListenerWrapper(
                 selected ? createSwipeSelectedTabAnimationListener(tabItem) :
                         createSwipeNeighborAnimationListener(tabItem)));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setDuration(animationDuration);
+        animation.setDuration(Math.round(animationDuration * (distance / maxDistance)));
         animation.setStartDelay(0);
         getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
         animation.start();

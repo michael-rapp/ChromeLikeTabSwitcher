@@ -58,9 +58,11 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
          *         The index of the previously selected tab as an {@link Integer} value
          * @param velocity
          *         The velocity of the swipe gesture in pixels per second as a {@link Float} value
+         * @param animationDuration
+         *         The duration of the swipe animation in milliseconds as a {@link Long} value
          */
         void onSwitchingBetweenTabsEnded(int selectedTabIndex, int previousSelectedTabIndex,
-                                         float velocity);
+                                         float velocity, long animationDuration);
 
     }
 
@@ -73,6 +75,11 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * The velocity, which must be reached by a drag gesture in order to start a swipe animation.
      */
     private final float minSwipeVelocity;
+
+    /**
+     * The duration of the swipe animation in milliseconds.
+     */
+    private final long swipeAnimationDuration;
 
     /**
      * The index of the currently selected tab.
@@ -126,7 +133,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
                                                    final float velocity) {
         if (callback != null) {
             callback.onSwitchingBetweenTabsEnded(selectedTabIndex, previousSelectedTabIndex,
-                    velocity);
+                    velocity, swipeAnimationDuration);
         }
     }
 
@@ -144,14 +151,19 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      *         The bounds of the onscreen area, the handler should take into consideration for
      *         handling touch events, as an instance of the class {@link RectF} or null, if the are
      *         should not be restricted
+     * @param animationDuration
+     *         The duration of the swipe animation in milliseconds as a {@link Long} value or -1, if
+     *         the default duration should be used
      */
     public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
-                             @Nullable final RectF touchableArea) {
+                             @Nullable final RectF touchableArea, final long animationDuration) {
         super(MAX_PRIORITY, touchableArea, true, tabSwitcher, dragThreshold);
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         Resources resources = tabSwitcher.getResources();
         this.minSwipeVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
+        this.swipeAnimationDuration = animationDuration != -1 ? animationDuration :
+                resources.getInteger(R.integer.swipe_animation_duration);
         this.callback = null;
         this.selectedTabIndex = -1;
     }

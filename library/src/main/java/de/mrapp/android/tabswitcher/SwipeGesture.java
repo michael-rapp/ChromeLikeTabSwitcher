@@ -16,6 +16,8 @@ package de.mrapp.android.tabswitcher;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
+
 /**
  * A drag gesture, which allows to switch between tabs, when swiping horizontally.
  *
@@ -29,12 +31,46 @@ public class SwipeGesture extends DragGesture {
      */
     public static class Builder extends DragGesture.Builder<SwipeGesture, Builder> {
 
+        /**
+         * The duration of the swipe animation of the gestures, which are created by the builder.
+         */
+        private long animationDuration;
+
+        /**
+         * Creates a new builder, which allows to configure and create instances of the class {@link
+         * SwipeGesture}.
+         */
+        public Builder() {
+            animationDuration = -1;
+        }
+
+        /**
+         * Sets the duration of the swipe animation of the gestures, which are created by the
+         * builder.
+         *
+         * @param animationDuration
+         *         The duration, which should be set, in milliseconds as a {@link Long} value or -1,
+         *         if the default duration should be used
+         * @return The builder, this method has been called upon, as an instance of the generic type
+         * BuilderType. The builder may not be null
+         */
+        public Builder setAnimationDuration(final long animationDuration) {
+            ensureAtLeast(animationDuration, -1, "The animation duration must be at least -1");
+            this.animationDuration = animationDuration;
+            return self();
+        }
+
         @Override
         public final SwipeGesture create() {
-            return new SwipeGesture(threshold, touchableArea);
+            return new SwipeGesture(threshold, touchableArea, animationDuration);
         }
 
     }
+
+    /**
+     * The duration of the swipe animation in milliseconds.
+     */
+    private final long animationDuration;
 
     /**
      * Creates a new drag gesture, which allows to switch between tabs, when swiping horizontally.
@@ -47,9 +83,25 @@ public class SwipeGesture extends DragGesture {
      *         The bounds of the onscreen area, which should be taken into consideration for
      *         recognizing the drag gesture, as an instance of the class {@link RectF} or null, if
      *         the area should not be restricted
+     * @param animationDuration
+     *         The duration of the swipe animation in milliseconds as a {@link Long} value. The
+     *         duration must be at least -1
      */
-    private SwipeGesture(final int threshold, @Nullable final RectF touchableArea) {
+    private SwipeGesture(final int threshold, @Nullable final RectF touchableArea,
+                         final long animationDuration) {
         super(threshold, touchableArea);
+        ensureAtLeast(animationDuration, -1, "The animation duration must be at least -1");
+        this.animationDuration = animationDuration;
+    }
+
+    /**
+     * Returns the duration of the swipe animation.
+     *
+     * @return The duration of the swipe animation in milliseconds as a {@link Long} value or -1, if
+     * the default duration should be used
+     */
+    public final long getAnimationDuration() {
+        return animationDuration;
     }
 
 }
