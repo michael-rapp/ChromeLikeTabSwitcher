@@ -301,6 +301,35 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
         return handled;
     }
 
+    /**
+     * Returns, whether a specific touch event should be intercepted according to the event
+     * handlers, or not.
+     *
+     * @param event
+     *         The event, which should be checked, as an instance of the class {@link MotionEvent}.
+     *         The event may not be null
+     * @return True, if the event should be intercepted, false otherwise
+     */
+    public final boolean interceptTouchEvent(@NonNull final MotionEvent event) {
+        ensureNotNull(event, "The event may not be null");
+
+        if (activeEventHandler != null && activeEventHandler.isInterceptingTouchEvents() &&
+                isInsideTouchableArea(event, activeEventHandler)) {
+            return true;
+        } else {
+            Iterator<AbstractTouchEventHandler> iterator = iterator();
+            AbstractTouchEventHandler handler;
+
+            while ((handler = iterator.next()) != null) {
+                if (handler.isInterceptingTouchEvents() && isInsideTouchableArea(event, handler)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public final Iterator<AbstractTouchEventHandler> iterator() {
         return new EventHandlerIterator();
