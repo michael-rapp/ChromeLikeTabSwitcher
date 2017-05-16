@@ -266,7 +266,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      * @return True, if the event handler is intercepting touch events, false otherwise
      */
     public final boolean isInterceptingTouchEvents() {
-        return interceptTouchEvents;
+        return isDraggingAllowed() && interceptTouchEvents;
     }
 
     /**
