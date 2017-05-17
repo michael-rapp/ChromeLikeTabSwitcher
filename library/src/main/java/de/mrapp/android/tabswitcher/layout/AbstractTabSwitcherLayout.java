@@ -1560,11 +1560,16 @@ public abstract class AbstractTabSwitcherLayout
             getArithmetics().setPosition(Axis.X_AXIS, view, distance);
             float position = getArithmetics().getPosition(Axis.X_AXIS, view);
 
-            if (Math.abs(position) >= swipedTabDistance) {
+            if (Math.abs(position) > 0) {
                 TabItem neighbor = TabItem.create(getModel(), getTabViewRecycler(),
                         position > 0 ? selectedTabIndex + 1 : selectedTabIndex - 1);
-                inflateView(neighbor,
-                        createSwipeNeighborLayoutListener(tabItem, neighbor, distance));
+
+                if (Math.abs(position) >= swipedTabDistance) {
+                    inflateView(neighbor,
+                            createSwipeNeighborLayoutListener(tabItem, neighbor, distance));
+                } else {
+                    getTabViewRecycler().remove(neighbor);
+                }
             }
         } else {
             float position = (float) Math.pow(Math.abs(distance), 0.75);
