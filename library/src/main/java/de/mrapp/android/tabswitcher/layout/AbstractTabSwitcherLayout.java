@@ -1628,9 +1628,12 @@ public abstract class AbstractTabSwitcherLayout
             left = false;
         }
 
-        float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
-        float targetPosition = left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
-        animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
+        if (neighbor.isInflated()) {
+            float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
+            float targetPosition =
+                    left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
+            animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
+        }
     }
 
     private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
