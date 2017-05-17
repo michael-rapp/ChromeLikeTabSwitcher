@@ -33,11 +33,12 @@ License.
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"/>
 
-        <android.support.v7.widget.Toolbar
+        <de.mrapp.android.util.view.UnfocusableToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
+            android:focusable="false"
             android:theme="?attr/toolbarTheme"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 

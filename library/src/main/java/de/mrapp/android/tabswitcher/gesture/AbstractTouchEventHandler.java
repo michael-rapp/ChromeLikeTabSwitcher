@@ -59,11 +59,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     private final RectF touchableArea;
 
     /**
-     * True, if the event handler is intercepting touch events, false otherwise.
-     */
-    private final boolean interceptTouchEvents;
-
-    /**
      * The tab switcher, the event handler belongs to.
      */
     private final TabSwitcher tabSwitcher;
@@ -211,8 +206,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         The bounds of the onscreen area, the handler should take into consideration for
      *         handling touch events, as an instance of the class {@link RectF} or null, if the are
      *         should not be restricted
-     * @param interceptTouchEvents
-     *         True, if the event handler should intercept touch events, false otherwise
      * @param tabSwitcher
      *         The tab switcher, the event handler belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
@@ -221,7 +214,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         as an {@link Integer} value The threshold must be at least 0
      */
     public AbstractTouchEventHandler(final int priority, @Nullable final RectF touchableArea,
-                                     final boolean interceptTouchEvents,
                                      @NonNull final TabSwitcher tabSwitcher,
                                      final int dragThreshold) {
         ensureAtLeast(priority, MIN_PRIORITY, "The priority must be at least" + MIN_PRIORITY);
@@ -230,7 +222,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
         ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.priority = priority;
         this.touchableArea = touchableArea;
-        this.interceptTouchEvents = interceptTouchEvents;
         this.tabSwitcher = tabSwitcher;
         this.dragHelper = new DragHelper(0);
         this.dragThreshold = dragThreshold;
@@ -267,15 +258,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     @Nullable
     public final RectF getTouchableArea() {
         return touchableArea;
-    }
-
-    /**
-     * Returns, whether the event handler is intercepting touch events, or not.
-     *
-     * @return True, if the event handler is intercepting touch events, false otherwise
-     */
-    public final boolean isInterceptingTouchEvents() {
-        return isDraggingAllowed() && interceptTouchEvents;
     }
 
     /**

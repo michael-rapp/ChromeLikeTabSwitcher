@@ -157,7 +157,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      */
     public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
                              @Nullable final RectF touchableArea, final long animationDuration) {
-        super(MAX_PRIORITY, touchableArea, true, tabSwitcher, dragThreshold);
+        super(MAX_PRIORITY, touchableArea, tabSwitcher, dragThreshold);
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         Resources resources = tabSwitcher.getResources();

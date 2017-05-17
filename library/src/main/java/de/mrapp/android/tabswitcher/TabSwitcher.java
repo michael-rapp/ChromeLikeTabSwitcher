@@ -1578,12 +1578,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     @Override
-    public final boolean onInterceptTouchEvent(final MotionEvent event) {
-        return touchEventDispatcher.interceptTouchEvent(event) ||
-                super.onInterceptTouchEvent(event);
-    }
-
-    @Override
     public final Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
         TabSwitcherState savedState = new TabSwitcherState(superState);

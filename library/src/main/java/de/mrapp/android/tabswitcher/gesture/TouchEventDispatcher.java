@@ -90,7 +90,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
          * Creates a new iterator, which allows to iterate the event handlers of a {@link
          * TouchEventDispatcher}.
          */
-        public EventHandlerIterator() {
+        EventHandlerIterator() {
             priorityIterator = eventHandlers.keySet().iterator();
 
             if (priorityIterator.hasNext()) {
@@ -294,34 +294,6 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
         }
 
         return handled;
-    }
-
-    /**
-     * Returns, whether a specific touch event should be intercepted according to the event
-     * handlers, or not.
-     *
-     * @param event
-     *         The event, which should be checked, as an instance of the class {@link MotionEvent}.
-     *         The event may not be null
-     * @return True, if the event should be intercepted, false otherwise
-     */
-    public final boolean interceptTouchEvent(@NonNull final MotionEvent event) {
-        ensureNotNull(event, "The event may not be null");
-
-        if (activeEventHandler != null && activeEventHandler.isInterceptingTouchEvents()) {
-            return true;
-        } else {
-            Iterator<AbstractTouchEventHandler> iterator = iterator();
-            AbstractTouchEventHandler handler;
-
-            while ((handler = iterator.next()) != null) {
-                if (handler.isInterceptingTouchEvents() && isInsideTouchableArea(event, handler)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     @Override
