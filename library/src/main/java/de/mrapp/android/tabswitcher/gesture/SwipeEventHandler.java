@@ -82,6 +82,11 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
     private final long swipeAnimationDuration;
 
     /**
+     * The distance between two neighboring tabs when being swiped in pixels.
+     */
+    private final int swipedTabDistance;
+
+    /**
      * The index of the currently selected tab.
      */
     private int selectedTabIndex;
@@ -98,7 +103,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      * @return True, if the threshold has been reached, false otherwise
      */
     private boolean isSwipeThresholdReached() {
-        return Math.abs(getDragHelper().getDragDistance()) > getTabSwitcher().getWidth() / 6f;
+        return Math.abs(getDragHelper().getDragDistance()) > 4 * swipedTabDistance;
     }
 
     /**
@@ -164,6 +169,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
         this.minSwipeVelocity = resources.getDimensionPixelSize(R.dimen.min_swipe_velocity);
         this.swipeAnimationDuration = animationDuration != -1 ? animationDuration :
                 resources.getInteger(R.integer.swipe_animation_duration);
+        this.swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
         this.callback = null;
         this.selectedTabIndex = -1;
     }
