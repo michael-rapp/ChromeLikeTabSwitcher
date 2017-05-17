@@ -1613,7 +1613,7 @@ public abstract class AbstractTabSwitcherLayout
                                                   final long animationDuration) {
         TabItem selectedTabItem =
                 TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
-        animateSwipe(selectedTabItem, 0, true, animationDuration);
+        animateSwipe(selectedTabItem, 0, true, animationDuration, velocity);
 
         if (selectedTabIndex != previousSelectedTabIndex) {
             TabItem neighbor =
@@ -1627,22 +1627,25 @@ public abstract class AbstractTabSwitcherLayout
                 targetPosition = (width + swipedTabDistance) * -1;
             }
 
-            animateSwipe(neighbor, targetPosition, false, animationDuration);
+            animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
         }
     }
 
     private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
-                              final boolean selected, final long animationDuration) {
+                              final boolean selected, final long animationDuration,
+                              final float velocity) {
         View view = tabItem.getView();
         float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
         float distance = Math.abs(targetPosition - currentPosition);
         float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
+        long duration = velocity > 0 ? Math.round((distance / velocity) * 1000) :
+                Math.round(animationDuration * (distance / maxDistance));
         ViewPropertyAnimator animation = view.animate();
         animation.setListener(new AnimationListenerWrapper(
                 selected ? createSwipeSelectedTabAnimationListener(tabItem) :
                         createSwipeNeighborAnimationListener(tabItem)));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setDuration(Math.round(animationDuration * (distance / maxDistance)));
+        animation.setDuration(duration);
         animation.setStartDelay(0);
         getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
         animation.start();
