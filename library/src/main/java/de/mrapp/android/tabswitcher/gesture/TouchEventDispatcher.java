@@ -271,14 +271,9 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
         boolean handled = false;
 
         if (activeEventHandler != null) {
-            if (isInsideTouchableArea(event, activeEventHandler)) {
-                handled = activeEventHandler.handleTouchEvent(event);
+            handled = activeEventHandler.handleTouchEvent(event);
 
-                if (!handled) {
-                    activeEventHandler = null;
-                }
-            } else {
-                activeEventHandler.onUp(event);
+            if (!handled) {
                 activeEventHandler = null;
             }
         }
@@ -313,8 +308,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     public final boolean interceptTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
 
-        if (activeEventHandler != null && activeEventHandler.isInterceptingTouchEvents() &&
-                isInsideTouchableArea(event, activeEventHandler)) {
+        if (activeEventHandler != null && activeEventHandler.isInterceptingTouchEvents()) {
             return true;
         } else {
             Iterator<AbstractTouchEventHandler> iterator = iterator();
