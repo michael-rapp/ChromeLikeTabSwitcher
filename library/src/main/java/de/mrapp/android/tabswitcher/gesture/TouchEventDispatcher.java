@@ -259,14 +259,14 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     }
 
     /**
-     * Handles a specific touch event by dispatching it to the first suited handler.
+     * Handles a specific touch event by dispatching it to the first suited event handler.
      *
      * @param event
-     *         The event, which should be dispatched, as an instance of the class {@link
-     *         MotionEvent}. The event may not be null
+     *         The event, which should be handled, as an instance of the class {@link MotionEvent}.
+     *         The event may not be null
      * @return True, if the event has been handled, false otherwise
      */
-    public final boolean dispatchTouchEvent(@NonNull final MotionEvent event) {
+    public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
         boolean handled = false;
 
