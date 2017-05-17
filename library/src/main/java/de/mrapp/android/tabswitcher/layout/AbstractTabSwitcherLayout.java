@@ -1614,21 +1614,25 @@ public abstract class AbstractTabSwitcherLayout
         TabItem selectedTabItem =
                 TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
         animateSwipe(selectedTabItem, 0, true, animationDuration, velocity);
-        TabItem neighbor;
-        boolean left;
+        TabItem neighbor = null;
+        boolean left = false;
 
         if (selectedTabIndex != previousSelectedTabIndex) {
             neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
             left = selectedTabIndex < previousSelectedTabIndex;
         } else if (getArithmetics().getPosition(Axis.X_AXIS, selectedTabItem.getView()) > 0) {
-            neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex + 1);
-            left = true;
+            if (selectedTabIndex + 1 < getModel().getCount()) {
+                neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex + 1);
+                left = true;
+            }
         } else {
-            neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex - 1);
-            left = false;
+            if (selectedTabIndex - 1 >= 0) {
+                neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex - 1);
+                left = false;
+            }
         }
 
-        if (neighbor.isInflated()) {
+        if (neighbor != null && neighbor.isInflated()) {
             float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
             float targetPosition =
                     left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
