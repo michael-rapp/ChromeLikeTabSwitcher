@@ -1614,21 +1614,23 @@ public abstract class AbstractTabSwitcherLayout
         TabItem selectedTabItem =
                 TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
         animateSwipe(selectedTabItem, 0, true, animationDuration, velocity);
+        TabItem neighbor;
+        boolean left;
 
         if (selectedTabIndex != previousSelectedTabIndex) {
-            TabItem neighbor =
-                    TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
-            float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
-            float targetPosition;
-
-            if (selectedTabIndex > previousSelectedTabIndex) {
-                targetPosition = width + swipedTabDistance;
-            } else {
-                targetPosition = (width + swipedTabDistance) * -1;
-            }
-
-            animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
+            neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
+            left = selectedTabIndex < previousSelectedTabIndex;
+        } else if (getArithmetics().getPosition(Axis.X_AXIS, selectedTabItem.getView()) > 0) {
+            neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex + 1);
+            left = true;
+        } else {
+            neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex - 1);
+            left = false;
         }
+
+        float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
+        float targetPosition = left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
+        animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
     }
 
     private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
