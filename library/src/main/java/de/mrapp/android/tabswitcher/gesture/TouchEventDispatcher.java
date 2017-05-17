@@ -273,7 +273,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
         if (activeEventHandler != null) {
             handled = activeEventHandler.handleTouchEvent(event);
 
-            if (!handled) {
+            if (!handled || activeEventHandler.isReset()) {
                 activeEventHandler = null;
             }
         }
@@ -286,7 +286,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
                 if (isInsideTouchableArea(event, handler)) {
                     handled = handler.handleTouchEvent(event);
 
-                    if (handled) {
+                    if (handled && !handler.isReset()) {
                         activeEventHandler = handler;
                     }
                 }

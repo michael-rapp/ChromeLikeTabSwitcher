@@ -238,6 +238,15 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     }
 
     /**
+     * Returns, whether the event handler is reset, or not.
+     *
+     * @return True, if the event handler is reset, false otherwise
+     */
+    public final boolean isReset() {
+        return pointerId == -1;
+    }
+
+    /**
      * Returns the priority of the event handler. Events are first dispatched to handlers with a
      * higher priority.
      *
