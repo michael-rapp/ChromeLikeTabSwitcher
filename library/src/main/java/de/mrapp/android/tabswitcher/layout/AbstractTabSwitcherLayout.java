@@ -536,6 +536,43 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * Animates a tab to be swiped horizontally.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be swiped, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param targetPosition
+     *         The position on the x-axis, the tab should be moved to, in pixels as a {@link Float}
+     *         value
+     * @param selected
+     *         True, if the tab should become the selected one, false otherwise
+     * @param animationDuration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param velocity
+     *         The velocity of the drag gesture, which caused the tab to be swiped, in pixels per
+     *         second as a {@link Float} value
+     */
+    private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
+                              final boolean selected, final long animationDuration,
+                              final float velocity) {
+        View view = tabItem.getView();
+        float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
+        float distance = Math.abs(targetPosition - currentPosition);
+        float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
+        long duration = velocity > 0 ? Math.round((distance / velocity) * 1000) :
+                Math.round(animationDuration * (distance / maxDistance));
+        ViewPropertyAnimator animation = view.animate();
+        animation.setListener(new AnimationListenerWrapper(
+                selected ? createSwipeSelectedTabAnimationListener(tabItem) :
+                        createSwipeNeighborAnimationListener(tabItem)));
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setDuration(duration);
+        animation.setStartDelay(0);
+        getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
+        animation.start();
+    }
+
+    /**
      * Creates and returns an animation listener, which allows to handle, when a fling animation
      * ended.
      *
@@ -567,12 +604,88 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Notifies the callback, that all animations have been ended.
+     * Creates and returns an animation listener, which allows to adapt the currently selected tab,
+     * when swiping the tabs horizontally has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be selected, as an instance
+     *         of the class {@link TabItem}. The tab item may not be null
+     * @return The animation listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
      */
-    private void notifyOnAnimationsEnded() {
-        if (callback != null) {
-            callback.onAnimationsEnded();
-        }
+    @NonNull
+    private AnimatorListener createSwipeSelectedTabAnimationListener(
+            @NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                Tab tab = tabItem.getTab();
+
+                if (getModel().getSelectedTab() != tab) {
+                    getModel().selectTab(tab);
+                }
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to remove the view, which is used to
+     * visualize a specific tab, when swiping the tabs horizontally has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be removed, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @return The animation listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createSwipeNeighborAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                getTabViewRecycler().remove(tabItem);
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a layout listener, which allows to position a tab, which is a neighbor of
+     * the currently selected tab, when swiping horizontally.
+     *
+     * @param neighbor
+     *         The tab item, which corresponds to the neighboring tab, as an instance of the class
+     *         {@link TabItem}. The tab item may not be null
+     * @param dragDistance
+     *         The distance of the swipe gesture in pixels as a {@link Float} value
+     * @return The layout listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The layout listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createSwipeNeighborLayoutListener(
+            @NonNull final TabItem neighbor, final float dragDistance) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = neighbor.getView();
+                float position;
+
+                if (dragDistance > 0) {
+                    position = -getTabSwitcher().getWidth() + dragDistance - swipedTabDistance;
+                } else {
+                    position = getTabSwitcher().getWidth() + dragDistance + swipedTabDistance;
+                }
+
+                getArithmetics().setPosition(Axis.X_AXIS, view, position);
+            }
+
+        };
     }
 
     /**
@@ -781,6 +894,15 @@ public abstract class AbstractTabSwitcherLayout
         }
 
         return false;
+    }
+
+    /**
+     * Notifies the callback, that all animations have been ended.
+     */
+    private void notifyOnAnimationsEnded() {
+        if (callback != null) {
+            callback.onAnimationsEnded();
+        }
     }
 
     /**
@@ -1581,27 +1703,6 @@ public abstract class AbstractTabSwitcherLayout
                         distance + " pixels");
     }
 
-    private OnGlobalLayoutListener createSwipeNeighborLayoutListener(
-            @NonNull final TabItem neighbor, final float dragDistance) {
-        return new OnGlobalLayoutListener() {
-
-            @Override
-            public void onGlobalLayout() {
-                View view = neighbor.getView();
-                float position;
-
-                if (dragDistance > 0) {
-                    position = -getTabSwitcher().getWidth() + dragDistance - swipedTabDistance;
-                } else {
-                    position = getTabSwitcher().getWidth() + dragDistance + swipedTabDistance;
-                }
-
-                getArithmetics().setPosition(Axis.X_AXIS, view, position);
-            }
-
-        };
-    }
-
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
@@ -1634,55 +1735,6 @@ public abstract class AbstractTabSwitcherLayout
                     left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
             animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
         }
-    }
-
-    private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
-                              final boolean selected, final long animationDuration,
-                              final float velocity) {
-        View view = tabItem.getView();
-        float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
-        float distance = Math.abs(targetPosition - currentPosition);
-        float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
-        long duration = velocity > 0 ? Math.round((distance / velocity) * 1000) :
-                Math.round(animationDuration * (distance / maxDistance));
-        ViewPropertyAnimator animation = view.animate();
-        animation.setListener(new AnimationListenerWrapper(
-                selected ? createSwipeSelectedTabAnimationListener(tabItem) :
-                        createSwipeNeighborAnimationListener(tabItem)));
-        animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setDuration(duration);
-        animation.setStartDelay(0);
-        getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
-        animation.start();
-    }
-
-    private AnimatorListener createSwipeSelectedTabAnimationListener(
-            @NonNull final TabItem tabItem) {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                Tab tab = tabItem.getTab();
-
-                if (getModel().getSelectedTab() != tab) {
-                    getModel().selectTab(tab);
-                }
-            }
-
-        };
-    }
-
-    private AnimatorListener createSwipeNeighborAnimationListener(@NonNull final TabItem tabItem) {
-        return new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                super.onAnimationEnd(animation);
-                getTabViewRecycler().remove(tabItem);
-            }
-
-        };
     }
 
 }
