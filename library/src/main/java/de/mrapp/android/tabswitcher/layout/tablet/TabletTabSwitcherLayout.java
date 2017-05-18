@@ -812,6 +812,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
+    public final void onSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
+        // TODO: Implement
+    }
+
+    @Override
+    public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
+                                                  final int previousSelectedTabIndex,
+                                                  final float velocity,
+                                                  final long animationDuration) {
+        // TODO: Implement
+    }
+
+    @Override
     public final void onTitleChanged(@NonNull final Tab tab) {
 
     }
