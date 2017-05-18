@@ -21,6 +21,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -31,8 +32,9 @@ import de.mrapp.android.util.view.AbstractViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A view recycler adapter, which allows to inflate the views, which are used to visualize the content
- * views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
+ * A view recycler adapter, which allows to inflate the views, which are used to visualize the
+ * content views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link
+ * TabSwitcherDecorator}.
  *
  * @author Michael Rapp
  * @since 0.1.0
@@ -91,7 +93,10 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
                                     @Nullable final ViewGroup parent, @NonNull final Tab item,
                                     final int viewType, @NonNull final Void... params) {
         int index = tabSwitcher.indexOf(item);
-        return decorator.inflateView(inflater, parent, item, index);
+        View view = decorator.inflateView(inflater, parent, item, index);
+        view.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
+        return view;
     }
 
     @Override

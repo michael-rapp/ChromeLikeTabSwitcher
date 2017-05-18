@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
@@ -130,12 +131,15 @@ public class TabletChildRecyclerAdapterWrapper extends AbstractViewRecycler.Adap
     public final View onInflateView(@NonNull final LayoutInflater inflater,
                                     @Nullable final ViewGroup parent, @NonNull final Tab item,
                                     final int viewType, @NonNull final Void... params) {
-        // TODO: Padding cannot be directly applied to view. We need a child view for this
-        /*
-        view.setPadding(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(),
-                getModel().getPaddingBottom());
-        */
-        return encapsulatedAdapter.onInflateView(inflater, parent, item, viewType, params);
+        View view = encapsulatedAdapter.onInflateView(inflater, parent, item, viewType, params);
+        FrameLayout container = new FrameLayout(tabSwitcher.getContext());
+        container.setPadding(tabSwitcher.getPaddingLeft(), 0, tabSwitcher.getPaddingRight(),
+                tabSwitcher.getPaddingBottom());
+        container.setLayoutParams(
+                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT));
+        container.addView(view);
+        return container;
     }
 
     @Override
