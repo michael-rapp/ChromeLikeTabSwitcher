@@ -35,7 +35,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
+import de.mrapp.android.tabswitcher.layout.AbstractTabRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
@@ -55,7 +55,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
+public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         implements AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
 
     /**
@@ -239,10 +239,10 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
      *         The view recycler, which allows to inflate the views, which are associated with tabs,
      *         as an instance of the class ViewRecycler. The view recycler may not be null
      */
-    public PhoneRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                @NonNull final TabSwitcherModel model,
-                                @NonNull final ThemeHelper themeHelper,
-                                @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
+    public PhoneTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                                   @NonNull final TabSwitcherModel model,
+                                   @NonNull final ThemeHelper themeHelper,
+                                   @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
         super(tabSwitcher, model, themeHelper);
         ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;

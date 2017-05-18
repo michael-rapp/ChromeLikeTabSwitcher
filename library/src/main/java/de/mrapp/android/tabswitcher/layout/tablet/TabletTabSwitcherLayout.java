@@ -13,11 +13,13 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -25,7 +27,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import java.util.Collections;
@@ -48,8 +52,8 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
 
@@ -164,9 +168,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private final ColorStateList tabBackgroundColor;
 
     /**
-     * The default background color of a tab's content.
+     * The distance between two neighboring tabs when being swiped in pixels.
      */
-    private final int tabContentBackgroundColor;
+    private final int swipedTabDistance;
 
     /**
      * The drag handler, which is used by the layout.
@@ -174,14 +178,14 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private TabletDragEventHandler dragHandler;
 
     /**
-     * The view recycler, which allows to recycle the views, which are associated with of tabs.
+     * The view recycler, which allows to recycle the views, which are associated with tabs.
      */
-    private ViewRecycler<Tab, Void> contentViewRecycler;
+    private AttachedViewRecycler<Tab, Void> contentViewRecycler;
 
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
      */
-    private TabletRecyclerAdapter recyclerAdapter;
+    private TabletTabRecyclerAdapter tabRecyclerAdapter;
 
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
@@ -254,35 +258,31 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
-     * Adapts the background color of the currently selected tab's content.
-     */
-    private void adaptTabContentBackgroundColor() {
-        Tab selectedTab = getModel().getSelectedTab();
-        int color = selectedTab != null ? selectedTab.getContentBackgroundColor() : -1;
-
-        if (color == -1) {
-            color = getModel().getTabContentBackgroundColor();
-        }
-
-        contentContainer.setBackgroundColor(color != -1 ? color : tabContentBackgroundColor);
-    }
-
-    /**
      * Inflates the content, which is associated with a specific tab.
      *
      * @param tab
      *         The tab, whose content should be inflated, as an instance of the class {@link Tab}.
      *         The tab may not be null
+     * @param listener
+     *         The layout listener, which should be notified, when the view has been inflated, as an
+     *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
+     *         notified
      */
-    private void inflateContent(@NonNull final Tab tab) {
-        Pair<View, ?> pair = contentViewRecycler.inflate(tab, contentContainer);
+    private void inflateContent(@NonNull final Tab tab,
+                                @Nullable final OnGlobalLayoutListener listener) {
+        Pair<View, Boolean> pair = contentViewRecycler.inflate(tab);
         View view = pair.first;
-        FrameLayout.LayoutParams layoutParams =
-                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT);
-        layoutParams.setMargins(getModel().getPaddingLeft(), 0, getModel().getPaddingRight(),
-                getModel().getPaddingBottom());
-        contentContainer.addView(view, layoutParams);
+
+        if (listener != null) {
+            boolean inflated = pair.second;
+
+            if (inflated) {
+                view.getViewTreeObserver()
+                        .addOnGlobalLayoutListener(new LayoutListenerWrapper(view, listener));
+            } else {
+                listener.onGlobalLayout();
+            }
+        }
     }
 
     /**
@@ -403,6 +403,97 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
+     * Animates a tab to be swiped horizontally.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be swiped, as an instance of
+     *         the class {@link TabItem}. The tab item may not be null
+     * @param targetPosition
+     *         The position on the x-axis, the tab should be moved to, in pixels as a {@link Float}
+     *         value
+     * @param selected
+     *         True, if the tab should become the selected one, false otherwise
+     * @param animationDuration
+     *         The duration of the animation in milliseconds as a {@link Long} value
+     * @param velocity
+     *         The velocity of the drag gesture, which caused the tab to be swiped, in pixels per
+     *         second as a {@link Float} value
+     */
+    private void animateSwipe(@NonNull final TabItem tabItem, final float targetPosition,
+                              final boolean selected, final long animationDuration,
+                              final float velocity) {
+        View view = contentViewRecycler.getView(tabItem.getTab());
+
+        if (view != null) {
+            float currentPosition = view.getX();
+            float distance = Math.abs(targetPosition - currentPosition);
+            float maxDistance = getTabSwitcher().getWidth() + swipedTabDistance;
+            long duration = velocity > 0 ? Math.round((distance / velocity) * 1000) :
+                    Math.round(animationDuration * (distance / maxDistance));
+            ViewPropertyAnimator animation = view.animate();
+            animation.setListener(new AnimationListenerWrapper(
+                    selected ? createSwipeSelectedTabAnimationListener(tabItem) :
+                            createSwipeNeighborAnimationListener(tabItem)));
+            animation.setInterpolator(new AccelerateDecelerateInterpolator());
+            animation.setDuration(duration);
+            animation.setStartDelay(0);
+            animation.x(targetPosition);
+            animation.start();
+        }
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to adapt the currently selected tab,
+     * when swiping the tabs horizontally has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, which should be selected, as an instance
+     *         of the class {@link TabItem}. The tab item may not be null
+     * @return The animation listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createSwipeSelectedTabAnimationListener(
+            @NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                Tab tab = tabItem.getTab();
+
+                if (getModel().getSelectedTab() != tab) {
+                    getModel().selectTab(tab);
+                }
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns an animation listener, which allows to remove the view, which is used to
+     * visualize a specific tab, when swiping the tabs horizontally has been ended.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose view should be removed, as an
+     *         instance of the class {@link TabItem}. The tab item may not be null
+     * @return The animation listener, which has been created, as an instance of the type {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createSwipeNeighborAnimationListener(@NonNull final TabItem tabItem) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(final Animator animation) {
+                super.onAnimationEnd(animation);
+                contentViewRecycler.remove(tabItem.getTab());
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to adapt the size and position of an
      * item, once its view has been inflated.
      *
@@ -427,6 +518,43 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
+                }
+            }
+
+        };
+    }
+
+    /**
+     * Creates and returns a layout listener, which allows to position a tab, which is a neighbor of
+     * the currently selected tab, when swiping horizontally.
+     *
+     * @param neighbor
+     *         The tab item, which corresponds to the neighboring tab, as an instance of the class
+     *         {@link TabItem}. The tab item may not be null
+     * @param dragDistance
+     *         The distance of the swipe gesture in pixels as a {@link Float} value
+     * @return The layout listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The layout listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createSwipeNeighborLayoutListener(
+            @NonNull final TabItem neighbor, final float dragDistance) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = contentViewRecycler.getView(neighbor.getTab());
+
+                if (view != null) {
+                    float position;
+
+                    if (dragDistance > 0) {
+                        position = -getTabSwitcher().getWidth() + dragDistance - swipedTabDistance;
+                    } else {
+                        position = getTabSwitcher().getWidth() + dragDistance + swipedTabDistance;
+                    }
+
+                    view.setX(position);
                 }
             }
 
@@ -468,8 +596,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         addTabButtonOffset = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_offset);
         tabBackgroundColor = themeHelper.getColorStateList(getTabSwitcher().getLayout(),
                 R.attr.tabSwitcherTabBackgroundColor);
-        tabContentBackgroundColor = getThemeHelper().getColor(getTabSwitcher().getLayout(),
-                R.attr.tabSwitcherTabContentBackgroundColor);
+        swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
     }
 
     @Override
@@ -489,18 +616,18 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         borderView = getTabSwitcher().findViewById(R.id.border_view);
         contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
-        contentViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new TabletRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
-        getModel().addListener(recyclerAdapter);
+        contentViewRecycler = new AttachedViewRecycler<>(contentContainer, inflater);
+        tabRecyclerAdapter =
+                new TabletTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
+        getModel().addListener(tabRecyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
-        tabViewRecycler.setAdapter(recyclerAdapter);
-        recyclerAdapter.setViewRecycler(tabViewRecycler);
+        tabViewRecycler.setAdapter(tabRecyclerAdapter);
+        tabRecyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler =
                 new TabletDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
         adaptBorderColor();
-        adaptTabContentBackgroundColor();
     }
 
     @Override
@@ -508,12 +635,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         // TODO: childViewRecycler.removeAll();
         // TODO: childViewRecycler.clearCache();
         if (!tabsOnly) {
-            getModel().removeListener(recyclerAdapter);
+            getModel().removeListener(tabRecyclerAdapter);
+            AttachedViewRecycler.Adapter<Tab, Void> contentViewRecyclerAdapter =
+                    contentViewRecycler.getAdapter();
+
+            if (contentViewRecyclerAdapter instanceof TabletChildRecyclerAdapterWrapper) {
+                getModel().removeListener(
+                        (TabletChildRecyclerAdapterWrapper) contentViewRecyclerAdapter);
+            }
         }
     }
 
     @Override
-    protected final ViewRecycler<Tab, Void> getContentViewRecycler() {
+    protected final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
         return contentViewRecycler;
     }
 
@@ -672,6 +806,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         return successorPosition + calculateTabSpacing();
     }
 
+    @NonNull
+    @Override
+    protected final AttachedViewRecycler.Adapter<Tab, Void> onCreateChildRecyclerAdapter() {
+        AttachedViewRecycler.Adapter<Tab, Void> adapter = contentViewRecycler.getAdapter();
+
+        if (adapter instanceof TabletChildRecyclerAdapterWrapper) {
+            getModel().removeListener((TabletChildRecyclerAdapterWrapper) adapter);
+        }
+
+        TabletChildRecyclerAdapterWrapper recyclerAdapter =
+                new TabletChildRecyclerAdapterWrapper(getTabSwitcher(), getThemeHelper(),
+                        contentViewRecycler, getModel().getChildRecyclerAdapter());
+        getModel().addListener(recyclerAdapter);
+        return recyclerAdapter;
+    }
+
     @Override
     public final void onGlobalLayout() {
         AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
@@ -688,7 +838,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         Tab selectedTab = getModel().getSelectedTab();
 
         if (selectedTab != null) {
-            inflateContent(selectedTab);
+            inflateContent(selectedTab, null);
         }
     }
 
@@ -710,11 +860,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
         if (previousIndex != index) {
-            contentContainer.removeAllViews();
             contentViewRecycler.removeAll();
 
             if (selectedTab != null) {
-                inflateContent(selectedTab);
+                inflateContent(selectedTab, null);
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
                 int tabSpacing = calculateTabSpacing();
@@ -802,18 +951,41 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
-    public final void onTabContentBackgroundColorChanged(@ColorInt final int color) {
-        adaptTabContentBackgroundColor();
-    }
-
-    @Override
     public final void onAddTabButtonVisibilityChanged(final boolean visible) {
         // TODO: Implement
     }
 
     @Override
     public final void onSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
-        // TODO: Implement
+        TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
+        View view = contentViewRecycler.getView(tabItem.getTab());
+
+        if (view != null) {
+            if (distance == 0 || (distance > 0 && selectedTabIndex < getModel().getCount() - 1) ||
+                    (distance < 0 && selectedTabIndex > 0)) {
+                view.setX(distance);
+
+                if (distance != 0) {
+                    TabItem neighbor = TabItem.create(getModel(), getTabViewRecycler(),
+                            distance > 0 ? selectedTabIndex + 1 : selectedTabIndex - 1);
+
+                    if (Math.abs(distance) >= swipedTabDistance) {
+                        inflateContent(neighbor.getTab(),
+                                createSwipeNeighborLayoutListener(neighbor, distance));
+                    } else {
+                        contentViewRecycler.remove(neighbor.getTab());
+                    }
+                }
+            } else {
+                float position = (float) Math.pow(Math.abs(distance), 0.75);
+                position = distance < 0 ? position * -1 : position;
+                view.setX(position);
+            }
+
+            getLogger().logVerbose(getClass(),
+                    "Swiping content of tab at index " + selectedTabIndex +
+                            ". Current swipe distance is " + distance + " pixels");
+        }
     }
 
     @Override
@@ -821,7 +993,45 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                                   final int previousSelectedTabIndex,
                                                   final float velocity,
                                                   final long animationDuration) {
-        // TODO: Implement
+        TabItem selectedTabItem =
+                TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
+        animateSwipe(selectedTabItem, 0, true, animationDuration, velocity);
+        TabItem neighbor = null;
+        boolean left = false;
+
+        if (selectedTabIndex != previousSelectedTabIndex) {
+            neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
+            left = selectedTabIndex < previousSelectedTabIndex;
+        } else {
+            View view = contentViewRecycler.getView(selectedTabItem.getTab());
+
+            if (view != null) {
+                if (view.getX() > 0) {
+                    if (selectedTabIndex + 1 < getModel().getCount()) {
+                        neighbor = TabItem.create(getModel(), getTabViewRecycler(),
+                                selectedTabIndex + 1);
+                        left = true;
+                    }
+                } else {
+                    if (selectedTabIndex - 1 >= 0) {
+                        neighbor = TabItem.create(getModel(), getTabViewRecycler(),
+                                selectedTabIndex - 1);
+                        left = false;
+                    }
+                }
+            }
+        }
+
+        if (neighbor != null) {
+            View neighborView = contentViewRecycler.getView(neighbor.getTab());
+
+            if (neighborView != null) {
+                float width = neighborView.getWidth();
+                float targetPosition =
+                        left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
+                animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
+            }
+        }
     }
 
     @Override
@@ -853,9 +1063,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @Override
     public final void onContentBackgroundColorChanged(@NonNull final Tab tab) {
-        if (getModel().getSelectedTab() == tab) {
-            adaptTabContentBackgroundColor();
-        }
+
     }
 
     @Override

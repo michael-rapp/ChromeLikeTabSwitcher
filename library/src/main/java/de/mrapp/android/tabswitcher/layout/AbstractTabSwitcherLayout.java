@@ -62,6 +62,7 @@ import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
+import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -502,7 +503,7 @@ public abstract class AbstractTabSwitcherLayout
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        getContentViewRecycler().setAdapter(getModel().getChildRecyclerAdapter());
+        getContentViewRecycler().setAdapter(onCreateChildRecyclerAdapter());
     }
 
     /**
@@ -1127,7 +1128,7 @@ public abstract class AbstractTabSwitcherLayout
      * as an instance of the class {@link ViewRecycler} or null, if the view recycler has not been
      * initialized yet
      */
-    protected abstract ViewRecycler<Tab, Void> getContentViewRecycler();
+    protected abstract AbstractViewRecycler<Tab, Void> getContentViewRecycler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view
@@ -1274,6 +1275,18 @@ public abstract class AbstractTabSwitcherLayout
      */
     protected boolean isOvershootingAtEnd(@NonNull final AbstractItemIterator iterator) {
         return false;
+    }
+
+    /**
+     * The method, which is invoked on implementing subclasses in order to create the view recycler
+     * adapter, which allows to inflate the child views, which are associated with tabs.
+     *
+     * @return The view recycler adapter, which has been created, as an instance of the class {@link
+     * AttachedViewRecycler.Adapter}. The recycler adapter may not be null }
+     */
+    @NonNull
+    protected AttachedViewRecycler.Adapter<Tab, Void> onCreateChildRecyclerAdapter() {
+        return getModel().getChildRecyclerAdapter();
     }
 
     /**

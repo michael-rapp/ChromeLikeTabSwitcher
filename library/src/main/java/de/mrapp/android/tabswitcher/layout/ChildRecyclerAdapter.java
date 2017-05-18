@@ -31,7 +31,7 @@ import de.mrapp.android.util.view.AbstractViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A view recycler adapter, which allows to inflate the views, which are used to visualize the child
+ * A view recycler adapter, which allows to inflate the views, which are used to visualize the content
  * views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
  *
  * @author Michael Rapp

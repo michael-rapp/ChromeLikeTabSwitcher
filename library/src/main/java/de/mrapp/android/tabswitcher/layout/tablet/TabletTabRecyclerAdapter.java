@@ -32,7 +32,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractRecyclerAdapter;
+import de.mrapp.android.tabswitcher.layout.AbstractTabRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
@@ -49,7 +49,7 @@ import de.mrapp.android.util.ViewUtil;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletRecyclerAdapter extends AbstractRecyclerAdapter
+public class TabletTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         implements Tab.Callback, Model.Listener {
 
     /**
@@ -120,9 +120,9 @@ public class TabletRecyclerAdapter extends AbstractRecyclerAdapter
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
      */
-    public TabletRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                 @NonNull final TabSwitcherModel model,
-                                 @NonNull final ThemeHelper themeHelper) {
+    public TabletTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                                    @NonNull final TabSwitcherModel model,
+                                    @NonNull final ThemeHelper themeHelper) {
         super(tabSwitcher, model, themeHelper);
         addTabButtonColor =
                 themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherAddTabButtonColor);

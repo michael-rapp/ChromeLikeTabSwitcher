@@ -64,6 +64,7 @@ import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
 
@@ -256,7 +257,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     /**
      * The adapter, which allows to inflate the views, which are used to visualize tabs.
      */
-    private PhoneRecyclerAdapter recyclerAdapter;
+    private PhoneTabRecyclerAdapter tabRecyclerAdapter;
 
     /**
      * The view recycler, which allows to recycle the views, which are used to visualize tabs.
@@ -287,7 +288,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        recyclerAdapter.clearCachedPreviews();
+        tabRecyclerAdapter.clearCachedPreviews();
     }
 
     /**
@@ -1073,7 +1074,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateReveal(@NonNull final AbstractItem item,
                                @NonNull final RevealAnimation revealAnimation) {
         tabViewBottomMargin = -1;
-        recyclerAdapter.clearCachedPreviews();
+        tabRecyclerAdapter.clearCachedPreviews();
         dragHandler.setCallback(null);
         View view = item.getView();
         ViewPropertyAnimator animation = view.animate();
@@ -1656,7 +1657,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 tabViewRecycler.clearCache();
-                recyclerAdapter.clearCachedPreviews();
+                tabRecyclerAdapter.clearCachedPreviews();
                 tabViewBottomMargin = -1;
             }
 
@@ -2035,7 +2036,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 getModel().addListener(PhoneTabSwitcherLayout.this);
                 tabViewRecycler.inflate(item);
                 tabViewRecycler.clearCache();
-                recyclerAdapter.clearCachedPreviews();
+                tabRecyclerAdapter.clearCachedPreviews();
                 tabViewBottomMargin = -1;
             }
 
@@ -2862,13 +2863,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         contentViewRecycler = new ViewRecycler<>(inflater);
-        recyclerAdapter = new PhoneRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
+        tabRecyclerAdapter = new PhoneTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
                 contentViewRecycler);
-        getModel().addListener(recyclerAdapter);
+        getModel().addListener(tabRecyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new ItemComparator(getTabSwitcher())));
-        tabViewRecycler.setAdapter(recyclerAdapter);
-        recyclerAdapter.setViewRecycler(tabViewRecycler);
+        tabViewRecycler.setAdapter(tabRecyclerAdapter);
+        tabRecyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler =
                 new PhoneDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptDecorator();
@@ -2879,15 +2880,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     protected final void onDetachLayout(final boolean tabsOnly) {
         contentViewRecycler.removeAll();
         contentViewRecycler.clearCache();
-        recyclerAdapter.clearCachedPreviews();
+        tabRecyclerAdapter.clearCachedPreviews();
 
         if (!tabsOnly) {
-            getModel().removeListener(recyclerAdapter);
+            getModel().removeListener(tabRecyclerAdapter);
         }
     }
 
     @Override
-    protected final ViewRecycler<Tab, Void> getContentViewRecycler() {
+    protected final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
         return contentViewRecycler;
     }
 

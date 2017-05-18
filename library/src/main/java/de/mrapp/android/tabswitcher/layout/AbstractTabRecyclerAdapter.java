@@ -57,7 +57,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public abstract class AbstractRecyclerAdapter
+public abstract class AbstractTabRecyclerAdapter
         extends AbstractViewRecycler.Adapter<AbstractItem, Integer>
         implements Tab.Callback, Model.Listener {
 
@@ -463,9 +463,9 @@ public abstract class AbstractRecyclerAdapter
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
      */
-    public AbstractRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                   @NonNull final TabSwitcherModel model,
-                                   @NonNull final ThemeHelper themeHelper) {
+    public AbstractTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                                      @NonNull final TabSwitcherModel model,
+                                      @NonNull final ThemeHelper themeHelper) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(themeHelper, "The theme helper may not be null");
