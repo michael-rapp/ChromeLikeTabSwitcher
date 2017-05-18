@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.example;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -41,6 +42,7 @@ import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeGesture;
@@ -153,10 +155,19 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 int right = insets.getSystemWindowInsetRight();
                 int bottom = insets.getSystemWindowInsetBottom();
                 tabSwitcher.setPadding(left, top, right, bottom);
-                tabSwitcher.addDragGesture(new SwipeGesture.Builder().setTouchableArea(left, top,
-                        left + (getDisplayWidth(MainActivity.this) - left - right), top + ThemeUtil
-                                .getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize))
-                        .create());
+                float touchableAreaTop = top;
+
+                if (tabSwitcher.getLayout() == Layout.TABLET) {
+                    touchableAreaTop += getResources()
+                            .getDimensionPixelSize(R.dimen.tablet_tab_container_height);
+                }
+
+                RectF touchableArea = new RectF(left, top,
+                        left + (getDisplayWidth(MainActivity.this) - left - right),
+                        touchableAreaTop + ThemeUtil
+                                .getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize));
+                tabSwitcher.addDragGesture(
+                        new SwipeGesture.Builder().setTouchableArea(touchableArea).create());
                 return insets;
             }
 

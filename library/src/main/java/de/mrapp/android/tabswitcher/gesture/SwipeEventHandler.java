@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 
@@ -187,7 +188,8 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
 
     @Override
     protected final boolean isDraggingAllowed() {
-        return !getTabSwitcher().isSwitcherShown() && getTabSwitcher().getSelectedTab() != null;
+        return (getTabSwitcher().getLayout() == Layout.TABLET ||
+                !getTabSwitcher().isSwitcherShown()) && getTabSwitcher().getSelectedTab() != null;
     }
 
     @Override
