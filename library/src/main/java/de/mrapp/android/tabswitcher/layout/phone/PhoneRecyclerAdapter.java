@@ -161,6 +161,19 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
     }
 
     /**
+     * Adapts the visibility of a tab's background.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose backgrounds's visibility should be
+     *         adapted, as an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    private void adaptBackgroundVisibility(@NonNull final TabItem tabItem) {
+        View view = tabItem.getView();
+        Drawable background = view.getBackground();
+        background.setAlpha(getModel().isSwitcherShown() ? 0xFF : 0x0);
+    }
+
+    /**
      * Adapts the background color of a tab's content.
      *
      * @param tabItem
@@ -297,6 +310,7 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
         layoutParams.bottomMargin = bottomMargin;
         view.setLayoutParams(layoutParams);
         adaptContentBackgroundColor(tabItem);
+        adaptBackgroundVisibility(tabItem);
 
         if (!getModel().isSwitcherShown()) {
             if (tabItem.getTab() == getModel().getSelectedTab()) {
