@@ -1591,11 +1591,9 @@ public abstract class AbstractTabSwitcherLayout
                 float position;
 
                 if (dragDistance > 0) {
-                    position = -getArithmetics().getSize(Axis.X_AXIS, view) + dragDistance -
-                            swipedTabDistance;
+                    position = -getTabSwitcher().getWidth() + dragDistance - swipedTabDistance;
                 } else {
-                    position = getArithmetics().getSize(Axis.X_AXIS, view) + dragDistance +
-                            swipedTabDistance;
+                    position = getTabSwitcher().getWidth() + dragDistance + swipedTabDistance;
                 }
 
                 getArithmetics().setPosition(Axis.X_AXIS, view, position);
