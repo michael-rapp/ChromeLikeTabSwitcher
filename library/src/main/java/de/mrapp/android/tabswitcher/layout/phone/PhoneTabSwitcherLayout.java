@@ -3305,7 +3305,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             getArithmetics().setPosition(Axis.X_AXIS, view, distance);
             float position = getArithmetics().getPosition(Axis.X_AXIS, view);
 
-            if (Math.abs(position) > 0) {
+            if (distance != 0) {
                 TabItem neighbor = TabItem.create(getModel(), getTabViewRecycler(),
                         position > 0 ? selectedTabIndex + 1 : selectedTabIndex - 1);
 
@@ -3321,9 +3321,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             getArithmetics().setPosition(Axis.X_AXIS, view, position);
         }
 
-        getLogger().logVerbose(getClass(),
-                "Swiping tab at index " + selectedTabIndex + ". Current swipe distance is " +
-                        distance + " pixels");
+        getLogger().logVerbose(getClass(), "Swiping content of tab at index " + selectedTabIndex +
+                ". Current swipe distance is " + distance + " pixels");
     }
 
     @Override
