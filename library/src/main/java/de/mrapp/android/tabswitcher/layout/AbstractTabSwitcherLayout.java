@@ -1565,7 +1565,7 @@ public abstract class AbstractTabSwitcherLayout
                         position > 0 ? selectedTabIndex + 1 : selectedTabIndex - 1);
 
                 if (Math.abs(position) >= swipedTabDistance) {
-                    inflateView(neighbor, createSwipeNeighborLayoutListener(tabItem, neighbor));
+                    inflateView(neighbor, createSwipeNeighborLayoutListener(neighbor, distance));
                 } else {
                     getTabViewRecycler().remove(neighbor);
                 }
@@ -1582,25 +1582,23 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     private OnGlobalLayoutListener createSwipeNeighborLayoutListener(
-            @NonNull final TabItem selectedTabItem, @NonNull final TabItem neighbor) {
+            @NonNull final TabItem neighbor, final float dragDistance) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                View selectedTabView = selectedTabItem.getView();
                 View view = neighbor.getView();
                 float position;
 
-                if (selectedTabItem.getIndex() < neighbor.getIndex()) {
-                    position = selectedTabView.getX() - swipedTabDistance -
-                            getArithmetics().getSize(Axis.X_AXIS, view);
+                if (dragDistance > 0) {
+                    position = -getArithmetics().getSize(Axis.X_AXIS, view) + dragDistance -
+                            swipedTabDistance;
                 } else {
-                    position = selectedTabView.getX() +
-                            getArithmetics().getSize(Axis.X_AXIS, selectedTabView) +
+                    position = getArithmetics().getSize(Axis.X_AXIS, view) + dragDistance +
                             swipedTabDistance;
                 }
 
-                view.setX(position);
+                getArithmetics().setPosition(Axis.X_AXIS, view, position);
             }
 
         };
