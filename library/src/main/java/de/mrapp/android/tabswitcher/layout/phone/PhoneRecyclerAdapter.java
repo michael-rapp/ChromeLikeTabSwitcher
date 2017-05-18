@@ -315,6 +315,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
         if (!getModel().isSwitcherShown()) {
             if (tabItem.getTab() == getModel().getSelectedTab()) {
                 addChildView(tabItem);
+            } else {
+                renderChildView(tabItem);
             }
         } else {
             renderChildView(tabItem);
