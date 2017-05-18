@@ -53,12 +53,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     private final int priority;
 
     /**
-     * The bounds of the onscreen area, the handler takes into consideration for handling
-     * touch events.
-     */
-    private final RectF touchableArea;
-
-    /**
      * The tab switcher, the event handler belongs to.
      */
     private final TabSwitcher tabSwitcher;
@@ -202,10 +196,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         The priority of the handler as an {@link Integer} value. The priority must be at
      *         least {@link AbstractTouchEventHandler#MIN_PRIORITY} and at maximum {@link
      *         AbstractTouchEventHandler#MAX_PRIORITY}
-     * @param touchableArea
-     *         The bounds of the onscreen area, the handler should take into consideration for
-     *         handling touch events, as an instance of the class {@link RectF} or null, if the are
-     *         should not be restricted
      * @param tabSwitcher
      *         The tab switcher, the event handler belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
@@ -213,15 +203,13 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      *         The threshold of the drag helper, which is used to recognize drag gestures, in pixels
      *         as an {@link Integer} value The threshold must be at least 0
      */
-    public AbstractTouchEventHandler(final int priority, @Nullable final RectF touchableArea,
-                                     @NonNull final TabSwitcher tabSwitcher,
+    public AbstractTouchEventHandler(final int priority, @NonNull final TabSwitcher tabSwitcher,
                                      final int dragThreshold) {
         ensureAtLeast(priority, MIN_PRIORITY, "The priority must be at least" + MIN_PRIORITY);
         ensureAtMaximum(priority, MAX_PRIORITY, "The priority must be at maximum " + MAX_PRIORITY);
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.priority = priority;
-        this.touchableArea = touchableArea;
         this.tabSwitcher = tabSwitcher;
         this.dragHelper = new DragHelper(0);
         this.dragThreshold = dragThreshold;
@@ -249,15 +237,16 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
 
     /**
      * Returns the bounds of the onscreen area, the handler takes into consideration for handling
-     * touch events. Touch events that occur outside of the area are clipped.
+     * touch events. Touch events that occur outside of the area are clipped. By default, the area
+     * is not restricted. Subclasses may override this method in order to restrict the area.
      *
      * @return The bounds of the onscreen area, the handler takes into consideration for handling
      * touch events, as an instance of the class {@link RectF} or null, if the area is not
      * restricted
      */
     @Nullable
-    public final RectF getTouchableArea() {
-        return touchableArea;
+    public RectF getTouchableArea() {
+        return null;
     }
 
     /**

@@ -13,6 +13,8 @@
  */
 package de.mrapp.android.tabswitcher.layout.tablet;
 
+import android.content.res.Resources;
+import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +55,11 @@ public class TabletDragEventHandler
     private final int tabOffset;
 
     /**
+     * The height of the view group, which contains the tab switcher's tabs.
+     */
+    private final int tabContainerHeight;
+
+    /**
      * Creates a new drag handler, which allows to calculate the position and state of tabs on touch
      * events, when using the tablet layout.
      *
@@ -75,8 +82,19 @@ public class TabletDragEventHandler
         super(tabSwitcher, arithmetics, true);
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
-        this.tabOffset =
-                tabSwitcher.getResources().getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        Resources resources = tabSwitcher.getResources();
+        this.tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        this.tabContainerHeight =
+                resources.getDimensionPixelSize(R.dimen.tablet_tab_container_height);
+    }
+
+    @NonNull
+    @Override
+    public final RectF getTouchableArea() {
+        int left = getTabSwitcher().getPaddingLeft();
+        int top = getTabSwitcher().getPaddingTop();
+        int right = getTabSwitcher().getPaddingRight();
+        return new RectF(left, top, getTabSwitcher().getWidth() - right, top + tabContainerHeight);
     }
 
     @Override

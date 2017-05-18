@@ -162,10 +162,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                             .getDimensionPixelSize(R.dimen.tablet_tab_container_height);
                 }
 
-                RectF touchableArea = new RectF(left, top,
-                        left + (getDisplayWidth(MainActivity.this) - left - right),
-                        touchableAreaTop + ThemeUtil
-                                .getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize));
+                RectF touchableArea = new RectF(left, touchableAreaTop,
+                        getDisplayWidth(MainActivity.this) - right, touchableAreaTop +
+                        ThemeUtil.getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize));
                 tabSwitcher.addDragGesture(
                         new SwipeGesture.Builder().setTouchableArea(touchableArea).create());
                 return insets;

@@ -68,6 +68,12 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
     }
 
     /**
+     * The bounds of the onscreen area, the handler takes into consideration for handling
+     * touch events.
+     */
+    private final RectF touchableArea;
+
+    /**
      * The velocity, which may be reached by a drag gesture at maximum to start a fling animation.
      */
     private final float maxFlingVelocity;
@@ -163,7 +169,8 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      */
     public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
                              @Nullable final RectF touchableArea, final long animationDuration) {
-        super(MAX_PRIORITY, touchableArea, tabSwitcher, dragThreshold);
+        super(MAX_PRIORITY, tabSwitcher, dragThreshold);
+        this.touchableArea = touchableArea;
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         Resources resources = tabSwitcher.getResources();
@@ -184,6 +191,12 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
+    }
+
+    @Nullable
+    @Override
+    public final RectF getTouchableArea() {
+        return touchableArea;
     }
 
     @Override

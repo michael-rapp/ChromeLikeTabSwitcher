@@ -440,7 +440,7 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
     public AbstractDragEventHandler(@NonNull final TabSwitcher tabSwitcher,
                                     @NonNull final Arithmetics arithmetics,
                                     final boolean swipeEnabled) {
-        super(MIN_PRIORITY, null, tabSwitcher,
+        super(MIN_PRIORITY, tabSwitcher,
                 tabSwitcher.getResources().getDimensionPixelSize(R.dimen.drag_threshold));
         ensureNotNull(arithmetics, "The arithmetics may not be null");
         this.arithmetics = arithmetics;
