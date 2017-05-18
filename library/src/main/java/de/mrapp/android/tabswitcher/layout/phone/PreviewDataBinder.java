@@ -46,9 +46,9 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     private final ViewGroup parent;
 
     /**
-     * The view recycler, which is used to inflate child views.
+     * The view recycler, which is used to inflate the views, which are associated with tabs.
      */
-    private final ViewRecycler<Tab, Void> childViewRecycler;
+    private final ViewRecycler<Tab, Void> contentViewRecycler;
 
     /**
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
@@ -57,17 +57,18 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      * @param parent
      *         The parent view of the tab switcher, the tabs belong to, as an instance of the class
      *         {@link ViewGroup}. The parent may not be null
-     * @param childViewRecycler
-     *         The view recycler, which should be used to inflate child views, as an instance of the
-     *         class ViewRecycler. The view recycler may not be null
+     * @param contentViewRecycler
+     *         The view recycler, which should be used to inflate the views, which are associated
+     *         with tabs, as an instance of the class ViewRecycler. The view recycler may not be
+     *         null
      */
     public PreviewDataBinder(@NonNull final ViewGroup parent,
-                             @NonNull final ViewRecycler<Tab, Void> childViewRecycler) {
+                             @NonNull final ViewRecycler<Tab, Void> contentViewRecycler) {
         super(parent.getContext(), new LruCache<Tab, Bitmap>(7));
         ensureNotNull(parent, "The parent may not be null");
-        ensureNotNull(childViewRecycler, "The child view recycler may not be null");
+        ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
         this.parent = parent;
-        this.childViewRecycler = childViewRecycler;
+        this.contentViewRecycler = contentViewRecycler;
     }
 
     @Override
@@ -75,17 +76,17 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
                                       @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
-        View child = viewHolder.child;
+        View content = viewHolder.content;
         Tab tab = tabItem.getTab();
 
-        if (child == null) {
-            Pair<View, ?> pair = childViewRecycler.inflate(tab, viewHolder.contentContainer);
-            child = pair.first;
+        if (content == null) {
+            Pair<View, ?> pair = contentViewRecycler.inflate(tab, viewHolder.contentContainer);
+            content = pair.first;
         } else {
-            childViewRecycler.getAdapter().onShowView(getContext(), child, tab, false);
+            contentViewRecycler.getAdapter().onShowView(getContext(), content, tab, false);
         }
 
-        viewHolder.child = child;
+        viewHolder.content = content;
     }
 
     @Nullable
@@ -94,16 +95,16 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
                                           @NonNull final TabItem... params) {
         TabItem tabItem = params[0];
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
-        View child = viewHolder.child;
-        viewHolder.child = null;
+        View content = viewHolder.content;
+        viewHolder.content = null;
         int width = parent.getWidth();
         int height = parent.getHeight();
-        child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+        content.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        child.draw(canvas);
+        content.draw(canvas);
         return bitmap;
     }
 
@@ -113,7 +114,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         view.setImageBitmap(data);
         view.setVisibility(data != null ? View.VISIBLE : View.GONE);
         TabItem tabItem = params[0];
-        childViewRecycler.remove(tabItem.getTab());
+        contentViewRecycler.remove(tabItem.getTab());
     }
 
 }

@@ -89,15 +89,15 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
     private final int tabContentBackgroundColor;
 
     /**
-     * Inflates the child view of a tab and adds it to the view hierarchy.
+     * Inflates the view, which is associated with a tab, and adds it to the view hierarchy.
      *
      * @param tabItem
-     *         The tab item, which corresponds to the tab, whose child view should be inflated, as
-     *         an instance of the class {@link TabItem}. The tab item may not be null
+     *         The tab item, which corresponds to the tab, whose associated view should be inflated,
+     *         as an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void addChildView(@NonNull final TabItem tabItem) {
+    private void addContentView(@NonNull final TabItem tabItem) {
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
-        View view = viewHolder.child;
+        View view = viewHolder.content;
         Tab tab = tabItem.getTab();
 
         if (view == null) {
@@ -109,7 +109,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
             layoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
                     getModel().getPaddingRight(), getModel().getPaddingBottom());
             parent.addView(view, 0, layoutParams);
-            viewHolder.child = view;
+            viewHolder.content = view;
         } else {
             tabViewRecycler.getAdapter().onShowView(getModel().getContext(), view, tab, false);
         }
@@ -120,44 +120,44 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
     }
 
     /**
-     * Renders and displays the child view of a tab.
+     * Renders and displays the preview of a tab.
      *
      * @param tabItem
      *         The tab item, which corresponds to the tab, whose preview should be rendered, as an
      *         instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void renderChildView(@NonNull final TabItem tabItem) {
+    private void renderPreview(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
         viewHolder.borderView
                 .setVisibility(getModel().isSwitcherShown() ? View.VISIBLE : View.GONE);
 
-        if (viewHolder.child != null) {
-            tabViewRecycler.getAdapter().onRemoveView(viewHolder.child, tab);
+        if (viewHolder.content != null) {
+            tabViewRecycler.getAdapter().onRemoveView(viewHolder.content, tab);
             dataBinder.load(tab, viewHolder.previewImageView, false, tabItem);
-            removeChildView(viewHolder, tab);
+            removeContentView(viewHolder, tab);
         } else {
             dataBinder.load(tab, viewHolder.previewImageView, tabItem);
         }
     }
 
     /**
-     * Removes the child of a tab from its parent.
+     * Removes the view, which is associated with a tab, from its parent.
      *
      * @param viewHolder
      *         The view holder, which stores references to the tab's views, as an instance of the
      *         class {@link PhoneTabViewHolder}. The view holder may not be null
      * @param tab
-     *         The tab, whose child should be removed, as an instance of the class {@link Tab}. The
-     *         tab may not be null
+     *         The tab, whose associated view should be removed, as an instance of the class {@link
+     *         Tab}. The tab may not be null
      */
-    private void removeChildView(@NonNull final PhoneTabViewHolder viewHolder,
-                                 @NonNull final Tab tab) {
+    private void removeContentView(@NonNull final PhoneTabViewHolder viewHolder,
+                                   @NonNull final Tab tab) {
         if (viewHolder.contentContainer.getChildCount() > 2) {
             viewHolder.contentContainer.removeViewAt(0);
         }
 
-        viewHolder.child = null;
+        viewHolder.content = null;
         tabViewRecycler.remove(tab);
     }
 
@@ -209,9 +209,9 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      *         class {@link PhoneTabViewHolder}. The view holder may not be null
      */
     private void adaptPadding(@NonNull final PhoneTabViewHolder viewHolder) {
-        if (viewHolder.child != null) {
-            LayoutParams childLayoutParams = (LayoutParams) viewHolder.child.getLayoutParams();
-            childLayoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
+        if (viewHolder.content != null) {
+            LayoutParams contentLayoutParams = (LayoutParams) viewHolder.content.getLayoutParams();
+            contentLayoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
                     getModel().getPaddingRight(), getModel().getPaddingBottom());
         }
 
@@ -315,12 +315,12 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
 
         if (!getModel().isSwitcherShown()) {
             if (tabItem.getTab() == getModel().getSelectedTab()) {
-                addChildView(tabItem);
+                addContentView(tabItem);
             } else {
-                renderChildView(tabItem);
+                renderPreview(tabItem);
             }
         } else {
-            renderChildView(tabItem);
+            renderPreview(tabItem);
         }
     }
 
@@ -342,7 +342,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
             TabItem tabItem = (TabItem) item;
             PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) view.getTag(R.id.tag_view_holder);
             Tab tab = tabItem.getTab();
-            removeChildView(viewHolder, tab);
+            removeContentView(viewHolder, tab);
 
             if (!dataBinder.isCached(tab)) {
                 Drawable drawable = viewHolder.previewImageView.getDrawable();

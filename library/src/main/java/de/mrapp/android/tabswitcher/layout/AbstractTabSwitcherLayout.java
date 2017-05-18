@@ -503,7 +503,7 @@ public abstract class AbstractTabSwitcherLayout
      * Adapts the decorator.
      */
     private void adaptDecorator() {
-        getContentViewRecycler().setAdapter(onCreateChildRecyclerAdapter());
+        getContentViewRecycler().setAdapter(onCreateContentRecyclerAdapter());
     }
 
     /**
@@ -1279,14 +1279,14 @@ public abstract class AbstractTabSwitcherLayout
 
     /**
      * The method, which is invoked on implementing subclasses in order to create the view recycler
-     * adapter, which allows to inflate the child views, which are associated with tabs.
+     * adapter, which allows to inflate the views, which are associated with tabs.
      *
      * @return The view recycler adapter, which has been created, as an instance of the class {@link
      * AttachedViewRecycler.Adapter}. The recycler adapter may not be null }
      */
     @NonNull
-    protected AttachedViewRecycler.Adapter<Tab, Void> onCreateChildRecyclerAdapter() {
-        return getModel().getChildRecyclerAdapter();
+    protected AttachedViewRecycler.Adapter<Tab, Void> onCreateContentRecyclerAdapter() {
+        return getModel().getContentRecyclerAdapter();
     }
 
     /**

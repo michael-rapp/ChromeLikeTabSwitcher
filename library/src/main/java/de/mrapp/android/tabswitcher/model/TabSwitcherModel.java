@@ -50,7 +50,7 @@ import de.mrapp.android.tabswitcher.TabCloseListener;
 import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
+import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.util.logging.LogLevel;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
@@ -212,9 +212,9 @@ public class TabSwitcherModel implements Model, Restorable {
     private TabSwitcherDecorator decorator;
 
     /**
-     * The adapter, which allows to inflate the child views of tabs.
+     * The adapter, which allows to inflate the views, which are associated with tabs.
      */
-    private ChildRecyclerAdapter childRecyclerAdapter;
+    private ContentRecyclerAdapter contentRecyclerAdapter;
 
     /**
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
@@ -705,7 +705,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.switcherShown = false;
         this.selectedTab = null;
         this.decorator = null;
-        this.childRecyclerAdapter = null;
+        this.contentRecyclerAdapter = null;
         this.padding = new int[]{0, 0, 0, 0};
         this.tabIconId = -1;
         this.tabIconBitmap = null;
@@ -848,13 +848,13 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
-     * Returns the adapter, which allows to inflate the child views of tabs.
+     * Returns the adapter, which allows to inflate the views, which are associated with tabs.
      *
-     * @return The adapter, which allows to inflate the child views of tabs, as an instance of the
-     * class {@link ChildRecyclerAdapter}
+     * @return The adapter, which allows to inflate the views, which are associated with tabs, as an
+     * instance of the class {@link ContentRecyclerAdapter}
      */
-    public final ChildRecyclerAdapter getChildRecyclerAdapter() {
-        return childRecyclerAdapter;
+    public final ContentRecyclerAdapter getContentRecyclerAdapter() {
+        return contentRecyclerAdapter;
     }
 
     @NonNull
@@ -867,7 +867,7 @@ public class TabSwitcherModel implements Model, Restorable {
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
-        this.childRecyclerAdapter = new ChildRecyclerAdapter(tabSwitcher, decorator);
+        this.contentRecyclerAdapter = new ContentRecyclerAdapter(tabSwitcher, decorator);
         notifyOnDecoratorChanged(decorator);
     }
 
@@ -1367,7 +1367,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
-        childRecyclerAdapter.saveInstanceState(outState);
+        contentRecyclerAdapter.saveInstanceState(outState);
     }
 
     @Override
@@ -1392,7 +1392,7 @@ public class TabSwitcherModel implements Model, Restorable {
                     savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
-            childRecyclerAdapter.restoreInstanceState(savedInstanceState);
+            contentRecyclerAdapter.restoreInstanceState(savedInstanceState);
         }
     }
 

@@ -32,7 +32,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
-import de.mrapp.android.tabswitcher.layout.ChildRecyclerAdapter;
+import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.Restorable;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
@@ -43,14 +43,14 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A wrapper, which encapsulates a {@link ChildRecyclerAdapter}, which allows to inflate the views,
+ * A wrapper, which encapsulates a {@link ContentRecyclerAdapter}, which allows to inflate the views,
  * which are used to visualize the content views of the tabs of a {@link TabSwitcher}. The wrapper
  * enables to adapt the views for use with the tablet layout.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletChildRecyclerAdapterWrapper extends AbstractViewRecycler.Adapter<Tab, Void>
+public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Adapter<Tab, Void>
         implements Restorable, Tab.Callback, Model.Listener {
 
     /**
@@ -66,7 +66,7 @@ public class TabletChildRecyclerAdapterWrapper extends AbstractViewRecycler.Adap
     /**
      * The encapsulated view recycler adapter.
      */
-    private final ChildRecyclerAdapter encapsulatedAdapter;
+    private final ContentRecyclerAdapter encapsulatedAdapter;
 
     /**
      * The default background color of a tab's content.
@@ -93,7 +93,7 @@ public class TabletChildRecyclerAdapterWrapper extends AbstractViewRecycler.Adap
     }
 
     /**
-     * Creates a new wrapper, which encapsulates a {@link ChildRecyclerAdapter}, which allows to
+     * Creates a new wrapper, which encapsulates a {@link ContentRecyclerAdapter}, which allows to
      * inflate the views, which are used to visualize the content views of the tabs of a {@link
      * TabSwitcher}.
      *
@@ -109,12 +109,12 @@ public class TabletChildRecyclerAdapterWrapper extends AbstractViewRecycler.Adap
      *         AttachedViewRecycler}. The view recycler may not be null
      * @param encapsulatedAdapter
      *         The view recycler adapter, which should be encapsulated, as an instance of the class
-     *         {@link ChildRecyclerAdapter}. The recycler adapter may not be null
+     *         {@link ContentRecyclerAdapter}. The recycler adapter may not be null
      */
-    public TabletChildRecyclerAdapterWrapper(@NonNull final TabSwitcher tabSwitcher,
-                                             @NonNull final ThemeHelper themeHelper,
-                                             @NonNull final AttachedViewRecycler<Tab, ?> viewRecycler,
-                                             @NonNull final ChildRecyclerAdapter encapsulatedAdapter) {
+    public TabletContentRecyclerAdapterWrapper(@NonNull final TabSwitcher tabSwitcher,
+                                               @NonNull final ThemeHelper themeHelper,
+                                               @NonNull final AttachedViewRecycler<Tab, ?> viewRecycler,
+                                               @NonNull final ContentRecyclerAdapter encapsulatedAdapter) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(themeHelper, "The theme helper may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");

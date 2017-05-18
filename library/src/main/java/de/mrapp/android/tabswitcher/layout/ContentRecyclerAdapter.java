@@ -32,54 +32,53 @@ import de.mrapp.android.util.view.AbstractViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A view recycler adapter, which allows to inflate the views, which are used to visualize the
- * content views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link
- * TabSwitcherDecorator}.
+ * A view recycler adapter, which allows to inflate the views, which are associated with the tabs of
+ * a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
  *
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void>
+public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void>
         implements Restorable {
 
     /**
      * The name of the extra, which is used to store the saved instance states of previously removed
-     * child views within a bundle.
+     * associated views within a bundle.
      */
     private static final String SAVED_INSTANCE_STATES_EXTRA =
-            ChildRecyclerAdapter.class.getName() + "::SavedInstanceStates";
+            ContentRecyclerAdapter.class.getName() + "::SavedInstanceStates";
 
     /**
-     * The tab switcher, which contains the tabs, the child views, which are inflated by the
+     * The tab switcher, which contains the tabs, the associated views, which are inflated by the
      * adapter, correspond to.
      */
     private final TabSwitcher tabSwitcher;
 
     /**
-     * The decorator, which is used to inflate the child views.
+     * The decorator, which is used to inflate the associated views.
      */
     private final TabSwitcherDecorator decorator;
 
     /**
-     * A sparse array, which manages the saved instance states of previously removed child views.
+     * A sparse array, which manages the saved instance states of previously removed associated
+     * views.
      */
     private SparseArray<Bundle> savedInstanceStates;
 
     /**
-     * Creates a new view recycler adapter, which allows to inflate the views, which are used to
-     * visualize the child views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link
-     * TabSwitcherDecorator}.
+     * Creates a new view recycler adapter, which allows to inflate views, which are associated with
+     * the tabs of a {@link TabSwitcher}, by encapsulating a {@link TabSwitcherDecorator}.
      *
      * @param tabSwitcher
-     *         The tab switcher, which contains the tabs, the child views, which are inflated by the
+     *         The tab switcher, which contains the tabs, whose associated views are inflated by the
      *         adapter, correspond to, as an instance of the class {@link TabSwitcher}. The tab
      *         switcher may not be null
      * @param decorator
-     *         The decorator, which should be used to inflate the child views, as an instance of the
-     *         class {@link TabSwitcherDecorator}. The decorator may not be null
+     *         The decorator, which should be used to inflate the associated views, as an instance
+     *         of the class {@link TabSwitcherDecorator}. The decorator may not be null
      */
-    public ChildRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
-                                @NonNull final TabSwitcherDecorator decorator) {
+    public ContentRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
+                                  @NonNull final TabSwitcherDecorator decorator) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(decorator, "The decorator may not be null");
         this.tabSwitcher = tabSwitcher;

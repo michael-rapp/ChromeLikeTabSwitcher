@@ -213,11 +213,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private View borderView;
 
     /**
-     * The view group, which contains the children of the tab switcher's tabs.
-     */
-    private ViewGroup contentContainer;
-
-    /**
      * Adapts the margins of the tab container and the toolbars.
      */
     private void adaptTabContainerAndToolbarMargins() {
@@ -615,7 +610,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
         tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         borderView = getTabSwitcher().findViewById(R.id.border_view);
-        contentContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
+        ViewGroup contentContainer =
+                (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
         contentViewRecycler = new AttachedViewRecycler<>(contentContainer, inflater);
         tabRecyclerAdapter =
                 new TabletTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
@@ -632,16 +628,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @Override
     protected final void onDetachLayout(final boolean tabsOnly) {
-        // TODO: childViewRecycler.removeAll();
-        // TODO: childViewRecycler.clearCache();
+        // TODO: contentViewRecycler.removeAll();
+        // TODO: contentViewRecycler.clearCache();
         if (!tabsOnly) {
             getModel().removeListener(tabRecyclerAdapter);
             AttachedViewRecycler.Adapter<Tab, Void> contentViewRecyclerAdapter =
                     contentViewRecycler.getAdapter();
 
-            if (contentViewRecyclerAdapter instanceof TabletChildRecyclerAdapterWrapper) {
+            if (contentViewRecyclerAdapter instanceof TabletContentRecyclerAdapterWrapper) {
                 getModel().removeListener(
-                        (TabletChildRecyclerAdapterWrapper) contentViewRecyclerAdapter);
+                        (TabletContentRecyclerAdapterWrapper) contentViewRecyclerAdapter);
             }
         }
     }
@@ -808,16 +804,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @NonNull
     @Override
-    protected final AttachedViewRecycler.Adapter<Tab, Void> onCreateChildRecyclerAdapter() {
+    protected final AttachedViewRecycler.Adapter<Tab, Void> onCreateContentRecyclerAdapter() {
         AttachedViewRecycler.Adapter<Tab, Void> adapter = contentViewRecycler.getAdapter();
 
-        if (adapter instanceof TabletChildRecyclerAdapterWrapper) {
-            getModel().removeListener((TabletChildRecyclerAdapterWrapper) adapter);
+        if (adapter instanceof TabletContentRecyclerAdapterWrapper) {
+            getModel().removeListener((TabletContentRecyclerAdapterWrapper) adapter);
         }
 
-        TabletChildRecyclerAdapterWrapper recyclerAdapter =
-                new TabletChildRecyclerAdapterWrapper(getTabSwitcher(), getThemeHelper(),
-                        contentViewRecycler, getModel().getChildRecyclerAdapter());
+        TabletContentRecyclerAdapterWrapper recyclerAdapter =
+                new TabletContentRecyclerAdapterWrapper(getTabSwitcher(), getThemeHelper(),
+                        contentViewRecycler, getModel().getContentRecyclerAdapter());
         getModel().addListener(recyclerAdapter);
         return recyclerAdapter;
     }
