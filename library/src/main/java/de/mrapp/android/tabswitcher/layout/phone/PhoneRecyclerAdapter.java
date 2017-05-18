@@ -129,7 +129,8 @@ public class PhoneRecyclerAdapter extends AbstractRecyclerAdapter
     private void renderChildView(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
-        viewHolder.borderView.setVisibility(View.VISIBLE);
+        viewHolder.borderView
+                .setVisibility(getModel().isSwitcherShown() ? View.VISIBLE : View.GONE);
 
         if (viewHolder.child != null) {
             tabViewRecycler.getAdapter().onRemoveView(viewHolder.child, tab);
