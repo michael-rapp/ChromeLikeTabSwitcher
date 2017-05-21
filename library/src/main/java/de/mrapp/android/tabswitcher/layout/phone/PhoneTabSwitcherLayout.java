@@ -1114,7 +1114,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             boolean overshooting =
                     referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
-            iterator = new InitialTabItemIterator(tabItems, false, 0);
+            iterator = new InitialTabItemIterator(tabItems, true, referenceIndex - 1);
             float minTabSpacing = calculateMinTabSpacing(getModel().getCount());
             float defaultTabSpacing = calculateMaxTabSpacing(getModel().getCount(), null);
             TabItem selectedTabItem =
@@ -3401,10 +3401,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (getModel().isSwitcherShown() && firstVisibleIndex != -1) {
             TabItem tabItem = TabItem.create(getModel(), viewRecycler, firstVisibleIndex);
-            float firstVisibleTabPosition = tabItem.getTag().getPosition();
-            getModel().setFirstVisibleTabIndex(firstVisibleIndex);
-            getModel().setFirstVisibleTabPosition(firstVisibleTabPosition);
-            result = Pair.create(firstVisibleIndex, firstVisibleTabPosition);
+            Tag tag = tabItem.getTag();
+
+            if (tag.getState() != State.HIDDEN) {
+                float firstVisibleTabPosition = tabItem.getTag().getPosition();
+                result = Pair.create(firstVisibleIndex, firstVisibleTabPosition);
+            }
         }
 
         childViewRecycler.removeAll();
