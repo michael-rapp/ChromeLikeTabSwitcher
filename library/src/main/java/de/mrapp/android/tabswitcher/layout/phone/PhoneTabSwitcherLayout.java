@@ -1107,7 +1107,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
-                if (pair.second != State.FLOATING) {
+                if (pair.second == State.STACKED_START || pair.second == State.STACKED_START_ATOP) {
                     break;
                 }
             }
