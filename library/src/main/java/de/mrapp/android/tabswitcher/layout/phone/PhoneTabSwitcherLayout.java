@@ -1080,8 +1080,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
             float attachedPosition = calculateAttachedPosition(getModel().getCount());
-            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                    firstVisibleTabIndex : selectedTabIndex;
+            int initialReferenceIndex =
+                    firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                            firstVisibleTabIndex : selectedTabIndex;
+            int referenceIndex = initialReferenceIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
             referencePosition = Math.min(calculateEndPosition(referenceIndex), referencePosition);
@@ -1106,6 +1108,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 predecessor);
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
+
+                if (firstVisibleIndex == -1 && pair.second != State.STACKED_END &&
+                        pair.second != State.HIDDEN) {
+                    firstVisibleIndex = tabItem.getIndex();
+                }
 
                 if (pair.second == State.STACKED_START || pair.second == State.STACKED_START_ATOP) {
                     break;
@@ -1175,13 +1182,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tabItem.getTag().setPosition(pair.first);
                 tabItem.getTag().setState(pair.second);
 
-                if (firstVisibleIndex == -1 && pair.second == State.FLOATING) {
+                if ((firstVisibleIndex == -1 || firstVisibleIndex > tabItem.getIndex()) &&
+                        pair.second == State.FLOATING) {
                     firstVisibleIndex = tabItem.getIndex();
                 }
-            }
-
-            if (firstVisibleIndex == -1) {
-                firstVisibleIndex = referenceIndex;
             }
         }
 
