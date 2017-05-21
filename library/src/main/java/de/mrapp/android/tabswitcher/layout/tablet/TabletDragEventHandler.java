@@ -91,11 +91,10 @@ public class TabletDragEventHandler
     @NonNull
     @Override
     public final RectF getTouchableArea() {
-        float left = getTabSwitcher().getX() + getTabSwitcher().getPaddingLeft();
-        float top = getTabSwitcher().getY() + getTabSwitcher().getPaddingTop();
+        float left = getTabSwitcher().getPaddingLeft();
+        float top = getTabSwitcher().getPaddingTop();
         int right = getTabSwitcher().getPaddingRight();
-        return new RectF(left, top, getTabSwitcher().getX() + getTabSwitcher().getWidth() - right,
-                top + tabContainerHeight);
+        return new RectF(left, top, getTabSwitcher().getWidth() - right, top + tabContainerHeight);
     }
 
     @Override
