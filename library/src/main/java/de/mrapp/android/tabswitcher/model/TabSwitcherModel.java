@@ -854,6 +854,8 @@ public class TabSwitcherModel implements Model, Restorable {
      * instance of the class {@link ContentRecyclerAdapter}
      */
     public final ContentRecyclerAdapter getContentRecyclerAdapter() {
+        ensureNotNull(contentRecyclerAdapter, "No decorator has been set",
+                IllegalStateException.class);
         return contentRecyclerAdapter;
     }
 
@@ -1367,7 +1369,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
-        contentRecyclerAdapter.saveInstanceState(outState);
+        getContentRecyclerAdapter().saveInstanceState(outState);
     }
 
     @Override
@@ -1392,7 +1394,7 @@ public class TabSwitcherModel implements Model, Restorable {
                     savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
-            contentRecyclerAdapter.restoreInstanceState(savedInstanceState);
+            getContentRecyclerAdapter().restoreInstanceState(savedInstanceState);
         }
     }
 
