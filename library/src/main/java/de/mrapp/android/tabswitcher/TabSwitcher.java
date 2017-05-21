@@ -1594,6 +1594,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
         model.removeListener(layout);
         layout = null;
+        touchEventDispatcher.clearEventHandlers();
         executePendingAction();
         getViewTreeObserver().addOnGlobalLayoutListener(
                 new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
