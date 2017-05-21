@@ -694,6 +694,17 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Sets the index of the first visible tab.
+     *
+     * @param firstVisibleTabIndex
+     *         The index of the first visible tab, which should be set, as an {@link Integer} value
+     *         or -1, if the index is unknown
+     */
+    public final void setFirstVisibleTabIndex(final int firstVisibleTabIndex) {
+        this.firstVisibleTabIndex = firstVisibleTabIndex;
+    }
+
+    /**
      * Returns the position of the first visible tab.
      *
      * @return The position of the first visible tab as a {@link Float} value or -1, if the position
@@ -701,6 +712,17 @@ public class TabSwitcherModel implements Model, Restorable {
      */
     public final float getFirstVisibleTabPosition() {
         return firstVisibleTabPosition;
+    }
+
+    /**
+     * Sets the position of the first visible tab.
+     *
+     * @param firstVisibleTabPosition
+     *         The position of the first visible tab, which should be set, as a {@link Float} value
+     *         or -1, if the position is unknown
+     */
+    public final void setFirstVisibleTabPosition(final float firstVisibleTabPosition) {
+        this.firstVisibleTabPosition = firstVisibleTabPosition;
     }
 
     /**

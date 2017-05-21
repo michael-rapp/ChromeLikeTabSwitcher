@@ -3401,7 +3401,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (getModel().isSwitcherShown() && firstVisibleIndex != -1) {
             TabItem tabItem = TabItem.create(getModel(), viewRecycler, firstVisibleIndex);
-            result = Pair.create(firstVisibleIndex, tabItem.getTag().getPosition());
+            float firstVisibleTabPosition = tabItem.getTag().getPosition();
+            getModel().setFirstVisibleTabIndex(firstVisibleIndex);
+            getModel().setFirstVisibleTabPosition(firstVisibleTabPosition);
+            result = Pair.create(firstVisibleIndex, firstVisibleTabPosition);
         }
 
         childViewRecycler.removeAll();
