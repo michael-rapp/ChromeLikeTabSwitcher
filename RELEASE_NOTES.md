@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.3 (May 23th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed issues, when margins are applied to a `TabSwitcher`.
+
 ## Version 0.1.2 (May 22th 2017)
 
 A bugfix release, which fixes the following issues:
