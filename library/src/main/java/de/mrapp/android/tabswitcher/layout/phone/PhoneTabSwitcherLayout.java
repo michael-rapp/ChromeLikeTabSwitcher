@@ -26,7 +26,6 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -680,7 +679,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
     private float calculateSwipePosition() {
-        return getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, getTabSwitcher());
+        return getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS, true);
     }
 
     /**
@@ -698,9 +697,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Float} value
      */
     private float calculateMaxTabSpacing(final int count, @Nullable final TabItem tabItem) {
-        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                        getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
+        float totalSpace = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
         float maxTabSpacing;
 
         if (count <= 2) {
@@ -740,11 +737,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
     private float calculateAttachedPosition(final int count) {
-        Toolbar[] toolbars = getTabSwitcher().getToolbars();
-        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
-                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        toolbars[0].getHeight() + tabInset : 0);
+        float totalSpace = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
         float attachedPosition;
 
         if (count == 3) {
@@ -888,27 +881,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     @NonNull
     private Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
-        Toolbar[] toolbars = getTabSwitcher().getToolbars();
-        int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
-                getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                toolbars[0].getHeight() - tabInset : 0;
-        int padding =
-                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START, getTabSwitcher()) +
-                        getArithmetics()
-                                .getPadding(Axis.DRAGGING_AXIS, Gravity.END, getTabSwitcher());
-        int offset = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
-                stackedTabCount * stackedTabSpacing : 0;
+        float size = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
 
         if (index < stackedTabCount) {
-            float position =
-                    size - toolbarHeight - tabInset - (stackedTabSpacing * (index + 1)) - padding +
-                            offset;
+            float position = size - tabInset - (stackedTabSpacing * (index + 1));
             return Pair.create(position, State.STACKED_END);
         } else {
-            float position =
-                    size - toolbarHeight - tabInset - (stackedTabSpacing * stackedTabCount) -
-                            padding + offset;
+            float position = size - tabInset - (stackedTabSpacing * stackedTabCount);
             return Pair.create(position, State.HIDDEN);
         }
     }
@@ -961,12 +940,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private int calculateBottomMargin(@NonNull final View view) {
         float tabHeight = (view.getHeight() - 2 * tabInset) * getArithmetics().getScale(view, true);
-        float containerHeight = getArithmetics().getSize(Axis.Y_AXIS, tabContainer);
-        int toolbarHeight = getModel().areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
+        float containerHeight = getArithmetics().getTabContainerSize(Axis.Y_AXIS, false);
         int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                 stackedTabCount * stackedTabSpacing;
-        return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
-                (containerHeight - getModel().getPaddingTop() - getModel().getPaddingBottom()));
+        return Math.round(tabHeight + tabInset + stackHeight - containerHeight);
     }
 
     /**
@@ -1280,7 +1257,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (tabItem.getIndex() < selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
-                    getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer));
+                    getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS));
         } else if (tabItem.getIndex() > selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
@@ -1379,7 +1356,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (tabItem.getIndex() < selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()), false);
+                    getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS), false);
         } else if (tabItem.getIndex() > selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
@@ -1910,14 +1887,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Interpolator interpolator =
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
-                Toolbar[] toolbars = getToolbars();
                 float peekPosition =
-                        (getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
-                                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
-                                        getTabSwitcher()) -
-                                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                                        getTabSwitcher().areToolbarsShown() ?
-                                        toolbars[0].getHeight() : 0)) * 0.66f;
+                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false) * 0.66f;
                 animatePeek(tabItem, duration, interpolator, peekPosition, peekAnimation);
             }
 

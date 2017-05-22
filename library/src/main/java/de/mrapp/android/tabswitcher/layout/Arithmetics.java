@@ -181,6 +181,31 @@ public interface Arithmetics {
     float getSize(@NonNull Axis axis, @NonNull View view);
 
     /**
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis. By default, the padding and the size of the toolbars are included.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
+     */
+    float getTabContainerSize(@NonNull Axis axis);
+
+    /**
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param includePadding
+     *         True, if the padding and the size of the toolbars should be included, false
+     *         otherwise
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
+     */
+    float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
+
+    /**
      * Returns the pivot of a view on a specific axis, depending on the current drag state.
      *
      * @param axis

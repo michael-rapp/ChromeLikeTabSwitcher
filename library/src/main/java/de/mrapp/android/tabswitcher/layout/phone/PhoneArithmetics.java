@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
@@ -323,6 +324,34 @@ public class PhoneArithmetics implements Arithmetics {
             return view.getHeight() * getScale(view, false);
         } else {
             return view.getWidth() * getScale(view, false);
+        }
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis) {
+        return getTabContainerSize(axis, true);
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
+        ensureNotNull(axis, "The axis may not be null");
+        ViewGroup tabContainer = tabSwitcher.getTabContainer();
+        assert tabContainer != null;
+        FrameLayout.LayoutParams layoutParams =
+                (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
+        int padding = !includePadding ? (getPadding(axis, Gravity.START, tabSwitcher) +
+                getPadding(axis, Gravity.END, tabSwitcher)) : 0;
+        Toolbar[] toolbars = tabSwitcher.getToolbars();
+
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            int toolbarSize =
+                    !includePadding && tabSwitcher.areToolbarsShown() && toolbars != null ?
+                            toolbars[0].getHeight() - tabInset : 0;
+            return tabContainer.getHeight() - layoutParams.topMargin - layoutParams.bottomMargin -
+                    padding - toolbarSize;
+        } else {
+            return tabContainer.getWidth() - layoutParams.leftMargin - layoutParams.rightMargin -
+                    padding;
         }
     }
 
