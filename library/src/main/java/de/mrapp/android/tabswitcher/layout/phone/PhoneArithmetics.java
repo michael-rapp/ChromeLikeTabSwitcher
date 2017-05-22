@@ -316,19 +316,13 @@ public class PhoneArithmetics implements Arithmetics {
 
     @Override
     public final float getSize(@NonNull final Axis axis, @NonNull final View view) {
-        return getSize(axis, view, false);
-    }
-
-    @Override
-    public final float getSize(@NonNull final Axis axis, @NonNull final View view,
-                               final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getHeight() * getScale(view, includePadding);
+            return view.getHeight() * getScale(view, false);
         } else {
-            return view.getWidth() * getScale(view, includePadding);
+            return view.getWidth() * getScale(view, false);
         }
     }
 

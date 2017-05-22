@@ -182,20 +182,6 @@ public interface Arithmetics {
     float getSize(@NonNull Axis axis, @NonNull View view);
 
     /**
-     * Returns the size of a view on a specific axis.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose size should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @param includePadding
-     *         True, if the view's padding should be taken into account, false otherwise
-     * @return The size of the given view on the given axis as a {@link Float} value
-     */
-    float getSize(@NonNull Axis axis, @NonNull View view, boolean includePadding);
-
-    /**
      * Returns the pivot of a view on a specific axis, depending on the current drag state.
      *
      * @param axis
