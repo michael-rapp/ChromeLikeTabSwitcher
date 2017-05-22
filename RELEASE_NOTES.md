@@ -10,9 +10,15 @@ The first stable release of the library. It introduces the following features:
 - Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode
 - Fixed various minor issues
 
+## Version 0.1.2 (May 22th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- Resolved issues when restoring the positions of tabs after orientation changes or when resuming the app. 
+
 ## Version 0.1.1 (May 11th 2017)
 
-A bugfix release, which fixed the following issues:
+A bugfix release, which fixes the following issues:
 
 - Improved detection of click events
 

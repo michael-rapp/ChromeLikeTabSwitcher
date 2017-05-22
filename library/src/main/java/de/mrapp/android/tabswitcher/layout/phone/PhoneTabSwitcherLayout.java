@@ -495,8 +495,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
             float attachedPosition = calculateAttachedPosition(getModel().getCount());
-            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                    firstVisibleTabIndex : selectedTabIndex;
+            int initialReferenceIndex =
+                    firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                            firstVisibleTabIndex : selectedTabIndex;
+            int referenceIndex = initialReferenceIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
             referencePosition =
@@ -520,14 +522,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
-                if (pair.second != State.FLOATING) {
+                if (firstVisibleIndex == -1 && pair.second != State.STACKED_END &&
+                        pair.second != State.HIDDEN) {
+                    setFirstVisibleIndex(tabItem.getIndex());
+                }
+
+                if (pair.second == State.STACKED_START || pair.second == State.STACKED_START_ATOP) {
                     break;
                 }
             }
 
             boolean overshooting =
                     referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
-            iterator = new InitialItemIterator(items, false, 0);
+            iterator = new InitialItemIterator(items, true, referenceIndex - 1);
             float minTabSpacing = calculateMinTabSpacing();
             float defaultTabSpacing = calculateMaxTabSpacing(null);
             AbstractItem selectedItem =
@@ -583,13 +590,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
-                if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
+                if ((getFirstVisibleIndex() == -1 || getFirstVisibleIndex() > tabItem.getIndex())
+                        && pair.second == State.FLOATING) {
                     setFirstVisibleIndex(item.getIndex());
                 }
-            }
-
-            if (getFirstVisibleIndex() == -1) {
-                setFirstVisibleIndex(referenceIndex);
             }
         }
 
