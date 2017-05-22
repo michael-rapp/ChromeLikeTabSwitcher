@@ -185,20 +185,24 @@ public class TabletArithmetics implements Arithmetics {
 
     @Override
     public final float getSize(@NonNull final Axis axis, @NonNull final View view) {
-        return getSize(axis, view, false);
-    }
-
-    @Override
-    public final float getSize(@NonNull final Axis axis, @NonNull final View view,
-                               final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return view.getWidth() * getScale(view, includePadding);
+            return view.getWidth() * getScale(view, false);
         } else {
-            return view.getHeight() * getScale(view, includePadding);
+            return view.getHeight() * getScale(view, false);
         }
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis) {
+        return getTabContainerSize(axis, true);
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

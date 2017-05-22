@@ -24,6 +24,7 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -2905,11 +2906,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     protected final float calculateAttachedPosition(final int count) {
-        Toolbar[] toolbars = getTabSwitcher().getToolbars();
-        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
-                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() + tabInset : 0);
+        float totalSpace = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
         float attachedPosition;
 
         if (count == 3) {
