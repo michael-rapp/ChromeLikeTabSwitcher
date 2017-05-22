@@ -522,9 +522,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
-                if (firstVisibleIndex == -1 && pair.second != State.STACKED_END &&
+                if (getFirstVisibleIndex() == -1 && pair.second != State.STACKED_END &&
                         pair.second != State.HIDDEN) {
-                    setFirstVisibleIndex(tabItem.getIndex());
+                    setFirstVisibleIndex(item.getIndex());
                 }
 
                 if (pair.second == State.STACKED_START || pair.second == State.STACKED_START_ATOP) {
@@ -590,8 +590,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
-                if ((getFirstVisibleIndex() == -1 || getFirstVisibleIndex() > tabItem.getIndex())
-                        && pair.second == State.FLOATING) {
+                if ((getFirstVisibleIndex() == -1 || getFirstVisibleIndex() > item.getIndex()) &&
+                        pair.second == State.FLOATING) {
                     setFirstVisibleIndex(item.getIndex());
                 }
             }
@@ -2867,8 +2867,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         contentViewRecycler = new ViewRecycler<>(inflater);
-        tabRecyclerAdapter = new PhoneTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
-                contentViewRecycler);
+        tabRecyclerAdapter =
+                new PhoneTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
+                        contentViewRecycler);
         getModel().addListener(tabRecyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new ItemComparator(getTabSwitcher())));

@@ -58,6 +58,7 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
@@ -1334,7 +1335,11 @@ public abstract class AbstractTabSwitcherLayout
                         firstVisibleIndex - (getModel().isAddTabButtonShown() ? 1 : 0));
             }
 
-            result = Pair.create(firstVisibleIndex, item.getTag().getPosition());
+            Tag tag = item.getTag();
+
+            if (tag.getState() != State.HIDDEN) {
+                result = Pair.create(firstVisibleIndex, tag.getPosition());
+            }
         }
 
         getTabViewRecycler().removeAll();
