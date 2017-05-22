@@ -131,6 +131,17 @@ public interface Arithmetics {
     int getPadding(@NonNull Axis axis, int gravity, @NonNull View view);
 
     /**
+     * Returns the scale of a tab's view, depending on its margin. By default, the view's padding is
+     * not taken into account.
+     *
+     * @param view
+     *         The view, whose scale should be returned, as an instance of the class {@link View}.
+     *         The view may not be null
+     * @return The scale of the given view as a {@link Float} value
+     */
+    float getTabScale(@NonNull final View view);
+
+    /**
      * Returns the scale of a tab's view, depending on its margin.
      *
      * @param view

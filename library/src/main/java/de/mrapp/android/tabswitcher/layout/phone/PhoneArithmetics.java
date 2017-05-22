@@ -26,25 +26,20 @@ import android.widget.FrameLayout;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.layout.AbstractArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
-import de.mrapp.android.tabswitcher.layout.Arithmetics;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
 
 /**
  * Provides methods, which allow to calculate the position, size and rotation of a {@link
- * TabSwitcher}'s children, when using the smartphone layout.
+ * TabSwitcher}'s tabs, when using the smartphone layout.
  *
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneArithmetics implements Arithmetics {
-
-    /**
-     * The tab switcher, the arithmetics are calculated for.
-     */
-    private final TabSwitcher tabSwitcher;
+public class PhoneArithmetics extends AbstractArithmetics {
 
     /**
      * The height of a tab's title container in pixels.
@@ -85,7 +80,7 @@ public class PhoneArithmetics implements Arithmetics {
             return Axis.DRAGGING_AXIS;
         } else if (axis == Axis.X_AXIS) {
             return Axis.ORTHOGONAL_AXIS;
-        } else if (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE) {
+        } else if (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE) {
             return axis == Axis.DRAGGING_AXIS ? Axis.ORTHOGONAL_AXIS : Axis.DRAGGING_AXIS;
         } else {
             return axis;
@@ -104,9 +99,11 @@ public class PhoneArithmetics implements Arithmetics {
      */
     private float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getTabSize(axis, view) / 2f : 0;
+            return getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
+                    getTabSize(axis, view) / 2f : 0;
         } else {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getTabSize(axis, view) / 2f;
+            return getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
+                    getTabSize(axis, view) / 2f;
         }
     }
 
@@ -156,7 +153,8 @@ public class PhoneArithmetics implements Arithmetics {
     private float getPivotWhenOvershootingAtEnd(@NonNull final Axis axis,
                                                 @NonNull final View view) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getTabSize(axis, view) / 2f;
+            return getTabSwitcher().getCount() > 1 ? endOvershootPivot :
+                    getTabSize(axis, view) / 2f;
         } else {
             return getTabSize(axis, view) / 2f;
         }
@@ -164,15 +162,14 @@ public class PhoneArithmetics implements Arithmetics {
 
     /**
      * Creates a new class, which provides methods, which allow to calculate the position, size and
-     * rotation of a {@link TabSwitcher}'s children, when using the smartphone layout.
+     * rotation of a {@link TabSwitcher}'s tabs, when using the smartphone layout.
      *
      * @param tabSwitcher
      *         The tab switcher, the arithmetics should be calculated for, as an instance of the
      *         class {@link TabSwitcher}. The tab switcher may not be null
      */
     public PhoneArithmetics(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        this.tabSwitcher = tabSwitcher;
+        super(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
@@ -183,7 +180,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getTouchPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
+    public final float getTouchPosition(@NonNull final Axis axis,
+                                        @NonNull final MotionEvent event) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(event, "The motion event may not be null");
 
@@ -200,18 +198,19 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            Toolbar[] toolbars = tabSwitcher.getToolbars();
-            return view.getY() - (tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
-                    toolbars != null ?
-                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) -
-                    getPadding(axis, Gravity.START, tabSwitcher);
+            Toolbar[] toolbars = getTabSwitcher().getToolbars();
+            return view.getY() -
+                    (getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
+                            toolbars != null ?
+                            toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset :
+                            0) - getPadding(axis, Gravity.START, getTabSwitcher());
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
-            return view.getX() - layoutParams.leftMargin - tabSwitcher.getPaddingLeft() / 2f +
-                    tabSwitcher.getPaddingRight() / 2f +
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
-                            tabSwitcher.isSwitcherShown() ?
+            return view.getX() - layoutParams.leftMargin - getTabSwitcher().getPaddingLeft() / 2f +
+                    getTabSwitcher().getPaddingRight() / 2f +
+                    (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE &&
+                            getTabSwitcher().isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0);
         }
     }
@@ -223,18 +222,18 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            Toolbar[] toolbars = tabSwitcher.getToolbars();
-            view.setY((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
+            Toolbar[] toolbars = getTabSwitcher().getToolbars();
+            view.setY((getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
                     toolbars != null ?
                     toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
-                    getPadding(axis, Gravity.START, tabSwitcher) + position);
+                    getPadding(axis, Gravity.START, getTabSwitcher()) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
-            view.setX(position + layoutParams.leftMargin + tabSwitcher.getPaddingLeft() / 2f -
-                    tabSwitcher.getPaddingRight() / 2f -
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
-                            tabSwitcher.isSwitcherShown() ?
+            view.setX(position + layoutParams.leftMargin + getTabSwitcher().getPaddingLeft() / 2f -
+                    getTabSwitcher().getPaddingRight() / 2f -
+                    (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE &&
+                            getTabSwitcher().isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
@@ -249,18 +248,20 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            Toolbar[] toolbars = tabSwitcher.getToolbars();
-            animator.y((tabSwitcher.areToolbarsShown() && tabSwitcher.isSwitcherShown() &&
+            Toolbar[] toolbars = getTabSwitcher().getToolbars();
+            animator.y((getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
                     toolbars != null ?
                     toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
-                    (includePadding ? getPadding(axis, Gravity.START, tabSwitcher) : 0) + position);
+                    (includePadding ? getPadding(axis, Gravity.START, getTabSwitcher()) : 0) +
+                    position);
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin + (includePadding ?
-                    tabSwitcher.getPaddingLeft() / 2f - tabSwitcher.getPaddingRight() / 2f : 0) -
-                    (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE &&
-                            tabSwitcher.isSwitcherShown() ?
+                    getTabSwitcher().getPaddingLeft() / 2f -
+                            getTabSwitcher().getPaddingRight() / 2f : 0) -
+                    (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE &&
+                            getTabSwitcher().isSwitcherShown() ?
                             stackedTabCount * stackedTabSpacing / 2f : 0));
         }
     }
@@ -285,8 +286,9 @@ public class PhoneArithmetics implements Arithmetics {
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
         float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin -
-                (includePadding ? tabSwitcher.getPaddingLeft() + tabSwitcher.getPaddingRight() :
-                        0) - (tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ?
+                (includePadding ?
+                        getTabSwitcher().getPaddingLeft() + getTabSwitcher().getPaddingRight() :
+                        0) - (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
                 stackedTabCount * stackedTabSpacing : 0);
         return targetWidth / width;
     }
@@ -324,31 +326,26 @@ public class PhoneArithmetics implements Arithmetics {
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getHeight() * getTabScale(view, false);
+            return view.getHeight() * getTabScale(view);
         } else {
-            return view.getWidth() * getTabScale(view, false);
+            return view.getWidth() * getTabScale(view);
         }
-    }
-
-    @Override
-    public final float getTabContainerSize(@NonNull final Axis axis) {
-        return getTabContainerSize(axis, true);
     }
 
     @Override
     public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
-        ViewGroup tabContainer = tabSwitcher.getTabContainer();
+        ViewGroup tabContainer = getTabSwitcher().getTabContainer();
         assert tabContainer != null;
         FrameLayout.LayoutParams layoutParams =
                 (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
-        int padding = !includePadding ? (getPadding(axis, Gravity.START, tabSwitcher) +
-                getPadding(axis, Gravity.END, tabSwitcher)) : 0;
-        Toolbar[] toolbars = tabSwitcher.getToolbars();
+        int padding = !includePadding ? (getPadding(axis, Gravity.START, getTabSwitcher()) +
+                getPadding(axis, Gravity.END, getTabSwitcher())) : 0;
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             int toolbarSize =
-                    !includePadding && tabSwitcher.areToolbarsShown() && toolbars != null ?
+                    !includePadding && getTabSwitcher().areToolbarsShown() && toolbars != null ?
                             toolbars[0].getHeight() - tabInset : 0;
             return tabContainer.getHeight() - layoutParams.topMargin - layoutParams.bottomMargin -
                     padding - toolbarSize;
@@ -416,10 +413,10 @@ public class PhoneArithmetics implements Arithmetics {
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setRotationY(
-                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         } else {
             view.setRotationX(
-                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         }
     }
 
@@ -432,10 +429,10 @@ public class PhoneArithmetics implements Arithmetics {
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.rotationY(
-                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         } else {
             animator.rotationX(
-                    tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
+                    getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? -1 * angle : angle);
         }
     }
 
