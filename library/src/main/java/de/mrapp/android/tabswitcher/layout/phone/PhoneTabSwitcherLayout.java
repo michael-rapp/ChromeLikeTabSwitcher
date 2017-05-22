@@ -376,7 +376,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return The bottom margin, which has been calculated, in pixels as an {@link Integer} value
      */
     private int calculateBottomMargin(@NonNull final View view) {
-        float tabHeight = (view.getHeight() - 2 * tabInset) * getArithmetics().getScale(view, true);
+        float tabHeight = (view.getHeight() - 2 * tabInset) * getArithmetics().getTabScale(view, true);
         float containerHeight = getArithmetics().getTabContainerSize(Axis.Y_AXIS, false);
         int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                 getStackedTabCount() * getStackedTabSpacing();
@@ -673,20 +673,20 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         view.setX(layoutParams.leftMargin);
         view.setY(layoutParams.topMargin);
-        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 1);
-        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 1);
-        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-        float scale = getArithmetics().getScale(view, true);
+        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, 1);
+        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, 1);
+        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+        float scale = getArithmetics().getTabScale(view, true);
         int selectedTabIndex = getModel().getSelectedTabIndex();
 
         if (item.getIndex() < selectedTabIndex) {
-            getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
+            getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view,
                     getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS));
         } else if (item.getIndex() > selectedTabIndex) {
-            getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
+            getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                             layoutParams.topMargin);
         }
@@ -700,12 +700,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setDuration(duration);
         animation.setInterpolator(interpolator);
         animation.setListener(new AnimationListenerWrapper(listener));
-        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, scale);
-        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
+        getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animation, scale);
+        getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animation, scale);
         getArithmetics()
-                .animatePosition(Axis.DRAGGING_AXIS, animation, view, item.getTag().getPosition(),
+                .animateTabPosition(Axis.DRAGGING_AXIS, animation, view, item.getTag().getPosition(),
                         true);
-        getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
+        getArithmetics().animateTabPosition(Axis.ORTHOGONAL_AXIS, animation, view, 0, true);
         animation.setStartDelay(0);
         animation.start();
     }
@@ -773,23 +773,23 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setDuration(duration);
         animation.setInterpolator(interpolator);
         animation.setListener(new AnimationListenerWrapper(listener));
-        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
-        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
+        getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animation, 1);
+        getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
-        getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, view,
+        getArithmetics().animateTabPosition(Axis.ORTHOGONAL_AXIS, animation, view,
                 getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? layoutParams.topMargin : 0,
                 false);
         int selectedTabIndex = getModel().getSelectedTabIndex();
 
         if (item.getIndex() < selectedTabIndex) {
-            getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
+            getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animation, view,
                     getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS), false);
         } else if (item.getIndex() > selectedTabIndex) {
-            getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
+            getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animation, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                             layoutParams.topMargin, false);
         } else {
-            getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
+            getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animation, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                             layoutParams.topMargin, false);
         }
@@ -822,12 +822,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                               final long delay, @NonNull final SwipeAnimation swipeAnimation,
                               @Nullable final AnimatorListener listener) {
         View view = item.getView();
-        float currentScale = getArithmetics().getScale(view, true);
+        float currentScale = getArithmetics().getTabScale(view, true);
         float swipePosition = calculateSwipePosition();
         float targetPosition = remove ?
                 (swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
                         swipePosition) : 0;
-        float currentPosition = getArithmetics().getPosition(Axis.ORTHOGONAL_AXIS, view);
+        float currentPosition = getArithmetics().getTabPosition(Axis.ORTHOGONAL_AXIS, view);
         float distance = Math.abs(targetPosition - currentPosition);
         long animationDuration = swipeAnimation.getDuration() != -1 ? swipeAnimation.getDuration() :
                 Math.round(swipeAnimationDuration * (distance / swipePosition));
@@ -838,10 +838,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setListener(new AnimationListenerWrapper(listener));
         animation.setDuration(animationDuration);
         getArithmetics()
-                .animatePosition(Axis.ORTHOGONAL_AXIS, animation, view, targetPosition, true);
-        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation,
+                .animateTabPosition(Axis.ORTHOGONAL_AXIS, animation, view, targetPosition, true);
+        getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animation,
                 remove ? swipedTabScale * currentScale : currentScale);
-        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation,
+        getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animation,
                 remove ? swipedTabScale * currentScale : currentScale);
         animation.alpha(remove ? swipedTabAlpha : 1);
         animation.setStartDelay(delay);
@@ -869,9 +869,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                               final boolean selected, final long animationDuration,
                               final float velocity) {
         View view = tabItem.getView();
-        float currentPosition = getArithmetics().getPosition(Axis.X_AXIS, view);
+        float currentPosition = getArithmetics().getTabPosition(Axis.X_AXIS, view);
         float distance = Math.abs(targetPosition - currentPosition);
-        float maxDistance = getArithmetics().getSize(Axis.X_AXIS, view) + swipedTabDistance;
+        float maxDistance = getArithmetics().getTabSize(Axis.X_AXIS, view) + swipedTabDistance;
         long duration = velocity > 0 ? Math.round((distance / velocity) * 1000) :
                 Math.round(animationDuration * (distance / maxDistance));
         ViewPropertyAnimator animation = view.animate();
@@ -881,7 +881,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setDuration(duration);
         animation.setStartDelay(0);
-        getArithmetics().animatePosition(Axis.X_AXIS, animation, view, targetPosition, true);
+        getArithmetics().animateTabPosition(Axis.X_AXIS, animation, view, targetPosition, true);
         animation.start();
     }
 
@@ -898,10 +898,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateRemove(@NonNull final AbstractItem removedItem,
                                @NonNull final SwipeAnimation swipeAnimation) {
         View view = removedItem.getView();
-        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
-        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
+        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
+        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
         animateSwipe(removedItem, true, 0, swipeAnimation,
                 createRemoveAnimationListener(removedItem));
     }
@@ -937,7 +937,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setListener(new AnimationListenerWrapper(listener));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setDuration(relocateAnimationDuration);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, position, true);
+        getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animation, view, position, true);
         animation.setStartDelay(delay);
         animation.start();
     }
@@ -964,13 +964,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateRevertStartOvershoot(@NonNull final Interpolator interpolator) {
         AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, 0);
         View view = item.getView();
-        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-        float position = getArithmetics().getPosition(Axis.DRAGGING_AXIS, view);
+        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+        float position = getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view);
         float targetPosition = item.getTag().getPosition();
-        final float startPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, view);
+        final float startPosition = getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view);
         ValueAnimator animation = ValueAnimator.ofFloat(targetPosition - position);
         animation.setDuration(Math.round(revertOvershootAnimationDuration * Math.abs(
                 (targetPosition - position) /
@@ -989,14 +989,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 while ((item = iterator.next()) != null) {
                     if (item.getIndex() == 0) {
                         View view = item.getView();
-                        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
+                        getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view,
                                 startPosition + (float) animation.getAnimatedValue());
                     } else if (item.isInflated()) {
                         View firstView = iterator.first().getView();
                         View view = item.getView();
                         view.setVisibility(
-                                getArithmetics().getPosition(Axis.DRAGGING_AXIS, firstView) <=
-                                        getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) ?
+                                getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, firstView) <=
+                                        getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view) ?
                                         View.INVISIBLE : View.VISIBLE);
                     }
                 }
@@ -1039,16 +1039,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             if (item.isInflated()) {
                 View view = item.getView();
 
-                if (getArithmetics().getRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
+                if (getArithmetics().getTabRotation(Axis.ORTHOGONAL_AXIS, view) != 0) {
                     ViewPropertyAnimator animation = view.animate();
                     animation.setListener(new AnimationListenerWrapper(
                             createRevertOvershootAnimationListener(view,
                                     !result ? listener : null)));
                     animation.setDuration(Math.round(revertOvershootAnimationDuration *
-                            (Math.abs(getArithmetics().getRotation(Axis.ORTHOGONAL_AXIS, view)) /
+                            (Math.abs(getArithmetics().getTabRotation(Axis.ORTHOGONAL_AXIS, view)) /
                                     maxAngle)));
                     animation.setInterpolator(interpolator);
-                    getArithmetics().animateRotation(Axis.ORTHOGONAL_AXIS, animation, 0);
+                    getArithmetics().animateTabRotation(Axis.ORTHOGONAL_AXIS, animation, 0);
                     animation.setStartDelay(0);
                     animation.start();
                     result = true;
@@ -1083,8 +1083,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setStartDelay(0);
         animation.setDuration(revealAnimation.getDuration() != -1 ? revealAnimation.getDuration() :
                 revealAnimationDuration);
-        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
-        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
+        getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animation, 1);
+        getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animation, 1);
         animation.start();
         animateToolbarVisibility(getModel().areToolbarsShown() && getModel().isEmpty(), 0);
     }
@@ -1117,21 +1117,21 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         float y = peekAnimation.getY() + tabTitleContainerHeight;
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         view.setAlpha(1f);
-        getArithmetics().setPivot(Axis.X_AXIS, view, x);
-        getArithmetics().setPivot(Axis.Y_AXIS, view, y);
+        getArithmetics().setTabPivot(Axis.X_AXIS, view, x);
+        getArithmetics().setTabPivot(Axis.Y_AXIS, view, y);
         view.setX(layoutParams.leftMargin);
         view.setY(layoutParams.topMargin);
-        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 0);
-        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 0);
+        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, 0);
+        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, 0);
         ViewPropertyAnimator animation = view.animate();
         animation.setInterpolator(interpolator);
         animation.setListener(
                 new AnimationListenerWrapper(createPeekAnimationListener(item, peekAnimation)));
         animation.setStartDelay(0);
         animation.setDuration(duration);
-        getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
-        getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view, peekPosition, true);
+        getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animation, 1);
+        getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animation, 1);
+        getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animation, view, peekPosition, true);
         animation.start();
         int selectedTabIndex = getModel().getSelectedTabIndex();
         TabItem selectedItem = TabItem.create(getModel(), tabViewRecycler, selectedTabIndex);
@@ -1275,14 +1275,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
                 view.setAlpha(1f);
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                        getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
                 view.setX(layoutParams.leftMargin);
                 view.setY(layoutParams.topMargin);
-                getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 1);
-                getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 1);
+                getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, 1);
+                getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, 1);
             }
 
         };
@@ -1314,12 +1314,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 FrameLayout.LayoutParams layoutParams =
                         (FrameLayout.LayoutParams) view.getLayoutParams();
                 view.setAlpha(1f);
-                getArithmetics().setPivot(Axis.X_AXIS, view, x);
-                getArithmetics().setPivot(Axis.Y_AXIS, view, y);
+                getArithmetics().setTabPivot(Axis.X_AXIS, view, x);
+                getArithmetics().setTabPivot(Axis.Y_AXIS, view, y);
                 view.setX(layoutParams.leftMargin);
                 view.setY(layoutParams.topMargin);
-                getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 0);
-                getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 0);
+                getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, 0);
+                getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, 0);
                 animateReveal(item, revealAnimation);
             }
 
@@ -1426,24 +1426,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         view.setTag(R.id.tag_properties, tag);
                         view.setAlpha(swipedTabAlpha);
                         float swipePosition = calculateSwipePosition();
-                        float scale = getArithmetics().getScale(view, true);
-                        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
-                                .getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
-                                .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-                        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
-                        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view,
+                        float scale = getArithmetics().getTabScale(view, true);
+                        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                                .getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                                .getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+                        getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view, tag.getPosition());
+                        getArithmetics().setTabPosition(Axis.ORTHOGONAL_AXIS, view,
                                 swipeAnimation.getDirection() == SwipeDirection.LEFT ?
                                         -1 * swipePosition : swipePosition);
-                        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, scale);
-                        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, scale);
-                        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
-                                .getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
-                        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
-                                .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-                        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
+                        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, scale);
+                        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, scale);
+                        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                                .getTabPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
+                        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                                .getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
+                        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, swipedTabScale * scale);
                         getArithmetics()
-                                .setScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
+                                .setTabScale(Axis.ORTHOGONAL_AXIS, view, swipedTabScale * scale);
                         animateSwipe(item, false, 0, swipeAnimation,
                                 createSwipeAnimationListener(item));
                     } else {
@@ -1485,7 +1485,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     position = getTabSwitcher().getWidth() + dragDistance + swipedTabDistance;
                 }
 
-                getArithmetics().setPosition(Axis.X_AXIS, view, position);
+                getArithmetics().setTabPosition(Axis.X_AXIS, view, position);
             }
 
         };
@@ -1638,8 +1638,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         FrameLayout.LayoutParams layoutParams =
                                 (FrameLayout.LayoutParams) view.getLayoutParams();
                         view.setAlpha(1f);
-                        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, 1);
-                        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, 1);
+                        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, 1);
+                        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, 1);
                         view.setX(layoutParams.leftMargin);
                         view.setY(layoutParams.topMargin);
                     } else {
@@ -1697,8 +1697,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 View view = item.getView();
                 adaptStackOnSwipeAborted(item, item.getIndex() + 1);
                 item.getTag().setClosing(false);
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                        getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
                 animateToolbarVisibility(true, 0);
             }
 
@@ -1863,10 +1863,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                        getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
 
                 if (listener != null) {
                     listener.onAnimationEnd(animation);
@@ -1926,9 +1926,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
                 View view = item.getView();
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, tabTitleContainerHeight);
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view, tabTitleContainerHeight);
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getArithmetics().getTabSize(Axis.ORTHOGONAL_AXIS, view) / 2f);
                 ViewPropertyAnimator animator = view.animate();
                 animator.setDuration(duration);
                 animator.setStartDelay(duration);
@@ -1936,10 +1936,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 animator.setListener(
                         new AnimationListenerWrapper(createRevertPeekAnimationListener(item)));
                 animator.alpha(0);
-                getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animator, view,
-                        getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) * 1.5f, false);
-                getArithmetics().animateScale(Axis.DRAGGING_AXIS, animator, 0);
-                getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animator, 0);
+                getArithmetics().animateTabPosition(Axis.DRAGGING_AXIS, animator, view,
+                        getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view) * 1.5f, false);
+                getArithmetics().animateTabScale(Axis.DRAGGING_AXIS, animator, 0);
+                getArithmetics().animateTabScale(Axis.ORTHOGONAL_AXIS, animator, 0);
                 animator.start();
             }
 
@@ -2101,13 +2101,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void adaptViewSize(@NonNull final AbstractItem item) {
         View view = item.getView();
-        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-        float scale = getArithmetics().getScale(view, true);
-        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, scale);
-        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, scale);
+        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+        float scale = getArithmetics().getTabScale(view, true);
+        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, scale);
+        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, scale);
     }
 
     /**
@@ -2627,18 +2627,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             dragDistance = distance < 0 ? dragDistance * -1 : dragDistance;
         }
 
-        getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
-        getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
-        float scale = getArithmetics().getScale(view, true);
+        getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.SWIPE));
+        getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.SWIPE));
+        float scale = getArithmetics().getTabScale(view, true);
         float ratio = 1 - (Math.abs(dragDistance) / calculateSwipePosition());
         float scaledClosedTabScale = swipedTabScale * scale;
         float targetScale = scaledClosedTabScale + ratio * (scale - scaledClosedTabScale);
-        getArithmetics().setScale(Axis.DRAGGING_AXIS, view, targetScale);
-        getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
+        getArithmetics().setTabScale(Axis.DRAGGING_AXIS, view, targetScale);
+        getArithmetics().setTabScale(Axis.ORTHOGONAL_AXIS, view, targetScale);
         view.setAlpha(swipedTabAlpha + ratio * (1 - swipedTabAlpha));
-        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
+        getArithmetics().setTabPosition(Axis.ORTHOGONAL_AXIS, view, dragDistance);
     }
 
     /**
@@ -2655,16 +2655,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         while ((item = iterator.next()) != null) {
             if (item.getIndex() == 0) {
                 View view = item.getView();
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view,
-                        getArithmetics().getPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view,
-                        getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
-                getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, position);
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.DRAGGING_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view,
+                        getArithmetics().getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.NONE));
+                getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view, position);
             } else if (item.isInflated()) {
                 View firstView = iterator.first().getView();
                 View view = item.getView();
-                view.setVisibility(getArithmetics().getPosition(Axis.DRAGGING_AXIS, firstView) <=
-                        getArithmetics().getPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
+                view.setVisibility(getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, firstView) <=
+                        getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view) ? View.INVISIBLE :
                         View.VISIBLE);
             }
         }
@@ -2686,11 +2686,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             if (item.getIndex() == 0) {
                 view.setCameraDistance(maxCameraDistance);
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
-                        .getPivot(Axis.DRAGGING_AXIS, view, DragState.OVERSHOOT_START));
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
-                        .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.OVERSHOOT_START));
-                getArithmetics().setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                        .getTabPivot(Axis.DRAGGING_AXIS, view, DragState.OVERSHOOT_START));
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                        .getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.OVERSHOOT_START));
+                getArithmetics().setTabRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             } else if (item.isInflated()) {
                 item.getView().setVisibility(View.INVISIBLE);
             }
@@ -2730,11 +2730,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                             minCameraDistance + (maxCameraDistance - minCameraDistance) * ratio);
                 }
 
-                getArithmetics().setPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
-                        .getPivot(Axis.DRAGGING_AXIS, view, DragState.OVERSHOOT_END));
-                getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
-                        .getPivot(Axis.ORTHOGONAL_AXIS, view, DragState.OVERSHOOT_END));
-                getArithmetics().setRotation(Axis.ORTHOGONAL_AXIS, view, angle);
+                getArithmetics().setTabPivot(Axis.DRAGGING_AXIS, view, getArithmetics()
+                        .getTabPivot(Axis.DRAGGING_AXIS, view, DragState.OVERSHOOT_END));
+                getArithmetics().setTabPivot(Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                        .getTabPivot(Axis.ORTHOGONAL_AXIS, view, DragState.OVERSHOOT_END));
+                getArithmetics().setTabRotation(Axis.ORTHOGONAL_AXIS, view, angle);
             }
         }
     }
@@ -2894,14 +2894,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         View view = item.getView();
         view.setAlpha(1f);
         view.setVisibility(View.VISIBLE);
-        getArithmetics().setPivot(Arithmetics.Axis.DRAGGING_AXIS, view, getArithmetics()
-                .getPivot(Arithmetics.Axis.DRAGGING_AXIS, view,
+        getArithmetics().setTabPivot(Arithmetics.Axis.DRAGGING_AXIS, view, getArithmetics()
+                .getTabPivot(Arithmetics.Axis.DRAGGING_AXIS, view,
                         AbstractDragEventHandler.DragState.NONE));
-        getArithmetics().setPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view, getArithmetics()
-                .getPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view,
+        getArithmetics().setTabPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view, getArithmetics()
+                .getTabPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, view,
                         AbstractDragEventHandler.DragState.NONE));
         super.updateView(item);
-        getArithmetics().setRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
+        getArithmetics().setTabRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
     @Override
@@ -2952,7 +2952,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float size = getArithmetics().getSize(Arithmetics.Axis.DRAGGING_AXIS, getTabSwitcher());
+        float size = getArithmetics().getTabSize(Arithmetics.Axis.DRAGGING_AXIS, getTabSwitcher());
         Toolbar[] toolbars = getTabSwitcher().getToolbars();
         int toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                 getTabSwitcher().areToolbarsShown() && toolbars != null ?
@@ -3267,7 +3267,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (remove) {
             View view = tabItem.getView();
             SwipeDirection direction =
-                    getArithmetics().getPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ?
+                    getArithmetics().getTabPosition(Axis.ORTHOGONAL_AXIS, view) < 0 ?
                             SwipeDirection.LEFT : SwipeDirection.RIGHT;
             long animationDuration =
                     velocity > 0 ? Math.round((calculateSwipePosition() / velocity) * 1000) : -1;
@@ -3291,8 +3291,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (distance == 0 || (distance > 0 && selectedTabIndex < getModel().getCount() - 1) ||
                 (distance < 0 && selectedTabIndex > 0)) {
-            getArithmetics().setPosition(Axis.X_AXIS, view, distance);
-            float position = getArithmetics().getPosition(Axis.X_AXIS, view);
+            getArithmetics().setTabPosition(Axis.X_AXIS, view, distance);
+            float position = getArithmetics().getTabPosition(Axis.X_AXIS, view);
 
             if (distance != 0) {
                 TabItem neighbor = TabItem.create(getModel(), getTabViewRecycler(),
@@ -3307,7 +3307,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         } else {
             float position = (float) Math.pow(Math.abs(distance), 0.75);
             position = distance < 0 ? position * -1 : position;
-            getArithmetics().setPosition(Axis.X_AXIS, view, position);
+            getArithmetics().setTabPosition(Axis.X_AXIS, view, position);
         }
 
         getLogger().logVerbose(getClass(), "Swiping content of tab at index " + selectedTabIndex +
@@ -3328,7 +3328,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (selectedTabIndex != previousSelectedTabIndex) {
             neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
             left = selectedTabIndex < previousSelectedTabIndex;
-        } else if (getArithmetics().getPosition(Axis.X_AXIS, selectedTabItem.getView()) > 0) {
+        } else if (getArithmetics().getTabPosition(Axis.X_AXIS, selectedTabItem.getView()) > 0) {
             if (selectedTabIndex + 1 < getModel().getCount()) {
                 neighbor = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex + 1);
                 left = true;
@@ -3341,7 +3341,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         if (neighbor != null && neighbor.isInflated()) {
-            float width = getArithmetics().getSize(Axis.X_AXIS, neighbor.getView());
+            float width = getArithmetics().getTabSize(Axis.X_AXIS, neighbor.getView());
             float targetPosition =
                     left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
             animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);

@@ -1030,8 +1030,8 @@ public abstract class AbstractTabSwitcherLayout
     protected void updateView(@NonNull final AbstractItem item) {
         float position = item.getTag().getPosition();
         View view = item.getView();
-        getArithmetics().setPosition(Axis.DRAGGING_AXIS, view, position);
-        getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, view, 0);
+        getArithmetics().setTabPosition(Axis.DRAGGING_AXIS, view, position);
+        getArithmetics().setTabPosition(Axis.ORTHOGONAL_AXIS, view, 0);
     }
 
     /**

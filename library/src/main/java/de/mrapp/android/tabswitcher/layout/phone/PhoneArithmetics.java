@@ -104,9 +104,9 @@ public class PhoneArithmetics implements Arithmetics {
      */
     private float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getSize(axis, view) / 2f : 0;
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? getTabSize(axis, view) / 2f : 0;
         } else {
-            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getSize(axis, view) / 2f;
+            return tabSwitcher.getLayout() == Layout.PHONE_LANDSCAPE ? 0 : getTabSize(axis, view) / 2f;
         }
     }
 
@@ -140,7 +140,7 @@ public class PhoneArithmetics implements Arithmetics {
      */
     private float getPivotWhenOvershootingAtStart(@NonNull final Axis axis,
                                                   @NonNull final View view) {
-        return getSize(axis, view) / 2f;
+        return getTabSize(axis, view) / 2f;
     }
 
     /**
@@ -156,9 +156,9 @@ public class PhoneArithmetics implements Arithmetics {
     private float getPivotWhenOvershootingAtEnd(@NonNull final Axis axis,
                                                 @NonNull final View view) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getSize(axis, view) / 2f;
+            return tabSwitcher.getCount() > 1 ? endOvershootPivot : getTabSize(axis, view) / 2f;
         } else {
-            return getSize(axis, view) / 2f;
+            return getTabSize(axis, view) / 2f;
         }
     }
 
@@ -183,7 +183,7 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
+    public final float getTouchPosition(@NonNull final Axis axis, @NonNull final MotionEvent event) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(event, "The motion event may not be null");
 
@@ -195,7 +195,7 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getPosition(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabPosition(@NonNull final Axis axis, @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -217,8 +217,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void setPosition(@NonNull final Axis axis, @NonNull final View view,
-                                  final float position) {
+    public final void setTabPosition(@NonNull final Axis axis, @NonNull final View view,
+                                     final float position) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -240,10 +240,10 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void animatePosition(@NonNull final Axis axis,
-                                      @NonNull final ViewPropertyAnimator animator,
-                                      @NonNull final View view, final float position,
-                                      final boolean includePadding) {
+    public final void animateTabPosition(@NonNull final Axis axis,
+                                         @NonNull final ViewPropertyAnimator animator,
+                                         @NonNull final View view, final float position,
+                                         final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
         ensureNotNull(view, "The view may not be null");
@@ -280,7 +280,7 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getScale(@NonNull final View view, final boolean includePadding) {
+    public final float getTabScale(@NonNull final View view, final boolean includePadding) {
         ensureNotNull(view, "The view may not be null");
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
@@ -292,8 +292,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void setScale(@NonNull final Axis axis, @NonNull final View view,
-                               final float scale) {
+    public final void setTabScale(@NonNull final Axis axis, @NonNull final View view,
+                                  final float scale) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -305,9 +305,9 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void animateScale(@NonNull final Axis axis,
-                                   @NonNull final ViewPropertyAnimator animator,
-                                   final float scale) {
+    public final void animateTabScale(@NonNull final Axis axis,
+                                      @NonNull final ViewPropertyAnimator animator,
+                                      final float scale) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
 
@@ -319,14 +319,14 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getSize(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabSize(@NonNull final Axis axis, @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getHeight() * getScale(view, false);
+            return view.getHeight() * getTabScale(view, false);
         } else {
-            return view.getWidth() * getScale(view, false);
+            return view.getWidth() * getTabScale(view, false);
         }
     }
 
@@ -359,8 +359,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getPivot(@NonNull final Axis axis, @NonNull final View view,
-                                @NonNull final DragState dragState) {
+    public final float getTabPivot(@NonNull final Axis axis, @NonNull final View view,
+                                   @NonNull final DragState dragState) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
         ensureNotNull(dragState, "The drag state may not be null");
@@ -377,8 +377,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void setPivot(@NonNull final Axis axis, @NonNull final View view,
-                               final float pivot) {
+    public final void setTabPivot(@NonNull final Axis axis, @NonNull final View view,
+                                  final float pivot) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -397,7 +397,7 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getRotation(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabRotation(@NonNull final Axis axis, @NonNull final View view) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -409,8 +409,8 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void setRotation(@NonNull final Axis axis, @NonNull final View view,
-                                  final float angle) {
+    public final void setTabRotation(@NonNull final Axis axis, @NonNull final View view,
+                                     final float angle) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(view, "The view may not be null");
 
@@ -424,9 +424,9 @@ public class PhoneArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void animateRotation(@NonNull final Axis axis,
-                                      @NonNull final ViewPropertyAnimator animator,
-                                      final float angle) {
+    public final void animateTabRotation(@NonNull final Axis axis,
+                                         @NonNull final ViewPropertyAnimator animator,
+                                         final float angle) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
 

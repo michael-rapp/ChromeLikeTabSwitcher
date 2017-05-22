@@ -59,19 +59,19 @@ public interface Arithmetics {
     }
 
     /**
-     * Returns the position of a motion event on a specific axis.
+     * Returns the position of a touch event on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
      * @param event
-     *         The motion event, whose position should be returned, as an instance of the class
+     *         The touch event, whose position should be returned, as an instance of the class
      *         {@link MotionEvent}. The motion event may not be null
-     * @return The position of the given motion event on the given axis as a {@link Float} value
+     * @return The position of the given touch event on the given axis as a {@link Float} value
      */
-    float getPosition(@NonNull Axis axis, @NonNull MotionEvent event);
+    float getTouchPosition(@NonNull Axis axis, @NonNull MotionEvent event);
 
     /**
-     * Returns the position of a view on a specific axis.
+     * Returns the position of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -80,10 +80,10 @@ public interface Arithmetics {
      *         View}. The view may not be null
      * @return The position of the given view on the given axis as a {@link Float} value
      */
-    float getPosition(@NonNull Axis axis, @NonNull View view);
+    float getTabPosition(@NonNull Axis axis, @NonNull View view);
 
     /**
-     * Sets the position of a view on a specific axis.
+     * Sets the position of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -93,10 +93,10 @@ public interface Arithmetics {
      * @param position
      *         The position, which should be set, as a {@link Float} value
      */
-    void setPosition(@NonNull Axis axis, @NonNull View view, float position);
+    void setTabPosition(@NonNull Axis axis, @NonNull View view, float position);
 
     /**
-     * Animates the position of a view on a specific axis.
+     * Animates the position of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -111,8 +111,8 @@ public interface Arithmetics {
      * @param includePadding
      *         True, if the view's padding should be taken into account, false otherwise
      */
-    void animatePosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
-                         @NonNull View view, float position, boolean includePadding);
+    void animateTabPosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
+                            @NonNull View view, float position, boolean includePadding);
 
     /**
      * Returns the padding of a view on a specific axis and using a specific gravity.
@@ -131,7 +131,7 @@ public interface Arithmetics {
     int getPadding(@NonNull Axis axis, int gravity, @NonNull View view);
 
     /**
-     * Returns the scale of a view, depending on its margin.
+     * Returns the scale of a tab's view, depending on its margin.
      *
      * @param view
      *         The view, whose scale should be returned, as an instance of the class {@link View}.
@@ -140,10 +140,10 @@ public interface Arithmetics {
      *         True, if the view's padding should be taken into account as well, false otherwise
      * @return The scale of the given view as a {@link Float} value
      */
-    float getScale(@NonNull final View view, final boolean includePadding);
+    float getTabScale(@NonNull final View view, final boolean includePadding);
 
     /**
-     * Sets the scale of a view on a specific axis.
+     * Sets the scale of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -153,7 +153,7 @@ public interface Arithmetics {
      * @param scale
      *         The scale, which should be set, as a {@link Float} value
      */
-    void setScale(@NonNull Axis axis, @NonNull View view, float scale);
+    void setTabScale(@NonNull Axis axis, @NonNull View view, float scale);
 
     /**
      * Animates the scale of a view on a specific axis.
@@ -166,10 +166,10 @@ public interface Arithmetics {
      * @param scale
      *         The scale, which should be set by the animation, as a {@link Float} value
      */
-    void animateScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
+    void animateTabScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
 
     /**
-     * Returns the size of a view on a specific axis.
+     * Returns the size of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -178,7 +178,7 @@ public interface Arithmetics {
      *         The view may not be null
      * @return The size of the given view on the given axis as a {@link Float} value
      */
-    float getSize(@NonNull Axis axis, @NonNull View view);
+    float getTabSize(@NonNull Axis axis, @NonNull View view);
 
     /**
      * Returns the size of the container, which contains the tab switcher's tabs, on a specific
@@ -206,7 +206,7 @@ public interface Arithmetics {
     float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
 
     /**
-     * Returns the pivot of a view on a specific axis, depending on the current drag state.
+     * Returns the pivot of a tab's view on a specific axis, depending on the current drag state.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -218,10 +218,10 @@ public interface Arithmetics {
      *         not be null
      * @return The pivot of the given view on the given axis as a {@link Float} value
      */
-    float getPivot(@NonNull Axis axis, @NonNull View view, @NonNull DragState dragState);
+    float getTabPivot(@NonNull Axis axis, @NonNull View view, @NonNull DragState dragState);
 
     /**
-     * Sets the pivot of a view on a specific axis.
+     * Sets the pivot of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -231,10 +231,10 @@ public interface Arithmetics {
      * @param pivot
      *         The pivot, which should be set, as a {@link Float} value
      */
-    void setPivot(@NonNull Axis axis, @NonNull View view, float pivot);
+    void setTabPivot(@NonNull Axis axis, @NonNull View view, float pivot);
 
     /**
-     * Returns the rotation of a view on a specific axis.
+     * Returns the rotation of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -243,10 +243,10 @@ public interface Arithmetics {
      *         View}. The view may not be null
      * @return The rotation of the given view on the given axis as a {@link Float} value
      */
-    float getRotation(@NonNull Axis axis, @NonNull View view);
+    float getTabRotation(@NonNull Axis axis, @NonNull View view);
 
     /**
-     * Sets the rotation of a view on a specific axis.
+     * Sets the rotation of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -256,10 +256,10 @@ public interface Arithmetics {
      * @param angle
      *         The rotation, which should be set, as a {@link Float} value
      */
-    void setRotation(@NonNull Axis axis, @NonNull View view, float angle);
+    void setTabRotation(@NonNull Axis axis, @NonNull View view, float angle);
 
     /**
-     * Animates the rotation of a view on a specific axis.
+     * Animates the rotation of a tab's view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -269,6 +269,7 @@ public interface Arithmetics {
      * @param angle
      *         The rotation, which should be set by the animation, as a {@link Float} value
      */
-    void animateRotation(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float angle);
+    void animateTabRotation(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
+                            float angle);
 
 }

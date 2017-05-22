@@ -315,7 +315,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * @return The width of the tab container in pixels as a {@link Float} value
      */
     private float calculateTabContainerWidth() {
-        float size = getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher());
+        float size = getArithmetics().getTabSize(Axis.DRAGGING_AXIS, getTabSwitcher());
         int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
         Toolbar[] toolbars = getToolbars();
         float primaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ?

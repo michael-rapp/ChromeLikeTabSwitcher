@@ -245,7 +245,7 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
      *         MotionEvent}. The motion event may not be null
      */
     private void handleClick(@NonNull final MotionEvent event) {
-        AbstractItem item = getFocusedItem(arithmetics.getPosition(Axis.DRAGGING_AXIS, event));
+        AbstractItem item = getFocusedItem(arithmetics.getTouchPosition(Axis.DRAGGING_AXIS, event));
 
         if (item != null) {
             notifyOnClick(item);
@@ -642,8 +642,8 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
 
     @Override
     protected final void onDrag(@NonNull final MotionEvent event) {
-        float dragPosition = arithmetics.getPosition(Axis.DRAGGING_AXIS, event);
-        float orthogonalPosition = arithmetics.getPosition(Axis.ORTHOGONAL_AXIS, event);
+        float dragPosition = arithmetics.getTouchPosition(Axis.DRAGGING_AXIS, event);
+        float orthogonalPosition = arithmetics.getTouchPosition(Axis.ORTHOGONAL_AXIS, event);
         handleDrag(dragPosition, orthogonalPosition);
     }
 
