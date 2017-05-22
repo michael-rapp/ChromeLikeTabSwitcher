@@ -1080,10 +1080,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
             float attachedPosition = calculateAttachedPosition(getModel().getCount());
-            int initialReferenceIndex =
-                    firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                            firstVisibleTabIndex : selectedTabIndex;
-            int referenceIndex = initialReferenceIndex;
+            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                    firstVisibleTabIndex : selectedTabIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
             referencePosition = Math.min(calculateEndPosition(referenceIndex), referencePosition);
