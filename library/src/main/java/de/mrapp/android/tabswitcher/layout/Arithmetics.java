@@ -169,8 +169,7 @@ public interface Arithmetics {
     void animateScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
 
     /**
-     * Returns the size of a view on a specific axis. By default, the view's padding is not taken
-     * into account.
+     * Returns the size of a view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -182,18 +181,29 @@ public interface Arithmetics {
     float getSize(@NonNull Axis axis, @NonNull View view);
 
     /**
-     * Returns the size of a view on a specific axis.
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis. By default, the padding and the size of the toolbars are included.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose size should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @param includePadding
-     *         True, if the view's padding should be taken into account, false otherwise
-     * @return The size of the given view on the given axis as a {@link Float} value
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
      */
-    float getSize(@NonNull Axis axis, @NonNull View view, boolean includePadding);
+    float getTabContainerSize(@NonNull Axis axis);
+
+    /**
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param includePadding
+     *         True, if the padding and the size of the toolbars should be included, false
+     *         otherwise
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
+     */
+    float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
 
     /**
      * Returns the pivot of a view on a specific axis, depending on the current drag state.

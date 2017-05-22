@@ -24,7 +24,6 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -324,7 +323,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @return The position, which has been calculated, in pixels as an {@link Float} value
      */
     private float calculateSwipePosition() {
-        return getArithmetics().getSize(Axis.ORTHOGONAL_AXIS, getTabSwitcher());
+        return getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS, true);
     }
 
     /**
@@ -339,9 +338,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * Float} value
      */
     private float calculateMaxTabSpacing(@Nullable final AbstractItem item) {
-        float totalSpace = getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer) -
-                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                        getModel().areToolbarsShown() ? toolbar.getHeight() + tabInset : 0);
+        float totalSpace = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
         float maxTabSpacing;
         int count = getModel().getCount();
 
@@ -379,12 +376,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private int calculateBottomMargin(@NonNull final View view) {
         float tabHeight = (view.getHeight() - 2 * tabInset) * getArithmetics().getScale(view, true);
-        float containerHeight = getArithmetics().getSize(Axis.Y_AXIS, tabContainer);
-        int toolbarHeight = getModel().areToolbarsShown() ? toolbar.getHeight() - tabInset : 0;
+        float containerHeight = getArithmetics().getTabContainerSize(Axis.Y_AXIS, false);
         int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                 getStackedTabCount() * getStackedTabSpacing();
-        return Math.round(tabHeight + tabInset + toolbarHeight + stackHeight -
-                (containerHeight - getModel().getPaddingTop() - getModel().getPaddingBottom()));
+        return Math.round(tabHeight + tabInset + stackHeight - containerHeight);
     }
 
     /**
@@ -495,10 +490,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!getModel().isEmpty()) {
             int selectedTabIndex = getModel().getSelectedTabIndex();
             float attachedPosition = calculateAttachedPosition(getModel().getCount());
-            int initialReferenceIndex =
-                    firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                            firstVisibleTabIndex : selectedTabIndex;
-            int referenceIndex = initialReferenceIndex;
+            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
+                    firstVisibleTabIndex : selectedTabIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabPosition : attachedPosition;
             referencePosition =
@@ -690,7 +683,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (item.getIndex() < selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
-                    getArithmetics().getSize(Axis.DRAGGING_AXIS, tabContainer));
+                    getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS));
         } else if (item.getIndex() > selectedTabIndex) {
             getArithmetics().setPosition(Axis.DRAGGING_AXIS, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
@@ -789,7 +782,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         if (item.getIndex() < selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
-                    getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()), false);
+                    getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS), false);
         } else if (item.getIndex() > selectedTabIndex) {
             getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, view,
                     getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
@@ -1358,15 +1351,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Interpolator interpolator =
                         peekAnimation.getInterpolator() != null ? peekAnimation.getInterpolator() :
                                 new AccelerateDecelerateInterpolator();
-                Toolbar[] toolbars = getToolbars();
                 float peekPosition =
-                        (getArithmetics().getSize(Axis.DRAGGING_AXIS, getTabSwitcher()) -
-                                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
-                                        getTabSwitcher()) -
-                                (getTabSwitcher().getLayout() == Layout.PHONE_PORTRAIT &&
-                                        getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                                        toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() :
-                                        0)) * 0.66f;
+                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false) * 0.66f;
                 animatePeek(item, duration, interpolator, peekPosition, peekAnimation);
             }
 
