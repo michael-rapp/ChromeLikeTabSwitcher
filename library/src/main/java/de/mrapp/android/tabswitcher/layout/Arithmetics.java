@@ -169,8 +169,7 @@ public interface Arithmetics {
     void animateScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
 
     /**
-     * Returns the size of a view on a specific axis. By default, the view's padding is not taken
-     * into account.
+     * Returns the size of a view on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
