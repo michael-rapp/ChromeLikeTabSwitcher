@@ -31,7 +31,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class SwipeEventHandler extends AbstractTouchEventHandler {
+public class SwipeEventHandler extends AbstractDragGestureEventHandler {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a {@link
@@ -66,12 +66,6 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
                                          float velocity, long animationDuration);
 
     }
-
-    /**
-     * The bounds of the onscreen area, the handler takes into consideration for handling
-     * touch events.
-     */
-    private final RectF touchableArea;
 
     /**
      * The velocity, which may be reached by a drag gesture at maximum to start a fling animation.
@@ -169,8 +163,7 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      */
     public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
                              @Nullable final RectF touchableArea, final long animationDuration) {
-        super(MAX_PRIORITY, tabSwitcher, dragThreshold);
-        this.touchableArea = touchableArea;
+        super(tabSwitcher, dragThreshold, touchableArea);
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         Resources resources = tabSwitcher.getResources();
@@ -191,12 +184,6 @@ public class SwipeEventHandler extends AbstractTouchEventHandler {
      */
     public final void setCallback(@Nullable final Callback callback) {
         this.callback = callback;
-    }
-
-    @Nullable
-    @Override
-    public final RectF getTouchableArea() {
-        return touchableArea;
     }
 
     @Override
