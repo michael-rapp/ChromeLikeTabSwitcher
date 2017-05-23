@@ -119,7 +119,7 @@ public interface Arithmetics {
      *         AbstractItem}. The item may not be null
      * @return The position of the given item on the given axis as a {@link Float} value
      */
-    float getTabPosition(@NonNull Axis axis, @NonNull AbstractItem item);
+    float getPosition(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
      * Sets the position of an item on a specific axis.
@@ -132,7 +132,7 @@ public interface Arithmetics {
      * @param position
      *         The position, which should be set, as a {@link Float} value
      */
-    void setTabPosition(@NonNull Axis axis, @NonNull AbstractItem item, float position);
+    void setPosition(@NonNull Axis axis, @NonNull AbstractItem item, float position);
 
     /**
      * Animates the position of an item on a specific axis. By default, the item's padding is not
@@ -149,8 +149,8 @@ public interface Arithmetics {
      * @param position
      *         The position, which should be set by the animation, as a {@link Float} value
      */
-    void animateTabPosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
-                            @NonNull AbstractItem item, float position);
+    void animatePosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
+                         @NonNull AbstractItem item, float position);
 
     /**
      * Animates the position of an item on a specific axis.
@@ -168,8 +168,8 @@ public interface Arithmetics {
      * @param includePadding
      *         True, if the item's padding should be taken into account, false otherwise
      */
-    void animateTabPosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
-                            @NonNull AbstractItem item, float position, boolean includePadding);
+    void animatePosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
+                         @NonNull AbstractItem item, float position, boolean includePadding);
 
     /**
      * Returns the scale of an item, depending on its margin. By default, the item's padding is
@@ -180,7 +180,7 @@ public interface Arithmetics {
      *         AbstractItem}. The item may not be null
      * @return The scale of the given item as a {@link Float} value
      */
-    float getTabScale(@NonNull final AbstractItem item);
+    float getScale(@NonNull final AbstractItem item);
 
     /**
      * Returns the scale of an item, depending on its margin.
@@ -192,7 +192,7 @@ public interface Arithmetics {
      *         True, if the item's padding should be taken into account as well, false otherwise
      * @return The scale of the given item as a {@link Float} value
      */
-    float getTabScale(@NonNull final AbstractItem item, final boolean includePadding);
+    float getScale(@NonNull final AbstractItem item, final boolean includePadding);
 
     /**
      * Sets the scale of an item on a specific axis.
@@ -205,7 +205,7 @@ public interface Arithmetics {
      * @param scale
      *         The scale, which should be set, as a {@link Float} value
      */
-    void setTabScale(@NonNull Axis axis, @NonNull AbstractItem item, float scale);
+    void setScale(@NonNull Axis axis, @NonNull AbstractItem item, float scale);
 
     /**
      * Animates the scale of an item on a specific axis.
@@ -218,7 +218,7 @@ public interface Arithmetics {
      * @param scale
      *         The scale, which should be set by the animation, as a {@link Float} value
      */
-    void animateTabScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
+    void animateScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
 
     /**
      * Returns the size of an item on a specific axis.
@@ -230,7 +230,7 @@ public interface Arithmetics {
      *         AbstractItem}. The item may not be null
      * @return The size of the given item on the given axis as a {@link Float} value
      */
-    float getTabSize(@NonNull Axis axis, @NonNull AbstractItem item);
+    float getSize(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
      * Returns the pivot of an item on a specific axis, depending on the current drag state.
@@ -245,7 +245,7 @@ public interface Arithmetics {
      *         not be null
      * @return The pivot of the given item on the given axis as a {@link Float} value
      */
-    float getTabPivot(@NonNull Axis axis, @NonNull AbstractItem item, @NonNull DragState dragState);
+    float getPivot(@NonNull Axis axis, @NonNull AbstractItem item, @NonNull DragState dragState);
 
     /**
      * Sets the pivot of an item on a specific axis.
@@ -258,7 +258,7 @@ public interface Arithmetics {
      * @param pivot
      *         The pivot, which should be set, as a {@link Float} value
      */
-    void setTabPivot(@NonNull Axis axis, @NonNull AbstractItem item, float pivot);
+    void setPivot(@NonNull Axis axis, @NonNull AbstractItem item, float pivot);
 
     /**
      * Returns the rotation of an item on a specific axis.
@@ -270,7 +270,7 @@ public interface Arithmetics {
      *         AbstractItem}. The item may not be null
      * @return The rotation of the given item on the given axis as a {@link Float} value
      */
-    float getTabRotation(@NonNull Axis axis, @NonNull AbstractItem item);
+    float getRotation(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
      * Sets the rotation of an item on a specific axis.
@@ -283,7 +283,7 @@ public interface Arithmetics {
      * @param angle
      *         The rotation, which should be set, as a {@link Float} value
      */
-    void setTabRotation(@NonNull Axis axis, @NonNull AbstractItem item, float angle);
+    void setRotation(@NonNull Axis axis, @NonNull AbstractItem item, float angle);
 
     /**
      * Animates the rotation of an item on a specific axis.
@@ -296,7 +296,6 @@ public interface Arithmetics {
      * @param angle
      *         The rotation, which should be set by the animation, as a {@link Float} value
      */
-    void animateTabRotation(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
-                            float angle);
+    void animateRotation(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float angle);
 
 }

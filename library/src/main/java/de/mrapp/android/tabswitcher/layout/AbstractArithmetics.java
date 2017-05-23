@@ -65,15 +65,15 @@ public abstract class AbstractArithmetics implements Arithmetics {
     }
 
     @Override
-    public final void animateTabPosition(@NonNull final Axis axis,
-                                         @NonNull final ViewPropertyAnimator animator,
-                                         @NonNull final AbstractItem item, final float position) {
-        animateTabPosition(axis, animator, item, position, false);
+    public final void animatePosition(@NonNull final Axis axis,
+                                      @NonNull final ViewPropertyAnimator animator,
+                                      @NonNull final AbstractItem item, final float position) {
+        animatePosition(axis, animator, item, position, false);
     }
 
     @Override
-    public final float getTabScale(@NonNull final AbstractItem item) {
-        return getTabScale(item, false);
+    public final float getScale(@NonNull final AbstractItem item) {
+        return getScale(item, false);
     }
 
 }

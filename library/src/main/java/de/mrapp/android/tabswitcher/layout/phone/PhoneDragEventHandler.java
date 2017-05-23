@@ -197,7 +197,7 @@ public class PhoneDragEventHandler
                 float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
                         toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0;
-                float viewPosition = getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, tabItem) +
+                float viewPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, tabItem) +
                         toolbarHeight +
                         getArithmetics().getTabSwitcherPadding(Axis.DRAGGING_AXIS, Gravity.START);
 
@@ -281,7 +281,7 @@ public class PhoneDragEventHandler
 
     @Override
     protected final boolean isSwipeThresholdReached(@NonNull final TabItem swipedTabItem) {
-        return Math.abs(getArithmetics().getTabPosition(Axis.ORTHOGONAL_AXIS, swipedTabItem)) >
+        return Math.abs(getArithmetics().getPosition(Axis.ORTHOGONAL_AXIS, swipedTabItem)) >
                 getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS) / 6f;
     }
 

@@ -111,7 +111,7 @@ public class TabletDragEventHandler
                         Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
                                 tabOffset) : 0;
                 float viewPosition =
-                        getArithmetics().getTabPosition(Arithmetics.Axis.DRAGGING_AXIS, item) +
+                        getArithmetics().getPosition(Arithmetics.Axis.DRAGGING_AXIS, item) +
                                 toolbarWidth + getArithmetics()
                                 .getTabSwitcherPadding(Arithmetics.Axis.DRAGGING_AXIS,
                                         Gravity.START);

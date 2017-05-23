@@ -103,7 +103,7 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabPosition(@NonNull final Axis axis, @NonNull final AbstractItem item) {
+    public final float getPosition(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The view may not be null");
         View view = item.getView();
@@ -120,8 +120,8 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void setTabPosition(@NonNull final Axis axis, @NonNull final AbstractItem item,
-                                     final float position) {
+    public final void setPosition(@NonNull final Axis axis, @NonNull final AbstractItem item,
+                                  final float position) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -137,10 +137,10 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void animateTabPosition(@NonNull final Axis axis,
-                                         @NonNull final ViewPropertyAnimator animator,
-                                         @NonNull final AbstractItem item, final float position,
-                                         final boolean includePadding) {
+    public final void animatePosition(@NonNull final Axis axis,
+                                      @NonNull final ViewPropertyAnimator animator,
+                                      @NonNull final AbstractItem item, final float position,
+                                      final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
         ensureNotNull(item, "The item may not be null");
@@ -156,14 +156,14 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabScale(@NonNull final AbstractItem item, final boolean includePadding) {
+    public final float getScale(@NonNull final AbstractItem item, final boolean includePadding) {
         ensureNotNull(item, "The item may not be null");
         return 1;
     }
 
     @Override
-    public final void setTabScale(@NonNull final Axis axis, @NonNull final AbstractItem item,
-                                  final float scale) {
+    public final void setScale(@NonNull final Axis axis, @NonNull final AbstractItem item,
+                               final float scale) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -176,9 +176,9 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void animateTabScale(@NonNull final Axis axis,
-                                      @NonNull final ViewPropertyAnimator animator,
-                                      final float scale) {
+    public final void animateScale(@NonNull final Axis axis,
+                                   @NonNull final ViewPropertyAnimator animator,
+                                   final float scale) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
 
@@ -190,30 +190,30 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
+    public final float getSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (axis == Axis.DRAGGING_AXIS) {
-            return view.getWidth() * getTabScale(item);
+            return view.getWidth() * getScale(item);
         } else {
-            return view.getHeight() * getTabScale(item);
+            return view.getHeight() * getScale(item);
         }
     }
 
     @Override
-    public final float getTabPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
-                                   @NonNull final DragState dragState) {
+    public final float getPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
+                                @NonNull final DragState dragState) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         ensureNotNull(dragState, "The drag state may not be null");
-        return getTabSize(axis, item) / 2f;
+        return getSize(axis, item) / 2f;
     }
 
     @Override
-    public void setTabPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
-                            final float pivot) {
+    public void setPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
+                         final float pivot) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -230,7 +230,7 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabRotation(@NonNull final Axis axis, @NonNull final AbstractItem item) {
+    public final float getRotation(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -243,8 +243,8 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void setTabRotation(@NonNull final Axis axis, @NonNull final AbstractItem item,
-                                     final float angle) {
+    public final void setRotation(@NonNull final Axis axis, @NonNull final AbstractItem item,
+                                  final float angle) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -257,9 +257,9 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void animateTabRotation(@NonNull final Axis axis,
-                                         @NonNull final ViewPropertyAnimator animator,
-                                         final float angle) {
+    public final void animateRotation(@NonNull final Axis axis,
+                                      @NonNull final ViewPropertyAnimator animator,
+                                      final float angle) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
 
