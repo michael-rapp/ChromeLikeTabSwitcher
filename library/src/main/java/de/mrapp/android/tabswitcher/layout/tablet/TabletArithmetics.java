@@ -141,133 +141,60 @@ public class TabletArithmetics extends AbstractArithmetics {
                                       @NonNull final ViewPropertyAnimator animator,
                                       @NonNull final AbstractItem item, final float position,
                                       final boolean includePadding) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
-        ensureNotNull(item, "The item may not be null");
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            Toolbar[] toolbars = getTabSwitcher().getToolbars();
-            animator.x((getTabSwitcher().areToolbarsShown() && toolbars != null ? Math.max(0,
-                    toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0) +
-                    position);
-        } else {
-            animator.y((tabContainerHeight - tabHeight) + position);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final float getScale(@NonNull final AbstractItem item, final boolean includePadding) {
-        ensureNotNull(item, "The item may not be null");
-        return 1;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final void setScale(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                final float scale) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        View view = item.getView();
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            view.setScaleX(scale);
-        } else {
-            view.setScaleY(scale);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final void animateScale(@NonNull final Axis axis,
                                    @NonNull final ViewPropertyAnimator animator,
                                    final float scale) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            animator.scaleX(scale);
-        } else {
-            animator.scaleY(scale);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final float getSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        View view = item.getView();
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            return view.getWidth() * getScale(item);
-        } else {
-            return view.getHeight() * getScale(item);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final float getPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                 @NonNull final DragState dragState) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        ensureNotNull(dragState, "The drag state may not be null");
-        return getSize(axis, item) / 2f;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void setPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                          final float pivot) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        View view = item.getView();
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            view.setTranslationY(
-                    view.getTranslationY() + (view.getPivotY() - pivot) * (1 - view.getScaleY()));
-            view.setPivotY(pivot);
-        } else {
-            view.setTranslationX(
-                    view.getTranslationX() + (view.getPivotX() - pivot) * (1 - view.getScaleX()));
-            view.setPivotX(pivot);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final float getRotation(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        View view = item.getView();
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            return view.getRotationX();
-        } else {
-            return view.getRotationY();
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final void setRotation(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float angle) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        View view = item.getView();
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            view.setRotationX(angle);
-        } else {
-            view.setRotationY(angle);
-        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public final void animateRotation(@NonNull final Axis axis,
                                       @NonNull final ViewPropertyAnimator animator,
                                       final float angle) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
-
-        if (axis == Axis.DRAGGING_AXIS) {
-            animator.rotationX(angle);
-        } else {
-            animator.rotationY(angle);
-        }
+        throw new UnsupportedOperationException();
     }
 
 }
