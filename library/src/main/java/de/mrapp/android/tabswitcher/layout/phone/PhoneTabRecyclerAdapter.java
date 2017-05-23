@@ -314,11 +314,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         adaptBackgroundVisibility(tabItem);
 
         if (!getModel().isSwitcherShown()) {
-            if (tabItem.getTab() == getModel().getSelectedTab()) {
-                addContentView(tabItem);
-            } else {
-                renderPreview(tabItem);
-            }
+            addContentView(tabItem);
         } else {
             renderPreview(tabItem);
         }
