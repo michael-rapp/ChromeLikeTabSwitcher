@@ -18,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
-import android.view.View;
 
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
@@ -194,15 +193,13 @@ public class PhoneDragEventHandler
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.getTag().getState() == State.FLOATING ||
                     tabItem.getTag().getState() == State.STACKED_START_ATOP) {
-                View view = tabItem.getView();
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
                         toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0;
-                float viewPosition =
-                        getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, view) + toolbarHeight +
-                                getArithmetics().getPadding(Axis.DRAGGING_AXIS, Gravity.START,
-                                        getTabSwitcher());
+                float viewPosition = getArithmetics().getTabPosition(Axis.DRAGGING_AXIS, tabItem) +
+                        toolbarHeight +
+                        getArithmetics().getTabSwitcherPadding(Axis.DRAGGING_AXIS, Gravity.START);
 
                 if (viewPosition <= position) {
                     return tabItem;
@@ -284,8 +281,7 @@ public class PhoneDragEventHandler
 
     @Override
     protected final boolean isSwipeThresholdReached(@NonNull final TabItem swipedTabItem) {
-        View view = swipedTabItem.getView();
-        return Math.abs(getArithmetics().getTabPosition(Axis.ORTHOGONAL_AXIS, view)) >
+        return Math.abs(getArithmetics().getTabPosition(Axis.ORTHOGONAL_AXIS, swipedTabItem)) >
                 getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS) / 6f;
     }
 

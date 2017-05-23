@@ -28,6 +28,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.Condition.ensureTrue;
@@ -88,75 +89,75 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     /**
-     * Returns the default pivot of a view on a specific axis.
+     * Returns the default pivot of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose pivot should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The pivot of the given item on the given axis as a {@link Float} value
      */
-    private float getDefaultPivot(@NonNull final Axis axis, @NonNull final View view) {
+    private float getDefaultPivot(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ?
-                    getTabSize(axis, view) / 2f : 0;
+                    getTabSize(axis, item) / 2f : 0;
         } else {
             return getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
-                    getTabSize(axis, view) / 2f;
+                    getTabSize(axis, item) / 2f;
         }
     }
 
     /**
-     * Returns the pivot of a view on a specific axis, when it is swiped.
+     * Returns the pivot of an item on a specific axis, when it is swiped.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose pivot should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The pivot of the given item on the given axis as a {@link Float} value
      */
-    private float getPivotWhenSwiping(@NonNull final Axis axis, @NonNull final View view) {
+    private float getPivotWhenSwiping(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return endOvershootPivot;
         } else {
-            return getDefaultPivot(axis, view);
+            return getDefaultPivot(axis, item);
         }
     }
 
     /**
-     * Returns the pivot of a view on a specific axis, when overshooting at the start.
+     * Returns the pivot of an item on a specific axis, when overshooting at the start.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose pivot should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The pivot of the given item on the given axis as a {@link Float} value
      */
     private float getPivotWhenOvershootingAtStart(@NonNull final Axis axis,
-                                                  @NonNull final View view) {
-        return getTabSize(axis, view) / 2f;
+                                                  @NonNull final AbstractItem item) {
+        return getTabSize(axis, item) / 2f;
     }
 
     /**
-     * Returns the pivot of a view on a specific axis, when overshooting at the end.
+     * Returns the pivot of an item on a specific axis, when overshooting at the end.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose pivot should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The pivot of the given item on the given axis as a {@link Float} value
      */
     private float getPivotWhenOvershootingAtEnd(@NonNull final Axis axis,
-                                                @NonNull final View view) {
+                                                @NonNull final AbstractItem item) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
             return getTabSwitcher().getCount() > 1 ? endOvershootPivot :
-                    getTabSize(axis, view) / 2f;
+                    getTabSize(axis, item) / 2f;
         } else {
-            return getTabSize(axis, view) / 2f;
+            return getTabSize(axis, item) / 2f;
         }
     }
 
@@ -193,9 +194,10 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabPosition(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabPosition(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = getTabSwitcher().getToolbars();
@@ -203,7 +205,7 @@ public class PhoneArithmetics extends AbstractArithmetics {
                     (getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
                             toolbars != null ?
                             toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset :
-                            0) - getPadding(axis, Gravity.START, getTabSwitcher());
+                            0) - getTabSwitcherPadding(axis, Gravity.START);
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -216,17 +218,18 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void setTabPosition(@NonNull final Axis axis, @NonNull final View view,
+    public final void setTabPosition(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                      final float position) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = getTabSwitcher().getToolbars();
             view.setY((getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
                     toolbars != null ?
                     toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
-                    getPadding(axis, Gravity.START, getTabSwitcher()) + position);
+                    getTabSwitcherPadding(axis, Gravity.START) + position);
         } else {
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
@@ -241,20 +244,20 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final void animateTabPosition(@NonNull final Axis axis,
                                          @NonNull final ViewPropertyAnimator animator,
-                                         @NonNull final View view, final float position,
+                                         @NonNull final AbstractItem item, final float position,
                                          final boolean includePadding) {
         ensureNotNull(axis, "The axis may not be null");
         ensureNotNull(animator, "The animator may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = getTabSwitcher().getToolbars();
             animator.y((getTabSwitcher().areToolbarsShown() && getTabSwitcher().isSwitcherShown() &&
                     toolbars != null ?
                     toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0) +
-                    (includePadding ? getPadding(axis, Gravity.START, getTabSwitcher()) : 0) +
-                    position);
+                    (includePadding ? getTabSwitcherPadding(axis, Gravity.START) : 0) + position);
         } else {
+            View view = item.getView();
             FrameLayout.LayoutParams layoutParams =
                     (FrameLayout.LayoutParams) view.getLayoutParams();
             animator.x(position + layoutParams.leftMargin + (includePadding ?
@@ -267,22 +270,23 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final int getPadding(@NonNull final Axis axis, final int gravity,
-                                @NonNull final View view) {
+    public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
         ensureNotNull(axis, "The axis may not be null");
         ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
-        ensureNotNull(view, "The view may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return gravity == Gravity.START ? view.getPaddingTop() : view.getPaddingBottom();
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
+                    getTabSwitcher().getPaddingBottom();
         } else {
-            return gravity == Gravity.START ? view.getPaddingLeft() : view.getPaddingRight();
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
+                    getTabSwitcher().getPaddingRight();
         }
     }
 
     @Override
-    public final float getTabScale(@NonNull final View view, final boolean includePadding) {
-        ensureNotNull(view, "The view may not be null");
+    public final float getTabScale(@NonNull final AbstractItem item, final boolean includePadding) {
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
         float targetWidth = width + layoutParams.leftMargin + layoutParams.rightMargin -
@@ -294,10 +298,11 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void setTabScale(@NonNull final Axis axis, @NonNull final View view,
+    public final void setTabScale(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float scale) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setScaleY(scale);
@@ -321,14 +326,15 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabSize(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return view.getHeight() * getTabScale(view);
+            return view.getHeight() * getTabScale(item);
         } else {
-            return view.getWidth() * getTabScale(view);
+            return view.getWidth() * getTabScale(item);
         }
     }
 
@@ -339,8 +345,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
         assert tabContainer != null;
         FrameLayout.LayoutParams layoutParams =
                 (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
-        int padding = !includePadding ? (getPadding(axis, Gravity.START, getTabSwitcher()) +
-                getPadding(axis, Gravity.END, getTabSwitcher())) : 0;
+        int padding = !includePadding ? (getTabSwitcherPadding(axis, Gravity.START) +
+                getTabSwitcherPadding(axis, Gravity.END)) : 0;
         Toolbar[] toolbars = getTabSwitcher().getToolbars();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -356,28 +362,29 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabPivot(@NonNull final Axis axis, @NonNull final View view,
+    public final float getTabPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                    @NonNull final DragState dragState) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
         ensureNotNull(dragState, "The drag state may not be null");
 
         if (dragState == DragState.SWIPE) {
-            return getPivotWhenSwiping(axis, view);
+            return getPivotWhenSwiping(axis, item);
         } else if (dragState == DragState.OVERSHOOT_START) {
-            return getPivotWhenOvershootingAtStart(axis, view);
+            return getPivotWhenOvershootingAtStart(axis, item);
         } else if (dragState == DragState.OVERSHOOT_END) {
-            return getPivotWhenOvershootingAtEnd(axis, view);
+            return getPivotWhenOvershootingAtEnd(axis, item);
         } else {
-            return getDefaultPivot(axis, view);
+            return getDefaultPivot(axis, item);
         }
     }
 
     @Override
-    public final void setTabPivot(@NonNull final Axis axis, @NonNull final View view,
+    public final void setTabPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float pivot) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -394,9 +401,10 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final float getTabRotation(@NonNull final Axis axis, @NonNull final View view) {
+    public final float getTabRotation(@NonNull final Axis axis, @NonNull final AbstractItem item) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The view may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return view.getRotationY();
@@ -406,10 +414,11 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final void setTabRotation(@NonNull final Axis axis, @NonNull final View view,
+    public final void setTabRotation(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                      final float angle) {
         ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(view, "The view may not be null");
+        ensureNotNull(item, "The item may not be null");
+        View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             view.setRotationY(

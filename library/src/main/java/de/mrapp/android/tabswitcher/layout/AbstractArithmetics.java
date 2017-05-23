@@ -14,9 +14,10 @@
 package de.mrapp.android.tabswitcher.layout;
 
 import android.support.annotation.NonNull;
-import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -59,13 +60,20 @@ public abstract class AbstractArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getTabScale(@NonNull final View view) {
-        return getTabScale(view, false);
+    public final float getTabScale(@NonNull final AbstractItem item) {
+        return getTabScale(item, false);
     }
 
     @Override
     public final float getTabContainerSize(@NonNull final Axis axis) {
         return getTabContainerSize(axis, true);
+    }
+
+    @Override
+    public final void animateTabPosition(@NonNull final Axis axis,
+                                         @NonNull final ViewPropertyAnimator animator,
+                                         @NonNull final AbstractItem item, final float position) {
+        animateTabPosition(axis, animator, item, position, false);
     }
 
 }

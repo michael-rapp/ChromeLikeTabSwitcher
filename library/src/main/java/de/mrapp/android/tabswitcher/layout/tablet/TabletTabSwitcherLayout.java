@@ -44,7 +44,6 @@ import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
-import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.ItemComparator;
@@ -315,7 +314,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * @return The width of the tab container in pixels as a {@link Float} value
      */
     private float calculateTabContainerWidth() {
-        float size = getArithmetics().getTabSize(Axis.DRAGGING_AXIS, getTabSwitcher());
+        // TODO: Move code to class TabletArithmetics
+        float size = tabContainer.getWidth();
         int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
         Toolbar[] toolbars = getToolbars();
         float primaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ?

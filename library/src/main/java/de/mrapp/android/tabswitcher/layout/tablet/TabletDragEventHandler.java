@@ -19,7 +19,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
-import android.view.View;
 
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -107,16 +106,15 @@ public class TabletDragEventHandler
         while ((item = iterator.next()) != null) {
             if (item.getTag().getState() == State.FLOATING ||
                     item.getTag().getState() == State.STACKED_START_ATOP) {
-                View view = item.getView();
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarWidth = getTabSwitcher().areToolbarsShown() && toolbars != null ?
                         Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
                                 tabOffset) : 0;
                 float viewPosition =
-                        getArithmetics().getTabPosition(Arithmetics.Axis.DRAGGING_AXIS, view) +
+                        getArithmetics().getTabPosition(Arithmetics.Axis.DRAGGING_AXIS, item) +
                                 toolbarWidth + getArithmetics()
-                                .getPadding(Arithmetics.Axis.DRAGGING_AXIS, Gravity.START,
-                                        getTabSwitcher());
+                                .getTabSwitcherPadding(Arithmetics.Axis.DRAGGING_AXIS,
+                                        Gravity.START);
 
                 if (viewPosition <= position) {
                     return item;

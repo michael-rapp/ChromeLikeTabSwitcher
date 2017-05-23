@@ -21,6 +21,7 @@ import android.view.ViewPropertyAnimator;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
+import de.mrapp.android.tabswitcher.model.AbstractItem;
 
 /**
  * Defines the interface, a class, which provides methods, which allow to calculate the position,
@@ -71,103 +72,118 @@ public interface Arithmetics {
     float getTouchPosition(@NonNull Axis axis, @NonNull MotionEvent event);
 
     /**
-     * Returns the position of a tab's view on a specific axis.
+     * Returns the position of a specific item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose position should be returned, as an instance of the class {@link
-     *         View}. The view may not be null
-     * @return The position of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose position should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The position of the given item on the given axis as a {@link Float} value
      */
-    float getTabPosition(@NonNull Axis axis, @NonNull View view);
+    float getTabPosition(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
-     * Sets the position of a tab's view on a specific axis.
+     * Sets the position of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose position should be set, as an instance of the class {@link View}. The
-     *         view may not be null
+     * @param item
+     *         The item, whose position should be set, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param position
      *         The position, which should be set, as a {@link Float} value
      */
-    void setTabPosition(@NonNull Axis axis, @NonNull View view, float position);
+    void setTabPosition(@NonNull Axis axis, @NonNull AbstractItem item, float position);
 
     /**
-     * Animates the position of a tab's view on a specific axis.
+     * Animates the position of an item on a specific axis. By default, the item's padding is not
+     * taken into account.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
      * @param animator
      *         The animator, which should be used to animate the position, as an instance of the
      *         class {@link ViewPropertyAnimator}. The animator may not be null
-     * @param view
-     *         The view, whose position should be animated, as an instance of the class {@link
+     * @param item
+     *         The item, whose position should be animated, as an instance of the class {@link
+     *         View}. The view may not be null
+     * @param position
+     *         The position, which should be set by the animation, as a {@link Float} value
+     */
+    void animateTabPosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
+                            @NonNull AbstractItem item, float position);
+
+    /**
+     * Animates the position of an item on a specific axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param animator
+     *         The animator, which should be used to animate the position, as an instance of the
+     *         class {@link ViewPropertyAnimator}. The animator may not be null
+     * @param item
+     *         The item, whose position should be animated, as an instance of the class {@link
      *         View}. The view may not be null
      * @param position
      *         The position, which should be set by the animation, as a {@link Float} value
      * @param includePadding
-     *         True, if the view's padding should be taken into account, false otherwise
+     *         True, if the item's padding should be taken into account, false otherwise
      */
     void animateTabPosition(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator,
-                            @NonNull View view, float position, boolean includePadding);
+                            @NonNull AbstractItem item, float position, boolean includePadding);
 
     /**
-     * Returns the padding of a view on a specific axis and using a specific gravity.
+     * Returns the padding of the tab switcher on a specific axis and using a specific gravity.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
      * @param gravity
      *         The gravity as an {@link Integer} value. The gravity must be
      *         <code>Gravity.START</code> or <code>Gravity.END</code>
-     * @param view
-     *         The view, whose padding should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The padding of the given view on the given axis and using the given gravity as an
+     * @return The padding of the tab switcher on the given axis and using the given gravity as an
      * {@link Integer} value
      */
-    int getPadding(@NonNull Axis axis, int gravity, @NonNull View view);
+    int getTabSwitcherPadding(@NonNull Axis axis, int gravity);
 
     /**
-     * Returns the scale of a tab's view, depending on its margin. By default, the view's padding is
+     * Returns the scale of an item, depending on its margin. By default, the item's padding is
      * not taken into account.
      *
-     * @param view
-     *         The view, whose scale should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The scale of the given view as a {@link Float} value
+     * @param item
+     *         The item, whose scale should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The scale of the given item as a {@link Float} value
      */
-    float getTabScale(@NonNull final View view);
+    float getTabScale(@NonNull final AbstractItem item);
 
     /**
-     * Returns the scale of a tab's view, depending on its margin.
+     * Returns the scale of an item, depending on its margin.
      *
-     * @param view
-     *         The view, whose scale should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
+     * @param item
+     *         The item, whose scale should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param includePadding
-     *         True, if the view's padding should be taken into account as well, false otherwise
-     * @return The scale of the given view as a {@link Float} value
+     *         True, if the item's padding should be taken into account as well, false otherwise
+     * @return The scale of the given item as a {@link Float} value
      */
-    float getTabScale(@NonNull final View view, final boolean includePadding);
+    float getTabScale(@NonNull final AbstractItem item, final boolean includePadding);
 
     /**
-     * Sets the scale of a tab's view on a specific axis.
+     * Sets the scale of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose scale should be set, as an instance of the class {@link View}. The
-     *         view may not be null
+     * @param item
+     *         The item, whose scale should be set, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param scale
      *         The scale, which should be set, as a {@link Float} value
      */
-    void setTabScale(@NonNull Axis axis, @NonNull View view, float scale);
+    void setTabScale(@NonNull Axis axis, @NonNull AbstractItem item, float scale);
 
     /**
-     * Animates the scale of a view on a specific axis.
+     * Animates the scale of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
@@ -180,16 +196,16 @@ public interface Arithmetics {
     void animateTabScale(@NonNull Axis axis, @NonNull ViewPropertyAnimator animator, float scale);
 
     /**
-     * Returns the size of a tab's view on a specific axis.
+     * Returns the size of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose size should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
-     * @return The size of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose size should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The size of the given item on the given axis as a {@link Float} value
      */
-    float getTabSize(@NonNull Axis axis, @NonNull View view);
+    float getTabSize(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
      * Returns the size of the container, which contains the tab switcher's tabs, on a specific
@@ -217,60 +233,60 @@ public interface Arithmetics {
     float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
 
     /**
-     * Returns the pivot of a tab's view on a specific axis, depending on the current drag state.
+     * Returns the pivot of an item on a specific axis, depending on the current drag state.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be returned, as an instance of the class {@link View}.
-     *         The view may not be null
+     * @param item
+     *         The item, whose pivot should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param dragState
      *         The current drag state as a value of the enum {@link DragState}. The drag state may
      *         not be null
-     * @return The pivot of the given view on the given axis as a {@link Float} value
+     * @return The pivot of the given item on the given axis as a {@link Float} value
      */
-    float getTabPivot(@NonNull Axis axis, @NonNull View view, @NonNull DragState dragState);
+    float getTabPivot(@NonNull Axis axis, @NonNull AbstractItem item, @NonNull DragState dragState);
 
     /**
-     * Sets the pivot of a tab's view on a specific axis.
+     * Sets the pivot of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose pivot should be set, as an instance of the class {@link View}. The
-     *         view may not be null
+     * @param item
+     *         The item, whose pivot should be set, as an instance of the class {@link View}. The
+     *         item may not be null
      * @param pivot
      *         The pivot, which should be set, as a {@link Float} value
      */
-    void setTabPivot(@NonNull Axis axis, @NonNull View view, float pivot);
+    void setTabPivot(@NonNull Axis axis, @NonNull AbstractItem item, float pivot);
 
     /**
-     * Returns the rotation of a tab's view on a specific axis.
+     * Returns the rotation of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose rotation should be returned, as an instance of the class {@link
-     *         View}. The view may not be null
-     * @return The rotation of the given view on the given axis as a {@link Float} value
+     * @param item
+     *         The item, whose rotation should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The rotation of the given item on the given axis as a {@link Float} value
      */
-    float getTabRotation(@NonNull Axis axis, @NonNull View view);
+    float getTabRotation(@NonNull Axis axis, @NonNull AbstractItem item);
 
     /**
-     * Sets the rotation of a tab's view on a specific axis.
+     * Sets the rotation of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param view
-     *         The view, whose rotation should be set, as an instance of the class {@link View}. The
-     *         view may not be null
+     * @param item
+     *         The item, whose rotation should be set, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
      * @param angle
      *         The rotation, which should be set, as a {@link Float} value
      */
-    void setTabRotation(@NonNull Axis axis, @NonNull View view, float angle);
+    void setTabRotation(@NonNull Axis axis, @NonNull AbstractItem item, float angle);
 
     /**
-     * Animates the rotation of a tab's view on a specific axis.
+     * Animates the rotation of an item on a specific axis.
      *
      * @param axis
      *         The axis as a value of the enum {@link Axis}. The axis may not be null
