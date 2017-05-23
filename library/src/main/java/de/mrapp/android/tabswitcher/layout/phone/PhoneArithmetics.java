@@ -154,8 +154,7 @@ public class PhoneArithmetics extends AbstractArithmetics {
     private float getPivotWhenOvershootingAtEnd(@NonNull final Axis axis,
                                                 @NonNull final AbstractItem item) {
         if (axis == Axis.DRAGGING_AXIS || axis == Axis.Y_AXIS) {
-            return getTabSwitcher().getCount() > 1 ? endOvershootPivot :
-                    getSize(axis, item) / 2f;
+            return getTabSwitcher().getCount() > 1 ? endOvershootPivot : getSize(axis, item) / 2f;
         } else {
             return getSize(axis, item) / 2f;
         }
@@ -172,12 +171,12 @@ public class PhoneArithmetics extends AbstractArithmetics {
     public PhoneArithmetics(@NonNull final TabSwitcher tabSwitcher) {
         super(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
-        this.tabTitleContainerHeight =
+        tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
-        this.stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
-        this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
-        this.endOvershootPivot = resources.getDimensionPixelSize(R.dimen.end_overshoot_pivot);
+        tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
+        stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
+        stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
+        endOvershootPivot = resources.getDimensionPixelSize(R.dimen.end_overshoot_pivot);
     }
 
     @Override
