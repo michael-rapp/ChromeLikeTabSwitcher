@@ -54,8 +54,8 @@ import java.util.Queue;
 import java.util.Set;
 
 import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
+import de.mrapp.android.tabswitcher.gesture.DragGestureEventHandlerFactory;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
-import de.mrapp.android.tabswitcher.gesture.TouchEventHandlerFactory;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
@@ -1052,7 +1052,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final void addDragGesture(@NonNull final DragGesture dragGesture) {
         ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
-                new TouchEventHandlerFactory(this).fromGesture(dragGesture);
+                new DragGestureEventHandlerFactory(this).fromGesture(dragGesture);
         touchEventDispatcher.addEventHandler(eventHandler);
     }
 
@@ -1066,7 +1066,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final void removeDragGesture(@NonNull final DragGesture dragGesture) {
         ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
-                new TouchEventHandlerFactory(this).fromGesture(dragGesture);
+                new DragGestureEventHandlerFactory(this).fromGesture(dragGesture);
         touchEventDispatcher.removeEventHandler(eventHandler);
     }
 

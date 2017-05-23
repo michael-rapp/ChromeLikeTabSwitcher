@@ -31,6 +31,38 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 public class PullDownGestureEventHandler extends AbstractDragGestureEventHandler {
 
     /**
+     * Defines the interface, a class, which should be notified about the events of a {@link
+     * PullDownGestureEventHandler} , must implement.
+     */
+    public interface Callback {
+
+        /**
+         * The method, which is notified, when the currently selected tab has been pulled down.
+         */
+        void onPulledDown();
+
+    }
+
+    /**
+     * The previous drag position.
+     */
+    private float previousDragPosition;
+
+    /**
+     * The callback, which is notified about the event handler's events.
+     */
+    private Callback callback;
+
+    /**
+     * Notifies the callback, that the currently selected tab has been pulled down.
+     */
+    private void notifyOnPulledDown() {
+        if (callback != null) {
+            callback.onPulledDown();
+        }
+    }
+
+    /**
      * Creates a new event handler, which allows to handle pull down gestures, which can be used to
      * show the tab switcher by pulling down the currently selected tab, when using the smartphone
      * layout.
@@ -49,6 +81,19 @@ public class PullDownGestureEventHandler extends AbstractDragGestureEventHandler
                                        final int dragThreshold,
                                        @Nullable final RectF touchableArea) {
         super(tabSwitcher, dragThreshold, touchableArea);
+        this.previousDragPosition = -1;
+        this.callback = null;
+    }
+
+    /**
+     * Sets the callback, which should be notified about the event handler's events.
+     *
+     * @param callback
+     *         The callback, which should be set, as an instance of the type {@link Callback} or
+     *         null, if no callback should be notified
+     */
+    public final void setCallback(@Nullable final Callback callback) {
+        this.callback = callback;
     }
 
     @Override
@@ -69,12 +114,25 @@ public class PullDownGestureEventHandler extends AbstractDragGestureEventHandler
 
     @Override
     protected final void onDrag(@NonNull final MotionEvent event) {
+        float dragPosition = event.getY();
 
+        if (dragPosition > previousDragPosition) {
+            previousDragPosition = dragPosition;
+            getDragHelper().update(dragPosition);
+
+            if (getDragHelper().hasThresholdBeenReached()) {
+                notifyOnPulledDown();
+            }
+        } else {
+            getDragHelper().reset();
+            previousDragPosition = -1;
+        }
     }
 
     @Override
     protected final void onUp(@Nullable final MotionEvent event) {
-
+        previousDragPosition = -1;
+        reset();
     }
 
 }

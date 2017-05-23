@@ -376,8 +376,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private int calculateBottomMargin(@NonNull final AbstractItem item) {
         View view = item.getView();
-        float tabHeight =
-                (view.getHeight() - 2 * tabInset) * getArithmetics().getScale(item, true);
+        float tabHeight = (view.getHeight() - 2 * tabInset) * getArithmetics().getScale(item, true);
         float containerHeight = getArithmetics().getTabContainerSize(Axis.Y_AXIS, false);
         int stackHeight = getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE ? 0 :
                 getStackedTabCount() * getStackedTabSpacing();
@@ -703,8 +702,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setListener(new AnimationListenerWrapper(listener));
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, scale);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, scale);
-        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, item,
-                item.getTag().getPosition(), true);
+        getArithmetics()
+                .animatePosition(Axis.DRAGGING_AXIS, animation, item, item.getTag().getPosition(),
+                        true);
         getArithmetics().animatePosition(Axis.ORTHOGONAL_AXIS, animation, item, 0, true);
         animation.setStartDelay(0);
         animation.start();
@@ -1125,8 +1125,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         animation.setDuration(duration);
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation, 1);
         getArithmetics().animateScale(Axis.ORTHOGONAL_AXIS, animation, 1);
-        getArithmetics()
-                .animatePosition(Axis.DRAGGING_AXIS, animation, item, peekPosition, true);
+        getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, item, peekPosition, true);
         animation.start();
         int selectedTabIndex = getModel().getSelectedTabIndex();
         TabItem selectedItem = TabItem.create(getModel(), tabViewRecycler, selectedTabIndex);
@@ -1426,8 +1425,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 .getPivot(Axis.DRAGGING_AXIS, item, DragState.NONE));
                         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, item, getArithmetics()
                                 .getPivot(Axis.ORTHOGONAL_AXIS, item, DragState.NONE));
-                        getArithmetics()
-                                .setPosition(Axis.DRAGGING_AXIS, item, tag.getPosition());
+                        getArithmetics().setPosition(Axis.DRAGGING_AXIS, item, tag.getPosition());
                         getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, item,
                                 swipeAnimation.getDirection() == SwipeDirection.LEFT ?
                                         -1 * swipePosition : swipePosition);
@@ -1437,8 +1435,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 .getPivot(Axis.DRAGGING_AXIS, item, DragState.SWIPE));
                         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, item, getArithmetics()
                                 .getPivot(Axis.ORTHOGONAL_AXIS, item, DragState.SWIPE));
-                        getArithmetics()
-                                .setScale(Axis.DRAGGING_AXIS, item, swipedTabScale * scale);
+                        getArithmetics().setScale(Axis.DRAGGING_AXIS, item, swipedTabScale * scale);
                         getArithmetics()
                                 .setScale(Axis.ORTHOGONAL_AXIS, item, swipedTabScale * scale);
                         animateSwipe(item, false, 0, swipeAnimation,
@@ -3324,6 +3321,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     left ? (width + swipedTabDistance) * -1 : width + swipedTabDistance;
             animateSwipe(neighbor, targetPosition, false, animationDuration, velocity);
         }
+    }
+
+    @Override
+    public final void onPulledDown() {
+        getModel().showSwitcher();
     }
 
 }

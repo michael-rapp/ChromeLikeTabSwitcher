@@ -44,6 +44,7 @@ import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.PeekAnimation;
+import de.mrapp.android.tabswitcher.PullDownGesture;
 import de.mrapp.android.tabswitcher.RevealAnimation;
 import de.mrapp.android.tabswitcher.SwipeGesture;
 import de.mrapp.android.tabswitcher.Tab;
@@ -167,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                         ThemeUtil.getDimensionPixelSize(MainActivity.this, R.attr.actionBarSize));
                 tabSwitcher.addDragGesture(
                         new SwipeGesture.Builder().setTouchableArea(touchableArea).create());
+                tabSwitcher.addDragGesture(
+                        new PullDownGesture.Builder().setTouchableArea(touchableArea).create());
                 return insets;
             }
 

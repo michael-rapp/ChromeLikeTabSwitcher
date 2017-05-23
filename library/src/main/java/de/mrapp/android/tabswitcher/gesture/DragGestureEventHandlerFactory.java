@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.gesture;
 import android.support.annotation.NonNull;
 
 import de.mrapp.android.tabswitcher.DragGesture;
+import de.mrapp.android.tabswitcher.PullDownGesture;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.SwipeGesture;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -23,12 +24,12 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A factory, which allows to create instances of the class {@link AbstractTouchEventHandler}.
+ * A factory, which allows to create instances of the class {@link AbstractDragGestureEventHandler}.
  *
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TouchEventHandlerFactory {
+public class DragGestureEventHandlerFactory {
 
     /**
      * The tab switcher, the event handler are created for.
@@ -37,13 +38,13 @@ public class TouchEventHandlerFactory {
 
     /**
      * Creates a new factory, which allows to create instances of the class {@link
-     * AbstractTouchEventHandler}.
+     * AbstractDragGestureEventHandler}.
      *
      * @param tabSwitcher
      *         The tab switcher, the event handler should be created for, as an instance of the
      *         class {@link TabSwitcher}. The tab switcher may not be null
      */
-    public TouchEventHandlerFactory(@NonNull final TabSwitcher tabSwitcher) {
+    public DragGestureEventHandlerFactory(@NonNull final TabSwitcher tabSwitcher) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
     }
@@ -65,8 +66,15 @@ public class TouchEventHandlerFactory {
             int dragThreshold = dragGesture.getThreshold() != -1 ? dragGesture.getThreshold() :
                     tabSwitcher.getResources()
                             .getDimensionPixelSize(R.dimen.swipe_gesture_threshold);
-            return new SwipeGestureEventHandler(tabSwitcher, dragThreshold, dragGesture.getTouchableArea(),
+            return new SwipeGestureEventHandler(tabSwitcher, dragThreshold,
+                    dragGesture.getTouchableArea(),
                     ((SwipeGesture) dragGesture).getAnimationDuration());
+        } else if (dragGesture instanceof PullDownGesture) {
+            int dragThreshold = dragGesture.getThreshold() != -1 ? dragGesture.getThreshold() :
+                    tabSwitcher.getResources()
+                            .getDimensionPixelSize(R.dimen.pull_down_gesture_threshold);
+            return new PullDownGestureEventHandler(tabSwitcher, dragThreshold,
+                    dragGesture.getTouchableArea());
         }
 
         throw new IllegalArgumentException(

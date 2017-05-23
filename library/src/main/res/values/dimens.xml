@@ -34,6 +34,7 @@ License.
 
     <!-- Common -->
     <dimen name="swipe_gesture_threshold">24dp</dimen>
+    <dimen name="pull_down_gesture_threshold">12dp</dimen>
 
     <!-- Phone layout -->
     <dimen name="phone_tab_title_padding">12dp</dimen>
