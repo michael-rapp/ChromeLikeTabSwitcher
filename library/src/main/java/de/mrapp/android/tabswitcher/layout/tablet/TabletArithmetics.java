@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 
 import de.mrapp.android.tabswitcher.R;
@@ -55,6 +56,11 @@ public class TabletArithmetics extends AbstractArithmetics {
     private final int tabOffset;
 
     /**
+     * The offset between a button, which allows to add a new tab, and a neighboring tab.
+     */
+    private final int addTabButtonOffset;
+
+    /**
      * Creates a new class, which provides methods, which allow to calculate the position, size and
      * rotation of a {@link TabSwitcher}'s tabs, when using the tablet layout.
      *
@@ -65,10 +71,10 @@ public class TabletArithmetics extends AbstractArithmetics {
     public TabletArithmetics(@NonNull final TabSwitcher tabSwitcher) {
         super(tabSwitcher);
         Resources resources = tabSwitcher.getResources();
-        this.tabHeight = resources.getDimensionPixelSize(R.dimen.tablet_tab_height);
-        this.tabContainerHeight =
-                resources.getDimensionPixelSize(R.dimen.tablet_tab_container_height);
-        this.tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        tabHeight = resources.getDimensionPixelSize(R.dimen.tablet_tab_height);
+        tabContainerHeight = resources.getDimensionPixelSize(R.dimen.tablet_tab_container_height);
+        tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
+        addTabButtonOffset = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_offset);
     }
 
     @Override
@@ -86,7 +92,28 @@ public class TabletArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
-        throw new UnsupportedOperationException();
+        ensureNotNull(axis, "The axis may not be null");
+
+        if (axis == Axis.DRAGGING_AXIS) {
+            ViewGroup tabContainer = getTabSwitcher().getTabContainer();
+            assert tabContainer != null;
+            float size = tabContainer.getWidth();
+            int padding = !includePadding ?
+                    getTabSwitcher().getPaddingRight() + getTabSwitcher().getPaddingLeft() : 0;
+            Toolbar[] toolbars = getTabSwitcher().getToolbars();
+            float primaryToolbarSize =
+                    !includePadding && getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                            Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
+                                    tabOffset) : 0;
+            float secondaryToolbarSize =
+                    !includePadding && getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                            Math.max(0, toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX].getWidth() -
+                                    (getTabSwitcher().isAddTabButtonShown() ? addTabButtonOffset :
+                                            0)) : 0;
+            return size - padding - primaryToolbarSize - secondaryToolbarSize;
+        } else {
+            return tabContainerHeight;
+        }
     }
 
     @Override

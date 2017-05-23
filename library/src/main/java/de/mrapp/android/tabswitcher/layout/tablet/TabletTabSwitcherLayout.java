@@ -44,6 +44,7 @@ import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.ItemComparator;
@@ -306,24 +307,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      */
     private int calculateAddTabButtonSpacing() {
         return getModel().isAddTabButtonShown() ? addTabButtonWidth + addTabButtonOffset : 0;
-    }
-
-    /**
-     * Calculates and returns the width of the tab container.
-     *
-     * @return The width of the tab container in pixels as a {@link Float} value
-     */
-    private float calculateTabContainerWidth() {
-        // TODO: Move code to class TabletArithmetics
-        float size = tabContainer.getWidth();
-        int padding = getModel().getPaddingRight() + getModel().getPaddingLeft();
-        Toolbar[] toolbars = getToolbars();
-        float primaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ?
-                Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0;
-        float secondaryToolbarSize = getModel().areToolbarsShown() && toolbars != null ? Math.max(0,
-                toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX].getWidth() -
-                        (getModel().isAddTabButtonShown() ? addTabButtonOffset : 0)) : 0;
-        return size - padding - primaryToolbarSize - secondaryToolbarSize;
     }
 
     /**
@@ -710,7 +693,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @NonNull
     @Override
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(final int index) {
-        float tabContainerWidth = calculateTabContainerWidth();
+        float tabContainerWidth = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
         int selectedTabIndex = getModel().getSelectedTabIndex();
         int selectedItemIndex = selectedTabIndex + (getModel().isAddTabButtonShown() ? 1 : 0);
         int i = getModel().isAddTabButtonShown() ? index - 1 : index;
@@ -758,7 +741,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     protected final float calculateMinStartPosition(final int index) {
         int thresholdPosition = (getItemCount() - 1) * calculateTabSpacing();
-        float tabContainerWidth = calculateTabContainerWidth();
+        float tabContainerWidth = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
 
         if (thresholdPosition < tabContainerWidth) {
             return calculateMaxEndPosition(index);
