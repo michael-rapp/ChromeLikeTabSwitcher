@@ -38,7 +38,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public abstract class AbstractDragEventHandler<CallbackType extends AbstractDragEventHandler.Callback>
+public abstract class AbstractDragTabsEventHandler<CallbackType extends AbstractDragTabsEventHandler.Callback>
         extends AbstractTouchEventHandler {
 
     /**
@@ -437,9 +437,9 @@ public abstract class AbstractDragEventHandler<CallbackType extends AbstractDrag
      * @param swipeEnabled
      *         True, if tabs can be swiped on the orthogonal axis, false otherwise
      */
-    public AbstractDragEventHandler(@NonNull final TabSwitcher tabSwitcher,
-                                    @NonNull final Arithmetics arithmetics,
-                                    final boolean swipeEnabled) {
+    public AbstractDragTabsEventHandler(@NonNull final TabSwitcher tabSwitcher,
+                                        @NonNull final Arithmetics arithmetics,
+                                        final boolean swipeEnabled) {
         super(MIN_PRIORITY, tabSwitcher,
                 tabSwitcher.getResources().getDimensionPixelSize(R.dimen.drag_threshold));
         ensureNotNull(arithmetics, "The arithmetics may not be null");

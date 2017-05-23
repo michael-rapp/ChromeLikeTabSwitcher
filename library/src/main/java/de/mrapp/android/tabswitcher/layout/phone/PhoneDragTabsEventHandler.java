@@ -24,7 +24,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
@@ -42,14 +42,14 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PhoneDragEventHandler
-        extends AbstractDragEventHandler<PhoneDragEventHandler.Callback> {
+public class PhoneDragTabsEventHandler
+        extends AbstractDragTabsEventHandler<PhoneDragTabsEventHandler.Callback> {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a drag handler,
      * must implement.
      */
-    public interface Callback extends AbstractDragEventHandler.Callback {
+    public interface Callback extends AbstractDragTabsEventHandler.Callback {
 
         /**
          * The method, which is invoked, when tabs are overshooting at the start.
@@ -168,9 +168,9 @@ public class PhoneDragEventHandler
      *         tabs, whose positions and states should be calculated by the tab switcher, as an
      *         instance of the class AttachedViewRecycler. The view recycler may not be null
      */
-    public PhoneDragEventHandler(@NonNull final TabSwitcher tabSwitcher,
-                                 @NonNull final Arithmetics arithmetics,
-                                 @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
+    public PhoneDragTabsEventHandler(@NonNull final TabSwitcher tabSwitcher,
+                                     @NonNull final Arithmetics arithmetics,
+                                     @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;

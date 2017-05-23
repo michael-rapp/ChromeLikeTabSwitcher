@@ -24,7 +24,7 @@ import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.State;
@@ -39,8 +39,8 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class TabletDragEventHandler
-        extends AbstractDragEventHandler<AbstractDragEventHandler.Callback> {
+public class TabletDragTabsEventHandler
+        extends AbstractDragTabsEventHandler<AbstractDragTabsEventHandler.Callback> {
 
     /**
      * The view recycler, which allows to inflate the views, which are used to visualize the tabs,
@@ -75,9 +75,9 @@ public class TabletDragEventHandler
      *         tabs, whose positions and states should be calculated by the tab switcher, as an
      *         instance of the class AttachedViewRecycler. The view recycler may not be null
      */
-    public TabletDragEventHandler(@NonNull final TabSwitcher tabSwitcher,
-                                  @NonNull final Arithmetics arithmetics,
-                                  @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
+    public TabletDragTabsEventHandler(@NonNull final TabSwitcher tabSwitcher,
+                                      @NonNull final Arithmetics arithmetics,
+                                      @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;

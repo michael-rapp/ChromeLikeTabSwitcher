@@ -41,7 +41,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
-import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
@@ -175,7 +175,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     /**
      * The drag handler, which is used by the layout.
      */
-    private TabletDragEventHandler dragHandler;
+    private TabletDragTabsEventHandler dragHandler;
 
     /**
      * The view recycler, which allows to recycle the views, which are associated with tabs.
@@ -578,7 +578,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
-    public final AbstractDragEventHandler<?> getDragHandler() {
+    public final AbstractDragTabsEventHandler<?> getDragHandler() {
         return dragHandler;
     }
 
@@ -604,7 +604,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         tabViewRecycler.setAdapter(tabRecyclerAdapter);
         tabRecyclerAdapter.setViewRecycler(tabViewRecycler);
         dragHandler =
-                new TabletDragEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
+                new TabletDragTabsEventHandler(getTabSwitcher(), getArithmetics(), tabViewRecycler);
         adaptTabContainerAndToolbarMargins();
         adaptBorderColor();
     }

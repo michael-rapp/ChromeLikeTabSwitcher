@@ -25,7 +25,7 @@ import android.view.ViewPropertyAnimator;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractArithmetics;
-import de.mrapp.android.tabswitcher.layout.AbstractDragEventHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler.DragState;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
