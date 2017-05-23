@@ -60,6 +60,44 @@ public interface Arithmetics {
     }
 
     /**
+     * Returns the padding of the tab switcher on a specific axis and using a specific gravity.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param gravity
+     *         The gravity as an {@link Integer} value. The gravity must be
+     *         <code>Gravity.START</code> or <code>Gravity.END</code>
+     * @return The padding of the tab switcher on the given axis and using the given gravity as an
+     * {@link Integer} value
+     */
+    int getTabSwitcherPadding(@NonNull Axis axis, int gravity);
+
+    /**
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis. By default, the padding and the size of the toolbars are included.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
+     */
+    float getTabContainerSize(@NonNull Axis axis);
+
+    /**
+     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
+     * axis.
+     *
+     * @param axis
+     *         The axis as a value of the enum {@link Axis}. The axis may not be null
+     * @param includePadding
+     *         True, if the padding and the size of the toolbars should be included, false
+     *         otherwise
+     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
+     * as a {@link Float} value
+     */
+    float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
+
+    /**
      * Returns the position of a touch event on a specific axis.
      *
      * @param axis
@@ -134,19 +172,6 @@ public interface Arithmetics {
                             @NonNull AbstractItem item, float position, boolean includePadding);
 
     /**
-     * Returns the padding of the tab switcher on a specific axis and using a specific gravity.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param gravity
-     *         The gravity as an {@link Integer} value. The gravity must be
-     *         <code>Gravity.START</code> or <code>Gravity.END</code>
-     * @return The padding of the tab switcher on the given axis and using the given gravity as an
-     * {@link Integer} value
-     */
-    int getTabSwitcherPadding(@NonNull Axis axis, int gravity);
-
-    /**
      * Returns the scale of an item, depending on its margin. By default, the item's padding is
      * not taken into account.
      *
@@ -206,31 +231,6 @@ public interface Arithmetics {
      * @return The size of the given item on the given axis as a {@link Float} value
      */
     float getTabSize(@NonNull Axis axis, @NonNull AbstractItem item);
-
-    /**
-     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
-     * axis. By default, the padding and the size of the toolbars are included.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
-     * as a {@link Float} value
-     */
-    float getTabContainerSize(@NonNull Axis axis);
-
-    /**
-     * Returns the size of the container, which contains the tab switcher's tabs, on a specific
-     * axis.
-     *
-     * @param axis
-     *         The axis as a value of the enum {@link Axis}. The axis may not be null
-     * @param includePadding
-     *         True, if the padding and the size of the toolbars should be included, false
-     *         otherwise
-     * @return The size of the container, which contains the tab switcher's tabs, on the given axis
-     * as a {@link Float} value
-     */
-    float getTabContainerSize(@NonNull Axis axis, boolean includePadding);
 
     /**
      * Returns the pivot of an item on a specific axis, depending on the current drag state.

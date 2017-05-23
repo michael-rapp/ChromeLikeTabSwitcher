@@ -72,6 +72,24 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
+    public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
+        if (axis == Axis.DRAGGING_AXIS) {
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
+                    getTabSwitcher().getPaddingRight();
+        } else {
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
+                    getTabSwitcher().getPaddingBottom();
+        }
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public final float getTouchPosition(@NonNull final Axis axis,
                                         @NonNull final MotionEvent event) {
         ensureNotNull(axis, "The axis may not be null");
@@ -138,19 +156,6 @@ public class TabletArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
-        if (axis == Axis.DRAGGING_AXIS) {
-            return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
-                    getTabSwitcher().getPaddingRight();
-        } else {
-            return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
-                    getTabSwitcher().getPaddingBottom();
-        }
-    }
-
-    @Override
     public final float getTabScale(@NonNull final AbstractItem item, final boolean includePadding) {
         ensureNotNull(item, "The item may not be null");
         return 1;
@@ -195,11 +200,6 @@ public class TabletArithmetics extends AbstractArithmetics {
         } else {
             return view.getHeight() * getTabScale(item);
         }
-    }
-
-    @Override
-    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

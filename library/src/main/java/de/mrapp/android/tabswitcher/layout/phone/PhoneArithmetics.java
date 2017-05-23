@@ -181,6 +181,43 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
+    public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
+        ensureNotNull(axis, "The axis may not be null");
+        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
+
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
+                    getTabSwitcher().getPaddingBottom();
+        } else {
+            return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
+                    getTabSwitcher().getPaddingRight();
+        }
+    }
+
+    @Override
+    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
+        ensureNotNull(axis, "The axis may not be null");
+        ViewGroup tabContainer = getTabSwitcher().getTabContainer();
+        assert tabContainer != null;
+        FrameLayout.LayoutParams layoutParams =
+                (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
+        int padding = !includePadding ? (getTabSwitcherPadding(axis, Gravity.START) +
+                getTabSwitcherPadding(axis, Gravity.END)) : 0;
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
+
+        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
+            int toolbarSize =
+                    !includePadding && getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                            toolbars[0].getHeight() - tabInset : 0;
+            return tabContainer.getHeight() - layoutParams.topMargin - layoutParams.bottomMargin -
+                    padding - toolbarSize;
+        } else {
+            return tabContainer.getWidth() - layoutParams.leftMargin - layoutParams.rightMargin -
+                    padding;
+        }
+    }
+
+    @Override
     public final float getTouchPosition(@NonNull final Axis axis,
                                         @NonNull final MotionEvent event) {
         ensureNotNull(axis, "The axis may not be null");
@@ -270,20 +307,6 @@ public class PhoneArithmetics extends AbstractArithmetics {
     }
 
     @Override
-    public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
-
-        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
-                    getTabSwitcher().getPaddingBottom();
-        } else {
-            return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
-                    getTabSwitcher().getPaddingRight();
-        }
-    }
-
-    @Override
     public final float getTabScale(@NonNull final AbstractItem item, final boolean includePadding) {
         ensureNotNull(item, "The item may not be null");
         View view = item.getView();
@@ -335,29 +358,6 @@ public class PhoneArithmetics extends AbstractArithmetics {
             return view.getHeight() * getTabScale(item);
         } else {
             return view.getWidth() * getTabScale(item);
-        }
-    }
-
-    @Override
-    public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
-        ensureNotNull(axis, "The axis may not be null");
-        ViewGroup tabContainer = getTabSwitcher().getTabContainer();
-        assert tabContainer != null;
-        FrameLayout.LayoutParams layoutParams =
-                (FrameLayout.LayoutParams) tabContainer.getLayoutParams();
-        int padding = !includePadding ? (getTabSwitcherPadding(axis, Gravity.START) +
-                getTabSwitcherPadding(axis, Gravity.END)) : 0;
-        Toolbar[] toolbars = getTabSwitcher().getToolbars();
-
-        if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
-            int toolbarSize =
-                    !includePadding && getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                            toolbars[0].getHeight() - tabInset : 0;
-            return tabContainer.getHeight() - layoutParams.topMargin - layoutParams.bottomMargin -
-                    padding - toolbarSize;
-        } else {
-            return tabContainer.getWidth() - layoutParams.leftMargin - layoutParams.rightMargin -
-                    padding;
         }
     }
 

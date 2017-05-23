@@ -60,11 +60,6 @@ public abstract class AbstractArithmetics implements Arithmetics {
     }
 
     @Override
-    public final float getTabScale(@NonNull final AbstractItem item) {
-        return getTabScale(item, false);
-    }
-
-    @Override
     public final float getTabContainerSize(@NonNull final Axis axis) {
         return getTabContainerSize(axis, true);
     }
@@ -74,6 +69,11 @@ public abstract class AbstractArithmetics implements Arithmetics {
                                          @NonNull final ViewPropertyAnimator animator,
                                          @NonNull final AbstractItem item, final float position) {
         animateTabPosition(axis, animator, item, position, false);
+    }
+
+    @Override
+    public final float getTabScale(@NonNull final AbstractItem item) {
+        return getTabScale(item, false);
     }
 
 }
