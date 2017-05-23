@@ -31,11 +31,11 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class SwipeEventHandler extends AbstractDragGestureEventHandler {
+public class SwipeGestureEventHandler extends AbstractDragGestureEventHandler {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a {@link
-     * SwipeEventHandler}, must implement.
+     * SwipeGestureEventHandler}, must implement.
      */
     public interface Callback {
 
@@ -161,8 +161,9 @@ public class SwipeEventHandler extends AbstractDragGestureEventHandler {
      *         The duration of the swipe animation in milliseconds as a {@link Long} value or -1, if
      *         the default duration should be used
      */
-    public SwipeEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
-                             @Nullable final RectF touchableArea, final long animationDuration) {
+    public SwipeGestureEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
+                                    @Nullable final RectF touchableArea,
+                                    final long animationDuration) {
         super(tabSwitcher, dragThreshold, touchableArea);
         ViewConfiguration configuration = ViewConfiguration.get(tabSwitcher.getContext());
         this.maxFlingVelocity = configuration.getScaledMaximumFlingVelocity();

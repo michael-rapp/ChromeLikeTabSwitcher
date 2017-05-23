@@ -46,7 +46,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
-import de.mrapp.android.tabswitcher.gesture.SwipeEventHandler;
+import de.mrapp.android.tabswitcher.gesture.SwipeGestureEventHandler;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
@@ -79,7 +79,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public abstract class AbstractTabSwitcherLayout
         implements TabSwitcherLayout, OnGlobalLayoutListener, Model.Listener,
         TouchEventDispatcher.Callback, AbstractDragEventHandler.Callback,
-        SwipeEventHandler.Callback {
+        SwipeGestureEventHandler.Callback {
 
     /**
      * Defines the interface, a class, which should be notified about the events of a tab switcher
@@ -399,8 +399,8 @@ public abstract class AbstractTabSwitcherLayout
      */
     private void registerEventHandlerCallbacks() {
         for (AbstractTouchEventHandler eventHandler : touchEventDispatcher) {
-            if (eventHandler instanceof SwipeEventHandler) {
-                ((SwipeEventHandler) eventHandler).setCallback(this);
+            if (eventHandler instanceof SwipeGestureEventHandler) {
+                ((SwipeGestureEventHandler) eventHandler).setCallback(this);
             }
         }
 
@@ -416,8 +416,8 @@ public abstract class AbstractTabSwitcherLayout
      */
     private void registerEventHandlerCallback(
             @NonNull final AbstractTouchEventHandler eventHandler) {
-        if (eventHandler instanceof SwipeEventHandler) {
-            ((SwipeEventHandler) eventHandler).setCallback(this);
+        if (eventHandler instanceof SwipeGestureEventHandler) {
+            ((SwipeGestureEventHandler) eventHandler).setCallback(this);
         }
     }
 
@@ -426,8 +426,8 @@ public abstract class AbstractTabSwitcherLayout
      */
     private void unregisterEventHandlerCallbacks() {
         for (AbstractTouchEventHandler eventHandler : touchEventDispatcher) {
-            if (eventHandler instanceof SwipeEventHandler) {
-                ((SwipeEventHandler) eventHandler).setCallback(null);
+            if (eventHandler instanceof SwipeGestureEventHandler) {
+                ((SwipeGestureEventHandler) eventHandler).setCallback(null);
             }
         }
 
@@ -443,8 +443,8 @@ public abstract class AbstractTabSwitcherLayout
      */
     private void unregisterEventHandlerCallback(
             @NonNull final AbstractTouchEventHandler eventHandler) {
-        if (eventHandler instanceof SwipeEventHandler) {
-            ((SwipeEventHandler) eventHandler).setCallback(null);
+        if (eventHandler instanceof SwipeGestureEventHandler) {
+            ((SwipeGestureEventHandler) eventHandler).setCallback(null);
         }
     }
 

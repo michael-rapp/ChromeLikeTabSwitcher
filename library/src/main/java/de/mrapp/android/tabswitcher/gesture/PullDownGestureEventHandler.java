@@ -28,7 +28,7 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
  * @author Michael Rapp
  * @since 1.0.0
  */
-public class PullDownEventHandler extends AbstractDragGestureEventHandler {
+public class PullDownGestureEventHandler extends AbstractDragGestureEventHandler {
 
     /**
      * Creates a new event handler, which allows to handle pull down gestures, which can be used to
@@ -45,8 +45,9 @@ public class PullDownEventHandler extends AbstractDragGestureEventHandler {
      *         The bounds of the onscreen area, the handler should take into consideration for
      *         handling touch events, as an instance of the class {@link RectF} or null, if the are
      */
-    public PullDownEventHandler(@NonNull final TabSwitcher tabSwitcher, final int dragThreshold,
-                                @Nullable final RectF touchableArea) {
+    public PullDownGestureEventHandler(@NonNull final TabSwitcher tabSwitcher,
+                                       final int dragThreshold,
+                                       @Nullable final RectF touchableArea) {
         super(tabSwitcher, dragThreshold, touchableArea);
     }
 
