@@ -121,6 +121,7 @@ public class PullDownGestureEventHandler extends AbstractDragGestureEventHandler
             getDragHelper().update(dragPosition);
 
             if (getDragHelper().hasThresholdBeenReached()) {
+                onUp(null);
                 notifyOnPulledDown();
             }
         } else {
