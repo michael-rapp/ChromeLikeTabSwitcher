@@ -520,8 +520,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     position = calculateSuccessorPosition(item, predecessor);
                 }
 
-                State predecessorState = item.getIndex() == referenceIndex ? State.FLOATING :
-                        (predecessor != null ? predecessor.getTag().getState() : null);
+                State predecessorState =
+                        item.getIndex() == referenceIndex && referenceIndex > 0 ? State.FLOATING :
+                                (predecessor != null ? predecessor.getTag().getState() : null);
                 Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessorState);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
