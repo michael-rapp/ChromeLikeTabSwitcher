@@ -18,10 +18,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -131,9 +133,9 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     private final SortedMap<Integer, Set<AbstractTouchEventHandler>> eventHandlers;
 
     /**
-     * The event handler, which is currently active.
+     * A list, which contains the event handlers, which are currently active.
      */
-    private AbstractTouchEventHandler activeEventHandler;
+    private final List<AbstractTouchEventHandler> activeEventHandlers;
 
     /**
      * The callback, which is notified, when event handlers are added or removed.
@@ -193,7 +195,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      */
     public TouchEventDispatcher() {
         this.eventHandlers = new TreeMap<>(Collections.reverseOrder());
-        this.activeEventHandler = null;
+        this.activeEventHandlers = new ArrayList<>();
         this.callback = null;
     }
 
@@ -252,9 +254,15 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
             }
         }
 
-        if (handler.equals(activeEventHandler)) {
-            activeEventHandler.onUp(null);
-            activeEventHandler = null;
+        for (int i = activeEventHandlers.size() - 1; i >= 0; i--) {
+            AbstractTouchEventHandler eventHandler = activeEventHandlers.get(i);
+
+            if (handler.equals(eventHandler)) {
+                eventHandler.onUp(null);
+                activeEventHandlers.remove(i);
+                break;
+            }
+
         }
     }
 
@@ -269,7 +277,12 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
             notifyOnRemovedEventHandler(eventHandler);
         }
 
+        for (AbstractTouchEventHandler handler : activeEventHandlers) {
+            handler.onUp(null);
+        }
+
         eventHandlers.clear();
+        activeEventHandlers.clear();
     }
 
     /**
@@ -282,32 +295,38 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      */
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
-        boolean handled = false;
+        boolean result = false;
 
-        if (activeEventHandler != null) {
-            handled = activeEventHandler.handleTouchEvent(event);
+        for (int i = activeEventHandlers.size() - 1; i >= 0; i--) {
+            AbstractTouchEventHandler eventHandler = activeEventHandlers.get(i);
+            boolean handled = eventHandler.handleTouchEvent(event);
 
-            if (!handled || activeEventHandler.isReset()) {
-                activeEventHandler = null;
+            if (!handled || eventHandler.isReset()) {
+                activeEventHandlers.remove(i);
             }
+
+            result |= handled;
         }
 
-        if (!handled) {
+        if (!result) {
             Iterator<AbstractTouchEventHandler> iterator = iterator();
             AbstractTouchEventHandler handler;
+            int handledPriority = Integer.MIN_VALUE;
 
-            while ((handler = iterator.next()) != null && !handled) {
+            while ((handler = iterator.next()) != null &&
+                    handler.getPriority() >= handledPriority) {
                 if (isInsideTouchableArea(event, handler)) {
-                    handled = handler.handleTouchEvent(event);
+                    result = handler.handleTouchEvent(event);
 
-                    if (handled && !handler.isReset()) {
-                        activeEventHandler = handler;
+                    if (result && !handler.isReset()) {
+                        activeEventHandlers.add(handler);
+                        handledPriority = handler.getPriority();
                     }
                 }
             }
         }
 
-        return handled;
+        return result;
     }
 
     @Override
