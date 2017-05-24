@@ -444,9 +444,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     /**
      * Shows the tab switcher in an animated manner.
+     *
+     * @param firstVisibleTabIndex
+     *         The index of the first visible tab as an {@link Integer} value or -1, if the index is
+     *         unknown
+     * @param firstVisibleTabPosition
+     *         The position of the first visible tab in pixels as a {@link Float} value or -1, if
+     *         the position is unknown
      */
-    private void animateShowSwitcher() {
-        AbstractItem[] items = calculateInitialItems(-1, -1);
+    private void animateShowSwitcher(final int firstVisibleTabIndex,
+                                     final float firstVisibleTabPosition) {
+        AbstractItem[] items = calculateInitialItems(firstVisibleTabIndex, firstVisibleTabPosition);
         AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
         AbstractItem item;
 
@@ -3030,7 +3038,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onSwitcherShown() {
         getLogger().logInfo(getClass(), "Showed tab switcher");
-        animateShowSwitcher();
+        animateShowSwitcher(-1, -1);
     }
 
     @Override
@@ -3325,7 +3333,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void onPulledDown() {
+        getDragHandler().getDragHelper().reset();
+        getModel().removeListener(this);
         getModel().showSwitcher();
+        getModel().addListener(this);
+
+        if (getTabSwitcher().getLayout() == Layout.PHONE_LANDSCAPE) {
+            animateShowSwitcher(-1, -1);
+        } else {
+            animateShowSwitcher(getModel().getSelectedTabIndex(), 0);
+        }
     }
 
 }

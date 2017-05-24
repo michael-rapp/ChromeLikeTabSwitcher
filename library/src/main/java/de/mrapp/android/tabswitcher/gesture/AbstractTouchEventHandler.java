@@ -110,17 +110,6 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     }
 
     /**
-     * Returns the drag helper, which is used by the event handler to recognize drag gestures.
-     *
-     * @return The drag helper, which is used by the event handler to recognize drag gestures, as an
-     * instance of the class {@link DragHelper}. The drag helper may not be null
-     */
-    @NonNull
-    protected final DragHelper getDragHelper() {
-        return dragHelper;
-    }
-
-    /**
      * The velocity tracker, which is used by the touch handler to measure the velocity of drag
      * gestures.
      *
@@ -247,6 +236,17 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     @Nullable
     public RectF getTouchableArea() {
         return null;
+    }
+
+    /**
+     * Returns the drag helper, which is used by the event handler to recognize drag gestures.
+     *
+     * @return The drag helper, which is used by the event handler to recognize drag gestures, as an
+     * instance of the class {@link DragHelper}. The drag helper may not be null
+     */
+    @NonNull
+    public final DragHelper getDragHelper() {
+        return dragHelper;
     }
 
     /**
