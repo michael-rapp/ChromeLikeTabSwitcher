@@ -250,6 +250,17 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     }
 
     /**
+     * Sets the id of the pointer, which has been used to start the current drag gesture.
+     *
+     * @param pointerId
+     *         The id, which should be set, as an {@link Integer} value or -1, if no drag gesture is
+     *         currently started
+     */
+    public final void setPointerId(final int pointerId) {
+        this.pointerId = pointerId;
+    }
+
+    /**
      * Handles a specific touch event. The event is only handled, if it occurred inside the
      * touchable area.
      *
@@ -261,7 +272,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
         ensureNotNull(event, "The event may not be null");
 
-        if (isDraggingAllowed()) {
+        if (!tabSwitcher.isAnimationRunning() && isDraggingAllowed()) {
             onTouchEvent();
 
             switch (event.getAction()) {
@@ -269,7 +280,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
                     handleDown(event);
                     return true;
                 case MotionEvent.ACTION_MOVE:
-                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                    if (event.getPointerId(0) == pointerId) {
                         if (velocityTracker == null) {
                             velocityTracker = VelocityTracker.obtain();
                         }
@@ -283,7 +294,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
 
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (!tabSwitcher.isAnimationRunning() && event.getPointerId(0) == pointerId) {
+                    if (event.getPointerId(0) == pointerId) {
                         onUp(event);
                     }
 

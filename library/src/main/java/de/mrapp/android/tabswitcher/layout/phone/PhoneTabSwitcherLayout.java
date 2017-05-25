@@ -3336,7 +3336,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     @Override
     public final void onPulledDown() {
-        getDragHandler().getDragHelper().reset();
         getModel().removeListener(this);
         getModel().showSwitcher();
         getModel().addListener(this);
@@ -3346,6 +3345,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         } else {
             animateShowSwitcher(getModel().getSelectedTabIndex(), 0);
         }
+
+        getDragHandler().getDragHelper().reset();
+        getDragHandler().setPointerId(0);
+        getDragHandler().setDragState(DragState.PULLING_DOWN);
     }
 
 }

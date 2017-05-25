@@ -75,7 +75,12 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
         /**
          * When a tab is swiped.
          */
-        SWIPE
+        SWIPE,
+
+        /**
+         * When the currently selected tab is pulled down.
+         */
+        PULLING_DOWN;
 
     }
 
@@ -538,6 +543,18 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
     }
 
     /**
+     * Sets the state of the currently performed drag gesture.
+     *
+     * @param dragState
+     *         The state, which should be set, as a value of the enum {@link DragState}. The state
+     *         may not be null
+     */
+    public final void setDragState(@NonNull final DragState dragState) {
+        ensureNotNull(dragState, "The drag state may not be null");
+        this.dragState = dragState;
+    }
+
+    /**
      * Handles drag gestures.
      *
      * @param dragPosition
@@ -585,7 +602,9 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
                     float dragDistance = getDragHelper().getDragDistance();
 
                     if (dragDistance == 0) {
-                        dragState = DragState.NONE;
+                        if (dragState != DragState.PULLING_DOWN) {
+                            dragState = DragState.NONE;
+                        }
                     } else {
                         dragState = previousDistance - dragDistance < 0 ? DragState.DRAG_TO_END :
                                 DragState.DRAG_TO_START;
@@ -670,7 +689,7 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
             notifyOnRevertEndOvershoot();
         } else if (dragState == DragState.OVERSHOOT_START) {
             notifyOnRevertStartOvershoot();
-        } else if (event != null) {
+        } else if (event != null && dragState != DragState.PULLING_DOWN) {
             handleClick(event);
         }
 
