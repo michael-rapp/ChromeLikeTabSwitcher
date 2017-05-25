@@ -192,6 +192,30 @@ Animation animation = new PeekAnimation.Builder().setDuration(2000)
 
 ![](doc/images/peek_animation.gif)
 
+# Using drag gestures
+
+The library provides multiple drag gestures, which can be used to perform certain actions. They can be set to a `TabSwitcher` by using its `addDragGesture`-method. If a previously added drag gesture should be removed, the `removeDragGesture`-method can be used accordingly. Usually, a onscreen area is specified for each gesture in order to specify the area, where drag gestures should be detected. Gestures, which In the following, the available drag gestures are discussed.
+
+## SwipeGesture
+
+Swipe gestures allow to switch between neighboring tabs, when the tab switcher is not currently shown, by swiping horizontally. Such gestures are represented by instances of the class `SwipeGesture`. In order to create a swipe gesture the builder pattern can be used as shown below. The `setTouchableArea` method call is used to specify the onscreen area, which should be taken into account for recognizing the gesture, the `setAnimationDuration`-method allows to set the duration of the swipe animation and the `setThreshold`-method call sets the distance in pixels, the gesture must last until it is recognized. All of these method calls  are optional.
+
+```java
+DragGesture gesture = new SwipeGesture.Builder().setTouchableArea(0, 0, 200, 100).setAnimationDuration(1000L).setThreshold(10).create();
+```
+
+![](doc/images/swipe_gesture.gif)
+
+## PullDownGesture
+
+A `PullDownGesture` can be used on smartphones to show the tab switcher by pulling down from the top. It does not have any effects when using the tablet layout. Instances of the class `PullDownGesture` can be created as follows.
+
+```java
+DragGesture gesture = new PullDownGesture.Builder().setTouchableArea(0, 0, 200, 100).setThreshold(10).create();
+```
+
+![](doc/images/pull_down_gesture.gif)
+
 ## Toolbars and Menus
 
 The view `TabSwitcher`, which is provided by the library, allows to show a toolbar. By default, the toolbar is always hidden. In order to show it, the `showToolbars`-method must be used. When using the smartphone layout, the toolbar is shown when the tab switcher is currently shown, or if no tabs are contained by the tab switcher. When using the tablet layout, two toolbars - one to the left and one to the right of the tabs - are always shown. The toolbars can be referenced by using the `getToolbars`-method. It returns an array, which contains the layout's toolbars. When using the smartphone layout, only one `Toolbar` is contained by the array, when using the tablet layout, the left one is contained at index 0 and the right one is contained at index 1.
