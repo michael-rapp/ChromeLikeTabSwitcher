@@ -823,7 +823,7 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Returns, whether a button, which allows to add a new tab, is shown. When using the smartphone
-     * layout, such a button is never shown. When using the talet layout, the button is shown next
+     * layout, such a button is never shown. When using the tablet layout, the button is shown next
      * to the tabs.
      *
      * @return True, if a button, which allows to add a new tab, is shown, false otherwise
@@ -843,7 +843,9 @@ public interface Model extends Iterable<Tab> {
     void showAddTabButton(@Nullable AddTabButtonListener listener);
 
     /**
-     * Returns the color of the button, which allows to add a new tab.
+     * Returns the color of the button, which allows to add a new tab. When using the smartphone
+     * layout, such a button is never shown. When using the tablet layout, the button is shown next
+     * to the tabs.
      *
      * @return The color of the button, which allows to add a new tab, as an instance of the class
      * {@link ColorStateList} or null, if the default color is used
@@ -852,7 +854,9 @@ public interface Model extends Iterable<Tab> {
     ColorStateList getAddTabButtonColor();
 
     /**
-     * Sets the color of the button, which allows to add a new tab.
+     * Sets the color of the button, which allows to add a new tab. This method does not
+     * have any effect when using the smartphone layout. When using the tablet layout, the button is
+     * shown next to the tabs.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value or -1, if the default
@@ -861,7 +865,9 @@ public interface Model extends Iterable<Tab> {
     void setAddTabButtonColor(@ColorInt int color);
 
     /**
-     * Sets the color of the button, which allows to add a new tab.
+     * Sets the color of the button, which allows to add a new tab. This method does not
+     * have any effect when using the smartphone layout. When using the tablet layout, the button is
+     * shown next to the tabs.
      *
      * @param colorStateList
      *         The color, which should be set, as an instance of the class {@link ColorStateList} or
