@@ -138,6 +138,11 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     private final List<AbstractTouchEventHandler> activeEventHandlers;
 
     /**
+     * The event handler, which currently handles a drag gesture.
+     */
+    private AbstractTouchEventHandler draggingEventHandler;
+
+    /**
      * The callback, which is notified, when event handlers are added or removed.
      */
     private Callback callback;
@@ -196,6 +201,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     public TouchEventDispatcher() {
         this.eventHandlers = new TreeMap<>(Collections.reverseOrder());
         this.activeEventHandlers = new ArrayList<>();
+        this.draggingEventHandler = null;
         this.callback = null;
     }
 
@@ -264,6 +270,11 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
             }
 
         }
+
+        if (handler.equals(draggingEventHandler)) {
+            draggingEventHandler.onUp(null);
+            draggingEventHandler = null;
+        }
     }
 
     /**
@@ -279,6 +290,11 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
 
         for (AbstractTouchEventHandler handler : activeEventHandlers) {
             handler.onUp(null);
+        }
+
+        if (draggingEventHandler != null) {
+            draggingEventHandler.onUp(null);
+            draggingEventHandler = null;
         }
 
         eventHandlers.clear();
@@ -297,15 +313,36 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
         ensureNotNull(event, "The event may not be null");
         boolean result = false;
 
-        for (int i = activeEventHandlers.size() - 1; i >= 0; i--) {
-            AbstractTouchEventHandler eventHandler = activeEventHandlers.get(i);
-            boolean handled = eventHandler.handleTouchEvent(event);
+        if (draggingEventHandler != null) {
+            result = draggingEventHandler.handleTouchEvent(event);
 
-            if (!handled || eventHandler.isReset()) {
-                activeEventHandlers.remove(i);
+            if (!result || draggingEventHandler.isReset() || !draggingEventHandler.isDragging()) {
+                draggingEventHandler = null;
             }
+        }
 
-            result |= handled;
+        if (!result) {
+            for (int i = activeEventHandlers.size() - 1; i >= 0; i--) {
+                AbstractTouchEventHandler handler = activeEventHandlers.get(i);
+                boolean handled = handler.handleTouchEvent(event);
+
+                if (!handled || handler.isReset()) {
+                    activeEventHandlers.remove(i);
+                } else if (handled && handler.isDragging()) {
+                    draggingEventHandler = handler;
+                    activeEventHandlers.remove(i);
+
+                    for (AbstractTouchEventHandler activeHandler : activeEventHandlers) {
+                        activeHandler.onUp(null);
+                    }
+
+                    activeEventHandlers.clear();
+                    result = true;
+                    break;
+                }
+
+                result |= handled;
+            }
         }
 
         if (!result) {
@@ -316,11 +353,24 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
             while ((handler = iterator.next()) != null &&
                     handler.getPriority() >= handledPriority) {
                 if (isInsideTouchableArea(event, handler)) {
-                    result = handler.handleTouchEvent(event);
+                    boolean handled = handler.handleTouchEvent(event);
 
-                    if (result && !handler.isReset()) {
-                        activeEventHandlers.add(handler);
-                        handledPriority = handler.getPriority();
+                    if (handled && !handler.isReset()) {
+                        result = true;
+
+                        if (handler.isDragging()) {
+                            draggingEventHandler = handler;
+
+                            for (AbstractTouchEventHandler activeHandler : activeEventHandlers) {
+                                activeHandler.onUp(null);
+                            }
+
+                            activeEventHandlers.clear();
+                            break;
+                        } else {
+                            activeEventHandlers.add(handler);
+                            handledPriority = handler.getPriority();
+                        }
                     }
                 }
             }

@@ -14,6 +14,7 @@
 package de.mrapp.android.tabswitcher.gesture;
 
 import android.graphics.RectF;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
@@ -212,6 +213,17 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      */
     public final boolean isReset() {
         return pointerId == -1;
+    }
+
+    /**
+     * Returns, whether a drag gesture is currently handled by the event handler, or not. This
+     * method may be overridden by subclasses, if multiple drag helpers are used.
+     *
+     * @return True, if a drag gesture is currently handled by the event handler, false otherwise
+     */
+    @CallSuper
+    public boolean isDragging() {
+        return dragHelper.hasThresholdBeenReached();
     }
 
     /**

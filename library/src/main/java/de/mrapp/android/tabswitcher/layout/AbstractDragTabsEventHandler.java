@@ -639,6 +639,11 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
     }
 
     @Override
+    public final boolean isDragging() {
+        return super.isDragging() || swipeDragHelper.hasThresholdBeenReached();
+    }
+
+    @Override
     public final void reset() {
         resetDragging();
         onReset();
