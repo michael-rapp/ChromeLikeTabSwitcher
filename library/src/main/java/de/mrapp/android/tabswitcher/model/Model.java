@@ -19,11 +19,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.view.View;
 import android.view.View.OnClickListener;
 
 import java.util.Collection;
@@ -309,6 +311,20 @@ public interface Model extends Iterable<Tab> {
          */
         void onToolbarMenuInflated(@MenuRes int resourceId,
                                    @Nullable OnMenuItemClickListener listener);
+
+        /**
+         * The method, which is invoked, when the view, which is shown, when the tab switcher is
+         * empty, has been changed.
+         *
+         * @param view
+         *         The view, which has been set, as an instance of the class {@link View} or null,
+         *         if no view should be shown, when the tab switcher is empty
+         * @param animationDuration
+         *         The duration of the fade animation, which is used to show or hide the view, in
+         *         milliseconds as a {@link Long} value. The duration must be at least 0 or -1, if
+         *         the default duration should be used
+         */
+        void onEmptyViewChanged(@Nullable View view, long animationDuration);
 
     }
 
@@ -973,6 +989,59 @@ public interface Model extends Iterable<Tab> {
      *         notified
      */
     void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
+
+    /**
+     * Returns the view, which is shown, when the tab switcher is empty.
+     *
+     * @return The view, which is shown, when the tab switcher is empty, as an instance of the class
+     * {@link View} or null, if no view is shown
+     */
+    @Nullable
+    View getEmptyView();
+
+    /**
+     * Sets the view, which should be shown, when the tab switcher is empty.
+     *
+     * @param view
+     *         The view, which should be set, as an instance of the class {@link View} or null, if
+     *         no view should be shown, when the tab switcher is empty
+     */
+    void setEmptyView(@Nullable View view);
+
+    /**
+     * Sets the view, which should be shown, when the tab switcher is empty.
+     *
+     * @param view
+     *         The view, which should be set, as an instance of the class {@link View} or null, if
+     *         no view should be shown, when the tab switcher is empty
+     * @param animationDuration
+     *         The duration of the fade animation, which is used to show or hide the view, in
+     *         milliseconds as a {@link Long} value. The duration must be at least 0 or -1, if the
+     *         default duration should be used
+     */
+    void setEmptyView(@Nullable View view, long animationDuration);
+
+    /**
+     * Sets the view, which should be shown, when the tab switcher is empty.
+     *
+     * @param resourceId
+     *         The resource id of the view, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid layout resource
+     */
+    void setEmptyView(@LayoutRes int resourceId);
+
+    /**
+     * Sets the view, which should be shown, when the tab switcher is empty.
+     *
+     * @param resourceId
+     *         The resource id of the view, which should be set, as an {@link Integer} value. The
+     *         resource id must correspond to a valid layout resource
+     * @param animationDuration
+     *         The duration of the fade animation, which is used to show or hide the view, in
+     *         milliseconds as a {@link Long} value. The duration must be at least 0 or -1, if the
+     *         default duration should be used
+     */
+    void setEmptyView(@LayoutRes int resourceId, long animationDuration);
 
     /**
      * Adds a new listener, which should be notified, when a tab is about to be closed by clicking

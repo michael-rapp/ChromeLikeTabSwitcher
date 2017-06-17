@@ -651,6 +651,11 @@ public abstract class AbstractTabRecyclerAdapter
     }
 
     @Override
+    public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
+
+    }
+
+    @Override
     public final void onTitleChanged(@NonNull final Tab tab) {
         TabItem tabItem = getTabItem(tab);
 

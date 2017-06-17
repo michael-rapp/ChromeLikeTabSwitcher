@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -325,6 +326,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
             obtainToolbarMenu(typedArray);
+            obtainEmptyView(typedArray);
         } finally {
             typedArray.recycle();
         }
@@ -523,6 +525,35 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * Obtains the view, which should be shown, when the tab switcher is empty, from a specific
+     * typed array.
+     *
+     * @param typedArray
+     *         The typed array, trhe view should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainEmptyView(@NonNull final TypedArray typedArray) {
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_emptyView, 0);
+
+        if (resourceId == 0) {
+            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherEmptyView);
+        }
+
+        if (resourceId != 0) {
+            long animationDuration =
+                    typedArray.getInteger(R.styleable.TabSwitcher_emptyViewAnimationDuration, -2);
+
+            if (animationDuration < -1) {
+                // TODO: Catch exception, set animationDuration to -1, if any is thrown
+                animationDuration = themeHelper
+                        .getInteger(getLayout(), R.attr.tabSwitcherEmptyViewAnimationDuration);
+            }
+
+            setEmptyView(resourceId, animationDuration < -1 ? -1 : animationDuration);
+        }
+    }
+
+    /**
      * Enqueues a specific action to be executed, when no animation is running.
      *
      * @param action
@@ -709,6 +740,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onToolbarMenuInflated(@MenuRes final int resourceId,
                                               @Nullable final OnMenuItemClickListener listener) {
+
+            }
+
+            @Override
+            public void onEmptyViewChanged(@Nullable final View view,
+                                           final long animationDuration) {
 
             }
 
@@ -1528,6 +1565,32 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
         model.inflateToolbarMenu(resourceId, listener);
+    }
+
+    @Nullable
+    @Override
+    public final View getEmptyView() {
+        return model.getEmptyView();
+    }
+
+    @Override
+    public void setEmptyView(@Nullable final View view) {
+        model.setEmptyView(view);
+    }
+
+    @Override
+    public final void setEmptyView(@Nullable final View view, final long animationDuration) {
+        model.setEmptyView(view, animationDuration);
+    }
+
+    @Override
+    public final void setEmptyView(@LayoutRes final int resourceId) {
+        model.setEmptyView(resourceId);
+    }
+
+    @Override
+    public final void setEmptyView(@LayoutRes final int resourceId, final long animationDuration) {
+        model.setEmptyView(resourceId);
     }
 
     @Override

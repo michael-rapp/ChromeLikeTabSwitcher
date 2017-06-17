@@ -43,9 +43,9 @@ import de.mrapp.android.util.view.AttachedViewRecycler;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A wrapper, which encapsulates a {@link ContentRecyclerAdapter}, which allows to inflate the views,
- * which are used to visualize the content views of the tabs of a {@link TabSwitcher}. The wrapper
- * enables to adapt the views for use with the tablet layout.
+ * A wrapper, which encapsulates a {@link ContentRecyclerAdapter}, which allows to inflate the
+ * views, which are used to visualize the content views of the tabs of a {@link TabSwitcher}. The
+ * wrapper enables to adapt the views for use with the tablet layout.
  *
  * @author Michael Rapp
  * @since 1.0.0
@@ -337,6 +337,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     @Override
     public final void onToolbarMenuInflated(@MenuRes final int resourceId,
                                             @Nullable final Toolbar.OnMenuItemClickListener listener) {
+
+    }
+
+    @Override
+    public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
 
     }
 

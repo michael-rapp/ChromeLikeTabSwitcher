@@ -935,6 +935,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
+    public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
+        if (getModel().isEmpty()) {
+            // TODO: Adapt empty view
+        }
+    }
+
+    @Override
     public final void onSwitchingBetweenTabs(final int selectedTabIndex, final float distance) {
         TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(), selectedTabIndex);
         View view = contentViewRecycler.getView(tabItem.getTab());

@@ -22,12 +22,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -292,6 +294,17 @@ public class TabSwitcherModel implements Model, Restorable {
      * The resource id of the menu of the toolbar, which is shown, when the tab switcher is shown.
      */
     private int toolbarMenuId;
+
+    /**
+     * The view, which is shown, when the tab switcher is empty.
+     */
+    private View emptyView;
+
+    /**
+     * The duration of the fade animation, which is used to show or hide the view, which is shown,
+     * when the tab switcher is empty.
+     */
+    private long emptyViewAnimationDuration;
 
     /**
      * The listener, which is notified, when an item of the menu of the toolbar, which is shown,
@@ -684,6 +697,24 @@ public class TabSwitcherModel implements Model, Restorable {
                                                       @Nullable final OnClickListener clickListener) {
         for (Listener listener : listeners) {
             listener.onToolbarNavigationIconChanged(icon, clickListener);
+        }
+    }
+
+    /**
+     * Notifies the listeners, that the view, which is shown, when the tab switcher is empty, has
+     * been changed.
+     *
+     * @param view
+     *         The view, which has been set, as an instance of the class {@link View} or null, if no
+     *         view should be shown, when the tab switcher is empty
+     * @param animationDuration
+     *         The duration of the fade animation, which is used to show or hide the view, in
+     *         milliseconds as a {@link Long} value. The duration must be at least 0 or -1, if the
+     *         default duration should be used
+     */
+    private void notifyOnEmptyViewChanged(@Nullable final View view, final long animationDuration) {
+        for (Listener listener : listeners) {
+            listener.onEmptyViewChanged(view, animationDuration);
         }
     }
 
@@ -1349,6 +1380,35 @@ public class TabSwitcherModel implements Model, Restorable {
         this.toolbarMenuId = resourceId;
         this.toolbarMenuItemListener = listener;
         notifyOnToolbarMenuInflated(resourceId, listener);
+    }
+
+    @Nullable
+    @Override
+    public final View getEmptyView() {
+        return emptyView;
+    }
+
+    @Override
+    public final void setEmptyView(@Nullable final View view) {
+        setEmptyView(view, -1);
+    }
+
+    @Override
+    public final void setEmptyView(@Nullable final View view, final long animationDuration) {
+        this.emptyView = view;
+        this.emptyViewAnimationDuration = view != null ? animationDuration : -1;
+        notifyOnEmptyViewChanged(emptyView, animationDuration);
+    }
+
+    @Override
+    public final void setEmptyView(@LayoutRes final int resourceId) {
+        setEmptyView(resourceId, -1);
+    }
+
+    @Override
+    public final void setEmptyView(@LayoutRes final int resourceId, final long animationDuration) {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        setEmptyView(inflater.inflate(resourceId, tabSwitcher, false), animationDuration);
     }
 
     @Override

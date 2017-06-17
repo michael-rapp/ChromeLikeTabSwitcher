@@ -3188,6 +3188,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
+        if (getModel().isEmpty()) {
+            // TODO: Adapt empty view
+        }
+    }
+
+    @Override
     public final void onGlobalLayout() {
         if (getModel().isSwitcherShown()) {
             AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),

@@ -34,6 +34,8 @@ License.
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
     <attr name="tabSwitcherToolbarNavigationIcon" format="reference"/>
+    <attr name="tabSwitcherEmptyView" format="reference"/>
+    <attr name="tabSwitcherEmptyViewAnimationDuration" format="integer"/>
     <attr name="tabSwitcherToolbarPopupTheme" format="reference"/>
 
     <declare-styleable name="TabSwitcher">
@@ -53,6 +55,8 @@ License.
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
+        <attr name="emptyView" format="reference"/>
+        <attr name="emptyViewAnimationDuration" format="integer"/>
         <attr name="themeGlobal" format="reference"/>
         <attr name="themePhone" format="reference"/>
         <attr name="themeTablet" format="reference"/>
