@@ -29,6 +29,7 @@ License.
     <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="reveal_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="peek_animation_duration">1200</integer>
+    <integer name="empty_view_animation_duration">@android:integer/config_shortAnimTime</integer>
 
     <!-- Smartphone layout -->
     <integer name="phone_stacked_tab_count">3</integer>

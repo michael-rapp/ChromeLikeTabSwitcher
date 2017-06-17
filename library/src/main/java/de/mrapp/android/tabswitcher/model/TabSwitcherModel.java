@@ -875,6 +875,17 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Returns the duration of the fade animation, which should be used to show or hide the view,
+     * which is shown, when the tab switcher is empty.
+     *
+     * @return The duration of the fade animation, which should be used to show or hide the view,
+     * which is shown, when the tab switcher is empty, in milliseconds as a {@link Long} value
+     */
+    public final long getEmptyViewAnimationDuration() {
+        return emptyViewAnimationDuration;
+    }
+
+    /**
      * Returns the listeners, which should be notified, when a tab is about to be closed by clicking
      * its close button.
      *

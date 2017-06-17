@@ -24,6 +24,7 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -229,6 +230,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final long peekAnimationDuration;
 
     /**
+     * The duration of the fade animation, which is used to show or hide the empty view.
+     */
+    private final long emptyViewAnimationDuration;
+
+    /**
      * The maximum angle, tabs can be rotated by, when overshooting at the start, in degrees.
      */
     private final float maxStartOvershootAngle;
@@ -274,6 +280,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private Toolbar toolbar;
 
     /**
+     * The view, which is shown, when the tab switcher is empty.
+     */
+    private View emptyView;
+
+    /**
      * The bottom margin of a view, which visualizes a tab.
      */
     private int tabViewBottomMargin;
@@ -288,6 +299,37 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void adaptDecorator() {
         tabRecyclerAdapter.clearCachedPreviews();
+    }
+
+    /**
+     * Adapts the visibility of the view, which is shown, when the tab switcher is empty.
+     *
+     * @param animationDuration
+     *         The duration of the fade animation, which should be used to show or hide the view, in
+     *         milliseconds as a {@link Long} value
+     */
+    private void adaptEmptyView(final long animationDuration) {
+        if (emptyView != null) {
+            getTabSwitcher().removeView(emptyView);
+        }
+
+        if (getModel().isEmpty()) {
+            emptyView = getModel().getEmptyView();
+
+            if (emptyView != null) {
+                emptyView.setAlpha(0);
+                FrameLayout.LayoutParams layoutParams =
+                        new FrameLayout.LayoutParams(emptyView.getLayoutParams().width,
+                                emptyView.getLayoutParams().height);
+                layoutParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL;
+                getTabSwitcher().addView(emptyView, 0, layoutParams);
+                ViewPropertyAnimator animation = emptyView.animate();
+                animation.setDuration(
+                        animationDuration == -1 ? emptyViewAnimationDuration : animationDuration);
+                animation.alpha(1);
+                animation.start();
+            }
+        }
     }
 
     /**
@@ -2826,6 +2868,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 resources.getInteger(R.integer.revert_overshoot_animation_duration);
         revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
         peekAnimationDuration = resources.getInteger(R.integer.peek_animation_duration);
+        emptyViewAnimationDuration = resources.getInteger(R.integer.empty_view_animation_duration);
         maxStartOvershootAngle = resources.getInteger(R.integer.max_start_overshoot_angle);
         maxEndOvershootAngle = resources.getInteger(R.integer.max_end_overshoot_angle);
         swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
@@ -2846,7 +2889,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
         } else {
             toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
-            toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
             getTabSwitcher().addView(toolbar);
             tabContainer = new FrameLayout(getContext());
             tabContainer.setId(R.id.tab_container);
@@ -3086,6 +3128,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         } else {
             addAllTabs(index, new Tab[]{tab}, animation);
         }
+
+        adaptEmptyView(
+                getModel().isSwitcherShown() ? getModel().getEmptyViewAnimationDuration() : 0);
     }
 
     @Override
@@ -3141,6 +3186,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         createRemoveLayoutListener(removedItem, swipeAnimation));
             }
         }
+
+        adaptEmptyView(
+                getModel().isSwitcherShown() ? getModel().getEmptyViewAnimationDuration() : 0);
     }
 
     @Override
@@ -3178,6 +3226,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
         }
+
+        adaptEmptyView(
+                getModel().isSwitcherShown() ? getModel().getEmptyViewAnimationDuration() : 0);
     }
 
     @Override
@@ -3207,13 +3258,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     inflateAndUpdateView(item, createBottomMarginLayoutListener(item));
                 }
             }
-
-            toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
         } else if (getModel().getSelectedTab() != null) {
             AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler,
                     getModel().getSelectedTabIndex());
             tabViewRecycler.inflate(item);
         }
+
+        boolean showToolbar = getModel().areToolbarsShown() &&
+                (getModel().isEmpty() || getModel().isSwitcherShown());
+        toolbar.setAlpha(showToolbar ? 1 : 0);
+        toolbar.setVisibility(showToolbar ? View.VISIBLE : View.INVISIBLE);
+        adaptEmptyView(0);
     }
 
     @Override

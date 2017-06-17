@@ -13,9 +13,9 @@ distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, e
 implied. See the License for the specific language governing permissions and limitations under the
 License.
 -->
-<de.mrapp.android.tabswitcher.TabSwitcher android:id="@+id/tab_switcher"
-                                          xmlns:android="http://schemas.android.com/apk/res/android"
-                                          xmlns:custom="http://schemas.android.com/apk/res-auto"
-                                          android:layout_width="match_parent"
-                                          android:layout_height="match_parent"
-                                          custom:emptyView="@layout/empty_view"/>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/empty_view_text"
+          android:textAppearance="?android:textAppearanceMedium"
+          android:textColor="@android:color/white"/>

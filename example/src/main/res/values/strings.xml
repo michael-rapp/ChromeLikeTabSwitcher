@@ -27,6 +27,7 @@ License.
     <string name="cleared_tabs_snackbar">Removed all tabs</string>
     <string name="undo">Undo</string>
     <string name="edit_text_hint">Text</string>
+    <string name="empty_view_text">No tabs available</string>
     <string name="theme_preference_category_title">Theme</string>
     <string name="theme_preference_key">theme_preference_key</string>
     <string name="theme_preference_title">Theme</string>
