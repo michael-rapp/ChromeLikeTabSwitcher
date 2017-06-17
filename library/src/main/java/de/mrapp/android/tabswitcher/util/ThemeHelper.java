@@ -96,10 +96,10 @@ public class ThemeHelper {
                                                final int themeResourceId) {
         int resourceId = layout == Layout.TABLET ? R.attr.tabSwitcherThemeTablet :
                 R.attr.tabSwitcherThemePhone;
-        int result = ThemeUtil.getResourceId(context, themeResourceId, resourceId);
+        int result = ThemeUtil.getResId(context, themeResourceId, resourceId, 0);
 
         if (result == 0) {
-            result = ThemeUtil.getResourceId(context, R.attr.tabSwitcherThemeGlobal);
+            result = ThemeUtil.getResId(context, R.attr.tabSwitcherThemeGlobal, 0);
 
             if (result == 0) {
                 result = R.style.TabSwitcher_Light;
@@ -272,18 +272,22 @@ public class ThemeHelper {
      * @param resourceId
      *         The resource id of the theme attribute, the resource id should be obtained from, as
      *         an {@link Integer} value. The resource id must correspond to a valid theme attribute
+     * @param defaultValue
+     *         The default value, which should be returned, if the given resource id is invalid, as
+     *         an {@link Integer} value
      * @return The resource id, which has been obtained, as an {@link Integer} value
      */
-    public int getResourceId(@NonNull final Layout layout, @AttrRes final int resourceId) {
-        int result = ThemeUtil.getResourceId(context, resourceId);
+    public int getResourceId(@NonNull final Layout layout, @AttrRes final int resourceId,
+                             final int defaultValue) {
+        int result = ThemeUtil.getResId(context, resourceId, 0);
 
         if (result == 0) {
             int themeResourceId = getThemeResourceId(layout);
-            result = ThemeUtil.getResourceId(context, themeResourceId, resourceId);
+            result = ThemeUtil.getResId(context, themeResourceId, resourceId, 0);
 
             if (result == 0) {
                 themeResourceId = obtainThemeFromThemeAttributes(layout, themeResourceId);
-                return ThemeUtil.getResourceId(context, themeResourceId, resourceId);
+                return ThemeUtil.getResId(context, themeResourceId, resourceId, defaultValue);
             }
         }
 
@@ -299,18 +303,22 @@ public class ThemeHelper {
      * @param resourceId
      *         The resource id of the theme attribute, the integer value should be obtained from, as
      *         an {@link Integer} value. The resource id must correspond to a valid theme attribute
+     * @param defaultValue
+     *         The default value, which should be returned, if the given resource id is invalid, as
+     *         an {@link Integer} value
      * @return The integer value, which has been obtained, as an {@link Integer} value
      */
-    public int getInteger(@NonNull final Layout layout, @AttrRes final int resourceId) {
-        int result = ThemeUtil.getInteger(context, resourceId);
+    public int getInteger(@NonNull final Layout layout, @AttrRes final int resourceId,
+                          final int defaultValue) {
+        int result = ThemeUtil.getInt(context, resourceId, 0);
 
         if (result == 0) {
             int themeResourceId = getThemeResourceId(layout);
-            result = ThemeUtil.getInteger(context, themeResourceId, resourceId);
+            result = ThemeUtil.getInt(context, themeResourceId, resourceId, 0);
 
             if (result == 0) {
                 themeResourceId = obtainThemeFromThemeAttributes(layout, themeResourceId);
-                return ThemeUtil.getInteger(context, themeResourceId, resourceId);
+                return ThemeUtil.getInt(context, themeResourceId, resourceId, defaultValue);
             }
         }
 

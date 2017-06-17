@@ -343,7 +343,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         int value = typedArray.getInt(R.styleable.TabSwitcher_layoutPolicy, 0);
 
         if (value == 0) {
-            value = themeHelper.getInteger(getLayout(), R.attr.tabSwitcherLayoutPolicy);
+            value = themeHelper.getInteger(getLayout(), R.attr.tabSwitcherLayoutPolicy, 0);
         }
 
         setLayoutPolicy(value == 0 ? LayoutPolicy.AUTO : LayoutPolicy.fromValue(value));
@@ -516,7 +516,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarMenu, 0);
 
         if (resourceId == 0) {
-            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherToolbarMenu);
+            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherToolbarMenu, 0);
         }
 
         if (resourceId != 0) {
@@ -536,7 +536,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_emptyView, 0);
 
         if (resourceId == 0) {
-            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherEmptyView);
+            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherEmptyView, 0);
         }
 
         if (resourceId != 0) {
@@ -544,9 +544,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                     typedArray.getInteger(R.styleable.TabSwitcher_emptyViewAnimationDuration, -2);
 
             if (animationDuration < -1) {
-                // TODO: Catch exception, set animationDuration to -1, if any is thrown
                 animationDuration = themeHelper
-                        .getInteger(getLayout(), R.attr.tabSwitcherEmptyViewAnimationDuration);
+                        .getInteger(getLayout(), R.attr.tabSwitcherEmptyViewAnimationDuration, -2);
             }
 
             setEmptyView(resourceId, Math.max(-1, animationDuration));
