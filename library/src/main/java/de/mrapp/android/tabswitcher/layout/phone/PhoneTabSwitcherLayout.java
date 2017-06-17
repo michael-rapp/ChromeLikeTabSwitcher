@@ -3241,7 +3241,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
         if (getModel().isEmpty()) {
-            // TODO: Adapt empty view
+            adaptEmptyView(0);
         }
     }
 
