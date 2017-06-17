@@ -16,6 +16,7 @@ License.
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
+          android:drawableTop="@drawable/ic_file_outline_white_36dp"
           android:text="@string/empty_view_text"
           android:textAppearance="?android:textAppearanceMedium"
           android:textColor="@android:color/white"/>
