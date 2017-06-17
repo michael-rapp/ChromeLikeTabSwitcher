@@ -549,7 +549,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                         .getInteger(getLayout(), R.attr.tabSwitcherEmptyViewAnimationDuration);
             }
 
-            setEmptyView(resourceId, animationDuration < -1 ? -1 : animationDuration);
+            setEmptyView(resourceId, Math.max(-1, animationDuration));
         }
     }
 
