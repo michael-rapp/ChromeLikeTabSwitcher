@@ -452,7 +452,9 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     @Override
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
                                  @NonNull final Tab tab, @NonNull final Animation animation) {
-
+        if (tabSwitcher.getCount() == 1) {
+            tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
+        }
     }
 
     @Override
@@ -460,6 +462,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                                    @NonNull final Tab tab, @NonNull final Animation animation) {
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         showUndoSnackbar(text, index, tab);
+
+        if (tabSwitcher.isEmpty()) {
+            tabSwitcher.inflateToolbarMenu(R.menu.tab, createToolbarMenuListener());
+        }
     }
 
     @Override
@@ -468,6 +474,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                                        @NonNull final Animation animation) {
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         showUndoSnackbar(text, 0, tabs);
+        tabSwitcher.inflateToolbarMenu(R.menu.tab, createToolbarMenuListener());
     }
 
     @Override

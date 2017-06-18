@@ -526,6 +526,12 @@ public abstract class AbstractTabSwitcherLayout
         if (toolbars != null && menuId != -1) {
             Toolbar toolbar = toolbars.length > 1 ? toolbars[TabSwitcher.SECONDARY_TOOLBAR_INDEX] :
                     toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX];
+            Menu previousMenu = toolbar.getMenu();
+
+            if (previousMenu != null) {
+                previousMenu.clear();
+            }
+
             toolbar.inflateMenu(menuId);
             toolbar.setOnMenuItemClickListener(getModel().getToolbarMenuItemListener());
         }

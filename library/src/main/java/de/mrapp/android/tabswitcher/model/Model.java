@@ -978,7 +978,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Inflates the menu of the toolbar, which is shown, when the tab switcher is shown. When using
-     * the tablet layout, the menu is inflated into the secondary toolbar.
+     * the tablet layout, the menu is inflated into the secondary toolbar. If another menu has
+     * already been inflated, its items will be removed.
      *
      * @param resourceId
      *         The resource id of the menu, which should be inflated, as an {@link Integer} value.
