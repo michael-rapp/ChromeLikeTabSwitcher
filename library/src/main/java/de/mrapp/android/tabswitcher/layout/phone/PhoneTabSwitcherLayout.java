@@ -1724,6 +1724,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
                 tabViewRecycler.removeAll();
+                setFirstVisibleIndex(-1);
                 animateToolbarVisibility(getModel().areToolbarsShown(), 0);
             }
 
