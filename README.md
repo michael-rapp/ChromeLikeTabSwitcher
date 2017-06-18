@@ -303,6 +303,27 @@ The attributes, which are available when defining a tab switcher in a XML layout
 
 As an alternative to creating a custom theme, the theme attribute shown above can also be applied globally by including them in the global app theme. This causes them to take priority over the attributes of the theme, which is applied to a tab switcher. 
 
+## Showing a Placeholder when TabSwitcher is empty
+
+The class `TabSwitcher` provides `setEmptyView`-methods, which can be used to specify a custom view, which is shown, when the tab switcher is empty. The specified view is shown or hidden by using a fade in, respectively a fade out, animation. The duration of these animation can be specified optionally. The first possibility to use the `setEmptyView`-method is to specify an instance of the class `android.view.View`:
+
+```java
+View view = // ... inflate view
+tabSwitcher.setEmpty(view); 
+// or tabSwitcher.setEmptyView(view, 1000L) if an animation duration should be specified
+```
+
+Alternatively, `setEmpyView`-method can be used by specifying the layout resource id of a view:
+
+```java
+tabSwitcher.setEmptyView(R.layout.empty_view); 
+// or tabSwitcher.setEmptyView(R.layout.empty_view, 1000L) if an animation duration should be specified
+```
+
+An example of a placeholder view being shown, when the tab switcher is empty, can be seen in the screenshot below.
+
+![](doc/images/empty_view.png)
+
 ## Padding
 
 The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWIndowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
