@@ -309,9 +309,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         milliseconds as a {@link Long} value
      */
     private void adaptEmptyView(final long animationDuration) {
-        if (emptyView != null) {
-            getTabSwitcher().removeView(emptyView);
-        }
+        detachEmptyView();
 
         if (getModel().isEmpty()) {
             emptyView = getModel().getEmptyView();
@@ -329,6 +327,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 animation.alpha(1);
                 animation.start();
             }
+        }
+    }
+
+    /**
+     * Detaches the view, which is shown, when the tab switcher is empty.
+     */
+    private void detachEmptyView() {
+        if (emptyView != null) {
+            getTabSwitcher().removeView(emptyView);
+            emptyView = null;
         }
     }
 
@@ -2916,6 +2924,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         contentViewRecycler.removeAll();
         contentViewRecycler.clearCache();
         tabRecyclerAdapter.clearCachedPreviews();
+        detachEmptyView();
 
         if (!tabsOnly) {
             getModel().removeListener(tabRecyclerAdapter);
