@@ -49,10 +49,10 @@ import android.widget.FrameLayout;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.gesture.DragGestureEventHandlerFactory;
@@ -235,7 +235,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
                             @AttrRes final int defaultStyle,
                             @StyleRes final int defaultStyleResource) {
         pendingActions = new LinkedList<>();
-        listeners = new LinkedHashSet<>();
+        listeners = new CopyOnWriteArraySet<>();
         model = new TabSwitcherModel(this);
         model.addListener(createModelListener());
         touchEventDispatcher = new TouchEventDispatcher();
