@@ -1527,8 +1527,9 @@ public abstract class AbstractTabSwitcherLayout
 
             if (listener != null) {
                 listener.onAddTab(getTabSwitcher());
-                getLogger().logVerbose(getClass(), "Clicked add tab button");
             }
+
+            getLogger().logVerbose(getClass(), "Clicked add tab button");
         }
     }
 

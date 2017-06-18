@@ -28,6 +28,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
+import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -126,12 +127,14 @@ public class TabletDragTabsEventHandler
             Tag tag = item.getTag();
             AbstractItem successor = iterator.peek();
 
-            if (tag.getState() == State.FLOATING || tag.getState() == State.STACKED_START_ATOP ||
+            if (item instanceof AddTabItem || tag.getState() == State.FLOATING ||
+                    tag.getState() == State.STACKED_START_ATOP ||
                     (tag.getState() == State.STACKED_END && successor != null &&
                             successor.getTag().getState() == State.FLOATING)) {
                 float viewPosition = getViewPosition(item);
+                float viewWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, item);
 
-                if (viewPosition <= position) {
+                if ((viewPosition + viewWidth >= position) && viewPosition <= position) {
                     if (successor != null &&
                             successor.getTag().getState() == State.STACKED_START_ATOP &&
                             successor.getIndex() == getTabSwitcher().getSelectedTabIndex() +
