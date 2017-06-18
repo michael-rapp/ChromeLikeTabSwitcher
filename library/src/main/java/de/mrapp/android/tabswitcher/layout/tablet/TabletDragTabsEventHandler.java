@@ -26,8 +26,10 @@ import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
+import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.State;
+import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -57,6 +59,23 @@ public class TabletDragTabsEventHandler
      * The height of the view group, which contains the tab switcher's tabs.
      */
     private final int tabContainerHeight;
+
+    /**
+     * Calculates and returns the position of a specific item, in relation to
+     * the position of the tab switcher.
+     *
+     * @param item
+     *         The item, whose position should be returned, as an instance of the class {@link
+     *         AbstractItem}. The item may not be null
+     * @return The position, which has been calculated, as a {@link Float} value
+     */
+    private float getViewPosition(@NonNull final AbstractItem item) {
+        Toolbar[] toolbars = getTabSwitcher().getToolbars();
+        float toolbarWidth = getTabSwitcher().areToolbarsShown() && toolbars != null ?
+                Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() - tabOffset) : 0;
+        return getArithmetics().getPosition(Axis.DRAGGING_AXIS, item) + toolbarWidth +
+                getArithmetics().getTabSwitcherPadding(Axis.DRAGGING_AXIS, Gravity.START);
+    }
 
     /**
      * Creates a new drag handler, which allows to calculate the position and state of tabs on touch
@@ -104,19 +123,28 @@ public class TabletDragTabsEventHandler
         AbstractItem item;
 
         while ((item = iterator.next()) != null) {
-            if (item.getTag().getState() == State.FLOATING ||
-                    item.getTag().getState() == State.STACKED_START_ATOP) {
-                Toolbar[] toolbars = getTabSwitcher().getToolbars();
-                float toolbarWidth = getTabSwitcher().areToolbarsShown() && toolbars != null ?
-                        Math.max(0, toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getWidth() -
-                                tabOffset) : 0;
-                float viewPosition =
-                        getArithmetics().getPosition(Arithmetics.Axis.DRAGGING_AXIS, item) +
-                                toolbarWidth + getArithmetics()
-                                .getTabSwitcherPadding(Arithmetics.Axis.DRAGGING_AXIS,
-                                        Gravity.START);
+            Tag tag = item.getTag();
+            AbstractItem successor = iterator.peek();
+
+            if (tag.getState() == State.FLOATING || tag.getState() == State.STACKED_START_ATOP ||
+                    (tag.getState() == State.STACKED_END && successor != null &&
+                            successor.getTag().getState() == State.FLOATING)) {
+                float viewPosition = getViewPosition(item);
 
                 if (viewPosition <= position) {
+                    if (successor != null &&
+                            successor.getTag().getState() == State.STACKED_START_ATOP &&
+                            successor.getIndex() == getTabSwitcher().getSelectedTabIndex() +
+                                    (getTabSwitcher().isAddTabButtonShown() ? 1 : 0)) {
+                        float successorPosition = getViewPosition(successor);
+                        float successorWidth =
+                                getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
+
+                        if (successorPosition + successorWidth >= position) {
+                            return successor;
+                        }
+                    }
+
                     return item;
                 }
             }

@@ -191,7 +191,13 @@ public class TabletArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        throw new UnsupportedOperationException();
+        View view = item.getView();
+
+        if (axis == Axis.DRAGGING_AXIS) {
+            return view.getWidth();
+        } else {
+            return view.getHeight();
+        }
     }
 
     @Override
