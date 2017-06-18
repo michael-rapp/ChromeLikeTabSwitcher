@@ -503,13 +503,16 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         tabSwitcher.showAddTabButton(createAddTabButtonListener());
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
-        tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
         tabSwitcher.getViewTreeObserver()
                 .addOnGlobalLayoutListener(createTabSwitcherLayoutListener());
 
         for (int i = 0; i < TAB_COUNT; i++) {
             tabSwitcher.addTab(createTab(i));
         }
+
+        tabSwitcher
+                .inflateToolbarMenu(tabSwitcher.getCount() > 0 ? R.menu.tab_switcher : R.menu.tab,
+                        createToolbarMenuListener());
     }
 
 }
