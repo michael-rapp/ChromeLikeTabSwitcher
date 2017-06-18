@@ -305,7 +305,7 @@ As an alternative to creating a custom theme, the theme attribute shown above ca
 
 ## Showing a Placeholder when TabSwitcher is empty
 
-The class `TabSwitcher` provides `setEmptyView`-methods, which can be used to specify a custom view, which is shown, when the tab switcher is empty. The specified view is shown or hidden by using a fade in, respectively a fade out, animation. The duration of these animation can be specified optionally. The first possibility to use the `setEmptyView`-method is to specify an instance of the class `android.view.View`:
+The class `TabSwitcher` provides `setEmptyView`-methods, which can be used to specify a custom view, which is shown, when the tab switcher is empty. The specified view is shown or hidden by using a fade in, respectively a fade out, animation. The duration of these animations can be specified optionally. The first possibility to use the `setEmptyView`-methods is to specify an instance of the class `android.view.View`:
 
 ```java
 View view = // ... inflate view
@@ -313,7 +313,7 @@ tabSwitcher.setEmpty(view);
 // or tabSwitcher.setEmptyView(view, 1000L) if an animation duration should be specified
 ```
 
-Alternatively, `setEmpyView`-method can be used by specifying the layout resource id of a view:
+Alternatively, the `setEmpyView`-methods can be used by specifying the layout resource id of a view:
 
 ```java
 tabSwitcher.setEmptyView(R.layout.empty_view); 
