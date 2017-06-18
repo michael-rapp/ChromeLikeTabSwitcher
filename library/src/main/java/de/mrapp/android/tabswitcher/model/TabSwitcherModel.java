@@ -1008,7 +1008,7 @@ public class TabSwitcherModel implements Model, Restorable {
             switcherVisibilityChanged = setSwitcherShown(false);
         }
 
-        if (animation instanceof PeekAnimation) {
+        if (animation instanceof PeekAnimation && getCount() > 1) {
             switcherVisibilityChanged = setSwitcherShown(true);
         }
 

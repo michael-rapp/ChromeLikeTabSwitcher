@@ -3115,7 +3115,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getLogger().logInfo(getClass(),
                 "Added tab at index " + index + " using a " + animation.getClass().getSimpleName());
 
-        if (animation instanceof PeekAnimation && !getModel().isEmpty()) {
+        if (animation instanceof PeekAnimation && getModel().getCount() > 1) {
             ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
                     " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
