@@ -1285,6 +1285,16 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * The method, which is called when dragging after the positions and states of all tabs have
+     * been calculated. It may be overridden by subclasses in order to implement a second layout
+     * pass, which requires the information, which has been calculated in the first pass, and allows
+     * to perform additional modifications of the tabs based on that information.
+     */
+    protected void secondLayoutPass() {
+
+    }
+
+    /**
      * The method, which is invoked on implementing subclasses in order to create the view recycler
      * adapter, which allows to inflate the views, which are associated with tabs.
      *
@@ -1491,6 +1501,8 @@ public abstract class AbstractTabSwitcherLayout
             } else {
                 calculatePositionsWhenDraggingToStart(dragDistance);
             }
+
+            secondLayoutPass();
         }
 
         DragState overshoot = isOvershootingAtEnd(

@@ -51,6 +51,7 @@ import de.mrapp.android.tabswitcher.model.ItemComparator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -783,6 +784,31 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                                        @NonNull final AbstractItem successor) {
         float successorPosition = successor.getTag().getPosition();
         return successorPosition + calculateTabSpacing();
+    }
+
+    @Override
+    protected final void secondLayoutPass() {
+        int selectedItemIndex =
+                getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).create();
+        AbstractItem item;
+
+        while ((item = iterator.next()) != null && item.getIndex() < selectedItemIndex) {
+            if (item.getIndex() != 0 || !getModel().isAddTabButtonShown()) {
+                int i = getModel().isAddTabButtonShown() ? item.getIndex() - 1 : item.getIndex();
+                Tag tag = item.getTag();
+
+                if (i >= getStackedTabCount() && tag.getState() == State.STACKED_END) {
+                    AbstractItem successor = iterator.peek();
+
+                    if (successor != null && successor.getTag().getState() == State.STACKED_END) {
+                        tag.setState(State.HIDDEN);
+                        inflateOrRemoveView(item);
+                    }
+                }
+            }
+        }
     }
 
     @NonNull
