@@ -803,9 +803,12 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                     if (tag.getState() == State.STACKED_END) {
                         AbstractItem successor = iterator.peek();
 
-                        if (successor != null && successor.getTag().getState() == State.STACKED_END) {
+                        if (successor != null &&
+                                successor.getTag().getState() == State.STACKED_END) {
                             tag.setState(State.HIDDEN);
                             inflateOrRemoveView(item);
+                        } else {
+                            break;
                         }
                     } else {
                         break;
