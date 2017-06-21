@@ -525,8 +525,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
         tabSwitcher.getViewTreeObserver()
                 .addOnGlobalLayoutListener(createTabSwitcherLayoutListener());
-        tabSwitcher.setTabBackgroundColor(
-                ContextCompat.getColorStateList(this, R.color.tablet_tab_background_light));
         inflateMenu();
     }
 
