@@ -107,6 +107,24 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
         DragState onDrag(@NonNull DragState dragState, float dragDistance);
 
         /**
+         * The method, which is invoked, when pressing a view has been started.
+         *
+         * @param item
+         *         The item, which corresponds to the view, which has been pressed, as an instance
+         *         of the class {@link AbstractItem}. The item may not be null
+         */
+        void onPressStarted(@NonNull AbstractItem item);
+
+        /**
+         * The method, which is invoked, when pressing a view has been ended.
+         *
+         * @param item
+         *         Tge item, which corresponds to the view, which was previously pressed, as an
+         *         instance of the class {@link AbstractItem}. The item may not be null
+         */
+        void onPressEnded(@NonNull AbstractItem item);
+
+        /**
          * The method, which is invoked, when a view has been clicked.
          *
          * @param item
@@ -202,6 +220,11 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
     private TabItem swipedTabItem;
 
     /**
+     * The currently pressed item.
+     */
+    private AbstractItem pressedItem;
+
+    /**
      * The state of the currently performed drag gesture.
      */
     private DragState dragState;
@@ -239,6 +262,11 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
 
         if (this.swipeDragHelper != null) {
             this.swipeDragHelper.reset();
+        }
+
+        if (pressedItem != null) {
+            notifyOnPressEnded(pressedItem);
+            pressedItem = null;
         }
     }
 
@@ -315,6 +343,32 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
         }
 
         return null;
+    }
+
+    /**
+     * Notifies the callback, that pressing a view has been started.
+     *
+     * @param item
+     *         The item, which corresponds to the view, which has been pressed, as an instance of
+     *         the class {@link AbstractItem}. The item may not be null
+     */
+    private void notifyOnPressStarted(@NonNull final AbstractItem item) {
+        if (callback != null) {
+            callback.onPressStarted(item);
+        }
+    }
+
+    /**
+     * Notifies the callback, that pressing a view has been ended.
+     *
+     * @param item
+     *         The item, which corresponds to the view, which was previously pressed, as an instance
+     *         of the class {@link AbstractItem}. The item may not be null
+     */
+    private void notifyOnPressEnded(@NonNull final AbstractItem item) {
+        if (callback != null) {
+            callback.onPressEnded(item);
+        }
     }
 
     /**
@@ -661,13 +715,23 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
 
     @Override
     protected final void onDown(@NonNull final MotionEvent event) {
+        pressedItem = getFocusedItem(getArithmetics().getTouchPosition(Axis.DRAGGING_AXIS, event));
 
+        if (pressedItem != null) {
+            notifyOnPressStarted(pressedItem);
+        }
     }
 
     @Override
     protected final void onDrag(@NonNull final MotionEvent event) {
         float dragPosition = arithmetics.getTouchPosition(Axis.DRAGGING_AXIS, event);
         float orthogonalPosition = arithmetics.getTouchPosition(Axis.ORTHOGONAL_AXIS, event);
+
+        if (pressedItem != null && !isInsideTouchableArea(event)) {
+            notifyOnPressEnded(pressedItem);
+            pressedItem = null;
+        }
+
         handleDrag(dragPosition, orthogonalPosition);
     }
 

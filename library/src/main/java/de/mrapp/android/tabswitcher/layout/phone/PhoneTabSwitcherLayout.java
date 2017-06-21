@@ -54,6 +54,7 @@ import de.mrapp.android.tabswitcher.iterator.ArrayItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler.DragState;
+import de.mrapp.android.tabswitcher.layout.AbstractTabRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
@@ -2940,6 +2941,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     protected final AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler() {
         return tabViewRecycler;
+    }
+
+    @Override
+    protected final AbstractTabRecyclerAdapter getTabRecyclerAdapter() {
+        return tabRecyclerAdapter;
     }
 
     @Override

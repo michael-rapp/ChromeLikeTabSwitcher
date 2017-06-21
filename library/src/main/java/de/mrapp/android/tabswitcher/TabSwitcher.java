@@ -427,6 +427,15 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         ColorStateList colorStateList =
                 typedArray.getColorStateList(R.styleable.TabSwitcher_addTabButtonColor);
 
+        if (colorStateList == null) {
+            try {
+                colorStateList = themeHelper
+                        .getColorStateList(getLayout(), R.attr.tabSwitcherAddTabButtonColor);
+            } catch (NotFoundException e) {
+                colorStateList = null;
+            }
+        }
+
         if (colorStateList != null) {
             setAddTabButtonColor(colorStateList);
         }

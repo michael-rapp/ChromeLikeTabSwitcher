@@ -42,6 +42,7 @@ import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
+import de.mrapp.android.tabswitcher.layout.AbstractTabRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
@@ -634,6 +635,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     protected final AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler() {
         return tabViewRecycler;
+    }
+
+    @Override
+    protected final AbstractTabRecyclerAdapter getTabRecyclerAdapter() {
+        return tabRecyclerAdapter;
     }
 
     @Override

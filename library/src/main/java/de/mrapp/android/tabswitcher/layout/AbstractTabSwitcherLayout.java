@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.ColorInt;
@@ -1148,6 +1149,16 @@ public abstract class AbstractTabSwitcherLayout
     protected abstract AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler();
 
     /**
+     * The method, which is invoked on implementing subclasses in order to retrieve the adapter of
+     * the view recycler, which allows to inflate the views, which are used to visualize the tabs.
+     *
+     * @return The adapter of the view recycler, which allows to inflated the views, which are used
+     * to visualize the tabs, as an instance of the class {@link AbstractTabRecyclerAdapter} or
+     * null, if the view recycler has not been initialized yet
+     */
+    protected abstract AbstractTabRecyclerAdapter getTabRecyclerAdapter();
+
+    /**
      * The method, which is invoked on implementing subclasses in order to inflate and update the
      * view, which is used to visualize a specific item.
      *
@@ -1513,6 +1524,36 @@ public abstract class AbstractTabSwitcherLayout
                 "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
                         dragState + ", overshoot is " + overshoot);
         return overshoot;
+    }
+
+    @Override
+    public final void onPressStarted(@NonNull final AbstractItem item) {
+        ColorStateList colorStateList = null;
+
+        if (item instanceof TabItem) {
+            TabItem tabItem = (TabItem) item;
+            Tab tab = tabItem.getTab();
+            colorStateList = tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
+                    getModel().getTabBackgroundColor();
+        } else if (item instanceof AddTabItem) {
+            colorStateList = getModel().getAddTabButtonColor();
+        }
+
+        if (colorStateList != null) {
+            int[] stateSet = new int[]{android.R.attr.state_pressed};
+            int color = colorStateList.getColorForState(stateSet, -1);
+
+            if (color != -1) {
+                View view = item.getView();
+                Drawable background = view.getBackground();
+                background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            }
+        }
+    }
+
+    @Override
+    public final void onPressEnded(@NonNull final AbstractItem item) {
+        getTabRecyclerAdapter().onTabBackgroundColorChanged(getModel().getTabBackgroundColor());
     }
 
     @Override
