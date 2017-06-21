@@ -30,7 +30,6 @@ import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.State;
-import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -79,6 +78,28 @@ public class TabletDragTabsEventHandler
     }
 
     /**
+     * Returns, whether a specific item is focusable, or not.
+     *
+     * @param item
+     *         The item, which should be checked, as an instance of the class {@link AbstractItem}.
+     *         The item may not be null
+     * @param selectedItemIndex
+     *         The index of the currently selected item as an {@link Integer} value
+     * @param successor
+     *         The successor of the given item as an instance of the class {@link AbstractItem} or
+     *         null, if the item does not have a successor
+     * @return True, if the given item is focusable, false otherwise
+     */
+    private boolean isItemFocusable(@NonNull final AbstractItem item, final int selectedItemIndex,
+                                    @Nullable final AbstractItem successor) {
+        return item instanceof AddTabItem || item.getIndex() == selectedItemIndex ||
+                item.getTag().getState() == State.FLOATING ||
+                item.getTag().getState() == State.STACKED_START_ATOP ||
+                (item.getTag().getState() == State.STACKED_END &&
+                        (successor == null || successor.getTag().getState() == State.FLOATING));
+    }
+
+    /**
      * Creates a new drag handler, which allows to calculate the position and state of tabs on touch
      * events, when using the tablet layout.
      *
@@ -119,36 +140,36 @@ public class TabletDragTabsEventHandler
     @Override
     @Nullable
     protected final AbstractItem getFocusedItem(final float position) {
-        AbstractItemIterator iterator =
-                new ItemIterator.Builder(getTabSwitcher(), viewRecycler).create();
+        int selectedItemIndex = getTabSwitcher().getSelectedTabIndex() +
+                (getTabSwitcher().isAddTabButtonShown() ? 1 : 0);
+        ItemIterator.Builder builder = new ItemIterator.Builder(getTabSwitcher(), viewRecycler);
+        AbstractItemIterator iterator = builder.start(selectedItemIndex).create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null) {
-            Tag tag = item.getTag();
-            AbstractItem successor = iterator.peek();
-
-            if (item instanceof AddTabItem || tag.getState() == State.FLOATING ||
-                    tag.getState() == State.STACKED_START_ATOP ||
-                    (tag.getState() == State.STACKED_END && successor != null &&
-                            successor.getTag().getState() == State.FLOATING)) {
+            if (isItemFocusable(item, selectedItemIndex, iterator.peek())) {
                 float viewPosition = getViewPosition(item);
                 float viewWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, item);
 
-                if ((viewPosition + viewWidth >= position) && viewPosition <= position) {
-                    if (successor != null &&
-                            successor.getTag().getState() == State.STACKED_START_ATOP &&
-                            successor.getIndex() == getTabSwitcher().getSelectedTabIndex() +
-                                    (getTabSwitcher().isAddTabButtonShown() ? 1 : 0)) {
-                        float successorPosition = getViewPosition(successor);
-                        float successorWidth =
-                                getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
-
-                        if (successorPosition + successorWidth >= position) {
-                            return successor;
-                        }
-                    }
-
+                if (position > viewPosition + viewWidth) {
+                    break;
+                } else if (position >= viewPosition) {
                     return item;
+                }
+            }
+        }
+
+        if (selectedItemIndex - 1 >= 0) {
+            iterator = builder.start(selectedItemIndex - 1).reverse(true).create();
+
+            while ((item = iterator.next()) != null) {
+                if (isItemFocusable(item, selectedItemIndex, iterator.previous())) {
+                    float viewPosition = getViewPosition(item);
+                    float viewWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, item);
+
+                    if (position >= viewPosition && position <= viewPosition + viewWidth) {
+                        return item;
+                    }
                 }
             }
         }
