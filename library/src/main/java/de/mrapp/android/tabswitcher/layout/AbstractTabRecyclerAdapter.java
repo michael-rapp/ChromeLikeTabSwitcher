@@ -15,7 +15,6 @@ package de.mrapp.android.tabswitcher.layout;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -92,11 +91,6 @@ public abstract class AbstractTabRecyclerAdapter
     private final ColorStateList tabBackgroundColor;
 
     /**
-     * The default icon of a tab's close button.
-     */
-    private final Drawable closeButtonIcon;
-
-    /**
      * The view recycler, the adapter is bound to.
      */
     private AttachedViewRecycler<AbstractItem, Integer> viewRecycler;
@@ -128,14 +122,6 @@ public abstract class AbstractTabRecyclerAdapter
 
         if (icon == null) {
             icon = model.getTabIcon();
-
-            if (icon == null) {
-                try {
-                    icon = getThemeHelper().getDrawable(getLayout(), R.attr.tabSwitcherTabIcon);
-                } catch (NotFoundException e) {
-                    icon = null;
-                }
-            }
         }
 
         viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
@@ -173,7 +159,7 @@ public abstract class AbstractTabRecyclerAdapter
             icon = model.getTabCloseButtonIcon();
         }
 
-        viewHolder.closeButton.setImageDrawable(icon != null ? icon : closeButtonIcon);
+        viewHolder.closeButton.setImageDrawable(icon);
     }
 
     /**
@@ -476,8 +462,6 @@ public abstract class AbstractTabRecyclerAdapter
                 themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabTitleTextColor);
         this.tabBackgroundColor =
                 themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabBackgroundColor);
-        this.closeButtonIcon =
-                themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherTabCloseButtonIcon);
         this.viewRecycler = null;
     }
 

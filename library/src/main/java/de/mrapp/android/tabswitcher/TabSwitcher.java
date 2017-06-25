@@ -380,9 +380,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TypedArray}. The typed array may not be null
      */
     private void obtainTabIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, 0);
 
-        if (resourceId != -1) {
+        if (resourceId == 0) {
+            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherTabIcon, 0);
+        }
+
+        if (resourceId != 0) {
             setTabIcon(resourceId);
         }
     }
@@ -465,9 +469,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TypedArray}. The typed array may not be null
      */
     private void obtainTabCloseButtonIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, -1);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, 0);
 
-        if (resourceId != -1) {
+        if (resourceId == 0) {
+            resourceId =
+                    themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherTabCloseButtonIcon, 0);
+        }
+
+        if (resourceId != 0) {
             setTabCloseButtonIcon(resourceId);
         }
     }
