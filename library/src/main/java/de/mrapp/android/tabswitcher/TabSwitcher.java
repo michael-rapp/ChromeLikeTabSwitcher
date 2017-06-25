@@ -346,7 +346,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             value = themeHelper.getInteger(getLayout(), R.attr.tabSwitcherLayoutPolicy, 0);
         }
 
-        setLayoutPolicy(value == 0 ? LayoutPolicy.AUTO : LayoutPolicy.fromValue(value));
+        setLayoutPolicy(LayoutPolicy.fromValue(value));
     }
 
     /**

@@ -25,22 +25,22 @@ public enum LayoutPolicy {
      * If the layout should automatically adapted, depending on whether the device is a smartphone
      * or tablet.
      */
-    AUTO(1),
+    AUTO(0),
 
     /**
      * If the smartphone layout should be used, regardless of the device.
      */
-    PHONE(2),
+    PHONE(1),
 
     /**
      * If the tablet layout should be used, regardless of the device.
      */
-    TABLET(3),
+    TABLET(2),
 
     /**
      * If the tablet layout should be used, regardless of the device, when in landscape mode.
      */
-    TABLET_LANDSCAPE(4);
+    TABLET_LANDSCAPE(3);
 
     /**
      * The value of the layout policy.
