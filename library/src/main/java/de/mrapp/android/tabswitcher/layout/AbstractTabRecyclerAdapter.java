@@ -108,7 +108,7 @@ public abstract class AbstractTabRecyclerAdapter
         Tab tab = tabItem.getTab();
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         Drawable icon = style.getTabIcon(tab);
-        viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+        viewHolder.iconImageView.setImageDrawable(icon);
     }
 
     /**
@@ -172,6 +172,20 @@ public abstract class AbstractTabRecyclerAdapter
         ColorStateList colorStateList = style.getTabTitleTextColor(tab);
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.titleTextView.setTextColor(colorStateList);
+    }
+
+    /**
+     * Adapts the visibility of a tab's progress bar.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose progress bar should be adapted, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    private void adaptProgressBarVisibility(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+        viewHolder.progressBar.setVisibility(tab.isProgressBarShown() ? View.VISIBLE : View.GONE);
+        viewHolder.iconImageView.setVisibility(tab.isProgressBarShown() ? View.GONE : View.VISIBLE);
     }
 
     /**
@@ -658,6 +672,15 @@ public abstract class AbstractTabRecyclerAdapter
         }
     }
 
+    @Override
+    public final void onProgressBarVisibilityChanged(@NonNull final Tab tab) {
+        TabItem tabItem = getTabItem(tab);
+
+        if (tabItem != null) {
+            adaptProgressBarVisibility(tabItem);
+        }
+    }
+
     @CallSuper
     @Override
     public int getViewType(@NonNull final AbstractItem item) {
@@ -680,6 +703,8 @@ public abstract class AbstractTabRecyclerAdapter
             AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
             View view = onInflateTabView(inflater, parent, viewHolder);
             viewHolder.titleTextView = view.findViewById(R.id.tab_title_text_view);
+            viewHolder.iconImageView = view.findViewById(R.id.tab_icon_image_view);
+            viewHolder.progressBar = view.findViewById(R.id.tab_progress_bar);
             viewHolder.closeButton = view.findViewById(R.id.close_tab_button);
             view.setTag(R.id.tag_view_holder, viewHolder);
             tabItem.setViewHolder(viewHolder);
@@ -712,6 +737,7 @@ public abstract class AbstractTabRecyclerAdapter
             tab.addCallback(this);
             adaptTitle(tabItem);
             adaptIcon(tabItem);
+            adaptProgressBarVisibility(tabItem);
             adaptCloseButton(tabItem);
             adaptCloseButtonIcon(tabItem);
             adaptBackgroundColor(tabItem);

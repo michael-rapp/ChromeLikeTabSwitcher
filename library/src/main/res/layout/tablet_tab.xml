@@ -23,6 +23,29 @@ License.
     android:paddingRight="@dimen/tablet_tab_padding_right"
     android:paddingStart="@dimen/tablet_tab_padding_left">
 
+    <FrameLayout
+        android:layout_width="@dimen/tab_icon_size"
+        android:layout_height="@dimen/tab_icon_size"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/tablet_tab_title_drawable_padding"
+        android:layout_marginRight="@dimen/tablet_tab_title_drawable_padding">
+
+        <ImageView
+            android:id="@+id/tab_icon_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:scaleType="centerInside"/>
+
+        <de.mrapp.android.view.CircularProgressBar
+            android:id="@+id/tab_progress_bar"
+            android:layout_width="@dimen/tab_progress_bar_size"
+            android:layout_height="@dimen/tab_progress_bar_size"
+            android:layout_gravity="center"
+            android:thickness="@dimen/tab_progress_bar_thickness"
+            android:visibility="gone"/>
+    </FrameLayout>
+
     <TextView
         android:id="@+id/tab_title_text_view"
         style="@style/Tab.Title.Tablet"

@@ -11,6 +11,7 @@ The first stable release of the library. It introduces the following features:
 - The background color of tabs is now adapted when pressed, if a `ColorStateList` with state `android:state_pressed` is set
 - Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode
 - Added the possibility to show a certain placeholder view, when a `TabSwitcher` is empty
+- Added the functionality to show a circular progress bar instead of an icon for individual tabs.
 - Fixed various minor issues
 
 ## Version 0.1.3 (May 23th 2017)

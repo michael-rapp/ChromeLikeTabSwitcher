@@ -25,16 +25,41 @@ License.
         android:layout_height="@dimen/tab_title_container_height"
         android:orientation="horizontal">
 
+        <FrameLayout
+            android:layout_width="@dimen/tab_icon_size"
+            android:layout_height="@dimen/tab_icon_size"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/phone_tab_title_drawable_padding"
+            android:layout_marginLeft="@dimen/phone_tab_title_padding"
+            android:layout_marginRight="@dimen/phone_tab_title_drawable_padding"
+            android:layout_marginStart="@dimen/phone_tab_title_padding">
+
+            <ImageView
+                android:id="@+id/tab_icon_image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="centerInside"/>
+
+            <de.mrapp.android.view.CircularProgressBar
+                android:id="@+id/tab_progress_bar"
+                android:layout_width="@dimen/tab_progress_bar_size"
+                android:layout_height="@dimen/tab_progress_bar_size"
+                android:layout_gravity="center"
+                android:thickness="@dimen/tab_progress_bar_thickness"
+                android:visibility="gone"/>
+        </FrameLayout>
+
         <TextView
             android:id="@+id/tab_title_text_view"
             style="@style/Tab.Title.Phone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/phone_tab_title_padding"
+            android:layout_marginRight="@dimen/phone_tab_title_padding"
             android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:paddingLeft="@dimen/phone_tab_title_padding"
-            android:paddingRight="@dimen/phone_tab_title_padding"/>
+            android:gravity="center_vertical"/>
 
         <ImageButton
             android:id="@+id/close_tab_button"

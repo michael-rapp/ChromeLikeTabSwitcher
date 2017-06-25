@@ -17,7 +17,6 @@ License.
 
     <style name="Tab.Title.Phone" parent="@style/Tab.Title.Base">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:drawablePadding">@dimen/phone_tab_title_drawable_padding</item>
     </style>
 
 </resources>

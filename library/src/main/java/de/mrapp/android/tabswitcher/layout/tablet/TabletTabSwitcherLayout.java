@@ -1076,4 +1076,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     }
 
+    @Override
+    public final void onProgressBarVisibilityChanged(@NonNull final Tab tab) {
+
+    }
+
 }

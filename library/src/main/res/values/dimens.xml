@@ -35,6 +35,9 @@ License.
     <!-- Common -->
     <dimen name="swipe_gesture_threshold">24dp</dimen>
     <dimen name="pull_down_gesture_threshold">12dp</dimen>
+    <dimen name="tab_icon_size">18dp</dimen>
+    <dimen name="tab_progress_bar_size">16dp</dimen>
+    <dimen name="tab_progress_bar_thickness">2dp</dimen>
 
     <!-- Phone layout -->
     <dimen name="phone_tab_title_padding">12dp</dimen>

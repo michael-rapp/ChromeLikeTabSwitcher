@@ -209,6 +209,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     }
 
     @Override
+    public final void onProgressBarVisibilityChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
     public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
 
     }

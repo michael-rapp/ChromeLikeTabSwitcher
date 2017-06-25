@@ -14,9 +14,11 @@
 package de.mrapp.android.tabswitcher.layout;
 
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.view.CircularProgressBar;
 
 /**
  * An abstract base class for all view holders, which allow to store references to the views, a tab
@@ -31,6 +33,16 @@ public abstract class AbstractTabViewHolder {
      * The text view, which is used to display the title of a tab.
      */
     public TextView titleTextView;
+
+    /**
+     * The image view, which is used to display the icon of a tab.
+     */
+    public ImageView iconImageView;
+
+    /**
+     * The progress bar of a tab.
+     */
+    public CircularProgressBar progressBar;
 
     /**
      * The close button of a tab.
