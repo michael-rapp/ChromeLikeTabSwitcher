@@ -19,7 +19,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -30,7 +29,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
-import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -475,16 +473,6 @@ public abstract class AbstractTabSwitcherLayout
 
         if (toolbars != null) {
             CharSequence title = getModel().getToolbarTitle();
-
-            if (TextUtils.isEmpty(title)) {
-                try {
-                    title = getThemeHelper()
-                            .getText(getTabSwitcher().getLayout(), R.attr.tabSwitcherToolbarTitle);
-                } catch (NotFoundException e) {
-                    title = null;
-                }
-            }
-
             toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].setTitle(title);
         }
     }

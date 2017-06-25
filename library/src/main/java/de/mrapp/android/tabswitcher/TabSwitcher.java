@@ -484,6 +484,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
 
         if (!TextUtils.isEmpty(title)) {
+            try {
+                title = themeHelper.getText(getLayout(), R.attr.tabSwitcherToolbarTitle);
+            } catch (NotFoundException e) {
+                title = null;
+            }
+
             setToolbarTitle(title);
         }
     }
