@@ -380,13 +380,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TypedArray}. The typed array may not be null
      */
     private void obtainTabIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, 0);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
 
-        if (resourceId == 0) {
-            resourceId = themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherTabIcon, 0);
-        }
-
-        if (resourceId != 0) {
+        if (resourceId != -1) {
             setTabIcon(resourceId);
         }
     }
@@ -493,12 +489,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
 
         if (!TextUtils.isEmpty(title)) {
-            try {
-                title = themeHelper.getText(getLayout(), R.attr.tabSwitcherToolbarTitle);
-            } catch (NotFoundException e) {
-                title = null;
-            }
-
             setToolbarTitle(title);
         }
     }
