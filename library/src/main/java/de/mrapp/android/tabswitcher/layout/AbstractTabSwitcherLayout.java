@@ -19,7 +19,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -30,7 +29,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
-import android.text.TextUtils;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -60,8 +58,8 @@ import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
@@ -357,9 +355,9 @@ public abstract class AbstractTabSwitcherLayout
     private final Arithmetics arithmetics;
 
     /**
-     * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
+     * The style, which allows to retrieve style attributes of the tab switcher.
      */
-    private final ThemeHelper themeHelper;
+    private final TabSwitcherStyle style;
 
     /**
      * The dispatcher, which is used to dispatch touch events to event handlers.
@@ -474,17 +472,7 @@ public abstract class AbstractTabSwitcherLayout
         Toolbar[] toolbars = getToolbars();
 
         if (toolbars != null) {
-            CharSequence title = getModel().getToolbarTitle();
-
-            if (TextUtils.isEmpty(title)) {
-                try {
-                    title = getThemeHelper()
-                            .getText(getTabSwitcher().getLayout(), R.attr.tabSwitcherToolbarTitle);
-                } catch (NotFoundException e) {
-                    title = null;
-                }
-            }
-
+            CharSequence title = style.getToolbarTitle();
             toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].setTitle(title);
         }
     }
@@ -497,7 +485,8 @@ public abstract class AbstractTabSwitcherLayout
 
         if (toolbars != null) {
             Toolbar toolbar = toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX];
-            toolbar.setNavigationIcon(getModel().getToolbarNavigationIcon());
+            Drawable icon = style.getToolbarNavigationIcon();
+            toolbar.setNavigationIcon(icon);
             toolbar.setNavigationOnClickListener(getModel().getToolbarNavigationIconListener());
         }
     }
@@ -820,15 +809,14 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
-     * Returns the theme helper, which allows to retrieve resources, depending on the tab switcher's
-     * theme.
+     * Returns the style, which allows to retrieve style attributes of the tab switcher.
      *
-     * @return The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     * theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be null
+     * @return The style, which allows to retrieve style attributes of the tab switcher, as an
+     * instance of the class {@link TabSwitcherStyle}. The style may not be null
      */
     @NonNull
-    protected final ThemeHelper getThemeHelper() {
-        return themeHelper;
+    protected final TabSwitcherStyle getStyle() {
+        return style;
     }
 
     /**
@@ -1067,10 +1055,9 @@ public abstract class AbstractTabSwitcherLayout
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the type
      *         {@link Arithmetics}. The arithmetics may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param touchEventDispatcher
      *         The dispatcher, which is used to dispatch touch events to event handlers, as an
      *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
@@ -1078,17 +1065,17 @@ public abstract class AbstractTabSwitcherLayout
     public AbstractTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final TabSwitcherModel model,
                                      @NonNull final Arithmetics arithmetics,
-                                     @NonNull final ThemeHelper themeHelper,
+                                     @NonNull final TabSwitcherStyle style,
                                      @NonNull final TouchEventDispatcher touchEventDispatcher) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
         ensureNotNull(arithmetics, "The arithmetics may not be null");
-        ensureNotNull(themeHelper, "The theme helper may not be null");
+        ensureNotNull(style, "The style may not be null");
         ensureNotNull(touchEventDispatcher, "The dispatcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;
-        this.themeHelper = themeHelper;
+        this.style = style;
         this.touchEventDispatcher = touchEventDispatcher;
         Resources resources = tabSwitcher.getResources();
         this.stackedTabSpacing = resources.getDimensionPixelSize(R.dimen.stacked_tab_spacing);
@@ -1324,7 +1311,7 @@ public abstract class AbstractTabSwitcherLayout
      *         True, if only the tabs should be inflated, false otherwise
      */
     public final void inflateLayout(final boolean tabsOnly) {
-        int themeResourceId = getThemeHelper().getThemeResourceId(tabSwitcher.getLayout());
+        int themeResourceId = style.getThemeHelper().getThemeResourceId(tabSwitcher.getLayout());
         LayoutInflater inflater =
                 LayoutInflater.from(new ContextThemeWrapper(getContext(), themeResourceId));
         onInflateLayout(inflater, tabsOnly);
@@ -1533,10 +1520,9 @@ public abstract class AbstractTabSwitcherLayout
         if (item instanceof TabItem) {
             TabItem tabItem = (TabItem) item;
             Tab tab = tabItem.getTab();
-            colorStateList = tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
-                    getModel().getTabBackgroundColor();
+            colorStateList = style.getTabBackgroundColor(tab);
         } else if (item instanceof AddTabItem) {
-            colorStateList = getModel().getAddTabButtonColor();
+            colorStateList = style.getAddTabButtonColor();
         }
 
         if (colorStateList != null) {

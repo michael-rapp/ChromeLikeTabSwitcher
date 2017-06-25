@@ -28,14 +28,13 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import de.mrapp.android.tabswitcher.Animation;
-import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.Restorable;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -59,6 +58,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     private final TabSwitcher tabSwitcher;
 
     /**
+     * The style, which allows to retrieve style attributes of the tab switcher.
+     */
+    private final TabSwitcherStyle style;
+
+    /**
      * The view recycler, the recycler adapter is attached to.
      */
     private final AttachedViewRecycler<Tab, ?> viewRecycler;
@@ -67,11 +71,6 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
      * The encapsulated view recycler adapter.
      */
     private final ContentRecyclerAdapter encapsulatedAdapter;
-
-    /**
-     * The default background color of a tab's content.
-     */
-    private final int tabContentBackgroundColor;
 
     /**
      * Adapts the background color of a specific tab's content.
@@ -83,13 +82,8 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
      *         The tab as an instance of the class {@link Tab}. The tab may not be null
      */
     private void adaptContentBackgroundColor(@NonNull final View view, @NonNull final Tab tab) {
-        int color = tab.getContentBackgroundColor();
-
-        if (color == -1) {
-            color = tabSwitcher.getTabContentBackgroundColor();
-        }
-
-        view.setBackgroundColor(color != -1 ? color : tabContentBackgroundColor);
+        int color = style.getTabContentBackgroundColor(tab);
+        view.setBackgroundColor(color);
     }
 
     /**
@@ -100,10 +94,9 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
      * @param tabSwitcher
      *         The tab switcher, the recycler adapter belongs to, as an instance of the class {@link
      *         TabSwitcher}. The tab switcher may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param viewRecycler
      *         The view recycler, the adapter is attached to, as an instance of the class {@link
      *         AttachedViewRecycler}. The view recycler may not be null
@@ -112,18 +105,17 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
      *         {@link ContentRecyclerAdapter}. The recycler adapter may not be null
      */
     public TabletContentRecyclerAdapterWrapper(@NonNull final TabSwitcher tabSwitcher,
-                                               @NonNull final ThemeHelper themeHelper,
+                                               @NonNull final TabSwitcherStyle style,
                                                @NonNull final AttachedViewRecycler<Tab, ?> viewRecycler,
                                                @NonNull final ContentRecyclerAdapter encapsulatedAdapter) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(themeHelper, "The theme helper may not be null");
+        ensureNotNull(style, "The style may not be null");
         ensureNotNull(viewRecycler, "The view recycler may not be null");
         ensureNotNull(encapsulatedAdapter, "The recycler adapter may not be null");
         this.tabSwitcher = tabSwitcher;
-        this.encapsulatedAdapter = encapsulatedAdapter;
+        this.style = style;
         this.viewRecycler = viewRecycler;
-        this.tabContentBackgroundColor = themeHelper
-                .getColor(tabSwitcher.getLayout(), R.attr.tabSwitcherTabContentBackgroundColor);
+        this.encapsulatedAdapter = encapsulatedAdapter;
     }
 
     @NonNull

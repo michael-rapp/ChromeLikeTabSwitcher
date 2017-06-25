@@ -39,7 +39,7 @@ import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.ViewUtil;
 
 /**
@@ -56,11 +56,6 @@ public class TabletTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      * The view type of a button, which allows to add a new tab.
      */
     private static final int ADD_TAB_BUTTON_VIEW_TYPE = 1;
-
-    /**
-     * The default color of the button, which allows to add a new tab.
-     */
-    private final ColorStateList addTabButtonColor;
 
     /**
      * Returns the item, which corresponds to the button, which allows to add a new tab.
@@ -92,12 +87,7 @@ public class TabletTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      *         an instance of the class {@link AddTabItem}. The add tab item may not be null
      */
     private void adaptAddTabButtonColor(@NonNull final AddTabItem addTabItem) {
-        ColorStateList colorStateList = getModel().getAddTabButtonColor();
-
-        if (colorStateList == null) {
-            colorStateList = addTabButtonColor;
-        }
-
+        ColorStateList colorStateList = getStyle().getAddTabButtonColor();
         int[] stateSet = new int[]{};
         int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         View view = addTabItem.getView();
@@ -115,17 +105,14 @@ public class TabletTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      */
     public TabletTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                     @NonNull final TabSwitcherModel model,
-                                    @NonNull final ThemeHelper themeHelper) {
-        super(tabSwitcher, model, themeHelper);
-        addTabButtonColor =
-                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherAddTabButtonColor);
+                                    @NonNull final TabSwitcherStyle style) {
+        super(tabSwitcher, model, style);
     }
 
     @Override

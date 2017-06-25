@@ -37,7 +37,6 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,6 +65,7 @@ import de.mrapp.android.tabswitcher.layout.tablet.TabletArithmetics;
 import de.mrapp.android.tabswitcher.layout.tablet.TabletTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.DisplayUtil.DeviceType;
@@ -201,6 +201,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private TabSwitcherModel model;
 
     /**
+     * The style, which allows to retrieve the style attributes of the tab switcher.
+     */
+    private TabSwitcherStyle style;
+
+    /**
      * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
      */
     private ThemeHelper themeHelper;
@@ -258,10 +263,10 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private void initializeLayout(@NonNull final Layout layout, final boolean inflatedTabsOnly) {
         if (layout == Layout.TABLET) {
             this.layout = new TabletTabSwitcherLayout(TabSwitcher.this, model,
-                    new TabletArithmetics(TabSwitcher.this), themeHelper, touchEventDispatcher);
+                    new TabletArithmetics(TabSwitcher.this), style, touchEventDispatcher);
         } else {
             this.layout = new PhoneTabSwitcherLayout(TabSwitcher.this, model,
-                    new PhoneArithmetics(TabSwitcher.this), themeHelper, touchEventDispatcher);
+                    new PhoneArithmetics(TabSwitcher.this), style, touchEventDispatcher);
         }
 
         this.layout.setCallback(createLayoutCallback());
@@ -315,6 +320,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
             int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
             themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
+            style = new TabSwitcherStyle(this, themeHelper);
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
@@ -380,9 +386,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TypedArray}. The typed array may not be null
      */
     private void obtainTabIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, -1);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabIcon, 0);
 
-        if (resourceId != -1) {
+        if (resourceId != 0) {
             setTabIcon(resourceId);
         }
     }
@@ -395,12 +401,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainTabBackgroundColor(@NonNull final TypedArray typedArray) {
-        ColorStateList colorStateList =
-                typedArray.getColorStateList(R.styleable.TabSwitcher_tabBackgroundColor);
-
-        if (colorStateList != null) {
-            setTabBackgroundColor(colorStateList);
-        }
+        setTabBackgroundColor(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabBackgroundColor));
     }
 
     /**
@@ -424,21 +426,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         {@link TypedArray}. The typed array may not be null
      */
     private void obtainAddTabButtonColor(@NonNull final TypedArray typedArray) {
-        ColorStateList colorStateList =
-                typedArray.getColorStateList(R.styleable.TabSwitcher_addTabButtonColor);
-
-        if (colorStateList == null) {
-            try {
-                colorStateList = themeHelper
-                        .getColorStateList(getLayout(), R.attr.tabSwitcherAddTabButtonColor);
-            } catch (NotFoundException e) {
-                colorStateList = null;
-            }
-        }
-
-        if (colorStateList != null) {
-            setAddTabButtonColor(colorStateList);
-        }
+        setAddTabButtonColor(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_addTabButtonColor));
     }
 
     /**
@@ -449,12 +438,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         {@link TypedArray}. The typed array may not be null
      */
     private void obtainTabTitleTextColor(@NonNull final TypedArray typedArray) {
-        ColorStateList colorStateList =
-                typedArray.getColorStateList(R.styleable.TabSwitcher_tabTitleTextColor);
-
-        if (colorStateList != null) {
-            setTabTitleTextColor(colorStateList);
-        }
+        setTabTitleTextColor(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabTitleTextColor));
     }
 
     /**
@@ -466,11 +451,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     private void obtainTabCloseButtonIcon(@NonNull final TypedArray typedArray) {
         int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_tabCloseButtonIcon, 0);
-
-        if (resourceId == 0) {
-            resourceId =
-                    themeHelper.getResourceId(getLayout(), R.attr.tabSwitcherTabCloseButtonIcon, 0);
-        }
 
         if (resourceId != 0) {
             setTabCloseButtonIcon(resourceId);
@@ -486,11 +466,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         {@link TypedArray}. The typed array may not be null
      */
     private void obtainToolbarTitle(@NonNull final TypedArray typedArray) {
-        CharSequence title = typedArray.getText(R.styleable.TabSwitcher_toolbarTitle);
-
-        if (!TextUtils.isEmpty(title)) {
-            setToolbarTitle(title);
-        }
+        setToolbarTitle(typedArray.getText(R.styleable.TabSwitcher_toolbarTitle));
     }
 
     /**
@@ -502,20 +478,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
-        Drawable icon = typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon);
-
-        if (icon == null) {
-            try {
-                icon = themeHelper
-                        .getDrawable(getLayout(), R.attr.tabSwitcherToolbarNavigationIcon);
-            } catch (NotFoundException e) {
-                icon = null;
-            }
-        }
-
-        if (icon != null) {
-            setToolbarNavigationIcon(icon, null);
-        }
+        setToolbarNavigationIcon(
+                typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon), null);
     }
 
     /**

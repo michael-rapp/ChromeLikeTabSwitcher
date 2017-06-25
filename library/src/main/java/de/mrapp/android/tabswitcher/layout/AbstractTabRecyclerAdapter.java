@@ -15,7 +15,6 @@ package de.mrapp.android.tabswitcher.layout;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
@@ -28,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
@@ -43,7 +41,7 @@ import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -77,24 +75,9 @@ public abstract class AbstractTabRecyclerAdapter
     private final TabSwitcherModel model;
 
     /*
-     * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
+     * The style, which allows to retrieve style attributes of the tab switcher.
      */
-    private final ThemeHelper themeHelper;
-
-    /**
-     * The default text color of a tab's title.
-     */
-    private final ColorStateList tabTitleTextColor;
-
-    /**
-     * The default background color of tabs.
-     */
-    private final ColorStateList tabBackgroundColor;
-
-    /**
-     * The default icon of a tab's close button.
-     */
-    private final Drawable closeButtonIcon;
+    private final TabSwitcherStyle style;
 
     /**
      * The view recycler, the adapter is bound to.
@@ -124,20 +107,7 @@ public abstract class AbstractTabRecyclerAdapter
     private void adaptIcon(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-        Drawable icon = tab.getIcon(model.getContext());
-
-        if (icon == null) {
-            icon = model.getTabIcon();
-
-            if (icon == null) {
-                try {
-                    icon = getThemeHelper().getDrawable(getLayout(), R.attr.tabSwitcherTabIcon);
-                } catch (NotFoundException e) {
-                    icon = null;
-                }
-            }
-        }
-
+        Drawable icon = style.getTabIcon(tab);
         viewHolder.titleTextView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
     }
 
@@ -166,14 +136,9 @@ public abstract class AbstractTabRecyclerAdapter
      */
     private void adaptCloseButtonIcon(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
+        Drawable icon = style.getTabCloseButtonIcon(tab);
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-        Drawable icon = tab.getCloseButtonIcon(model.getContext());
-
-        if (icon == null) {
-            icon = model.getTabCloseButtonIcon();
-        }
-
-        viewHolder.closeButton.setImageDrawable(icon != null ? icon : closeButtonIcon);
+        viewHolder.closeButton.setImageDrawable(icon);
     }
 
     /**
@@ -185,14 +150,7 @@ public abstract class AbstractTabRecyclerAdapter
      */
     private void adaptBackgroundColor(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
-        ColorStateList colorStateList =
-                tab.getBackgroundColor() != null ? tab.getBackgroundColor() :
-                        model.getTabBackgroundColor();
-
-        if (colorStateList == null) {
-            colorStateList = tabBackgroundColor;
-        }
-
+        ColorStateList colorStateList = style.getTabBackgroundColor(tab);
         int[] stateSet = model.getSelectedTab() == tab ? new int[]{android.R.attr.state_selected} :
                 new int[]{};
         int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
@@ -211,15 +169,9 @@ public abstract class AbstractTabRecyclerAdapter
      */
     private void adaptTitleTextColor(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
+        ColorStateList colorStateList = style.getTabTitleTextColor(tab);
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-        ColorStateList colorStateList = tab.getTitleTextColor() != null ? tab.getTitleTextColor() :
-                model.getTabTitleTextColor();
-
-        if (colorStateList != null) {
-            viewHolder.titleTextView.setTextColor(colorStateList);
-        } else {
-            viewHolder.titleTextView.setTextColor(tabTitleTextColor);
-        }
+        viewHolder.titleTextView.setTextColor(colorStateList);
     }
 
     /**
@@ -325,15 +277,14 @@ public abstract class AbstractTabRecyclerAdapter
     }
 
     /**
-     * Returns the theme helper, which allows to retrieve resources, depending on the tab switcher's
-     * theme.
+     * Returns the style, which allow to retrieve style attributes of the tab switcher.
      *
-     * @return The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     * theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be null
+     * @return The style, which allows to retrieve style attributes of the tab switcher, as an
+     * instance of the class {@link TabSwitcherStyle}. The style may not be null
      */
     @NonNull
-    protected final ThemeHelper getThemeHelper() {
-        return themeHelper;
+    protected final TabSwitcherStyle getStyle() {
+        return style;
     }
 
     /**
@@ -458,26 +409,19 @@ public abstract class AbstractTabRecyclerAdapter
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher switcher, as
+     *         an instance of the class {@link TabSwitcherStyle}. The style may not be null
      */
     public AbstractTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                       @NonNull final TabSwitcherModel model,
-                                      @NonNull final ThemeHelper themeHelper) {
+                                      @NonNull final TabSwitcherStyle style) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(model, "The model may not be null");
-        ensureNotNull(themeHelper, "The theme helper may not be null");
+        ensureNotNull(style, "The style may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
-        this.themeHelper = themeHelper;
-        this.tabTitleTextColor =
-                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabTitleTextColor);
-        this.tabBackgroundColor =
-                themeHelper.getColorStateList(getLayout(), R.attr.tabSwitcherTabBackgroundColor);
-        this.closeButtonIcon =
-                themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherTabCloseButtonIcon);
+        this.style = style;
         this.viewRecycler = null;
     }
 
@@ -735,8 +679,8 @@ public abstract class AbstractTabRecyclerAdapter
             TabItem tabItem = (TabItem) item;
             AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
             View view = onInflateTabView(inflater, parent, viewHolder);
-            viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
-            viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
+            viewHolder.titleTextView = view.findViewById(R.id.tab_title_text_view);
+            viewHolder.closeButton = view.findViewById(R.id.close_tab_button);
             view.setTag(R.id.tag_view_holder, viewHolder);
             tabItem.setViewHolder(viewHolder);
             item.setView(view);

@@ -52,8 +52,8 @@ import de.mrapp.android.tabswitcher.model.ItemComparator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
@@ -165,11 +165,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private final int addTabButtonOffset;
 
     /**
-     * The default background color of tabs.
-     */
-    private final ColorStateList tabBackgroundColor;
-
-    /**
      * The distance between two neighboring tabs when being swiped in pixels.
      */
     private final int swipedTabDistance;
@@ -237,17 +232,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      */
     private void adaptBorderColor() {
         Tab selectedTab = getModel().getSelectedTab();
-        ColorStateList colorStateList =
-                selectedTab != null ? selectedTab.getBackgroundColor() : null;
-
-        if (colorStateList == null) {
-            colorStateList = getModel().getTabBackgroundColor();
-
-            if (colorStateList == null) {
-                colorStateList = tabBackgroundColor;
-            }
-        }
-
+        ColorStateList colorStateList = getStyle().getTabBackgroundColor(selectedTab);
         int[] stateSet = new int[]{android.R.attr.state_selected};
         int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         Drawable background = borderView.getBackground();
@@ -553,10 +538,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the type
      *         {@link Arithmetics}. The arithmetics may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param touchEventDispatcher
      *         The dispatcher, which is used to dispatch touch events to event handlers, as an
      *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
@@ -564,9 +548,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     public TabletTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
                                    @NonNull final Arithmetics arithmetics,
-                                   @NonNull final ThemeHelper themeHelper,
+                                   @NonNull final TabSwitcherStyle style,
                                    @NonNull final TouchEventDispatcher touchEventDispatcher) {
-        super(tabSwitcher, model, arithmetics, themeHelper, touchEventDispatcher);
+        super(tabSwitcher, model, arithmetics, style, touchEventDispatcher);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.tablet_stacked_tab_count);
         maxTabWidth = resources.getDimensionPixelSize(R.dimen.tablet_tab_max_width);
@@ -574,8 +558,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
         addTabButtonWidth = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_width);
         addTabButtonOffset = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_offset);
-        tabBackgroundColor = themeHelper.getColorStateList(getTabSwitcher().getLayout(),
-                R.attr.tabSwitcherTabBackgroundColor);
         swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
     }
 
@@ -591,15 +573,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             inflater.inflate(R.layout.tablet_layout, getTabSwitcher(), true);
         }
 
-        primaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
-        secondaryToolbar = (Toolbar) getTabSwitcher().findViewById(R.id.secondary_toolbar);
-        tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
+        primaryToolbar = getTabSwitcher().findViewById(R.id.primary_toolbar);
+        secondaryToolbar = getTabSwitcher().findViewById(R.id.secondary_toolbar);
+        tabContainer = getTabSwitcher().findViewById(R.id.tab_container);
         borderView = getTabSwitcher().findViewById(R.id.border_view);
-        ViewGroup contentContainer =
-                (ViewGroup) getTabSwitcher().findViewById(R.id.content_container);
+        ViewGroup contentContainer = getTabSwitcher().findViewById(R.id.content_container);
         contentViewRecycler = new AttachedViewRecycler<>(contentContainer, inflater);
-        tabRecyclerAdapter =
-                new TabletTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper());
+        tabRecyclerAdapter = new TabletTabRecyclerAdapter(getTabSwitcher(), getModel(), getStyle());
         getModel().addListener(tabRecyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
@@ -834,7 +814,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         }
 
         TabletContentRecyclerAdapterWrapper recyclerAdapter =
-                new TabletContentRecyclerAdapterWrapper(getTabSwitcher(), getThemeHelper(),
+                new TabletContentRecyclerAdapterWrapper(getTabSwitcher(), getStyle(),
                         contentViewRecycler, getModel().getContentRecyclerAdapter());
         getModel().addListener(recyclerAdapter);
         return recyclerAdapter;

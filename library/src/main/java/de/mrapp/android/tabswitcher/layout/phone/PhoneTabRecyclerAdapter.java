@@ -40,7 +40,7 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
@@ -82,11 +82,6 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      * The height of the view group, which contains a tab's title and close button, in pixels.
      */
     private final int tabTitleContainerHeight;
-
-    /**
-     * The background color of a tab's content.
-     */
-    private final int tabContentBackgroundColor;
 
     /**
      * Inflates the view, which is associated with a tab, and adds it to the view hierarchy.
@@ -183,13 +178,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      */
     private void adaptContentBackgroundColor(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
-        int color = tab.getContentBackgroundColor() != -1 ? tab.getContentBackgroundColor() :
-                getModel().getTabContentBackgroundColor();
-
-        if (color == -1) {
-            color = tabContentBackgroundColor;
-        }
-
+        int color = getStyle().getTabContentBackgroundColor(tab);
         PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
         viewHolder.contentContainer.setBackgroundColor(color);
     }
@@ -231,19 +220,18 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      * @param model
      *         The model, which belongs to the tab switcher, as an instance of the class {@link
      *         TabSwitcherModel}. The model may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param tabViewRecycler
      *         The view recycler, which allows to inflate the views, which are associated with tabs,
      *         as an instance of the class ViewRecycler. The view recycler may not be null
      */
     public PhoneTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                    @NonNull final TabSwitcherModel model,
-                                   @NonNull final ThemeHelper themeHelper,
+                                   @NonNull final TabSwitcherStyle style,
                                    @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
-        super(tabSwitcher, model, themeHelper);
+        super(tabSwitcher, model, style);
         ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler);
@@ -253,8 +241,6 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         this.tabBorderWidth = resources.getDimensionPixelSize(R.dimen.tab_border_width);
         this.tabTitleContainerHeight =
                 resources.getDimensionPixelSize(R.dimen.tab_title_container_height);
-        this.tabContentBackgroundColor =
-                getThemeHelper().getColor(getLayout(), R.attr.tabSwitcherTabContentBackgroundColor);
         adaptLogLevel();
     }
 
@@ -285,11 +271,11 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         int padding = tabInset + tabBorderWidth;
         view.setPadding(padding, tabInset, padding, padding);
         ((PhoneTabViewHolder) viewHolder).titleContainer =
-                (ViewGroup) view.findViewById(R.id.tab_title_container);
+                view.findViewById(R.id.tab_title_container);
         ((PhoneTabViewHolder) viewHolder).contentContainer =
-                (ViewGroup) view.findViewById(R.id.content_container);
+                view.findViewById(R.id.content_container);
         ((PhoneTabViewHolder) viewHolder).previewImageView =
-                (ImageView) view.findViewById(R.id.preview_image_view);
+                view.findViewById(R.id.preview_image_view);
         adaptPadding((PhoneTabViewHolder) viewHolder);
         ((PhoneTabViewHolder) viewHolder).borderView = view.findViewById(R.id.border_view);
         Drawable borderDrawable =

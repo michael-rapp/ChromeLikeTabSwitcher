@@ -63,8 +63,8 @@ import de.mrapp.android.tabswitcher.model.ItemComparator;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
+import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.tabswitcher.model.Tag;
-import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
@@ -2836,10 +2836,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param arithmetics
      *         The arithmetics, which should be used by the layout, as an instance of the class
      *         {@link PhoneArithmetics}. The arithmetics may not be null
-     * @param themeHelper
-     *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
-     *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
-     *         null
+     * @param style
+     *         The style, which allows to retrieve style attributes of the tab switcher, as an
+     *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param touchEventDispatcher
      *         The dispatcher, which is used to dispatch touch events to event handlers, as an
      *         instance of the class {@link TouchEventDispatcher}. The dispatcher may not be null
@@ -2847,9 +2846,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     public PhoneTabSwitcherLayout(@NonNull final TabSwitcher tabSwitcher,
                                   @NonNull final TabSwitcherModel model,
                                   @NonNull final PhoneArithmetics arithmetics,
-                                  @NonNull final ThemeHelper themeHelper,
+                                  @NonNull final TabSwitcherStyle style,
                                   @NonNull final TouchEventDispatcher touchEventDispatcher) {
-        super(tabSwitcher, model, arithmetics, themeHelper, touchEventDispatcher);
+        super(tabSwitcher, model, arithmetics, style, touchEventDispatcher);
         Resources resources = tabSwitcher.getResources();
         stackedTabCount = resources.getInteger(R.integer.phone_stacked_tab_count);
         tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);
@@ -2907,9 +2906,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         contentViewRecycler = new ViewRecycler<>(inflater);
-        tabRecyclerAdapter =
-                new PhoneTabRecyclerAdapter(getTabSwitcher(), getModel(), getThemeHelper(),
-                        contentViewRecycler);
+        tabRecyclerAdapter = new PhoneTabRecyclerAdapter(getTabSwitcher(), getModel(), getStyle(),
+                contentViewRecycler);
         getModel().addListener(tabRecyclerAdapter);
         tabViewRecycler = new AttachedViewRecycler<>(tabContainer, inflater,
                 Collections.reverseOrder(new ItemComparator(getTabSwitcher())));
