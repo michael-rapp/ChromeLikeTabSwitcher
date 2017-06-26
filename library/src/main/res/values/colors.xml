@@ -18,6 +18,7 @@ License.
     <!-- Common -->
     <color name="tab_title_text_color_light">#a8000000</color>
     <color name="tab_title_text_color_dark">@android:color/white</color>
+    <color name="tab_progress_bar_color">#ff2196f3</color>
 
     <!-- Phone layout -->
     <color name="phone_tab_switcher_background_color">#ff14181c</color>

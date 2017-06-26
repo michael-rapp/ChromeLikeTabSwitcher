@@ -214,6 +214,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     }
 
     @Override
+    public final void onProgressBarColorChanged(@NonNull final Tab tab) {
+
+    }
+
+    @Override
     public final void onLogLevelChanged(@NonNull final LogLevel logLevel) {
 
     }
@@ -302,6 +307,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
 
     @Override
     public final void onTabCloseButtonIconChanged(@Nullable final Drawable icon) {
+
+    }
+
+    @Override
+    public final void onTabProgressBarColorChanged(@ColorInt final int color) {
 
     }
 

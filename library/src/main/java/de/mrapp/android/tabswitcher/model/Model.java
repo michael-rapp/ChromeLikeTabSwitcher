@@ -243,6 +243,15 @@ public interface Model extends Iterable<Tab> {
         void onTabCloseButtonIconChanged(@Nullable Drawable icon);
 
         /**
+         * The method, which is invoked, when the color of a tab's progress bar has been changed.
+         *
+         * @param color
+         *         The color, which has been set, as an {@link Integer} value or -1, if the default
+         *         color should be used
+         */
+        void onTabProgressBarColorChanged(@ColorInt int color);
+
+        /**
          * The method, which is invoked, when it has been changed, whether the button, which allows
          * to add a new tab, should be shown, or not.
          *
@@ -818,6 +827,24 @@ public interface Model extends Iterable<Tab> {
      */
     @Nullable
     Drawable getTabCloseButtonIcon();
+
+    /**
+     * Returns the color of a tab's progress bar.
+     *
+     * @return The color of a tab's progress bar as an {@link Integer} value or -1, if the default
+     * color is used
+     */
+    @ColorInt
+    int getTabProgressBarColor();
+
+    /**
+     * Sets the color of a tab's progress bar.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
+     */
+    void setTabProgressBarColor(@ColorInt int color);
 
     /**
      * Sets the default icon of a tab's close button.

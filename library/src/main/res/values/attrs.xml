@@ -31,6 +31,7 @@ License.
     <attr name="tabSwitcherAddTabButtonColor" format="color"/>
     <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabCloseButtonIcon" format="reference"/>
+    <attr name="tabSwitcherTabProgressBarColor" format="color"/>
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
     <attr name="tabSwitcherToolbarNavigationIcon" format="reference"/>

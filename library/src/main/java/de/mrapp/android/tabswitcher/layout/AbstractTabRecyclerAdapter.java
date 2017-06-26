@@ -189,6 +189,20 @@ public abstract class AbstractTabRecyclerAdapter
     }
 
     /**
+     * Adapts the color of a tab's progress bar.
+     *
+     * @param tabItem
+     *         The tab item, which corresponds to the tab, whose progress bar should be adapted, as
+     *         an instance of the class {@link TabItem}. The tab item may not be null
+     */
+    private void adaptProgressBarColor(@NonNull final TabItem tabItem) {
+        Tab tab = tabItem.getTab();
+        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+        int color = style.getTabProgressBarColor(tab);
+        viewHolder.progressBar.setColor(color);
+    }
+
+    /**
      * Adapts the selection state of a tab's views.
      *
      * @param tabItem
@@ -577,6 +591,19 @@ public abstract class AbstractTabRecyclerAdapter
     }
 
     @Override
+    public final void onTabProgressBarColorChanged(@ColorInt final int color) {
+        ItemIterator iterator =
+                new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
+
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                adaptProgressBarColor((TabItem) item);
+            }
+        }
+    }
+
+    @Override
     public final void onAddTabButtonVisibilityChanged(final boolean visible) {
 
     }
@@ -678,6 +705,15 @@ public abstract class AbstractTabRecyclerAdapter
 
         if (tabItem != null) {
             adaptProgressBarVisibility(tabItem);
+        }
+    }
+
+    @Override
+    public final void onProgressBarColorChanged(@NonNull final Tab tab) {
+        TabItem tabItem = getTabItem(tab);
+
+        if (tabItem != null) {
+            adaptProgressBarColor(tabItem);
         }
     }
 

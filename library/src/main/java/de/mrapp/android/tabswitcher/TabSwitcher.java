@@ -689,6 +689,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             }
 
             @Override
+            public void onTabProgressBarColorChanged(@ColorInt final int color) {
+
+            }
+
+            @Override
             public void onAddTabButtonVisibilityChanged(final boolean visible) {
 
             }
@@ -1452,6 +1457,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final Drawable getTabCloseButtonIcon() {
         return model.getTabCloseButtonIcon();
+    }
+
+    @Override
+    public final int getTabProgressBarColor() {
+        return model.getTabProgressBarColor();
+    }
+
+    @Override
+    public final void setTabProgressBarColor(@ColorInt final int color) {
+        model.setTabProgressBarColor(color);
     }
 
     @Override

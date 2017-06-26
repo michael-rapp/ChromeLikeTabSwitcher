@@ -182,7 +182,8 @@ public class TabSwitcherStyle {
      * Returns the close button icon of tabs.
      *
      * @param tab
-     *         The tab as an instance of the class {@link Tab}. The tab may not be null
+     *         The tab, the icon should be returned for, as an instance of the class {@link Tab} or
+     *         null, if the icon should not be returned for a specific tab
      * @return The close button icon of tabs as an instance of the class {@link Drawable}
      */
     public final Drawable getTabCloseButtonIcon(@Nullable final Tab tab) {
@@ -198,6 +199,30 @@ public class TabSwitcherStyle {
         }
 
         return icon;
+    }
+
+    /**
+     * Returns the progress bar color of tabs.
+     *
+     * @param tab
+     *         The tab, the color should be returned for, as an instance of the class {@link Tab} or
+     *         null, if the color should not be returned for a specific tab
+     * @return The progress bar color of tabs as an {@link Integer} value
+     */
+    @ColorInt
+    public final int getTabProgressBarColor(@Nullable final Tab tab) {
+        int color = tab != null ? tab.getProgressBarColor() : -1;
+
+        if (color == -1) {
+            color = tabSwitcher.getTabProgressBarColor();
+
+            if (color == -1) {
+                color = themeHelper
+                        .getColor(tabSwitcher.getLayout(), R.attr.tabSwitcherTabProgressBarColor);
+            }
+        }
+
+        return color;
     }
 
     /**

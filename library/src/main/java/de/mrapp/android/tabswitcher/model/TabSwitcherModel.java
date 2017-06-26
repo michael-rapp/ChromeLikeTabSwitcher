@@ -155,6 +155,13 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcher.class.getName() + "::TabCloseButtonIconBitmap";
 
     /**
+     * The name of the extra, which is used to store the color of a tab's progress bar within a
+     * bundle.
+     */
+    private static final String TAB_PROGRESS_BAR_COLOR_EXTRA =
+            TabSwitcher.class.getName() + "::TabProgressBarColor";
+
+    /**
      * The name of the extra, which is used to store, whether the toolbars are shown, or not, within
      * a bundle.
      */
@@ -257,6 +264,11 @@ public class TabSwitcherModel implements Model, Restorable {
      * The bitmap of the icon of a tab's close button.
      */
     private Bitmap tabCloseButtonIconBitmap;
+
+    /**
+     * The color of a tab's progress bar.
+     */
+    private int tabProgressBarColor;
 
     /**
      * The listener, which is notified, when the button, which allows to add a tab, has been
@@ -608,6 +620,19 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Notifies the listeners, that the color of a tab's progress bar has been changed.
+     *
+     * @param color
+     *         The color, which has been set, as an {@link Integer} value or -1, if the default
+     *         color should be used
+     */
+    private void notifyOnTabProgressBarColorChanged(@ColorInt final int color) {
+        for (Listener listener : listeners) {
+            listener.onTabProgressBarColorChanged(color);
+        }
+    }
+
+    /**
      * Notifies the listeners, that is has been changed, whether the button, which allows to add a
      * new tab, should be shown, or not.
      *
@@ -745,6 +770,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabTitleTextColor = null;
         this.tabCloseButtonIconId = -1;
         this.tabCloseButtonIconBitmap = null;
+        this.tabProgressBarColor = -1;
         this.addTabButtonListener = null;
         this.addTabButtonColor = null;
         this.showToolbars = false;
@@ -1296,6 +1322,17 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     @Override
+    public final int getTabProgressBarColor() {
+        return tabProgressBarColor;
+    }
+
+    @Override
+    public final void setTabProgressBarColor(@ColorInt final int color) {
+        this.tabProgressBarColor = color;
+        notifyOnTabProgressBarColorChanged(color);
+    }
+
+    @Override
     public final void setTabCloseButtonIcon(@DrawableRes final int resourceId) {
         tabCloseButtonIconId = resourceId;
         tabCloseButtonIconBitmap = null;
@@ -1460,6 +1497,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
         outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
+        outState.putInt(TAB_PROGRESS_BAR_COLOR_EXTRA, tabProgressBarColor);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
         getContentRecyclerAdapter().saveInstanceState(outState);
@@ -1485,6 +1523,7 @@ public class TabSwitcherModel implements Model, Restorable {
             tabCloseButtonIconId = savedInstanceState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
             tabCloseButtonIconBitmap =
                     savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
+            tabProgressBarColor = savedInstanceState.getInt(TAB_PROGRESS_BAR_COLOR_EXTRA, -1);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
             getContentRecyclerAdapter().restoreInstanceState(savedInstanceState);

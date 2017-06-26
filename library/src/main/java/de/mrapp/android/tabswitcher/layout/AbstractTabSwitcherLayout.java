@@ -1469,6 +1469,11 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void onTabProgressBarColorChanged(@ColorInt final int color) {
+
+    }
+
+    @Override
     public void onSwitcherShown() {
 
     }

@@ -20,6 +20,7 @@ License.
         <item name="tabSwitcherThemeTablet">@style/TabSwitcher.Tablet</item>
         <item name="tabSwitcherTabTitleTextColor">@color/tab_title_text_color_dark</item>
         <item name="tabSwitcherToolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="tabSwitcherTabProgressBarColor">@color/tab_progress_bar_color</item>
     </style>
 
     <style name="TabSwitcher.Light" parent="@style/ThemeOverlay.AppCompat.Light">
@@ -27,6 +28,7 @@ License.
         <item name="tabSwitcherThemeTablet">@style/TabSwitcher.Tablet.Light</item>
         <item name="tabSwitcherTabTitleTextColor">@color/tab_title_text_color_light</item>
         <item name="tabSwitcherToolbarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="tabSwitcherTabProgressBarColor">@color/tab_progress_bar_color</item>
     </style>
 
     <style name="TabSwitcher.Phone" parent="@style/TabSwitcher">

@@ -143,6 +143,15 @@ public class Tab implements Parcelable {
          */
         void onProgressBarVisibilityChanged(@NonNull Tab tab);
 
+        /**
+         * The method, which is invoked, when the color of the tab's progress bar has been changed.
+         *
+         * @param tab
+         *         The observed tab as an instance of the class {@link Tab}. The tab may not be
+         *         null
+         */
+        void onProgressBarColorChanged(@NonNull Tab tab);
+
     }
 
     /**
@@ -200,6 +209,11 @@ public class Tab implements Parcelable {
      * True, if the tab's progress bar is shown, false otherwise.
      */
     private boolean progressBarShown;
+
+    /**
+     * The color of the tab's progress bar.
+     */
+    private int progressBarColor;
 
     /**
      * Optional parameters, which are associated with the tab.
@@ -279,6 +293,15 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Notifies all callbacks, that the color of the tab's progress bar has been changed.
+     */
+    private void notifyOnProgressBarColorChanged() {
+        for (Callback callback : callbacks) {
+            callback.onProgressBarColorChanged(this);
+        }
+    }
+
+    /**
      * Creates a new tab, which can be added to a {@link TabSwitcher} widget.
      *
      * @param source
@@ -296,6 +319,7 @@ public class Tab implements Parcelable {
         this.contentBackgroundColor = source.readInt();
         this.titleTextColor = source.readParcelable(getClass().getClassLoader());
         this.progressBarShown = source.readInt() > 0;
+        this.progressBarColor = source.readInt();
         this.parameters = source.readBundle(getClass().getClassLoader());
     }
 
@@ -317,6 +341,7 @@ public class Tab implements Parcelable {
         this.contentBackgroundColor = -1;
         this.titleTextColor = null;
         this.progressBarShown = false;
+        this.progressBarColor = -1;
         this.parameters = null;
     }
 
@@ -599,6 +624,29 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Returns the color of the tab's progress bar.
+     *
+     * @return The color of the tab's progress bar as an {@link Integer} value or -1, if the default
+     * color should be used
+     */
+    @ColorInt
+    public final int getProgressBarColor() {
+        return progressBarColor;
+    }
+
+    /**
+     * Sets the color of the tab's progress bar.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value or -1, if the default
+     *         color should be used
+     */
+    public final void setProgressBarColor(@ColorInt final int color) {
+        this.progressBarColor = color;
+        notifyOnProgressBarColorChanged();
+    }
+
+    /**
      * Returns a bundle, which contains the optional parameters, which are associated with the tab.
      *
      * @return A bundle, which contains the optional parameters, which are associated with the tab,
@@ -664,6 +712,7 @@ public class Tab implements Parcelable {
         parcel.writeInt(contentBackgroundColor);
         parcel.writeParcelable(titleTextColor, flags);
         parcel.writeInt(progressBarShown ? 1 : 0);
+        parcel.writeInt(progressBarColor);
         parcel.writeBundle(parameters);
     }
 
