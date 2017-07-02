@@ -490,6 +490,32 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
+     * Creates and returns a layout listener, which allows to position the content of a tab, after
+     * it has been inflated.
+     *
+     * @param tab
+     *         The tab, whose content has been inflated, as an instance of the class {@link Tab}.
+     *         The tab may not be null
+     * @return The layout listener, which has been created, as an instance of the type {@link
+     * OnGlobalLayoutListener}. The listener may not be null
+     */
+    @NonNull
+    private OnGlobalLayoutListener createContentLayoutListener(@NonNull final Tab tab) {
+        return new OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                View view = contentViewRecycler.getView(tab);
+
+                if (view != null) {
+                    view.setX(0);
+                }
+            }
+
+        };
+    }
+
+    /**
      * Creates and returns a layout listener, which allows to position a tab, which is a neighbor of
      * the currently selected tab, when swiping horizontally.
      *
@@ -836,7 +862,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         Tab selectedTab = getModel().getSelectedTab();
 
         if (selectedTab != null) {
-            inflateContent(selectedTab, null);
+            inflateContent(selectedTab, createContentLayoutListener(selectedTab));
         }
     }
 
@@ -861,10 +887,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             contentViewRecycler.removeAll();
 
             if (selectedTab != null) {
-                inflateContent(selectedTab, null);
+                inflateContent(selectedTab, createContentLayoutListener(selectedTab));
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
-
                 int tabSpacing = calculateTabSpacing();
                 int previousSelectedItemIndex = previousIndex +
                         (previousIndex != -1 && getModel().isAddTabButtonShown() ? 1 : 0);
