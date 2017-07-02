@@ -201,19 +201,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private final long swipeAnimationDuration;
 
     /**
-     * The delay of the animation, which is used to remove all tabs.
-     */
-    private final long clearAnimationDelay;
-
-    /**
      * The duration of the animation, which is used to relocate tabs.
      */
     private final long relocateAnimationDuration;
-
-    /**
-     * The delay of the animation, which is used to relocate tabs.
-     */
-    private final long relocateAnimationDelay;
 
     /**
      * The duration of the animation, which is used to revert overshoots.
@@ -349,6 +339,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 (FrameLayout.LayoutParams) toolbar.getLayoutParams();
         layoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
                 getModel().getPaddingRight(), 0);
+    }
+
+    /**
+     * Calculates and returns the delays of subsequently started animations, depending on the
+     * animations' durations.
+     *
+     * @param animationDuration
+     *         The duration of the animations in milliseconds as a {@link Long} value
+     * @return The delay, which has been calculated, as a {@link Long} value
+     */
+    private long calculateAnimationDelay(final long animationDuration) {
+        return Math.round(animationDuration * 0.4);
     }
 
     /**
@@ -869,9 +871,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         class {@link AbstractItem}. The item may not be null
      * @param remove
      *         True, if the tab should be removed after the animation has finished, false otherwise
-     * @param delay
-     *         The delay after which the animation should be started in milliseconds as a {@link
-     *         Long} value
+     * @param delayMultiplier
+     *         The multiplied, which should be used to calculate the delay after which the animation
+     *         should be started, by being multiplied with the default delay, as an {@link Integer}
+     *         value
      * @param swipeAnimation
      *         The animation, which should be used, as an instance of the class {@link
      *         SwipeAnimation}. The animation may not be null
@@ -881,13 +884,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         notified
      */
     private void animateSwipe(@NonNull final AbstractItem item, final boolean remove,
-                              final long delay, @NonNull final SwipeAnimation swipeAnimation,
+                              final int delayMultiplier,
+                              @NonNull final SwipeAnimation swipeAnimation,
                               @Nullable final AnimatorListener listener) {
         View view = item.getView();
         float currentScale = getArithmetics().getScale(item, true);
         float swipePosition = calculateSwipePosition();
         float targetPosition = remove ?
-                (swipeAnimation.getDirection() == SwipeDirection.LEFT ? -1 * swipePosition :
+                (swipeAnimation.getDirection() == SwipeDirection.LEFT_OR_TOP ? -1 * swipePosition :
                         swipePosition) : 0;
         float currentPosition = getArithmetics().getPosition(Axis.ORTHOGONAL_AXIS, item);
         float distance = Math.abs(targetPosition - currentPosition);
@@ -906,7 +910,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getArithmetics().animateScale(Axis.DRAGGING_AXIS, animation,
                 remove ? swipedTabScale * currentScale : currentScale);
         animation.alpha(remove ? swipedTabAlpha : 1);
-        animation.setStartDelay(delay);
+        animation.setStartDelay(delayMultiplier * calculateAnimationDelay(animationDuration));
         animation.start();
     }
 
@@ -964,7 +968,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getArithmetics().setPivot(Axis.ORTHOGONAL_AXIS, removedItem,
                 getArithmetics().getPivot(Axis.ORTHOGONAL_AXIS, removedItem, DragState.SWIPE));
         animateSwipe(removedItem, true, 0, swipeAnimation,
-                createRemoveAnimationListener(removedItem));
+                createRemoveAnimationListener(removedItem, swipeAnimation));
     }
 
     /**
@@ -978,28 +982,36 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tag
      *         The tag, which should be applied to the given item, as an instance of the class
      *         {@link Tag} or null, if no tag should be applied
-     * @param delay
-     *         The delay of the relocate animation in milliseconds as a {@link Long} value
+     * @param delayMultiplier
+     *         The multiplier, which should be used to calculate the delay of the relocate
+     *         animation, by being multiplied with the default delay, as an {@link Integer} value
      * @param listener
      *         The listener, which should be notified about the progress of the relocate animation,
      *         as an instance of the type {@link AnimatorListener} or null, if no listener should be
      *         notified
+     * @param swipeAnimation
+     *         The animation, which has been used to add or remove the tab, which caused the other
+     *         tabs to be relocated, as an instance of the class {@link SwipeAnimation}. The
+     *         animation may not be null
      */
     private void animateRelocate(@NonNull final AbstractItem item, final float position,
-                                 @Nullable final Tag tag, final long delay,
-                                 @Nullable final AnimatorListener listener) {
+                                 @Nullable final Tag tag, final int delayMultiplier,
+                                 @Nullable final AnimatorListener listener,
+                                 @NonNull final SwipeAnimation swipeAnimation) {
         if (tag != null) {
             item.getView().setTag(R.id.tag_properties, tag);
             item.setTag(tag);
         }
 
         View view = item.getView();
+        long animationDuration = swipeAnimation.getRelocateAnimationDuration() != -1 ?
+                swipeAnimation.getRelocateAnimationDuration() : relocateAnimationDuration;
         ViewPropertyAnimator animation = view.animate();
         animation.setListener(new AnimationListenerWrapper(listener));
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
-        animation.setDuration(relocateAnimationDuration);
+        animation.setDuration(animationDuration);
         getArithmetics().animatePosition(Axis.DRAGGING_AXIS, animation, item, position, true);
-        animation.setStartDelay(delay);
+        animation.setStartDelay(delayMultiplier * calculateAnimationDelay(animationDuration));
         animation.start();
     }
 
@@ -1285,12 +1297,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tag
      *         The tag, which should be applied to the given item, as an instance of the class
      *         {@link Tag} or null, if no tag should be applied
-     * @param delay
-     *         The delay of the relocate animation in milliseconds as a {@link Long} value
+     * @param delayMultiplier
+     *         The multiplier, which should be used to calculate the delay of the relocate
+     *         animation, by being multiplied with the default delay, as an {@link Integer} value
      * @param listener
      *         The listener, which should be notified about the progress of the relocate animation,
      *         as an instance of the type {@link AnimatorListener} or null, if no listener should be
      *         notified
+     * @param swipeAnimation
+     *         The animation, which has been used to add or remove the tab, which caused the other
+     *         tabs to be relocated, as an instance of the class {@link SwipeAnimation}. The
+     *         animation may not be null
      * @return The listener, which has been created, as an instance of the class {@link
      * OnGlobalLayoutListener}. The listener may not be null
      */
@@ -1298,13 +1315,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private OnGlobalLayoutListener createRelocateLayoutListener(@NonNull final AbstractItem item,
                                                                 final float position,
                                                                 @Nullable final Tag tag,
-                                                                final long delay,
-                                                                @Nullable final AnimatorListener listener) {
+                                                                final int delayMultiplier,
+                                                                @Nullable final AnimatorListener listener,
+                                                                @NonNull final SwipeAnimation swipeAnimation) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                animateRelocate(item, position, tag, delay, listener);
+                animateRelocate(item, position, tag, delayMultiplier, listener, swipeAnimation);
             }
 
         };
@@ -1458,14 +1476,14 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     State state = referenceItem != null ? referenceItem.getTag().getState() : null;
 
                     if (state == null || state == State.STACKED_START) {
-                        items = relocateWhenAddingStackedTabs(true, addedItems);
+                        items = relocateWhenAddingStackedTabs(true, addedItems, swipeAnimation);
                     } else if (state == State.STACKED_END) {
-                        items = relocateWhenAddingStackedTabs(false, addedItems);
+                        items = relocateWhenAddingStackedTabs(false, addedItems, swipeAnimation);
                     } else if (state == State.FLOATING ||
                             (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
                         items = relocateWhenAddingFloatingTabs(addedItems, referenceItem,
                                 isReferencingPredecessor, attachedPosition,
-                                attachedPosition != previousAttachedPosition);
+                                attachedPosition != previousAttachedPosition, swipeAnimation);
                     } else {
                         items = relocateWhenAddingHiddenTabs(addedItems, referenceItem);
                     }
@@ -1489,7 +1507,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 .getPivot(Axis.ORTHOGONAL_AXIS, item, DragState.NONE));
                         getArithmetics().setPosition(Axis.DRAGGING_AXIS, item, tag.getPosition());
                         getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, item,
-                                swipeAnimation.getDirection() == SwipeDirection.LEFT ?
+                                swipeAnimation.getDirection() == SwipeDirection.LEFT_OR_TOP ?
                                         -1 * swipePosition : swipePosition);
                         getArithmetics().setScale(Axis.DRAGGING_AXIS, item, scale);
                         getArithmetics().setScale(Axis.ORTHOGONAL_AXIS, item, scale);
@@ -1818,12 +1836,15 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param removedItem
      *         The item, which corresponds to the tab, which has been removed, as an instance of the
      *         class {@link AbstractItem}. The item may not be null
+     * @param swipeAnimation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link SwipeAnimation}. The animation may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
      */
     @NonNull
-    private AnimatorListener createRemoveAnimationListener(
-            @NonNull final AbstractItem removedItem) {
+    private AnimatorListener createRemoveAnimationListener(@NonNull final AbstractItem removedItem,
+                                                           @NonNull final SwipeAnimation swipeAnimation) {
         return new AnimatorListenerAdapter() {
 
             @Override
@@ -1840,12 +1861,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 State state = removedItem.getTag().getState();
 
                 if (state == State.STACKED_END) {
-                    relocateWhenRemovingStackedTab(removedItem, false);
+                    relocateWhenRemovingStackedTab(removedItem, false, swipeAnimation);
                 } else if (state == State.STACKED_START) {
-                    relocateWhenRemovingStackedTab(removedItem, true);
+                    relocateWhenRemovingStackedTab(removedItem, true, swipeAnimation);
                 } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
                     relocateWhenRemovingFloatingTab(removedItem, attachedPosition,
-                            previousAttachedPosition != attachedPosition);
+                            previousAttachedPosition != attachedPosition, swipeAnimation);
                 }
             }
 
@@ -2170,13 +2191,19 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param removedItem
      *         The item, which corresponds to the tab, which has been removed, as an instance of the
      *         class {@link AbstractItem}. The item may not be null
+     * @param attachedPosition
+     *         The attached position in pixels as a {@link Float} value
      * @param attachedPositionChanged
      *         True, if removing the tab caused the attached position to be changed, false
      *         otherwise
+     * @param swipeAnimation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link SwipeAnimation}. The animation may not be null
      */
     private void relocateWhenRemovingFloatingTab(@NonNull final AbstractItem removedItem,
                                                  final float attachedPosition,
-                                                 boolean attachedPositionChanged) {
+                                                 final boolean attachedPositionChanged,
+                                                 final SwipeAnimation swipeAnimation) {
         AbstractItemIterator iterator;
         AbstractItem item;
         float defaultTabSpacing = calculateMaxTabSpacing(null);
@@ -2245,8 +2272,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tag.setState(pair.second);
 
                 if (tag.getState() != State.HIDDEN) {
-                    long startDelay = Math.abs(removedItem.getIndex() - item.getIndex()) *
-                            relocateAnimationDelay;
+                    int delayMultiplier = Math.abs(removedItem.getIndex() - item.getIndex());
 
                     if (!item.isInflated()) {
                         Pair<Float, State> pair2 =
@@ -2255,7 +2281,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         item.getTag().setState(pair2.second);
                     }
 
-                    relocate(item, tag.getPosition(), tag, startDelay);
+                    relocate(item, tag.getPosition(), tag, delayMultiplier, swipeAnimation);
                 } else {
                     break;
                 }
@@ -2278,8 +2304,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 Tag tag = item.getTag().clone();
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
-                long startDelay = (Math.abs(removedItem.getIndex() - item.getIndex()) + 1) *
-                        relocateAnimationDelay;
+                int delayMultiplier = Math.abs(removedItem.getIndex() - item.getIndex()) + 1;
 
                 if (!item.isInflated()) {
                     Pair<Float, State> pair2 =
@@ -2289,7 +2314,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     item.getTag().setState(pair2.second);
                 }
 
-                relocate(item, tag.getPosition(), tag, startDelay);
+                relocate(item, tag.getPosition(), tag, delayMultiplier, swipeAnimation);
                 previousPosition = pair.first;
                 previousTag = tag;
 
@@ -2309,9 +2334,13 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param start
      *         True, if the removed tab was part of the stack, which is located at the start, false,
      *         if it was part of the stack, which is located at the end
+     * @param swipeAnimation
+     *         The animation, which has been used to remove the tab, as an instance of the class
+     *         {@link SwipeAnimation}. The animation may not be nullD
      */
     private void relocateWhenRemovingStackedTab(@NonNull final AbstractItem removedItem,
-                                                final boolean start) {
+                                                final boolean start,
+                                                @NonNull final SwipeAnimation swipeAnimation) {
         int startIndex = removedItem.getIndex() + (start ? -1 : 0);
         ItemIterator iterator =
                 new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).reverse(start)
@@ -2342,10 +2371,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 break;
             } else {
                 item.getTag().setPosition(previousProjectedPosition);
-                long startDelay =
-                        (Math.abs(startIndex - item.getIndex()) + 1) * relocateAnimationDelay;
-                animateRelocate(item, previousProjectedPosition, null, startDelay,
-                        createRelocateAnimationListener(item));
+                int delayMultiplier = Math.abs(startIndex - item.getIndex()) + 1;
+                animateRelocate(item, previousProjectedPosition, null, delayMultiplier,
+                        createRelocateAnimationListener(item), swipeAnimation);
             }
 
             previousProjectedPosition = projectedPosition;
@@ -2368,6 +2396,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The current attached position in pixels as a {@link Float} value
      * @param attachedPositionChanged
      *         True, if adding the tab caused the attached position to be changed, false otherwise
+     * @param swipeAnimation
+     *         The animation, which has been used to add the tabs, as an instance of the class
+     *         {@link SwipeAnimation}. The animation may not be null
      * @return An array, which contains the items, which correspond to the tabs, which have been
      * added, as an array of the type {@link AbstractItem}. The array may not be null
      */
@@ -2376,7 +2407,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                                           @NonNull final AbstractItem referenceItem,
                                                           final boolean isReferencingPredecessor,
                                                           final float attachedPosition,
-                                                          final boolean attachedPositionChanged) {
+                                                          final boolean attachedPositionChanged,
+                                                          @NonNull final SwipeAnimation swipeAnimation) {
         AbstractItem firstAddedItem = addedItems[0];
         AbstractItem lastAddedItem = addedItems[addedItems.length - 1];
         float referencePosition = referenceItem.getTag().getPosition();
@@ -2478,7 +2510,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                         item.getTag().setState(pair2.second);
                     }
 
-                    relocate(item, tag.getPosition(), tag, 0);
+                    relocate(item, tag.getPosition(), tag, 0, swipeAnimation);
                 }
 
                 if (pair.second == State.HIDDEN || pair.second == State.STACKED_END) {
@@ -2513,7 +2545,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     item.getTag().setState(pair2.second);
                 }
 
-                relocate(item, tag.getPosition(), tag, 0);
+                relocate(item, tag.getPosition(), tag, 0, swipeAnimation);
                 previousPosition = pair.first;
                 previousTag = tag;
 
@@ -2535,12 +2567,16 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param addedItems
      *         An array, which contains the items, which correspond to the tabs, which have been
      *         added, as an array of the type {@link AbstractItem}. The array may not be null
+     * @param swipeAnimation
+     *         The animation, which has been used to add the tabs, as an instance of the class
+     *         {@link SwipeAnimation}. The animation may not be null
      * @return An array, which contains the items, which correspond to the tabs, which have been
      * added, as an array of the type {@link AbstractItem}. The array may not be null
      */
     @NonNull
     private AbstractItem[] relocateWhenAddingStackedTabs(final boolean start,
-                                                         @NonNull final AbstractItem[] addedItems) {
+                                                         @NonNull final AbstractItem[] addedItems,
+                                                         @NonNull final SwipeAnimation swipeAnimation) {
         if (!start) {
             setFirstVisibleIndex(getFirstVisibleIndex() + addedItems.length);
         }
@@ -2583,7 +2619,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 tag.setPosition(pair.first);
                 tag.setState(pair.second);
                 animateRelocate(item, tag.getPosition(), tag, 0,
-                        createRelocateAnimationListener(item));
+                        createRelocateAnimationListener(item), swipeAnimation);
             } else {
                 break;
             }
@@ -2641,18 +2677,24 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      * @param tag
      *         The tag, which should be applied to the tab, once it has been relocated, as an
      *         instance of the class {@link Tag} or null, if no tag should be applied
-     * @param startDelay
-     *         The start delay of the relocate animation in milliseconds as a {@link Long} value
+     * @param delayMultiplier
+     *         The multiplier, which should be used to calculate the delay of the relocate
+     *         animation, by being multiplied with the default delay, as an {@link Integer} value
+     * @param swipeAnimation
+     *         The animation, which has been used to add or remove the tab, which caused the other
+     *         tabs to be relocated, as an instance of the class {@link SwipeAnimation}. The
+     *         animation may not be null
      */
     private void relocate(@NonNull final AbstractItem item, final float relocatePosition,
-                          @Nullable final Tag tag, final long startDelay) {
+                          @Nullable final Tag tag, final int delayMultiplier,
+                          @NonNull final SwipeAnimation swipeAnimation) {
         if (item.isInflated()) {
-            animateRelocate(item, relocatePosition, tag, startDelay,
-                    createRelocateAnimationListener(item));
+            animateRelocate(item, relocatePosition, tag, delayMultiplier,
+                    createRelocateAnimationListener(item), swipeAnimation);
         } else {
             inflateAndUpdateView(item,
-                    createRelocateLayoutListener(item, relocatePosition, tag, startDelay,
-                            createRelocateAnimationListener(item)));
+                    createRelocateLayoutListener(item, relocatePosition, tag, delayMultiplier,
+                            createRelocateAnimationListener(item), swipeAnimation));
             item.getView().setVisibility(View.INVISIBLE);
         }
     }
@@ -2870,9 +2912,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         toolbarVisibilityAnimationDelay =
                 resources.getInteger(R.integer.toolbar_visibility_animation_delay);
         swipeAnimationDuration = resources.getInteger(R.integer.swipe_animation_duration);
-        clearAnimationDelay = resources.getInteger(R.integer.clear_animation_delay);
         relocateAnimationDuration = resources.getInteger(R.integer.relocate_animation_duration);
-        relocateAnimationDelay = resources.getInteger(R.integer.relocate_animation_delay);
         revertOvershootAnimationDuration =
                 resources.getInteger(R.integer.revert_overshoot_animation_duration);
         revealAnimationDuration = resources.getInteger(R.integer.reveal_animation_duration);
@@ -3224,18 +3264,18 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     new ArrayItemIterator.Builder(getModel(), tabViewRecycler, tabs, 0)
                             .reverse(true).create();
             AbstractItem item;
-            int startDelay = 0;
+            int delayMultiplier = 0;
 
             while ((item = iterator.next()) != null) {
                 AbstractItem previous = iterator.previous();
 
                 if (item.getTag().getState() == State.FLOATING ||
                         (previous != null && previous.getTag().getState() == State.FLOATING)) {
-                    startDelay += clearAnimationDelay;
+                    delayMultiplier++;
                 }
 
                 if (item.isInflated()) {
-                    animateSwipe(item, true, startDelay, swipeAnimation,
+                    animateSwipe(item, true, delayMultiplier, swipeAnimation,
                             !iterator.hasNext() ? createClearAnimationListener() : null);
                 }
             }
@@ -3331,7 +3371,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (remove) {
             SwipeDirection direction =
                     getArithmetics().getPosition(Axis.ORTHOGONAL_AXIS, tabItem) < 0 ?
-                            SwipeDirection.LEFT : SwipeDirection.RIGHT;
+                            SwipeDirection.LEFT_OR_TOP : SwipeDirection.RIGHT_OR_BOTTOM;
             long animationDuration =
                     velocity > 0 ? Math.round((calculateSwipePosition() / velocity) * 1000) : -1;
             Animation animation = new SwipeAnimation.Builder().setDirection(direction)

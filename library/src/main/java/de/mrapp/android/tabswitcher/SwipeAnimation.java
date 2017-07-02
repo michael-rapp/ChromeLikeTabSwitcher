@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.animation.Interpolator;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -38,13 +39,13 @@ public class SwipeAnimation extends Animation {
          * When the tab should be moved to/from the left, respectively the top when in landscape
          * mode.
          */
-        LEFT,
+        LEFT_OR_TOP,
 
         /**
          * When the tab should be moved to/from the right, respectively the bottom when in landscape
          * mode.
          */
-        RIGHT
+        RIGHT_OR_BOTTOM
 
     }
 
@@ -60,11 +61,18 @@ public class SwipeAnimation extends Animation {
         private SwipeDirection direction;
 
         /**
+         * The duration of the animations, which are used to relocate the other tabs, when a tabs
+         * has been added or removed.
+         */
+        private long relocateAnimationDuration;
+
+        /**
          * Creates a new builder, which allows to configure and create instances of the class {@link
          * SwipeAnimation}.
          */
         public Builder() {
-            setDirection(SwipeDirection.RIGHT);
+            setDirection(SwipeDirection.RIGHT_OR_BOTTOM);
+            setRelocateAnimationDuration(-1);
         }
 
         /**
@@ -72,8 +80,8 @@ public class SwipeAnimation extends Animation {
          *
          * @param direction
          *         The direction, which should be set, as a value of the enum {@link
-         *         SwipeDirection}. The direction may either be {@link SwipeDirection#LEFT} or
-         *         {@link SwipeDirection#RIGHT}
+         *         SwipeDirection}. The direction may either be {@link SwipeDirection#LEFT_OR_TOP}
+         *         or {@link SwipeDirection#RIGHT_OR_BOTTOM}
          * @return The builder, this method has be called upon, as an instance of the generic type
          * BuilderType. The builder may not be null
          */
@@ -84,10 +92,28 @@ public class SwipeAnimation extends Animation {
             return self();
         }
 
+        /**
+         * Sets the duration of the animations, which are used to relocate the other tabs, when a
+         * tab has been added or removed.
+         *
+         * @param relocateAnimationDuration
+         *         The duration, which should be set, in milliseconds as a {@link Long} value or -1,
+         *         if the default duration should be used
+         * @return The builder, this method has be called upon, as an instance of the generic type
+         * BuilderType. The builder may not be null
+         */
+        @NonNull
+        public final Builder setRelocateAnimationDuration(final long relocateAnimationDuration) {
+            ensureAtLeast(relocateAnimationDuration, -1,
+                    "The relocate animation duration must be at least -1");
+            this.relocateAnimationDuration = relocateAnimationDuration;
+            return self();
+        }
+
         @NonNull
         @Override
         public final SwipeAnimation create() {
-            return new SwipeAnimation(duration, interpolator, direction);
+            return new SwipeAnimation(duration, interpolator, direction, relocateAnimationDuration);
         }
 
     }
@@ -96,6 +122,12 @@ public class SwipeAnimation extends Animation {
      * The direction of the swipe animation.
      */
     private final SwipeDirection direction;
+
+    /**
+     * The duration of the animations, which are used to relocate the other tabs, when a tabs has
+     * been added or removed.
+     */
+    private final long relocateAnimationDuration;
 
     /**
      * Creates a new swipe animation.
@@ -109,12 +141,20 @@ public class SwipeAnimation extends Animation {
      * @param direction
      *         The direction of the swipe animation as a value of the enum {@link SwipeDirection}.
      *         The direction may not be null
+     * @param relocateAnimationDuration
+     *         The duration of the animations, which are used to relocate other tabs, when a tab has
+     *         been added or removed, in milliseconds as a {@link Long} value or -1, if the default
+     *         duration should be used
      */
     private SwipeAnimation(final long duration, @Nullable final Interpolator interpolator,
-                           @NonNull final SwipeDirection direction) {
+                           @NonNull final SwipeDirection direction,
+                           final long relocateAnimationDuration) {
         super(duration, interpolator);
         ensureNotNull(direction, "The direction may not be null");
+        ensureAtLeast(relocateAnimationDuration, -1,
+                "The relocate animation duration must be at least -1");
         this.direction = direction;
+        this.relocateAnimationDuration = relocateAnimationDuration;
     }
 
     /**
@@ -126,6 +166,18 @@ public class SwipeAnimation extends Animation {
     @NonNull
     public final SwipeDirection getDirection() {
         return direction;
+    }
+
+    /**
+     * Returns the duration of the animations, which are used to relocate the other tabs, when a tab
+     * has been added or removed.
+     *
+     * @return The duration of the animations, which are used to relocate the other tabs, when a tab
+     * has been added or removed, in milliseconds as a {@link Long} value or -1, if the default
+     * duration is used
+     */
+    public final long getRelocateAnimationDuration() {
+        return relocateAnimationDuration;
     }
 
 }
