@@ -802,28 +802,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void secondLayoutPass() {
         int selectedItemIndex =
                 getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+        int start = getStackedTabCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
         AbstractItemIterator iterator =
-                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).create();
+                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).start(start)
+                        .create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null && item.getIndex() < selectedItemIndex) {
             if (item instanceof TabItem) {
                 Tag tag = item.getTag();
-                int i = getModel().isAddTabButtonShown() ? item.getIndex() - 1 : item.getIndex();
 
-                if (i >= getStackedTabCount()) {
-                    if (tag.getState() == State.STACKED_END) {
-                        AbstractItem successor = iterator.peek();
+                if (tag.getState() == State.STACKED_END) {
+                    AbstractItem successor = iterator.peek();
 
-                        if (successor != null &&
-                                successor.getTag().getState() == State.STACKED_END) {
-                            tag.setState(State.HIDDEN);
-                            inflateOrRemoveView(item);
-                        } else {
-                            break;
-                        }
-                    } else {
-                        break;
+                    if (successor != null && successor.getTag().getState() == State.STACKED_END) {
+                        tag.setState(State.HIDDEN);
+                        inflateOrRemoveView(item);
                     }
                 }
             }
