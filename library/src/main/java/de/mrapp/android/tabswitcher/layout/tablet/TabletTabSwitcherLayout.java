@@ -802,24 +802,24 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void secondLayoutPass() {
         int selectedItemIndex =
                 getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
-        int start = getStackedTabCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
+        int stackedTabCount = getStackedTabCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
         AbstractItemIterator iterator =
-                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).start(start)
-                        .create();
+                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler())
+                        .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null && item.getIndex() < selectedItemIndex) {
-            if (item instanceof TabItem) {
-                Tag tag = item.getTag();
+            Tag tag = item.getTag();
 
-                if (tag.getState() == State.STACKED_END) {
-                    AbstractItem successor = iterator.peek();
+            if (tag.getState() == State.STACKED_END && item.getIndex() >= stackedTabCount) {
+                AbstractItem successor = iterator.peek();
 
-                    if (successor != null && successor.getTag().getState() == State.STACKED_END) {
-                        tag.setState(State.HIDDEN);
-                        inflateOrRemoveView(item);
-                    }
+                if (successor != null && successor.getTag().getState() == State.STACKED_END) {
+                    tag.setState(State.HIDDEN);
+                    inflateOrRemoveView(item);
                 }
+            } else if (tag.getState() == State.FLOATING) {
+                return;
             }
         }
     }
