@@ -1521,17 +1521,21 @@ public abstract class AbstractTabSwitcherLayout
     @Override
     public final void onPressStarted(@NonNull final AbstractItem item) {
         ColorStateList colorStateList = null;
+        boolean selected = false;
 
         if (item instanceof TabItem) {
             TabItem tabItem = (TabItem) item;
             Tab tab = tabItem.getTab();
             colorStateList = style.getTabBackgroundColor(tab);
+            selected = getModel().getSelectedTab() == tab;
         } else if (item instanceof AddTabItem) {
             colorStateList = style.getAddTabButtonColor();
         }
 
         if (colorStateList != null) {
-            int[] stateSet = new int[]{android.R.attr.state_pressed};
+            int[] stateSet = selected ?
+                    new int[]{android.R.attr.state_pressed, android.R.attr.state_selected} :
+                    new int[]{android.R.attr.state_pressed};
             int color = colorStateList.getColorForState(stateSet, -1);
 
             if (color != -1) {
