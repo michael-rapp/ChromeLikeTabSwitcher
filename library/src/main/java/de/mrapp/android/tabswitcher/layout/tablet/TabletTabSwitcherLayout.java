@@ -781,9 +781,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         AbstractItem item;
 
         while ((item = iterator.next()) != null && item.getIndex() < selectedItemIndex) {
-            if (item.getIndex() != 0 || !getModel().isAddTabButtonShown()) {
-                int i = getModel().isAddTabButtonShown() ? item.getIndex() - 1 : item.getIndex();
+            if (item instanceof TabItem) {
                 Tag tag = item.getTag();
+                int i = getModel().isAddTabButtonShown() ? item.getIndex() - 1 : item.getIndex();
 
                 if (i >= getStackedTabCount()) {
                     if (tag.getState() == State.STACKED_END) {
@@ -864,38 +864,30 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 inflateContent(selectedTab, null);
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
-                int tabSpacing = calculateTabSpacing();
-                int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
-                float referencePosition =
-                        TabItem.create(getModel(), tabViewRecycler, index).getTag().getPosition();
-                referencePosition = Math.max(
-                        Math.min(calculateMaxEndPosition(selectedItemIndex), referencePosition),
-                        calculateMinStartPosition(selectedItemIndex));
-                AbstractItemIterator iterator =
-                        new ItemIterator.Builder(getModel(), getTabViewRecycler()).create();
-                AbstractItem item;
 
-                while ((item = iterator.next()) != null) {
-                    float position;
+                if (index > 0) {
+                    int tabSpacing = calculateTabSpacing();
+                    int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
+                    float referencePosition =
+                            TabItem.create(getModel(), tabViewRecycler, index).getTag()
+                                    .getPosition();
+                    AbstractItemIterator iterator =
+                            new ItemIterator.Builder(getModel(), getTabViewRecycler())
+                                    .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
+                    AbstractItem item;
 
-                    if (item.getIndex() == 0 && getModel().isAddTabButtonShown()) {
-                        position = referencePosition + ((selectedItemIndex - 1) * tabSpacing) +
-                                calculateTabSpacing() + addTabButtonOffset;
-                    } else if (item.getIndex() == selectedItemIndex) {
-                        position = referencePosition;
-                    } else if (item.getIndex() < selectedItemIndex) {
-                        position = referencePosition +
+                    while ((item = iterator.next()) != null &&
+                            item.getIndex() < selectedItemIndex) {
+                        float position = referencePosition +
                                 ((selectedItemIndex - item.getIndex()) * tabSpacing);
-                    } else {
-                        position = referencePosition -
-                                ((item.getIndex() - selectedItemIndex) * tabSpacing);
+                        Pair<Float, State> pair =
+                                clipPosition(item.getIndex(), position, iterator.previous());
+                        item.getTag().setPosition(pair.first);
+                        item.getTag().setState(pair.second);
+                        inflateOrRemoveView(item);
                     }
 
-                    Pair<Float, State> pair =
-                            clipPosition(item.getIndex(), position, iterator.previous());
-                    item.getTag().setPosition(pair.first);
-                    item.getTag().setState(pair.second);
-                    inflateOrRemoveView(item);
+                    secondLayoutPass();
                 }
             }
         }
