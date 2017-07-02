@@ -2835,37 +2835,6 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Returns, whether a hidden tab at a specific index, is part of the stack, which is located at
-     * the start, or not.
-     *
-     * @param index
-     *         The index of the hidden tab, as an {@link Integer} value
-     * @return True, if the hidden tab is part of the stack, which is located at the start, false
-     * otherwise
-     */
-    private boolean isStackedAtStart(final int index) {
-        boolean start = true;
-        AbstractItemIterator iterator =
-                new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).start(index + 1)
-                        .create();
-        AbstractItem item;
-
-        while ((item = iterator.next()) != null) {
-            State state = item.getTag().getState();
-
-            if (state == State.STACKED_START) {
-                start = true;
-                break;
-            } else if (state == State.FLOATING) {
-                start = false;
-                break;
-            }
-        }
-
-        return start;
-    }
-
-    /**
      * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on
      * smartphones.
      *

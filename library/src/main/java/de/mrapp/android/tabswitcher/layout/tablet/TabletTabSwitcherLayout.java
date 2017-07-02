@@ -865,30 +865,75 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
 
-                if (index > 0) {
-                    int tabSpacing = calculateTabSpacing();
-                    int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
-                    float referencePosition =
-                            TabItem.create(getModel(), tabViewRecycler, index).getTag()
-                                    .getPosition();
-                    AbstractItemIterator iterator =
-                            new ItemIterator.Builder(getModel(), getTabViewRecycler())
-                                    .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
-                    AbstractItem item;
+                int tabSpacing = calculateTabSpacing();
+                int previousSelectedItemIndex = previousIndex +
+                        (previousIndex != -1 && getModel().isAddTabButtonShown() ? 1 : 0);
+                int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
+                TabItem selectedTabItem = TabItem.create(getModel(), tabViewRecycler, index);
+                float referencePosition;
 
-                    while ((item = iterator.next()) != null &&
-                            item.getIndex() < selectedItemIndex) {
-                        float position = referencePosition +
+                if (selectedTabItem.isInflated()) {
+                    referencePosition = selectedTabItem.getTag().getPosition();
+                } else if (isStackedAtStart(selectedTabItem.getIndex())) {
+                    Pair<Float, State> pair =
+                            calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
+                                    selectedTabItem.getIndex(), selectedTabItem);
+                    referencePosition = pair.first;
+                } else {
+                    Pair<Float, State> pair =
+                            calculatePositionAndStateWhenStackedAtEnd(selectedTabItem.getIndex());
+                    referencePosition = pair.first;
+                }
+
+                AbstractItemIterator iterator =
+                        new ItemIterator.Builder(getModel(), getTabViewRecycler())
+                                .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
+                AbstractItem item;
+
+                while ((item = iterator.next()) != null) {
+                    float position = -1;
+
+                    if (item.getIndex() == selectedItemIndex) {
+                        position = referencePosition;
+                    } else if (item.getIndex() < selectedItemIndex) {
+                        position = referencePosition +
                                 ((selectedItemIndex - item.getIndex()) * tabSpacing);
+                    } else if (item.getIndex() == previousSelectedItemIndex) {
+                        position = item.getTag().getPosition();
+                    } else if (item.getTag().getState() == State.STACKED_END ||
+                            (item.getTag().getState() == State.HIDDEN &&
+                                    item.getIndex() < (selectedItemIndex + getStackedTabCount()))) {
+                        position = referencePosition;
+                    }
+
+                    if (position != -1) {
                         Pair<Float, State> pair =
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
                         inflateOrRemoveView(item);
                     }
-
-                    secondLayoutPass();
                 }
+
+                secondLayoutPass();
+
+                    /*
+                    if (previousIndex > index) {
+                        iterator = new ItemIterator.Builder(getModel(), getTabViewRecycler())
+                                .start(previousIndex + (getModel().isAddTabButtonShown() ? 1 : 0))
+                                .create();
+                        TabItem tabItem = (TabItem) iterator.next();
+
+                        if (tabItem != null) {
+                            Pair<Float, State> pair =
+                                    clipPosition(tabItem.getIndex(), tabItem.getTag().getPosition(),
+                                            iterator.previous());
+                            tabItem.getTag().setPosition(pair.first);
+                            tabItem.getTag().setState(pair.second);
+                            inflateOrRemoveView(tabItem);
+                        }
+                    }
+                    */
             }
         }
     }
