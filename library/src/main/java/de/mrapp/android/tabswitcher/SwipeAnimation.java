@@ -20,9 +20,9 @@ import android.view.animation.Interpolator;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
- * A swipe animation, which moves tabs on the orthogonal axis, while animating their size and
- * opacity at the same time. Swipe animations can be used to add or remove tabs to a {@link
- * TabSwitcher} when using the smartphone layout.
+ * A swipe animation, which moves tabs on the orthogonal axis. When using the smartphone layout,
+ * their size and opacity is animated at the same time. Swipe animations can be used to add or
+ * remove tabs to a {@link TabSwitcher}.
  *
  * @author Michael Rapp
  * @since 0.1.0
@@ -35,14 +35,14 @@ public class SwipeAnimation extends Animation {
     public enum SwipeDirection {
 
         /**
-         * When the tab should be swiped in/out from/to the left, respectively the top, when
-         * dragging horizontally.
+         * When the tab should be moved to/from the left, respectively the top when in landscape
+         * mode.
          */
         LEFT,
 
         /**
-         * When the tab should be swiped in/out from/to the right, respectively the bottom, when
-         * dragging horizontally.
+         * When the tab should be moved to/from the right, respectively the bottom when in landscape
+         * mode.
          */
         RIGHT
 
