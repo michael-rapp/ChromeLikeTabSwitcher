@@ -1391,6 +1391,7 @@ public abstract class AbstractTabSwitcherLayout
         getTabViewRecycler().clearCache();
         onDetachLayout(tabsOnly);
         unregisterEventHandlerCallbacks();
+        touchEventDispatcher.removeEventHandler(getDragHandler());
 
         if (!tabsOnly) {
             getTabSwitcher().removeAllViews();

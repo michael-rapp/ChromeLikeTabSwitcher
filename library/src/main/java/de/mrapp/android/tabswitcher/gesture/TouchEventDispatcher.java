@@ -258,30 +258,6 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     }
 
     /**
-     * Removes all event handlers from the dispatcher.
-     */
-    public final void clearEventHandlers() {
-        Iterator<AbstractTouchEventHandler> iterator = iterator();
-        AbstractTouchEventHandler eventHandler;
-
-        while ((eventHandler = iterator.next()) != null) {
-            notifyOnRemovedEventHandler(eventHandler);
-        }
-
-        for (AbstractTouchEventHandler handler : activeEventHandlers) {
-            handler.onUp(null);
-        }
-
-        if (draggingEventHandler != null) {
-            draggingEventHandler.onUp(null);
-            draggingEventHandler = null;
-        }
-
-        eventHandlers.clear();
-        activeEventHandlers.clear();
-    }
-
-    /**
      * Handles a specific touch event by dispatching it to the first suited event handler.
      *
      * @param event
