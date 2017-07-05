@@ -229,9 +229,10 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
 
         if (handlers != null) {
             Iterator<AbstractTouchEventHandler> iterator = handlers.iterator();
-            AbstractTouchEventHandler eventHandler;
 
-            while ((eventHandler = iterator.next()) != null) {
+            while (iterator.hasNext()) {
+                AbstractTouchEventHandler eventHandler = iterator.next();
+
                 if (handler.equals(eventHandler)) {
                     iterator.remove();
                     notifyOnRemovedEventHandler(eventHandler);
