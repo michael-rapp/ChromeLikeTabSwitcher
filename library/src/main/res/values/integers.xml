@@ -20,11 +20,14 @@ License.
     <integer name="max_end_overshoot_angle">3</integer>
     <integer name="show_switcher_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="hide_switcher_animation_duration">@android:integer/config_shortAnimTime</integer>
-    <integer name="toolbar_visibility_animation_duration">@android:integer/config_mediumAnimTime</integer>
-    <integer name="toolbar_visibility_animation_delay">@android:integer/config_shortAnimTime</integer>
+    <integer name="toolbar_visibility_animation_duration">@android:integer/config_mediumAnimTime
+    </integer>
+    <integer name="toolbar_visibility_animation_delay">@android:integer/config_shortAnimTime
+    </integer>
     <integer name="swipe_animation_duration">@android:integer/config_longAnimTime</integer>
     <integer name="relocate_animation_duration">@android:integer/config_mediumAnimTime</integer>
-    <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime</integer>
+    <integer name="revert_overshoot_animation_duration">@android:integer/config_shortAnimTime
+    </integer>
     <integer name="reveal_animation_duration">@android:integer/config_shortAnimTime</integer>
     <integer name="peek_animation_duration">1200</integer>
     <integer name="empty_view_animation_duration">@android:integer/config_shortAnimTime</integer>
@@ -34,5 +37,8 @@ License.
 
     <!-- Tablet layout -->
     <integer name="tablet_stacked_tab_count">4</integer>
+    <integer name="close_button_visibility_animation_duration">
+        @android:integer/config_shortAnimTime
+    </integer>
 
 </resources>

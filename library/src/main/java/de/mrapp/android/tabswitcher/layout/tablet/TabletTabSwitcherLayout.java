@@ -31,6 +31,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import java.util.Collections;
 
@@ -44,6 +45,7 @@ import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.AbstractTabRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
+import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
@@ -58,6 +60,7 @@ import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
+import static de.mrapp.android.util.DisplayUtil.dpToPixels;
 
 /**
  * A layout, which implements the functionality of a {@link TabSwitcher} on tablets.
@@ -170,6 +173,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private final int swipedTabDistance;
 
     /**
+     * The duration of the animation, which is used to show or hide the close button of tabs.
+     */
+    private final long closeButtonVisibilityAnimationDuration;
+
+    /**
      * The drag handler, which is used by the layout.
      */
     private TabletDragTabsEventHandler dragHandler;
@@ -237,6 +245,136 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         int color = colorStateList.getColorForState(stateSet, colorStateList.getDefaultColor());
         Drawable background = borderView.getBackground();
         background.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+    }
+
+    /**
+     * Adapts the visibility of the close button of a specific tab's successor.
+     *
+     * @param item
+     *         The item, which corresponds to the tab, whose successor's close button should be
+     *         adapted, as an instance of the class {@link AbstractItem}. The item may not be null
+     */
+    private void adaptSuccessorCloseButtonVisibility(@NonNull final AbstractItem item) {
+        if (item.getIndex() < getModel().getCount() - (getModel().isAddTabButtonShown() ? 0 : 1)) {
+            TabItem successor = TabItem.create(getModel(), getTabViewRecycler(),
+                    item.getIndex() + (getModel().isAddTabButtonShown() ? 0 : 1));
+            adaptCloseButtonVisibility(successor, successor, item);
+        }
+    }
+
+    /**
+     * Adapts the visibility of the close button of a specific tab's predecessor.
+     *
+     * @param item
+     *         The item, which corresponds to the tab, whose predecessor's close button should be
+     *         adapted, as an instance of the class {@link AbstractItem}. The item may not be null
+     */
+    private void adaptPredecessorCloseButtonVisibility(@NonNull final AbstractItem item) {
+        if (item.getIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
+            TabItem predecessor = TabItem.create(getModel(), getTabViewRecycler(),
+                    item.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1));
+            adaptCloseButtonVisibility(predecessor, item, predecessor);
+        }
+    }
+
+    /**
+     * Adapts the visibility of the close button of a specific tab, depending on the positions of
+     * two successive tabs.
+     *
+     * @param item
+     *         The item, which corresponds to the tab, whose close button should be adapted, as an
+     *         instance of the class {@link TabItem}. The item may not be null
+     * @param successor
+     *         The item, which corresponds to the rear one of both successive tabs, as an item of
+     *         the class {@link AbstractItem}. The item may not be null
+     * @param predecessor
+     *         The item, which corresponds to the front one of both successive tabs, as an item of
+     *         the class {@link AbstractItem}. The item may not be null
+     */
+    private void adaptCloseButtonVisibility(@NonNull final TabItem item,
+                                            @NonNull final AbstractItem successor,
+                                            @NonNull final AbstractItem predecessor) {
+        if (item.isInflated() && item.getTab().isCloseable()) {
+            int selectedTabIndex = getModel().getSelectedTabIndex();
+            AbstractTabViewHolder viewHolder = item.getViewHolder();
+            float predecessorPosition =
+                    getArithmetics().getPosition(Axis.DRAGGING_AXIS, predecessor);
+            float successorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, successor);
+            float successorWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
+            animateCloseButtonVisibility(viewHolder, selectedTabIndex == item.getIndex() ||
+                    (successorPosition + successorWidth - tabOffset -
+                            dpToPixels(getContext(), 8)) <= predecessorPosition);
+        }
+    }
+
+    /**
+     * Animates the visibility of a tab's close button.
+     *
+     * @param viewHolder
+     *         The view holder, which holds a reference to the close button, whose visibility should
+     *         be animated, as an instance of the class {@link AbstractTabViewHolder}. The view
+     *         holder may not be null
+     * @param show
+     *         True, if the close button should be shown, false otherwise
+     */
+    private void animateCloseButtonVisibility(@NonNull final AbstractTabViewHolder viewHolder,
+                                              final boolean show) {
+        ImageButton closeButton = viewHolder.closeButton;
+        Boolean visible = (Boolean) closeButton.getTag(R.id.tag_visibility);
+
+        if (visible == null || visible != show) {
+            closeButton.setTag(R.id.tag_visibility, show);
+
+            if (closeButton.getAnimation() != null) {
+                closeButton.getAnimation().cancel();
+            }
+
+            ViewPropertyAnimator animation = closeButton.animate();
+            animation.setListener(createCloseButtonVisibilityAnimationListener(viewHolder, show));
+            animation.alpha(show ? 1 : 0);
+            animation.setStartDelay(0);
+            animation.setDuration(closeButtonVisibilityAnimationDuration);
+            animation.start();
+        }
+    }
+
+    /**
+     * Creates and returns a listener, which allows to observe the progress of the animation, which
+     * is used to animate the visibility of a tab's close button.
+     *
+     * @param viewHolder
+     *         The view holder, which holds a reference to the close button, whose visibility is
+     *         animated, as an instance of the class {@link AbstractTabViewHolder}. The view holder
+     *         may not be null
+     * @param show
+     *         True, if the animation shows the close button, false otherwise
+     * @return The listener, which has been created, as an instance of the class {@link
+     * AnimatorListener}. The listener may not be null
+     */
+    @NonNull
+    private AnimatorListener createCloseButtonVisibilityAnimationListener(
+            @NonNull final AbstractTabViewHolder viewHolder, final boolean show) {
+        return new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+
+                if (show) {
+                    viewHolder.closeButton.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                if (!show) {
+                    viewHolder.closeButton.setVisibility(View.INVISIBLE);
+                }
+            }
+
+        };
     }
 
     /**
@@ -585,6 +723,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         addTabButtonWidth = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_width);
         addTabButtonOffset = resources.getDimensionPixelSize(R.dimen.tablet_add_tab_button_offset);
         swipedTabDistance = resources.getDimensionPixelSize(R.dimen.swiped_tab_distance);
+        closeButtonVisibilityAnimationDuration =
+                resources.getInteger(android.R.integer.config_shortAnimTime);
     }
 
     @Override
@@ -954,6 +1094,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                     }
                     */
             }
+        }
+    }
+
+    @Override
+    protected final void updateView(@NonNull final AbstractItem item) {
+        super.updateView(item);
+        int selectedItemIndex =
+                getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+
+        if (item.getIndex() == selectedItemIndex) {
+            adaptSuccessorCloseButtonVisibility(item);
+            adaptPredecessorCloseButtonVisibility(item);
+        } else if (item.getIndex() >= selectedItemIndex) {
+            adaptSuccessorCloseButtonVisibility(item);
+        } else {
+            adaptPredecessorCloseButtonVisibility(item);
         }
     }
 

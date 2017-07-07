@@ -118,10 +118,11 @@ public abstract class AbstractTabRecyclerAdapter
      *         The tab item, which corresponds to the tab, whose close button should be adapted, as
      *         an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptCloseButton(@NonNull final TabItem tabItem) {
+    private void adaptCloseButtonVisibility(@NonNull final TabItem tabItem) {
         Tab tab = tabItem.getTab();
         AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
         viewHolder.closeButton.setVisibility(tab.isCloseable() ? View.VISIBLE : View.GONE);
+        viewHolder.closeButton.setTag(R.id.tag_visibility, tab.isCloseable());
         viewHolder.closeButton.setOnClickListener(
                 tab.isCloseable() ? createCloseButtonClickListener(viewHolder.closeButton, tab) :
                         null);
@@ -663,7 +664,7 @@ public abstract class AbstractTabRecyclerAdapter
         TabItem tabItem = getTabItem(tab);
 
         if (tabItem != null) {
-            adaptCloseButton(tabItem);
+            adaptCloseButtonVisibility(tabItem);
         }
     }
 
@@ -774,7 +775,7 @@ public abstract class AbstractTabRecyclerAdapter
             adaptTitle(tabItem);
             adaptIcon(tabItem);
             adaptProgressBarVisibility(tabItem);
-            adaptCloseButton(tabItem);
+            adaptCloseButtonVisibility(tabItem);
             adaptCloseButtonIcon(tabItem);
             adaptBackgroundColor(tabItem);
             adaptTitleTextColor(tabItem);
