@@ -585,7 +585,7 @@ public abstract class AbstractTabSwitcherLayout
                 item.getTag().setState(pair.second);
             }
 
-            inflateOrRemoveView(item);
+            inflateOrRemoveView(item, true);
         }
     }
 
@@ -662,7 +662,7 @@ public abstract class AbstractTabSwitcherLayout
                 item.getTag().setState(pair.second);
             }
 
-            inflateOrRemoveView(item);
+            inflateOrRemoveView(item, true);
         }
 
         if (firstVisibleIndex > 0) {
@@ -680,7 +680,7 @@ public abstract class AbstractTabSwitcherLayout
                             clipPosition(successor.getIndex(), successorPosition, item);
                     successor.getTag().setPosition(pair.first);
                     successor.getTag().setState(pair.second);
-                    inflateOrRemoveView(successor);
+                    inflateOrRemoveView(successor, true);
 
                     if (successor.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = successor.getIndex();
@@ -697,7 +697,7 @@ public abstract class AbstractTabSwitcherLayout
                             clipPosition(item.getIndex(), newPosition, (AbstractItem) null);
                     item.getTag().setPosition(pair.first);
                     item.getTag().setState(pair.second);
-                    inflateOrRemoveView(item);
+                    inflateOrRemoveView(item, true);
 
                     if (item.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = item.getIndex();
@@ -1000,15 +1000,18 @@ public abstract class AbstractTabSwitcherLayout
      * @param item
      *         The item, whose view should be inflated or removed, as an instance of the class
      *         {@link AbstractItem}. The item may not be null
+     * @param dragging
+     *         True, if the item is currently being dragged, false otherwise
      */
-    protected final void inflateOrRemoveView(@NonNull final AbstractItem item) {
+    protected final void inflateOrRemoveView(@NonNull final AbstractItem item,
+                                             final boolean dragging) {
         if (item.isInflated() && !item.isVisible()) {
             getTabViewRecycler().remove(item);
         } else if (item.isVisible()) {
             if (!item.isInflated()) {
-                inflateAndUpdateView(item, null);
+                inflateAndUpdateView(item, dragging, null);
             } else {
-                updateView(item);
+                updateView(item, dragging);
             }
         }
     }
@@ -1052,9 +1055,11 @@ public abstract class AbstractTabSwitcherLayout
      * @param item
      *         The item, whose view should be updated, as an instance of the class {@link
      *         AbstractItem}. The item may not be null
+     * @param dragging
+     *         True, if the item is currently being dragged, false otherwise
      */
     @CallSuper
-    protected void updateView(@NonNull final AbstractItem item) {
+    protected void updateView(@NonNull final AbstractItem item, final boolean dragging) {
         float position = item.getTag().getPosition();
         getArithmetics().setPosition(Axis.DRAGGING_AXIS, item, position);
         getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, item, 0);
@@ -1183,12 +1188,15 @@ public abstract class AbstractTabSwitcherLayout
      * @param item
      *         The item, whose view should be inflated, as an instance of the class {@link
      *         AbstractItem}. The item may not be null
+     * @param dragging
+     *         True, if the view is currently being dragged, false otherwise
      * @param listener
      *         The layout listener, which should be notified, when the view has been inflated, as an
      *         instance of the type {@link OnGlobalLayoutListener} or null, if no listener should be
      *         notified
      */
     protected abstract void inflateAndUpdateView(@NonNull final AbstractItem item,
+                                                 final boolean dragging,
                                                  @Nullable final OnGlobalLayoutListener listener);
 
     /**

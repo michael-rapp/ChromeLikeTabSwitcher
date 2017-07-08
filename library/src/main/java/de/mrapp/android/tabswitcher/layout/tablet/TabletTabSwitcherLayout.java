@@ -613,6 +613,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * @param item
      *         The item, whose view should be adapted, as an instance of the class {@link
      *         AbstractItem}. The item may not be null
+     * @param dragging
+     *         True, if the item is currently being dragged, false otherwise
      * @param layoutListener
      *         The layout lister, which should be notified, when the created listener is invoked, as
      *         an instance of the type {@link OnGlobalLayoutListener} or null, if no listener should
@@ -622,12 +624,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      */
     @NonNull
     private OnGlobalLayoutListener createInflateViewLayoutListener(@NonNull final AbstractItem item,
+                                                                   final boolean dragging,
                                                                    @Nullable final OnGlobalLayoutListener layoutListener) {
         return new OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
-                updateView(item);
+                updateView(item, dragging);
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
@@ -800,8 +803,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @Override
     protected final void inflateAndUpdateView(@NonNull final AbstractItem item,
+                                              final boolean dragging,
                                               @Nullable final OnGlobalLayoutListener listener) {
-        inflateView(item, createInflateViewLayoutListener(item, listener));
+        inflateView(item, createInflateViewLayoutListener(item, dragging, listener));
     }
 
     @Override
@@ -966,7 +970,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
                 if (successor != null && successor.getTag().getState() == State.STACKED_END) {
                     tag.setState(State.HIDDEN);
-                    inflateOrRemoveView(item);
+                    inflateOrRemoveView(item, false);
                 }
             } else if (tag.getState() == State.FLOATING) {
                 return;
@@ -999,7 +1003,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
         while ((item = iterator.next()) != null) {
             if (item.isVisible()) {
-                inflateAndUpdateView(item, null);
+                inflateAndUpdateView(item, false, null);
             }
         }
 
@@ -1080,7 +1084,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
-                        inflateOrRemoveView(item);
+                        inflateOrRemoveView(item, false);
                     }
                 }
 
@@ -1108,18 +1112,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
-    protected final void updateView(@NonNull final AbstractItem item) {
-        super.updateView(item);
-        int selectedItemIndex =
-                getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+    protected final void updateView(@NonNull final AbstractItem item, final boolean dragging) {
+        super.updateView(item, dragging);
 
-        if (item.getIndex() == selectedItemIndex) {
-            adaptSuccessorCloseButtonVisibility(item);
-            adaptPredecessorPaddingAndCloseButtonVisibility(item);
-        } else if (item.getIndex() >= selectedItemIndex) {
-            adaptSuccessorCloseButtonVisibility(item);
-        } else {
-            adaptPredecessorPaddingAndCloseButtonVisibility(item);
+        if (dragging) {
+            int selectedItemIndex =
+                    getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+
+            if (item.getIndex() == selectedItemIndex) {
+                adaptSuccessorCloseButtonVisibility(item);
+                adaptPredecessorPaddingAndCloseButtonVisibility(item);
+            } else if (item.getIndex() >= selectedItemIndex) {
+                adaptSuccessorCloseButtonVisibility(item);
+            } else {
+                adaptPredecessorPaddingAndCloseButtonVisibility(item);
+            }
         }
     }
 
