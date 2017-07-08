@@ -48,7 +48,7 @@ License.
     <dimen name="tablet_tab_min_width">164dp</dimen>
     <dimen name="tablet_tab_max_width">256dp</dimen>
     <dimen name="tablet_tab_height">36dp</dimen>
-    <dimen name="tablet_tab_padding_left">20dp</dimen>
+    <dimen name="tablet_tab_padding_left">22dp</dimen>
     <dimen name="tablet_tab_padding_right">12dp</dimen>
     <dimen name="tablet_tab_title_drawable_padding">4dp</dimen>
     <dimen name="tablet_tab_offset">24dp</dimen>

@@ -739,6 +739,7 @@ public abstract class AbstractTabRecyclerAdapter
             TabItem tabItem = (TabItem) item;
             AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
             View view = onInflateTabView(inflater, parent, viewHolder);
+            viewHolder.titleContainer = view.findViewById(R.id.tab_title_container);
             viewHolder.titleTextView = view.findViewById(R.id.tab_title_text_view);
             viewHolder.iconImageView = view.findViewById(R.id.tab_icon_image_view);
             viewHolder.progressBar = view.findViewById(R.id.tab_progress_bar);

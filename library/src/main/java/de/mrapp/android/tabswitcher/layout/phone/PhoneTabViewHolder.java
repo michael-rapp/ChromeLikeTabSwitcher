@@ -30,11 +30,6 @@ import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 public class PhoneTabViewHolder extends AbstractTabViewHolder {
 
     /**
-     * The view group, which contains the title and close button of a tab.
-     */
-    public ViewGroup titleContainer;
-
-    /**
      * The view group, which contains the view, which is associated with a tab.
      */
     public ViewGroup contentContainer;

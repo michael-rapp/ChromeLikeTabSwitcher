@@ -270,8 +270,6 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         ViewUtil.setBackground(view, backgroundDrawable);
         int padding = tabInset + tabBorderWidth;
         view.setPadding(padding, tabInset, padding, padding);
-        ((PhoneTabViewHolder) viewHolder).titleContainer =
-                view.findViewById(R.id.tab_title_container);
         ((PhoneTabViewHolder) viewHolder).contentContainer =
                 view.findViewById(R.id.content_container);
         ((PhoneTabViewHolder) viewHolder).previewImageView =

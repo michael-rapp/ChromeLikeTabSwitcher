@@ -13,6 +13,7 @@
  */
 package de.mrapp.android.tabswitcher.layout;
 
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,6 +29,11 @@ import de.mrapp.android.view.CircularProgressBar;
  * @since 0.1.0
  */
 public abstract class AbstractTabViewHolder {
+
+    /**
+     * The view group, which contains the title and close button of a tab.
+     */
+    public ViewGroup titleContainer;
 
     /**
      * The text view, which is used to display the title of a tab.
