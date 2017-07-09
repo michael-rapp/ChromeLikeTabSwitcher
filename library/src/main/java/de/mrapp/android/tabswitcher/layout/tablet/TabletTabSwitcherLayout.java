@@ -248,35 +248,41 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
-     * Adapts the visibility of the close button of a specific tab's successor.
+     * Adapts the visibility of the close button of a specific tab.
      *
-     * @param item
-     *         The item, which corresponds to the tab, whose successor's close button should be
-     *         adapted, as an instance of the class {@link AbstractItem}. The item may not be null
+     * @param tabItem
+     *         The item, which corresponds to the tab, whose close button should be adapted, as an
+     *         instance of the class {@link TabItem}. The item may not be null
      */
-    private void adaptSuccessorCloseButtonVisibility(@NonNull final AbstractItem item) {
-        if (item.getIndex() < getModel().getCount() - (getModel().isAddTabButtonShown() ? 0 : 1)) {
-            TabItem successor = TabItem.create(getModel(), getTabViewRecycler(),
-                    item.getIndex() + (getModel().isAddTabButtonShown() ? 0 : 1));
-            adaptCloseButtonVisibility(successor, successor, item);
+    private void adaptCloseButtonVisibility(@NonNull final TabItem tabItem) {
+        if (tabItem.getIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
+            TabItem predecessor = TabItem.create(getModel(), getTabViewRecycler(),
+                    tabItem.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1));
+            AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+
+            if (predecessor.isInflated()) {
+                adaptCloseButtonVisibility(viewHolder, tabItem, predecessor);
+            } else {
+                animateCloseButtonVisibility(viewHolder, true);
+            }
         }
     }
 
     /**
      * Adapts the visibility of the close button of a specific tab's predecessor.
      *
-     * @param item
+     * @param tabItem
      *         The item, which corresponds to the tab, whose predecessor's close button should be
-     *         adapted, as an instance of the class {@link AbstractItem}. The item may not be null
+     *         adapted, as an instance of the class {@link TabItem}. The tab item may not be null
      */
-    private void adaptPredecessorPaddingAndCloseButtonVisibility(@NonNull final AbstractItem item) {
-        if (item.getIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
+    private void adaptPredecessorPaddingAndCloseButtonVisibility(@NonNull final TabItem tabItem) {
+        if (tabItem.getIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
             TabItem predecessor = TabItem.create(getModel(), getTabViewRecycler(),
-                    item.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1));
-            float offset = adaptCloseButtonVisibility(predecessor, item, predecessor);
+                    tabItem.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1));
 
             if (predecessor.isInflated()) {
                 AbstractTabViewHolder viewHolder = predecessor.getViewHolder();
+                float offset = adaptCloseButtonVisibility(viewHolder, tabItem, predecessor);
                 View titleContainer = viewHolder.titleContainer;
                 titleContainer.setPadding(Math.round(offset), 0, 0, 0);
             }
@@ -287,9 +293,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * Adapts the visibility of the close button of a specific tab, depending on the positions of
      * two successive tabs.
      *
-     * @param item
-     *         The item, which corresponds to the tab, whose close button should be adapted, as an
-     *         instance of the class {@link TabItem}. The item may not be null
+     * @param viewHolder
+     *         The view holder, which holds a reference to the close button, whose visibility should
+     *         be adapted, as an instance of the class {@link AbstractTabViewHolder}. The view
+     *         holder may not be null
      * @param successor
      *         The item, which corresponds to the rear one of both successive tabs, as an item of
      *         the class {@link AbstractItem}. The item may not be null
@@ -298,23 +305,15 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      *         the class {@link AbstractItem}. The item may not be null
      * @return The offset between the two successive tabs in pixels as a {@link Float} value
      */
-    private float adaptCloseButtonVisibility(@NonNull final TabItem item,
+    private float adaptCloseButtonVisibility(@NonNull final AbstractTabViewHolder viewHolder,
                                              @NonNull final AbstractItem successor,
                                              @NonNull final AbstractItem predecessor) {
-        if (item.isInflated() && item.getTab().isCloseable()) {
-            int selectedTabIndex = getModel().getSelectedTabIndex();
-            AbstractTabViewHolder viewHolder = item.getViewHolder();
-            float predecessorPosition =
-                    getArithmetics().getPosition(Axis.DRAGGING_AXIS, predecessor);
-            float successorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, successor);
-            float successorWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
-            float offset = successorPosition + successorWidth - tabOffset - predecessorPosition;
-            animateCloseButtonVisibility(viewHolder,
-                    selectedTabIndex == item.getIndex() || offset <= dpToPixels(getContext(), 8));
-            return offset;
-        }
-
-        return 0;
+        float predecessorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, predecessor);
+        float successorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, successor);
+        float successorWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
+        float offset = successorPosition + successorWidth - tabOffset - predecessorPosition;
+        animateCloseButtonVisibility(viewHolder, offset <= dpToPixels(getContext(), 8));
+        return offset;
     }
 
     /**
@@ -1115,17 +1114,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void updateView(@NonNull final AbstractItem item, final boolean dragging) {
         super.updateView(item, dragging);
 
-        if (dragging) {
-            int selectedItemIndex =
-                    getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
+        if (dragging && item instanceof TabItem && item.isInflated()) {
+            TabItem tabItem = (TabItem) item;
 
-            if (item.getIndex() == selectedItemIndex) {
-                adaptSuccessorCloseButtonVisibility(item);
-                adaptPredecessorPaddingAndCloseButtonVisibility(item);
-            } else if (item.getIndex() >= selectedItemIndex) {
-                adaptSuccessorCloseButtonVisibility(item);
-            } else {
-                adaptPredecessorPaddingAndCloseButtonVisibility(item);
+            if (tabItem.getTab().isCloseable()) {
+                int selectedItemIndex = getModel().getSelectedTabIndex() +
+                        (getModel().isAddTabButtonShown() ? 1 : 0);
+
+                if (item.getIndex() == selectedItemIndex) {
+                    animateCloseButtonVisibility(tabItem.getViewHolder(), true);
+                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                } else if (item.getIndex() >= selectedItemIndex) {
+                    adaptCloseButtonVisibility(tabItem);
+                } else {
+                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                }
             }
         }
     }
