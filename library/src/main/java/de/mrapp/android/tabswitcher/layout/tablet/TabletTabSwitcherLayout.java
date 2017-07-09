@@ -379,7 +379,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 super.onAnimationEnd(animation);
 
                 if (!show) {
-                    viewHolder.closeButton.setVisibility(View.INVISIBLE);
+                    viewHolder.closeButton.setVisibility(View.GONE);
                 }
             }
 
