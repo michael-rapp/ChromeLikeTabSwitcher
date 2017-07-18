@@ -843,8 +843,8 @@ public class TabSwitcherModel implements Model, Restorable {
     /**
      * Returns the position of the first visible tab.
      *
-     * @return The position of the first visible tab as a {@link Float} value or -1, if the position
-     * is unknown
+     * @return The position of the first visible tab in relation to the available space as a {@link
+     * Float} value or -1, if the position is unknown
      */
     public final float getFirstVisibleTabPosition() {
         return firstVisibleTabPosition;

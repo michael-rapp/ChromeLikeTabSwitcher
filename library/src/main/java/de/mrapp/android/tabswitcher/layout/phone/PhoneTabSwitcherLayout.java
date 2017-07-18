@@ -537,8 +537,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      *         The index of the first visible tab as an {@link Integer} value or -1, if the index is
      *         unknown
      * @param firstVisibleTabPosition
-     *         The position of the first visible tab in pixels as a {@link Float} value or -1, if
-     *         the position is unknown
+     *         The position of the first visible tab in relation to the available space as a {@link
+     *         Float} value or -1, if the position is unknown
      * @return An array, which contains the items, as an array of the type {@link AbstractItem}. The
      * array may not be null
      */
@@ -555,7 +555,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
                     firstVisibleTabIndex : selectedTabIndex;
             float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                    firstVisibleTabPosition : attachedPosition;
+                    firstVisibleTabPosition *
+                            getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false) :
+                    attachedPosition;
             referencePosition =
                     Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
             AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);

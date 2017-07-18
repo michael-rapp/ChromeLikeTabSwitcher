@@ -1372,7 +1372,8 @@ public abstract class AbstractTabSwitcherLayout
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
      * @return A pair, which contains the index of the first visible tab, as well as its current
-     * position, as an instance of the class Pair or null, if the tab switcher is not shown
+     * position in relation to the available space, as an instance of the class Pair or null, if the
+     * tab switcher is not shown
      */
     @Nullable
     public final Pair<Integer, Float> detachLayout(final boolean tabsOnly) {
@@ -1391,7 +1392,10 @@ public abstract class AbstractTabSwitcherLayout
             Tag tag = item.getTag();
 
             if (tag.getState() != State.HIDDEN) {
-                result = Pair.create(firstVisibleIndex, tag.getPosition());
+                float position = tag.getPosition();
+                float totalSpace =
+                        getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS, false);
+                result = Pair.create(firstVisibleIndex, position / totalSpace);
             }
         }
 
