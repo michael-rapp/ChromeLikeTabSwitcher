@@ -2939,7 +2939,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         Pair<Integer, Float> result = null;
 
         if (getTabSwitcher().isSwitcherShown() && getFirstVisibleIndex() != -1) {
-            AbstractItem tabItem = TabItem.create(getModel(), getTabViewRecycler(),
+            TabItem tabItem = TabItem.create(getModel(), getTabViewRecycler(),
                     getFirstVisibleIndex() - (getModel().isAddTabButtonShown() ? 1 : 0));
             Tag tag = tabItem.getTag();
 
