@@ -746,7 +746,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         // TODO: contentViewRecycler.clearCache();
         Pair<Integer, Float> result = null;
 
-        if (getFirstVisibleIndex() > (getModel().isAddTabButtonShown() ? 0 : -1)) {
+        if (getFirstVisibleIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
             TabItem item = TabItem.create(getModel(), getTabViewRecycler(),
                     getFirstVisibleIndex() - (getModel().isAddTabButtonShown() ? 1 : 0));
             Tag tag = item.getTag();
