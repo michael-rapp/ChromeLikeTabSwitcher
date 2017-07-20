@@ -59,7 +59,6 @@ import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
-import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
@@ -1148,8 +1147,12 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
+     * @return A pair, which contains the index of the first visible tab, as well as its current
+     * position in relation to the available space, as an instance of the class Pair or null, if the
+     * tab switcher is not shown
      */
-    protected abstract void onDetachLayout(final boolean tabsOnly);
+    @Nullable
+    protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view
@@ -1377,31 +1380,9 @@ public abstract class AbstractTabSwitcherLayout
      */
     @Nullable
     public final Pair<Integer, Float> detachLayout(final boolean tabsOnly) {
-        Pair<Integer, Float> result = null;
-
-        if (getTabSwitcher().isSwitcherShown() && firstVisibleIndex != -1) {
-            AbstractItem item;
-
-            if (firstVisibleIndex == 0 && getModel().isAddTabButtonShown()) {
-                item = AddTabItem.create(getTabViewRecycler());
-            } else {
-                item = TabItem.create(getModel(), getTabViewRecycler(),
-                        firstVisibleIndex - (getModel().isAddTabButtonShown() ? 1 : 0));
-            }
-
-            Tag tag = item.getTag();
-
-            if (tag.getState() != State.HIDDEN) {
-                float position = tag.getPosition();
-                float totalSpace =
-                        getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS, false);
-                result = Pair.create(firstVisibleIndex, position / totalSpace);
-            }
-        }
-
+        Pair<Integer, Float> pair = onDetachLayout(tabsOnly);
         getTabViewRecycler().removeAll();
         getTabViewRecycler().clearCache();
-        onDetachLayout(tabsOnly);
         unregisterEventHandlerCallbacks();
         touchEventDispatcher.removeEventHandler(getDragHandler());
 
@@ -1409,7 +1390,7 @@ public abstract class AbstractTabSwitcherLayout
             getTabSwitcher().removeAllViews();
         }
 
-        return result;
+        return pair;
     }
 
     /**

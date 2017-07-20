@@ -2933,8 +2933,27 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         adaptToolbarMargin();
     }
 
+    @Nullable
     @Override
-    protected final void onDetachLayout(final boolean tabsOnly) {
+    protected final Pair<Integer, Float> onDetachLayout(final boolean tabsOnly) {
+        Pair<Integer, Float> result = null;
+
+        if (getTabSwitcher().isSwitcherShown() && getFirstVisibleIndex() != -1) {
+            AbstractItem tabItem = TabItem.create(getModel(), getTabViewRecycler(),
+                    getFirstVisibleIndex() - (getModel().isAddTabButtonShown() ? 1 : 0));
+            Tag tag = tabItem.getTag();
+
+            if (tag.getState() != State.HIDDEN) {
+                float position = tag.getPosition();
+                float draggingAxisSize =
+                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+                float orthogonalAxisSize =
+                        getArithmetics().getTabContainerSize(Axis.ORTHOGONAL_AXIS, false);
+                result = Pair.create(getFirstVisibleIndex(),
+                        position / Math.max(draggingAxisSize, orthogonalAxisSize));
+            }
+        }
+
         contentViewRecycler.removeAll();
         contentViewRecycler.clearCache();
         tabRecyclerAdapter.clearCachedPreviews();
@@ -2943,6 +2962,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (!tabsOnly) {
             getModel().removeListener(tabRecyclerAdapter);
         }
+
+        return result;
     }
 
     @Override

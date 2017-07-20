@@ -769,8 +769,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         adaptBorderColor();
     }
 
+    @Nullable
     @Override
-    protected final void onDetachLayout(final boolean tabsOnly) {
+    protected final Pair<Integer, Float> onDetachLayout(final boolean tabsOnly) {
         // TODO: contentViewRecycler.removeAll();
         // TODO: contentViewRecycler.clearCache();
         if (!tabsOnly) {
@@ -783,6 +784,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                         (TabletContentRecyclerAdapterWrapper) contentViewRecyclerAdapter);
             }
         }
+
+        return null;
     }
 
     @Override
