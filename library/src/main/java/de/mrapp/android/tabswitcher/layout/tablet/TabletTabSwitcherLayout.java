@@ -463,49 +463,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         AbstractItem[] items = new AbstractItem[getItemCount()];
 
         if (items.length > 0) {
-            int tabSpacing = calculateTabSpacing();
-            int referenceIndex = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                    firstVisibleTabIndex : 0;
-            float referencePosition = firstVisibleTabIndex != -1 && firstVisibleTabPosition != -1 ?
-                    firstVisibleTabPosition : -1;
-            AbstractItem referenceItem = null;
+            int referenceIndex = 0;
             AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);
             AbstractItem item;
 
             while ((item = iterator.next()) != null) {
                 AbstractItem predecessor = iterator.previous();
-                float position;
-
-                if (item.getIndex() == referenceIndex && referencePosition != -1) {
-                    referenceItem = item;
-                    position = referencePosition;
-                } else {
-                    position = calculateMaxEndPosition(item.getIndex());
-                }
-
+                float position = calculateMaxEndPosition(item.getIndex());
                 Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
                 if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
                     setFirstVisibleIndex(item.getIndex());
-                }
-            }
-
-            if (referenceIndex > 0 && referenceItem != null) {
-                iterator = new InitialItemIterator(items, true, referenceIndex - 1);
-
-                while ((item = iterator.next()) != null && item.getIndex() < referenceIndex) {
-                    AbstractItem predecessor = iterator.peek();
-                    float position = referenceItem.getTag().getPosition() +
-                            ((item.getIndex() - referenceIndex) * tabSpacing);
-                    Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
-                    item.getTag().setPosition(pair.first);
-                    item.getTag().setState(pair.second);
-
-                    if (pair.second == State.FLOATING) {
-                        setFirstVisibleIndex(item.getIndex());
-                    }
                 }
             }
         }
@@ -774,6 +744,21 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final Pair<Integer, Float> onDetachLayout(final boolean tabsOnly) {
         // TODO: contentViewRecycler.removeAll();
         // TODO: contentViewRecycler.clearCache();
+        Pair<Integer, Float> result = null;
+
+        if (getFirstVisibleIndex() > (getModel().isAddTabButtonShown() ? 0 : -1)) {
+            TabItem item = TabItem.create(getModel(), getTabViewRecycler(),
+                    getFirstVisibleIndex() - (getModel().isAddTabButtonShown() ? 1 : 0));
+            Tag tag = item.getTag();
+
+            if (tag.getState() != State.HIDDEN) {
+                float position = tag.getPosition();
+                float tabContainerSize =
+                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+                result = Pair.create(getFirstVisibleIndex(), position / tabContainerSize);
+            }
+        }
+
         if (!tabsOnly) {
             getModel().removeListener(tabRecyclerAdapter);
             AttachedViewRecycler.Adapter<Tab, Void> contentViewRecyclerAdapter =
@@ -785,7 +770,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             }
         }
 
-        return null;
+        return result;
     }
 
     @Override
@@ -1005,7 +990,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
         while ((item = iterator.next()) != null) {
             if (item.isVisible()) {
-                inflateAndUpdateView(item, false, null);
+                inflateAndUpdateView(item, true, null);
             }
         }
 
