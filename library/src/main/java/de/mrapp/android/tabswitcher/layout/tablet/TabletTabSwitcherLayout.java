@@ -444,6 +444,18 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
+     * Returns, whether the tab container is large enough to take up all tabs, or not.
+     *
+     * @return True, if the tab container is large enough to take up all tabs, false otherwise
+     */
+    private boolean areTabsFittingIntoTabContainer() {
+        int thresholdPosition = getModel().getCount() * calculateTabSpacing() +
+                (getModel().isAddTabButtonShown() ? calculateAddTabButtonSpacing() : 0);
+        float tabContainerSize = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+        return thresholdPosition <= tabContainerSize;
+    }
+
+    /**
      * Calculates and returns the items when the tab switcher is shown initially.
      *
      * @param firstVisibleTabIndex
@@ -898,18 +910,17 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @Override
     protected final float calculateMinStartPosition(final int index) {
-        int thresholdPosition = getModel().getCount() * calculateTabSpacing() +
-                (getModel().isAddTabButtonShown() ? calculateAddTabButtonSpacing() : 0);
-        float tabContainerWidth = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
-
-        if (thresholdPosition < tabContainerWidth) {
+        if (areTabsFittingIntoTabContainer()) {
             return calculateMaxEndPosition(index);
         } else {
+            float tabContainerSize =
+                    getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+
             if (index == 0 && getModel().isAddTabButtonShown()) {
-                return tabContainerWidth - addTabButtonWidth;
+                return tabContainerSize - addTabButtonWidth;
             } else {
                 int i = getModel().isAddTabButtonShown() ? index : index + 1;
-                return tabContainerWidth - calculateAddTabButtonSpacing() -
+                return tabContainerSize - calculateAddTabButtonSpacing() -
                         (calculateTabSpacing() * i);
             }
         }
