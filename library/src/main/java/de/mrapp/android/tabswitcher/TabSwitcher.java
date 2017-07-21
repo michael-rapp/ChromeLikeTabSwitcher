@@ -1260,6 +1260,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         });
     }
 
+    @Override
+    public final void selectTab(final int index) {
+        model.selectTab(index);
+    }
+
     @Nullable
     @Override
     public final Tab getSelectedTab() {

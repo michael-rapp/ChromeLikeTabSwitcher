@@ -664,6 +664,16 @@ public interface Model extends Iterable<Tab> {
     void selectTab(@NonNull Tab tab);
 
     /**
+     * Selects the tab as a specific index.
+     *
+     * @param index
+     *         The index of the tab, which should be selected, as an {@link Integer} value. The
+     *         index must be at least 0 and at maximum <code>getCount() - 1</code>, otherwise a
+     *         {@link IndexOutOfBoundsException} will be thrown
+     */
+    void selectTab(int index);
+
+    /**
      * Sets the padding of the tab switcher.
      *
      * @param left

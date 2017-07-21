@@ -1198,6 +1198,11 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     @Override
+    public final void selectTab(final int index) {
+        selectTab(getTab(index));
+    }
+
+    @Override
     public final Iterator<Tab> iterator() {
         return tabs.iterator();
     }
