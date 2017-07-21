@@ -464,7 +464,9 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
         if (items.length > 0) {
             int referenceIndex = 0;
-            AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);
+            InitialItemIteratorBuilder builder =
+                    new InitialItemIteratorBuilder(items).start(referenceIndex);
+            AbstractItemIterator iterator = builder.create();
             AbstractItem item;
 
             while ((item = iterator.next()) != null) {
@@ -478,6 +480,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                     setFirstVisibleIndex(item.getIndex());
                 }
             }
+
+            secondLayoutPass(builder);
         }
 
         dragHandler.setCallback(this);
@@ -941,13 +945,13 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
-    protected final void secondLayoutPass() {
+    protected final void secondLayoutPass(
+            @NonNull final AbstractItemIterator.AbstractBuilder builder) {
         int selectedItemIndex =
                 getModel().getSelectedTabIndex() + (getModel().isAddTabButtonShown() ? 1 : 0);
         int stackedTabCount = getStackedTabCount() + (getModel().isAddTabButtonShown() ? 1 : 0);
         AbstractItemIterator iterator =
-                new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler())
-                        .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
+                builder.start(getModel().isAddTabButtonShown() ? 1 : 0).create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null && item.getIndex() < selectedItemIndex) {
@@ -986,7 +990,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     public final void onGlobalLayout() {
         AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
                 getModel().getFirstVisibleTabPosition());
-        AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+        AbstractItemIterator iterator = new InitialItemIteratorBuilder(items).create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null) {
@@ -1076,7 +1080,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                     }
                 }
 
-                secondLayoutPass();
+                secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
 
                     /*
                     if (previousIndex > index) {

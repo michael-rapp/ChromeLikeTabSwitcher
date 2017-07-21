@@ -210,6 +210,40 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     /**
+     * A builder, which allows to configure and create instances of the class {@link
+     * InitialItemIterator}.
+     */
+    protected class InitialItemIteratorBuilder extends
+            AbstractItemIterator.AbstractBuilder<InitialItemIteratorBuilder, InitialItemIterator> {
+
+        /**
+         * The backing array, which is used to store items, once their initial position and
+         * state has been calculated.
+         */
+        private final AbstractItem[] backingArray;
+
+        /**
+         * Creates a new builder, which allows to configure and create instances of the class
+         * {@link InitialItemIterator}.
+         *
+         * @param backingArray
+         *         The backing array, which should be used to store items, once their initial
+         *         position and state has been calculated. The backing array may not be null
+         */
+        public InitialItemIteratorBuilder(@NonNull final AbstractItem[] backingArray) {
+            ensureNotNull(backingArray, "The backing array may not be null");
+            this.backingArray = backingArray;
+        }
+
+        @NonNull
+        @Override
+        public InitialItemIterator create() {
+            return new InitialItemIterator(backingArray, reverse, start);
+        }
+
+    }
+
+    /**
      * An iterator, which allows to iterate the items, which correspond to the child views of a
      * {@link TabSwitcher}. When an item is referenced for the first time, its initial position
      * and state is calculated and the item is stored in a backing array. When the item is
@@ -275,8 +309,8 @@ public abstract class AbstractTabSwitcherLayout
          *         The index of the first item, which should be iterated, as an {@link Integer}
          *         value or -1, if all items should be iterated
          */
-        public InitialItemIterator(@NonNull final AbstractItem[] backingArray,
-                                   final boolean reverse, final int start) {
+        private InitialItemIterator(@NonNull final AbstractItem[] backingArray,
+                                    final boolean reverse, final int start) {
             ensureNotNull(backingArray, "The backing array may not be null");
             this.backingArray = backingArray;
             initialize(reverse, start);
@@ -1329,8 +1363,13 @@ public abstract class AbstractTabSwitcherLayout
      * been calculated. It may be overridden by subclasses in order to implement a second layout
      * pass, which requires the information, which has been calculated in the first pass, and allows
      * to perform additional modifications of the tabs based on that information.
+     *
+     * @param builder
+     *         The builder, which allows to create the iterator, which should be used to iterate the
+     *         tabs, as an instance of the class {@link AbstractItemIterator.AbstractBuilder}. The
+     *         builder may not be null
      */
-    protected void secondLayoutPass() {
+    protected void secondLayoutPass(@NonNull final AbstractItemIterator.AbstractBuilder builder) {
 
     }
 
@@ -1530,7 +1569,7 @@ public abstract class AbstractTabSwitcherLayout
                 calculatePositionsWhenDraggingToStart(dragDistance);
             }
 
-            secondLayoutPass();
+            secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
         }
 
         DragState overshoot = isOvershootingAtEnd(

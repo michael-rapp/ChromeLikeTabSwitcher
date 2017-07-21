@@ -508,7 +508,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     private void animateShowSwitcher(final int firstVisibleTabIndex,
                                      final float firstVisibleTabPosition) {
         AbstractItem[] items = calculateInitialItems(firstVisibleTabIndex, firstVisibleTabPosition);
-        AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+        AbstractItemIterator iterator = new InitialItemIteratorBuilder(items).create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null) {
@@ -560,7 +560,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     attachedPosition;
             referencePosition =
                     Math.min(calculateMaxEndPosition(referenceIndex), referencePosition);
-            AbstractItemIterator iterator = new InitialItemIterator(items, false, referenceIndex);
+            AbstractItemIterator iterator =
+                    new InitialItemIteratorBuilder(items).start(referenceIndex).create();
             AbstractItem item;
 
             while ((item = iterator.next()) != null) {
@@ -594,7 +595,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             boolean overshooting =
                     referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
-            iterator = new InitialItemIterator(items, true, referenceIndex - 1);
+            iterator = new InitialItemIteratorBuilder(items).reverse(true).start(referenceIndex - 1)
+                    .create();
             float minTabSpacing = calculateMinTabSpacing();
             float defaultTabSpacing = calculateMaxTabSpacing(null);
             AbstractItem selectedItem =
@@ -3301,7 +3303,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         if (getModel().isSwitcherShown()) {
             AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
                     getModel().getFirstVisibleTabPosition());
-            AbstractItemIterator iterator = new InitialItemIterator(items, false, 0);
+            AbstractItemIterator iterator = new InitialItemIteratorBuilder(items).create();
             AbstractItem item;
 
             while ((item = iterator.next()) != null) {
