@@ -23,7 +23,6 @@ License.
         <enum name="auto" value="1"/>
         <enum name="phone" value="2"/>
         <enum name="tablet" value="3"/>
-        <enum name="tablet_landscape" value="4"/>
     </attr>
     <attr name="tabSwitcherTabIcon" format="reference"/>
     <attr name="tabSwitcherTabBackgroundColor" format="color"/>
