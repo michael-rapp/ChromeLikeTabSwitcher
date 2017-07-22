@@ -104,12 +104,6 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::SelectedTab";
 
     /**
-     * The name of the extra, which is used to store the index of the selected tab within a bundle.
-     */
-    private static final String SELECTED_TAB_INDEX_EXTRA =
-            TabSwitcherModel.class.getName() + "::SelectedTabIndex";
-
-    /**
      * The name of the extra, which is used to store the padding within a bundle.
      */
     private static final String PADDING_EXTRA = TabSwitcherModel.class.getName() + "::Padding";
@@ -219,11 +213,6 @@ public class TabSwitcherModel implements Model, Restorable {
      * The currently selected tab.
      */
     private Tab selectedTab;
-
-    /**
-     * The index of the currently selected tab.
-     */
-    private int selectedTabIndex;
 
     /**
      * The decorator, which allows to inflate the views, which correspond to the tab switcher's
@@ -771,7 +760,6 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
         this.selectedTab = null;
-        this.selectedTabIndex = -1;
         this.decorator = null;
         this.contentRecyclerAdapter = null;
         this.padding = new int[]{0, 0, 0, 0};
@@ -1032,6 +1020,7 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(animation, "The animation may not be null");
         tabs.add(index, tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
+        int selectedTabIndex = previousSelectedTabIndex;
         boolean switcherVisibilityChanged = false;
 
         if (previousSelectedTabIndex == -1) {
@@ -1089,7 +1078,8 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(animation, "The animation may not be null");
 
         if (tabs.length > 0) {
-            int previousSelectedTabIndex = selectedTabIndex;
+            int previousSelectedTabIndex = getSelectedTabIndex();
+            int selectedTabIndex = previousSelectedTabIndex;
 
             for (int i = 0; i < tabs.length; i++) {
                 Tab tab = tabs[i];
@@ -1116,7 +1106,8 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(tab, "The tab may not be null");
         ensureNotNull(animation, "The animation may not be null");
         int index = indexOfOrThrowException(tab);
-        int previousSelectedTabIndex = selectedTabIndex;
+        int previousSelectedTabIndex = getSelectedTabIndex();
+        int selectedTabIndex = previousSelectedTabIndex;
         tabs.remove(index);
 
         if (isEmpty()) {
@@ -1147,7 +1138,6 @@ public class TabSwitcherModel implements Model, Restorable {
         tabs.clear();
         notifyOnAllTabsRemoved(result, animation);
         selectedTab = null;
-        selectedTabIndex = -1;
     }
 
     @Override
@@ -1184,17 +1174,17 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final int getSelectedTabIndex() {
-        return selectedTabIndex;
+        return selectedTab != null ? indexOf(selectedTab) : -1;
     }
 
     @Override
     public final void selectTab(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
         int previousIndex = getSelectedTabIndex();
-        selectedTabIndex = indexOfOrThrowException(tab);
+        int index = indexOfOrThrowException(tab);
         selectedTab = tab;
         boolean switcherHidden = setSwitcherShown(false);
-        notifyOnSelectionChanged(previousIndex, selectedTabIndex, tab, switcherHidden);
+        notifyOnSelectionChanged(previousIndex, index, tab, switcherHidden);
     }
 
     @Override
@@ -1504,7 +1494,6 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putParcelableArrayList(TABS_EXTRA, tabs);
         outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
         outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
-        outState.putInt(SELECTED_TAB_INDEX_EXTRA, selectedTabIndex);
         outState.putIntArray(PADDING_EXTRA, padding);
         outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
         outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
@@ -1529,7 +1518,6 @@ public class TabSwitcherModel implements Model, Restorable {
             tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
             switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);
             selectedTab = savedInstanceState.getParcelable(SELECTED_TAB_EXTRA);
-            selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_EXTRA);
             padding = savedInstanceState.getIntArray(PADDING_EXTRA);
             tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
             tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
