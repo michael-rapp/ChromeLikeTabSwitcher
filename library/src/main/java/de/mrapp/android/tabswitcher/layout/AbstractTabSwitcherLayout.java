@@ -1181,9 +1181,10 @@ public abstract class AbstractTabSwitcherLayout
      *
      * @param tabsOnly
      *         True, if only the tabs should be detached, false otherwise
-     * @return A pair, which contains the index of the first visible tab, as well as its current
-     * position in relation to the available space, as an instance of the class Pair or null, if the
-     * tab switcher is not shown
+     * @return A pair, which contains the index of the tab, which should be used as a reference,
+     * when restoring the positions of tabs, as well as its current position in relation to the
+     * available space, as an instance of the class Pair or null, if the positions of tabs should
+     * not be restored
      */
     @Nullable
     protected abstract Pair<Integer, Float> onDetachLayout(final boolean tabsOnly);

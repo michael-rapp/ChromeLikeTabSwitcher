@@ -67,18 +67,18 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class TabSwitcherModel implements Model, Restorable {
 
     /**
-     * The name of the extra, which is used to store the index of the first visible tab within a
-     * bundle.
+     * The name of the extra, which is used to store the index of the tab, which is used as a
+     * reference, when restoring the positions of tabs, within a bundle.
      */
-    public static final String FIRST_VISIBLE_TAB_INDEX_EXTRA =
-            TabSwitcherModel.class.getName() + "::FirstVisibleIndex";
+    public static final String REFERENCE_TAB_INDEX_EXTRA =
+            TabSwitcherModel.class.getName() + "::ReferenceTabIndex";
 
     /**
-     * The name of the extra, which is used to store the position of the first visible tab within a
-     * bundle.
+     * The name of the extra, which is used to store the position of the tab, which is used as a
+     * reference, when restoring the positions of tabs, within a bundle.
      */
-    public static final String FIRST_VISIBLE_TAB_POSITION_EXTRA =
-            TabSwitcherModel.class.getName() + "::FirstVisiblePosition";
+    public static final String REFERENCE_TAB_POSITION_EXTRA =
+            TabSwitcherModel.class.getName() + "::ReferenceTabPosition";
 
     /**
      * The name of the extra, which is used to store the log level within a bundle.
@@ -185,14 +185,14 @@ public class TabSwitcherModel implements Model, Restorable {
     private final Set<Listener> listeners;
 
     /**
-     * The index of the first visible tab.
+     * The index of the tab, which is used as a reference, when restoring the positions of tabs.
      */
-    private int firstVisibleTabIndex;
+    private int referenceTabIndex;
 
     /**
-     * The position of the first visible tab.
+     * The position of the tab, which is used as a reference, when restoring the positions of tabs.
      */
-    private float firstVisibleTabPosition;
+    private float referenceTabPosition;
 
     /**
      * The log level, which is used for logging.
@@ -754,8 +754,8 @@ public class TabSwitcherModel implements Model, Restorable {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
-        this.firstVisibleTabIndex = -1;
-        this.firstVisibleTabPosition = -1;
+        this.referenceTabIndex = -1;
+        this.referenceTabPosition = -1;
         this.logLevel = LogLevel.INFO;
         this.tabs = new ArrayList<>();
         this.switcherShown = false;
@@ -808,45 +808,50 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
-     * Returns the index of the first visible tab.
+     * Returns the index of the tab, which is used as a reference, when restoring the positions of
+     * tabs.
      *
-     * @return The index of the first visible tab as an {@link Integer} value or -1, if the index is
-     * unknown
+     * @return The index of the tab, which is used as a reference, when restoring the positions of
+     * tabs, as an {@link Integer} value or -1, if the positions of tabs should not be restored
      */
-    public final int getFirstVisibleTabIndex() {
-        return firstVisibleTabIndex;
+    public final int getReferenceTabIndex() {
+        return referenceTabIndex;
     }
 
     /**
-     * Sets the index of the first visible tab.
+     * Sets the index of the tab, which should be used as a reference, when restoring the positions
+     * of tabs.
      *
-     * @param firstVisibleTabIndex
-     *         The index of the first visible tab, which should be set, as an {@link Integer} value
-     *         or -1, if the index is unknown
+     * @param referenceTabIndex
+     *         The index, which should be set, as an {@link Integer} value or -1, if the positions
+     *         of tabs should not be restored
      */
-    public final void setFirstVisibleTabIndex(final int firstVisibleTabIndex) {
-        this.firstVisibleTabIndex = firstVisibleTabIndex;
+    public final void setReferenceTabIndex(final int referenceTabIndex) {
+        this.referenceTabIndex = referenceTabIndex;
     }
 
     /**
-     * Returns the position of the first visible tab.
+     * Returns the position of the tab, which is used as a reference, when restoring the positions
+     * of tabs.
      *
-     * @return The position of the first visible tab in relation to the available space as a {@link
-     * Float} value or -1, if the position is unknown
+     * @return The position of the tab, which is used as a reference, when restoring the positions
+     * of tabs, in relation to the available space as a {@link Float} value or -1, if the positions
+     * of tabs should not be restored
      */
-    public final float getFirstVisibleTabPosition() {
-        return firstVisibleTabPosition;
+    public final float getReferenceTabPosition() {
+        return referenceTabPosition;
     }
 
     /**
-     * Sets the position of the first visible tab.
+     * Sets the position of the tab, which should be used as a reference, when restoring the
+     * positions of tabs.
      *
-     * @param firstVisibleTabPosition
-     *         The position of the first visible tab, which should be set, as a {@link Float} value
-     *         or -1, if the position is unknown
+     * @param referenceTabPosition
+     *         The position, which should be set, in relation to the available space as a {@link
+     *         Float} value or -1, if the position of tabs should not be restored
      */
-    public final void setFirstVisibleTabPosition(final float firstVisibleTabPosition) {
-        this.firstVisibleTabPosition = firstVisibleTabPosition;
+    public final void setReferenceTabPosition(final float referenceTabPosition) {
+        this.referenceTabPosition = referenceTabPosition;
     }
 
     /**
@@ -1511,9 +1516,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            firstVisibleTabIndex = savedInstanceState.getInt(FIRST_VISIBLE_TAB_INDEX_EXTRA, -1);
-            firstVisibleTabPosition =
-                    savedInstanceState.getFloat(FIRST_VISIBLE_TAB_POSITION_EXTRA, -1);
+            referenceTabIndex = savedInstanceState.getInt(REFERENCE_TAB_INDEX_EXTRA, -1);
+            referenceTabPosition = savedInstanceState.getFloat(REFERENCE_TAB_POSITION_EXTRA, -1);
             logLevel = (LogLevel) savedInstanceState.getSerializable(LOG_LEVEL_EXTRA);
             tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
             switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);

@@ -1644,14 +1644,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
         if (pair != null) {
             savedState.modelState
-                    .putInt(TabSwitcherModel.FIRST_VISIBLE_TAB_INDEX_EXTRA, pair.first);
+                    .putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
             savedState.modelState
-                    .putFloat(TabSwitcherModel.FIRST_VISIBLE_TAB_POSITION_EXTRA, pair.second);
-            model.setFirstVisibleTabIndex(pair.first);
-            model.setFirstVisibleTabPosition(pair.second);
+                    .putFloat(TabSwitcherModel.REFERENCE_TAB_POSITION_EXTRA, pair.second);
+            model.setReferenceTabIndex(pair.first);
+            model.setReferenceTabPosition(pair.second);
         } else {
-            model.setFirstVisibleTabPosition(-1);
-            model.setFirstVisibleTabIndex(-1);
+            model.setReferenceTabPosition(-1);
+            model.setReferenceTabIndex(-1);
         }
 
         model.removeListener(layout);

@@ -458,42 +458,105 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     /**
      * Calculates and returns the items when the tab switcher is shown initially.
      *
-     * @param firstVisibleTabIndex
-     *         The index of the first visible tab as an {@link Integer} value or -1, if the index is
-     *         unknown
-     * @param firstVisibleTabPosition
-     *         The position of the first visible tab in pixels as a {@link Float} value or -1, if
-     *         the position is unknown
+     * @param referenceTabIndex
+     *         The index of the tab, which is used as a reference, when restoring the positions of
+     *         tabs, as an {@link Integer} value or -1, if the positions of tabs should not be
+     *         restored
+     * @param referenceTabPosition
+     *         The position of tab, which is used as a reference, when restoring the positions of
+     *         tabs, in relation to the available space as a {@link Float} value or -1, if the
+     *         positions of tabs should not be restored
      * @return An array, which contains the tab items, as an array of the type {@link AbstractItem}.
      * The array may not be null
      */
     @NonNull
-    private AbstractItem[] calculateInitialItems(final int firstVisibleTabIndex,
-                                                 final float firstVisibleTabPosition) {
+    private AbstractItem[] calculateInitialItems(final int referenceTabIndex,
+                                                 final float referenceTabPosition) {
         dragHandler.reset();
         setFirstVisibleIndex(-1);
         AbstractItem[] items = new AbstractItem[getItemCount()];
 
         if (items.length > 0) {
-            int referenceIndex = 0;
-            InitialItemIteratorBuilder builder =
-                    new InitialItemIteratorBuilder(items).start(referenceIndex);
-            AbstractItemIterator iterator = builder.create();
-            AbstractItem item;
 
-            while ((item = iterator.next()) != null) {
-                AbstractItem predecessor = iterator.previous();
-                float position = calculateMaxEndPosition(item.getIndex());
-                Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
-                item.getTag().setPosition(pair.first);
-                item.getTag().setState(pair.second);
+            if (referenceTabIndex != -1 && referenceTabPosition != -1) {
+                float referencePosition = referenceTabPosition *
+                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+                referencePosition = Math.max(calculateMinStartPosition(referenceTabIndex),
+                        Math.min(calculateMaxEndPosition(referenceTabIndex), referencePosition));
+                AbstractItemIterator iterator =
+                        new InitialItemIteratorBuilder(items).start(referenceTabIndex).create();
+                AbstractItem item;
 
-                if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
-                    setFirstVisibleIndex(item.getIndex());
+                while ((item = iterator.next()) != null) {
+                    float position;
+
+                    if (item.getIndex() == referenceTabIndex) {
+                        position = referencePosition;
+                    } else {
+                        position = referencePosition -
+                                (calculateTabSpacing() * (item.getIndex() - referenceTabIndex));
+                    }
+
+                    Pair<Float, State> pair =
+                            clipPosition(item.getIndex(), position, iterator.previous());
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+
+                    if (item.getIndex() == referenceTabIndex) {
+                        referencePosition = pair.first;
+                    }
+
+                    if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
+                        setFirstVisibleIndex(item.getIndex());
+                    }
                 }
+
+                iterator = new InitialItemIteratorBuilder(items).create();
+                int firstVisibleIndex = -1;
+
+                while ((item = iterator.next()) != null && item.getIndex() < referenceTabIndex) {
+                    float position;
+
+                    if (item instanceof AddTabItem) {
+                        position = calculateMaxEndPosition(item.getIndex());
+                    } else {
+                        position = referencePosition +
+                                (calculateTabSpacing() * (referenceTabIndex - item.getIndex()));
+                    }
+
+                    Pair<Float, State> pair =
+                            clipPosition(item.getIndex(), position, iterator.previous());
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+
+                    if (firstVisibleIndex == -1 && pair.second == State.FLOATING) {
+                        firstVisibleIndex = item.getIndex();
+                    }
+                }
+
+                if (firstVisibleIndex != -1) {
+                    setFirstVisibleIndex(firstVisibleIndex);
+                }
+            } else {
+                AbstractItemIterator iterator =
+                        new InitialItemIteratorBuilder(items).start(0).create();
+                AbstractItem item;
+
+                while ((item = iterator.next()) != null) {
+                    AbstractItem predecessor = iterator.previous();
+                    float position = calculateMaxEndPosition(item.getIndex());
+                    Pair<Float, State> pair = clipPosition(item.getIndex(), position, predecessor);
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+
+                    if (getFirstVisibleIndex() == -1 && pair.second == State.FLOATING) {
+                        setFirstVisibleIndex(item.getIndex());
+                    }
+                }
+
             }
 
-            secondLayoutPass(builder);
+            secondLayoutPass(new InitialItemIteratorBuilder(items).start(0));
         }
 
         dragHandler.setCallback(this);
@@ -761,18 +824,20 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         // TODO: contentViewRecycler.removeAll();
         // TODO: contentViewRecycler.clearCache();
         Pair<Integer, Float> result = null;
+        ItemIterator iterator =
+                new ItemIterator.Builder(getModel(), getTabViewRecycler()).start(getItemCount() - 1)
+                        .reverse(true).create();
+        AbstractItem item;
 
-        if (getFirstVisibleIndex() > (getModel().isAddTabButtonShown() ? 1 : 0) &&
-                !areTabsFittingIntoTabContainer()) {
-            TabItem item = TabItem.create(getModel(), getTabViewRecycler(),
-                    getFirstVisibleIndex() - (getModel().isAddTabButtonShown() ? 1 : 0));
-            Tag tag = item.getTag();
-
-            if (tag.getState() != State.HIDDEN) {
-                float position = tag.getPosition();
-                float tabContainerSize =
-                        getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
-                result = Pair.create(getFirstVisibleIndex(), position / tabContainerSize);
+        if (!areTabsFittingIntoTabContainer()) {
+            while ((item = iterator.next()) != null) {
+                if (item.getTag().getState() == State.FLOATING) {
+                    float position = item.getTag().getPosition();
+                    float tabContainerSize =
+                            getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
+                    result = Pair.create(item.getIndex(), position / tabContainerSize);
+                    break;
+                }
             }
         }
 
@@ -1000,8 +1065,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
     @Override
     public final void onGlobalLayout() {
-        AbstractItem[] items = calculateInitialItems(getModel().getFirstVisibleTabIndex(),
-                getModel().getFirstVisibleTabPosition());
+        AbstractItem[] items = calculateInitialItems(getModel().getReferenceTabIndex(),
+                getModel().getReferenceTabPosition());
         AbstractItemIterator iterator = new InitialItemIteratorBuilder(items).create();
         AbstractItem item;
 
