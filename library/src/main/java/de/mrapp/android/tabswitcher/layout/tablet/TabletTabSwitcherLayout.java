@@ -308,8 +308,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     private float adaptCloseButtonVisibility(@NonNull final AbstractTabViewHolder viewHolder,
                                              @NonNull final AbstractItem successor,
                                              @NonNull final AbstractItem predecessor) {
-        float predecessorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, predecessor);
-        float successorPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, successor);
+        float predecessorPosition = predecessor.getTag().getPosition();
+        float successorPosition = successor.getTag().getPosition();
         float successorWidth = getArithmetics().getSize(Axis.DRAGGING_AXIS, successor);
         float offset = successorPosition + successorWidth - tabOffset - predecessorPosition;
         animateCloseButtonVisibility(viewHolder, offset <= dpToPixels(getContext(), 8));
@@ -1116,18 +1116,15 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 while ((item = iterator.next()) != null && (item.getIndex() <= selectedItemIndex ||
                         item.getTag().getState() == State.STACKED_END ||
                         item.getTag().getState() == State.HIDDEN)) {
-                    if (item.getIndex() == selectedItemIndex) {
-                        if (item.getTag().getState() == State.HIDDEN ||
-                                item.getTag().getState() == State.STACKED_END) {
-                            float position = calculatePositionAndStateWhenStackedAtEnd(
-                                    item.getIndex()).first;
-                            Pair<Float, State> pair =
-                                    clipPosition(item.getIndex(), position, iterator.previous());
-                            item.getTag().setPosition(pair.first);
-                            item.getTag().setState(pair.second);
-                        }
-
-                        inflateOrRemoveView(item, true);
+                    if (item.getIndex() == selectedItemIndex &&
+                            (item.getTag().getState() == State.HIDDEN ||
+                                    item.getTag().getState() == State.STACKED_END)) {
+                        float position =
+                                calculatePositionAndStateWhenStackedAtEnd(item.getIndex()).first;
+                        Pair<Float, State> pair =
+                                clipPosition(item.getIndex(), position, iterator.previous());
+                        item.getTag().setPosition(pair.first);
+                        item.getTag().setState(pair.second);
                     } else if (item.getIndex() > selectedItemIndex &&
                             item.getTag().getState() != State.FLOATING) {
                         float position =
@@ -1136,7 +1133,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
-                        inflateOrRemoveView(item, false);
                     } else if (item.getIndex() < selectedItemIndex &&
                             item.getTag().getState() == State.HIDDEN) {
                         float position =
@@ -1145,14 +1141,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
-                        inflateOrRemoveView(item, false);
                     }
+
+                    inflateOrRemoveView(item, true);
                 }
 
             }
 
             secondLayoutPass(new ItemIterator.Builder(getModel(), getTabViewRecycler()));
         }
+
     }
 
     @Override
