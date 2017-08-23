@@ -1145,12 +1145,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
                     inflateOrRemoveView(item, true);
                 }
-
             }
 
             secondLayoutPass(new ItemIterator.Builder(getModel(), getTabViewRecycler()));
         }
-
     }
 
     @Override
