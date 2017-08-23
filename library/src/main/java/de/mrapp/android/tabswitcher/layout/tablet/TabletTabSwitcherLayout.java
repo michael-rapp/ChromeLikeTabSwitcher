@@ -256,11 +256,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      */
     private void adaptCloseButtonVisibility(@NonNull final TabItem tabItem) {
         if (tabItem.getIndex() > (getModel().isAddTabButtonShown() ? 1 : 0)) {
-            TabItem predecessor = TabItem.create(getModel(), getTabViewRecycler(),
-                    tabItem.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1));
             AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+            TabItem predecessor = null;
+            int predecessorIndex = tabItem.getIndex() - (getModel().isAddTabButtonShown() ? 2 : 1);
 
-            if (predecessor.isInflated()) {
+            while ((predecessor == null || !predecessor.isInflated()) && predecessorIndex >= 0) {
+                predecessor = TabItem.create(getModel(), getTabViewRecycler(), predecessorIndex);
+                predecessorIndex--;
+            }
+
+            if (predecessor != null && predecessor.isInflated()) {
                 adaptCloseButtonVisibility(viewHolder, tabItem, predecessor);
             } else {
                 animateCloseButtonVisibility(viewHolder, true);
