@@ -263,7 +263,8 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
     @Override
     protected final View onInflateTabView(@NonNull final LayoutInflater inflater,
                                           @Nullable final ViewGroup parent,
-                                          @NonNull final AbstractTabViewHolder viewHolder) {
+                                          @NonNull final AbstractTabViewHolder viewHolder,
+                                          @NonNull final Integer... params) {
         View view = inflater.inflate(R.layout.phone_tab, parent, false);
         Drawable backgroundDrawable =
                 ContextCompat.getDrawable(getModel().getContext(), R.drawable.phone_tab_background);

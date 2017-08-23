@@ -383,13 +383,17 @@ public abstract class AbstractTabRecyclerAdapter
      *         The view holder, which should hold references to the child views of the view, which
      *         should be inflated, as an instance of the class {@link AbstractTabViewHolder}. The
      *         view holder may not be null
+     * @param params
+     *         An array, which may contain optional parameters, as an array of the generic type
+     *         ParamType or an empty array, if no optional parameters are available
      * @return The view, which has been inflated, as an instance of the class {@link View}. The view
      * may not be null
      */
     @NonNull
     protected abstract View onInflateTabView(@NonNull final LayoutInflater inflater,
                                              @Nullable final ViewGroup parent,
-                                             @NonNull final AbstractTabViewHolder viewHolder);
+                                             @NonNull final AbstractTabViewHolder viewHolder,
+                                             @NonNull final Integer... params);
 
     /**
      * The method, which is invoked on implementing subclasses in order to adapt the appearance of a
@@ -739,7 +743,7 @@ public abstract class AbstractTabRecyclerAdapter
         if (viewType == TAB_VIEW_TYPE) {
             TabItem tabItem = (TabItem) item;
             AbstractTabViewHolder viewHolder = onCreateTabViewHolder();
-            View view = onInflateTabView(inflater, parent, viewHolder);
+            View view = onInflateTabView(inflater, parent, viewHolder, params);
             viewHolder.titleContainer = view.findViewById(R.id.tab_title_container);
             viewHolder.titleTextView = view.findViewById(R.id.tab_title_text_view);
             viewHolder.iconImageView = view.findViewById(R.id.tab_icon_image_view);

@@ -186,8 +186,10 @@ public class TabletTabRecyclerAdapter extends AbstractTabRecyclerAdapter {
     @Override
     protected final View onInflateTabView(@NonNull final LayoutInflater inflater,
                                           @Nullable final ViewGroup parent,
-                                          @NonNull final AbstractTabViewHolder viewHolder) {
+                                          @NonNull final AbstractTabViewHolder viewHolder,
+                                          @NonNull final Integer... params) {
         View view = inflater.inflate(R.layout.tablet_tab, parent, false);
+        view.getLayoutParams().width = params[0];
         StateListDrawable backgroundDrawable = new StateListDrawable();
         Drawable defaultDrawable = ContextCompat
                 .getDrawable(getModel().getContext(), R.drawable.tablet_tab_background);

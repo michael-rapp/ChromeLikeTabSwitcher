@@ -875,7 +875,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void inflateAndUpdateView(@NonNull final AbstractItem item,
                                               final boolean dragging,
                                               @Nullable final OnGlobalLayoutListener listener) {
-        inflateView(item, createInflateViewLayoutListener(item, dragging, listener));
+        inflateView(item, createInflateViewLayoutListener(item, dragging, listener),
+                calculateTabWidth());
     }
 
     @Override
@@ -1156,26 +1157,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void updateView(@NonNull final AbstractItem item, final boolean dragging) {
         super.updateView(item, dragging);
 
-        if (item instanceof TabItem) {
-            item.getView().getLayoutParams().width = calculateTabWidth();
+        if (item instanceof TabItem && dragging) {
+            TabItem tabItem = (TabItem) item;
 
-            if (dragging) {
-                TabItem tabItem = (TabItem) item;
+            if (tabItem.getTab().isCloseable()) {
+                int selectedItemIndex = getModel().getSelectedTabIndex() +
+                        (getModel().isAddTabButtonShown() ? 1 : 0);
 
-                if (tabItem.getTab().isCloseable()) {
-                    int selectedItemIndex = getModel().getSelectedTabIndex() +
-                            (getModel().isAddTabButtonShown() ? 1 : 0);
-
-                    if (item.getIndex() == selectedItemIndex) {
-                        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-                        animateCloseButtonVisibility(viewHolder, true);
-                        viewHolder.titleContainer.setPadding(0, 0, 0, 0);
-                        adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
-                    } else if (item.getIndex() >= selectedItemIndex) {
-                        adaptCloseButtonVisibility(tabItem);
-                    } else {
-                        adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
-                    }
+                if (item.getIndex() == selectedItemIndex) {
+                    AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+                    animateCloseButtonVisibility(viewHolder, true);
+                    viewHolder.titleContainer.setPadding(0, 0, 0, 0);
+                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                } else if (item.getIndex() >= selectedItemIndex) {
+                    adaptCloseButtonVisibility(tabItem);
+                } else {
+                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
                 }
             }
         }
