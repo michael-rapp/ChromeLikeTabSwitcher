@@ -421,7 +421,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
      * @return The width, which has been calculated, in pixels as an {@link Integer} value
      */
     private int calculateTabWidth() {
-        return maxTabWidth;
+        float tabContainerSize = getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false) -
+                (getModel().isAddTabButtonShown() ? addTabButtonWidth : 0);
+        float width = tabContainerSize / 4f;
+        return Math.round(Math.max(Math.min(maxTabWidth, width), minTabWidth));
     }
 
     /**
@@ -477,7 +480,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         AbstractItem[] items = new AbstractItem[getItemCount()];
 
         if (items.length > 0) {
-
             if (referenceTabIndex != -1 && referenceTabPosition != -1) {
                 float referencePosition = referenceTabPosition *
                         getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
@@ -553,7 +555,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                         setFirstVisibleIndex(item.getIndex());
                     }
                 }
-
             }
 
             secondLayoutPass(new InitialItemIteratorBuilder(items).start(0));
@@ -1155,22 +1156,26 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     protected final void updateView(@NonNull final AbstractItem item, final boolean dragging) {
         super.updateView(item, dragging);
 
-        if (dragging && item instanceof TabItem && item.isInflated()) {
-            TabItem tabItem = (TabItem) item;
+        if (item instanceof TabItem) {
+            item.getView().getLayoutParams().width = calculateTabWidth();
 
-            if (tabItem.getTab().isCloseable()) {
-                int selectedItemIndex = getModel().getSelectedTabIndex() +
-                        (getModel().isAddTabButtonShown() ? 1 : 0);
+            if (dragging) {
+                TabItem tabItem = (TabItem) item;
 
-                if (item.getIndex() == selectedItemIndex) {
-                    AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
-                    animateCloseButtonVisibility(viewHolder, true);
-                    viewHolder.titleContainer.setPadding(0, 0, 0, 0);
-                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
-                } else if (item.getIndex() >= selectedItemIndex) {
-                    adaptCloseButtonVisibility(tabItem);
-                } else {
-                    adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                if (tabItem.getTab().isCloseable()) {
+                    int selectedItemIndex = getModel().getSelectedTabIndex() +
+                            (getModel().isAddTabButtonShown() ? 1 : 0);
+
+                    if (item.getIndex() == selectedItemIndex) {
+                        AbstractTabViewHolder viewHolder = tabItem.getViewHolder();
+                        animateCloseButtonVisibility(viewHolder, true);
+                        viewHolder.titleContainer.setPadding(0, 0, 0, 0);
+                        adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                    } else if (item.getIndex() >= selectedItemIndex) {
+                        adaptCloseButtonVisibility(tabItem);
+                    } else {
+                        adaptPredecessorPaddingAndCloseButtonVisibility(tabItem);
+                    }
                 }
             }
         }
