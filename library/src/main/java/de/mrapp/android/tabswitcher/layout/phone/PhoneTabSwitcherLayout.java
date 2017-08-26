@@ -1629,7 +1629,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onGlobalLayout() {
                 adaptViewSize(item);
-                updateView(item, dragging);
+                updateView(item, dragging, true);
 
                 if (layoutListener != null) {
                     layoutListener.onGlobalLayout();
@@ -1691,7 +1691,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                inflateOrRemoveView(item, false);
+                inflateOrRemoveView(item, false, true);
             }
 
         };
@@ -1779,7 +1779,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             @Override
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
-                inflateOrRemoveView(item, false);
+                inflateOrRemoveView(item, false, true);
                 adaptStackOnSwipeAborted(item, item.getIndex() + 1);
                 item.getTag().setClosing(false);
                 getArithmetics().setPivot(Axis.DRAGGING_AXIS, item,
@@ -1921,7 +1921,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
 
                 if (item.isVisible()) {
-                    updateView(item, false);
+                    updateView(item, false, true);
                 } else {
                     tabViewRecycler.remove(item);
                 }
@@ -2148,7 +2148,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 (State) null);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-                inflateOrRemoveView(item, false);
+                inflateOrRemoveView(item, false, true);
             }
         }
     }
@@ -2175,7 +2175,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                 item.getIndex(), swipedItem);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-                inflateOrRemoveView(item, false);
+                inflateOrRemoveView(item, false, true);
             }
         }
     }
@@ -2989,7 +2989,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final void updateView(@NonNull final AbstractItem item, final boolean dragging) {
+    protected final void updateView(@NonNull final AbstractItem item, final boolean dragging,
+                                    final boolean animate) {
         View view = item.getView();
         view.setAlpha(1f);
         view.setVisibility(View.VISIBLE);
@@ -2999,7 +3000,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         getArithmetics().setPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, item, getArithmetics()
                 .getPivot(Arithmetics.Axis.ORTHOGONAL_AXIS, item,
                         AbstractDragTabsEventHandler.DragState.NONE));
-        super.updateView(item, dragging);
+        super.updateView(item, dragging, animate);
         getArithmetics().setRotation(Arithmetics.Axis.ORTHOGONAL_AXIS, item, 0);
     }
 

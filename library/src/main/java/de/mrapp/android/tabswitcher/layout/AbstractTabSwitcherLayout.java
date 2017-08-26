@@ -618,7 +618,7 @@ public abstract class AbstractTabSwitcherLayout
                 item.getTag().setState(pair.second);
             }
 
-            inflateOrRemoveView(item, true);
+            inflateOrRemoveView(item, true, true);
         }
     }
 
@@ -695,7 +695,7 @@ public abstract class AbstractTabSwitcherLayout
                 item.getTag().setState(pair.second);
             }
 
-            inflateOrRemoveView(item, true);
+            inflateOrRemoveView(item, true, true);
         }
 
         if (firstVisibleIndex > 0) {
@@ -713,7 +713,7 @@ public abstract class AbstractTabSwitcherLayout
                             clipPosition(successor.getIndex(), successorPosition, item);
                     successor.getTag().setPosition(pair.first);
                     successor.getTag().setState(pair.second);
-                    inflateOrRemoveView(successor, true);
+                    inflateOrRemoveView(successor, true, true);
 
                     if (successor.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = successor.getIndex();
@@ -730,7 +730,7 @@ public abstract class AbstractTabSwitcherLayout
                             clipPosition(item.getIndex(), newPosition, (AbstractItem) null);
                     item.getTag().setPosition(pair.first);
                     item.getTag().setState(pair.second);
-                    inflateOrRemoveView(item, true);
+                    inflateOrRemoveView(item, true, true);
 
                     if (item.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = item.getIndex();
@@ -1035,16 +1035,18 @@ public abstract class AbstractTabSwitcherLayout
      *         {@link AbstractItem}. The item may not be null
      * @param dragging
      *         True, if the item is currently being dragged, false otherwise
+     * @param animate
+     *         True, if an animation should be used to inflate or remove the item, false otherwise
      */
     protected final void inflateOrRemoveView(@NonNull final AbstractItem item,
-                                             final boolean dragging) {
+                                             final boolean dragging, final boolean animate) {
         if (item.isInflated() && !item.isVisible()) {
             getTabViewRecycler().remove(item);
         } else if (item.isVisible()) {
             if (!item.isInflated()) {
                 inflateAndUpdateView(item, dragging, null);
             } else {
-                updateView(item, dragging);
+                updateView(item, dragging, animate);
             }
         }
     }
@@ -1090,9 +1092,12 @@ public abstract class AbstractTabSwitcherLayout
      *         AbstractItem}. The item may not be null
      * @param dragging
      *         True, if the item is currently being dragged, false otherwise
+     * @param animate
+     *         True, if an animation should be used to update the view, false otherwise
      */
     @CallSuper
-    protected void updateView(@NonNull final AbstractItem item, final boolean dragging) {
+    protected void updateView(@NonNull final AbstractItem item, final boolean dragging,
+                              final boolean animate) {
         float position = item.getTag().getPosition();
         getArithmetics().setPosition(Axis.DRAGGING_AXIS, item, position);
         getArithmetics().setPosition(Axis.ORTHOGONAL_AXIS, item, 0);
