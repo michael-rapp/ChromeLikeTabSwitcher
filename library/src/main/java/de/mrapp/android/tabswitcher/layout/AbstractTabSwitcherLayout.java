@@ -1576,6 +1576,7 @@ public abstract class AbstractTabSwitcherLayout
             }
 
             secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
+            print();
         }
 
         DragState overshoot = isOvershootingAtEnd(
@@ -1586,6 +1587,24 @@ public abstract class AbstractTabSwitcherLayout
                 "Dragging using a distance of " + dragDistance + " pixels. Drag state is " +
                         dragState + ", overshoot is " + overshoot);
         return overshoot;
+    }
+
+    // TODO: Remove
+    private void print() {
+        AbstractItemIterator iterator =
+                new ItemIterator.Builder(getModel(), getTabViewRecycler()).reverse(true)
+                        .start(getModel().getCount()).create();
+        AbstractItem item;
+
+        while ((item = iterator.next()) != null) {
+            if (item instanceof TabItem) {
+                System.out.println(
+                        item.getIndex() + ": pos = " + item.getTag().getPosition() + ", state = " +
+                                item.getTag().getState());
+            }
+        }
+
+        System.out.println("-------------------------------------------------------------");
     }
 
     @Override
