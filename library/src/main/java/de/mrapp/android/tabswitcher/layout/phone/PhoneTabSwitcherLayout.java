@@ -593,7 +593,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     setFirstVisibleIndex(item.getIndex());
                 }
 
-                if (pair.second == State.STACKED_START || pair.second == State.STACKED_START_ATOP) {
+                if (pair.second == State.STACKED_START || pair.second == State.STACKED_ATOP) {
                     break;
                 }
             }
@@ -1489,7 +1489,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     } else if (state == State.STACKED_END) {
                         items = relocateWhenAddingStackedTabs(false, addedItems, swipeAnimation);
                     } else if (state == State.FLOATING ||
-                            (state == State.STACKED_START_ATOP && (index > 0 || count <= 2))) {
+                            (state == State.STACKED_ATOP && (index > 0 || count <= 2))) {
                         items = relocateWhenAddingFloatingTabs(addedItems, referenceItem,
                                 isReferencingPredecessor, attachedPosition,
                                 attachedPosition != previousAttachedPosition, swipeAnimation);
@@ -1876,7 +1876,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     relocateWhenRemovingStackedTab(removedItem, false, swipeAnimation);
                 } else if (state == State.STACKED_START) {
                     relocateWhenRemovingStackedTab(removedItem, true, swipeAnimation);
-                } else if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
+                } else if (state == State.FLOATING || state == State.STACKED_ATOP) {
                     relocateWhenRemovingFloatingTab(removedItem, attachedPosition,
                             previousAttachedPosition != attachedPosition, swipeAnimation);
                 }
@@ -1916,7 +1916,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             public void onAnimationEnd(final Animator animation) {
                 super.onAnimationEnd(animation);
 
-                if (item.getTag().getState() == State.STACKED_START_ATOP) {
+                if (item.getTag().getState() == State.STACKED_ATOP) {
                     adaptStackOnSwipeAborted(item, item.getIndex() + 1);
                 }
 
@@ -2137,7 +2137,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void adaptStackOnSwipe(@NonNull final AbstractItem swipedItem, final int successorIndex,
                                    final int count) {
-        if (swipedItem.getTag().getState() == State.STACKED_START_ATOP &&
+        if (swipedItem.getTag().getState() == State.STACKED_ATOP &&
                 successorIndex < getModel().getCount()) {
             AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
             State state = item.getTag().getState();
@@ -2165,11 +2165,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
      */
     private void adaptStackOnSwipeAborted(@NonNull final AbstractItem swipedItem,
                                           final int successorIndex) {
-        if (swipedItem.getTag().getState() == State.STACKED_START_ATOP &&
+        if (swipedItem.getTag().getState() == State.STACKED_ATOP &&
                 successorIndex < getModel().getCount()) {
             AbstractItem item = TabItem.create(getTabSwitcher(), tabViewRecycler, successorIndex);
 
-            if (item.getTag().getState() == State.STACKED_START_ATOP) {
+            if (item.getTag().getState() == State.STACKED_ATOP) {
                 Pair<Float, State> pair =
                         calculatePositionAndStateWhenStackedAtStart(getTabSwitcher().getCount(),
                                 item.getIndex(), swipedItem);
@@ -2301,7 +2301,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         if (attachedPositionChanged && getModel().getCount() > 2 &&
-                removedItem.getTag().getState() != State.STACKED_START_ATOP) {
+                removedItem.getTag().getState() != State.STACKED_ATOP) {
             iterator = new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
                     .start(removedItem.getIndex()).create();
             float previousPosition = initialReferencePosition;
@@ -2362,7 +2362,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         while ((item = iterator.next()) != null && (item.getTag().getState() == State.HIDDEN ||
                 item.getTag().getState() == State.STACKED_START ||
-                item.getTag().getState() == State.STACKED_START_ATOP ||
+                item.getTag().getState() == State.STACKED_ATOP ||
                 item.getTag().getState() == State.STACKED_END)) {
             float projectedPosition = item.getTag().getPosition();
 
@@ -2462,7 +2462,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     State predecessorState =
                             predecessor != null ? predecessor.getTag().getState() : null;
                     pair = clipPosition(item.getIndex(), iterationReferencePosition,
-                            predecessorState == State.STACKED_START_ATOP ? State.FLOATING :
+                            predecessorState == State.STACKED_ATOP ? State.FLOATING :
                                     predecessorState);
                     currentReferenceItem = iterationReferenceItem = item;
                     initialReferencePosition =
@@ -2602,7 +2602,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
         while ((item = iterator.next()) != null &&
                 (item.getTag().getState() == State.STACKED_START ||
-                        item.getTag().getState() == State.STACKED_START_ATOP ||
+                        item.getTag().getState() == State.STACKED_ATOP ||
                         item.getTag().getState() == State.STACKED_END ||
                         item.getTag().getState() == State.HIDDEN)) {
             AbstractItem predecessor = start ? iterator.peek() : iterator.previous();
@@ -3042,12 +3042,12 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             float position = getStackedTabSpacing() * (count - (index + 1));
             return Pair.create(position,
                     (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.STACKED_START);
+                            State.STACKED_ATOP : State.STACKED_START);
         } else {
             float position = getStackedTabSpacing() * getStackedTabCount();
             return Pair.create(position,
                     (predecessorState == null || predecessorState == State.FLOATING) ?
-                            State.STACKED_START_ATOP : State.HIDDEN);
+                            State.STACKED_ATOP : State.HIDDEN);
         }
     }
 
@@ -3073,7 +3073,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
             AbstractItemIterator iterator =
                     new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler).create();
             AbstractItem item = iterator.getItem(0);
-            return item.getTag().getState() == State.STACKED_START_ATOP;
+            return item.getTag().getState() == State.STACKED_ATOP;
         }
     }
 

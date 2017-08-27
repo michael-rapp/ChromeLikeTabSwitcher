@@ -935,7 +935,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             state = State.FLOATING;
         } else if (index == selectedItemIndex) {
             position = getStackedTabSpacing() * Math.min(count - (index + 1), getStackedTabCount());
-            state = State.STACKED_START_ATOP;
+            state = State.STACKED_ATOP;
         } else if (index < selectedItemIndex) {
             if ((selectedItemIndex - index) < getStackedTabCount()) {
                 position = (getStackedTabSpacing() *
@@ -952,11 +952,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             if ((count - index) <= getStackedTabCount()) {
                 position = getStackedTabSpacing() * (count - (index + 1));
                 state = predecessorState == null || predecessorState == State.FLOATING ?
-                        State.STACKED_START_ATOP : State.STACKED_START;
+                        State.STACKED_ATOP : State.STACKED_START;
             } else {
                 position = getStackedTabSpacing() * getStackedTabCount();
                 state = predecessorState == null || predecessorState == State.FLOATING ?
-                        State.STACKED_START_ATOP : State.HIDDEN;
+                        State.STACKED_ATOP : State.HIDDEN;
             }
         }
 

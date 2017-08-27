@@ -192,7 +192,7 @@ public class PhoneDragTabsEventHandler
 
         while ((tabItem = iterator.next()) != null) {
             if (tabItem.getTag().getState() == State.FLOATING ||
-                    tabItem.getTag().getState() == State.STACKED_START_ATOP) {
+                    tabItem.getTag().getState() == State.STACKED_ATOP) {
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?

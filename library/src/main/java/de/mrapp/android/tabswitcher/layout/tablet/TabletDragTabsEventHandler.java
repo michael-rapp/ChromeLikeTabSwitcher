@@ -94,7 +94,7 @@ public class TabletDragTabsEventHandler
                                     @Nullable final AbstractItem successor) {
         return item instanceof AddTabItem || item.getIndex() == selectedItemIndex ||
                 item.getTag().getState() == State.FLOATING ||
-                item.getTag().getState() == State.STACKED_START_ATOP ||
+                item.getTag().getState() == State.STACKED_ATOP ||
                 (item.getTag().getState() == State.STACKED_END &&
                         (successor == null || successor.getTag().getState() == State.FLOATING));
     }

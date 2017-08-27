@@ -640,7 +640,7 @@ public abstract class AbstractTabSwitcherLayout
                                                        @NonNull final AbstractItem item,
                                                        @Nullable final AbstractItem predecessor) {
         if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
-            if ((item.getTag().getState() == State.STACKED_START_ATOP && item.getIndex() == 0) ||
+            if ((item.getTag().getState() == State.STACKED_ATOP && item.getIndex() == 0) ||
                     item.getTag().getState() == State.FLOATING) {
                 float currentPosition = item.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
@@ -653,7 +653,7 @@ public abstract class AbstractTabSwitcherLayout
                 Pair<Float, State> pair = clipPosition(item.getIndex(), newPosition, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-            } else if (item.getTag().getState() == State.STACKED_START_ATOP) {
+            } else if (item.getTag().getState() == State.STACKED_ATOP) {
                 return true;
             }
         } else {
@@ -772,7 +772,7 @@ public abstract class AbstractTabSwitcherLayout
                 Pair<Float, State> pair = clipPosition(item.getIndex(), newPosition, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-            } else if (item.getTag().getState() == State.STACKED_START_ATOP) {
+            } else if (item.getTag().getState() == State.STACKED_ATOP) {
                 float currentPosition = item.getTag().getPosition();
                 Pair<Float, State> pair =
                         clipPosition(item.getIndex(), currentPosition, predecessor);

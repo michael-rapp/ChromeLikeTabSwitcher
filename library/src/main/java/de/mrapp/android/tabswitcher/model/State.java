@@ -29,7 +29,7 @@ public enum State {
     /**
      * When the tab is displayed atop of the stack, which is located at the start of the switcher.
      */
-    STACKED_START_ATOP,
+    STACKED_ATOP,
 
     /**
      * When the tab is floating and freely movable.
