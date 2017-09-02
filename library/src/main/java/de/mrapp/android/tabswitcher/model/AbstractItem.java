@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import de.mrapp.android.tabswitcher.TabSwitcher;
+import de.mrapp.android.tabswitcher.model.State.HiddenState;
 
 import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -118,7 +119,7 @@ public abstract class AbstractItem {
      * @return True, if the item is currently visible, false otherwise
      */
     public final boolean isVisible() {
-        return tag.getState() != State.HIDDEN || tag.isClosing();
+        return !(tag.getState() instanceof HiddenState) || tag.isClosing();
     }
 
     /**

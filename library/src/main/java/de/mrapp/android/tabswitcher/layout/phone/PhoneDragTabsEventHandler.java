@@ -28,7 +28,8 @@ import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler;
 import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
-import de.mrapp.android.tabswitcher.model.State;
+import de.mrapp.android.tabswitcher.model.State.FloatingState;
+import de.mrapp.android.tabswitcher.model.State.StackedAtopState;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
 import de.mrapp.android.util.view.AttachedViewRecycler;
@@ -191,15 +192,16 @@ public class PhoneDragTabsEventHandler
         AbstractItem tabItem;
 
         while ((tabItem = iterator.next()) != null) {
-            if (tabItem.getTag().getState() == State.FLOATING ||
-                    tabItem.getTag().getState() == State.STACKED_ATOP) {
+            if (tabItem.getTag().getState() instanceof FloatingState ||
+                    tabItem.getTag().getState() instanceof StackedAtopState) {
                 Toolbar[] toolbars = getTabSwitcher().getToolbars();
                 float toolbarHeight = getTabSwitcher().getLayout() != Layout.PHONE_LANDSCAPE &&
                         getTabSwitcher().areToolbarsShown() && toolbars != null ?
                         toolbars[TabSwitcher.PRIMARY_TOOLBAR_INDEX].getHeight() - tabInset : 0;
-                float viewPosition = getArithmetics().getPosition(Axis.DRAGGING_AXIS, tabItem) +
-                        toolbarHeight +
-                        getArithmetics().getTabSwitcherPadding(Axis.DRAGGING_AXIS, Gravity.START);
+                float viewPosition =
+                        getArithmetics().getPosition(Axis.DRAGGING_AXIS, tabItem) + toolbarHeight +
+                                getArithmetics()
+                                        .getTabSwitcherPadding(Axis.DRAGGING_AXIS, Gravity.START);
 
                 if (viewPosition <= position) {
                     return tabItem;

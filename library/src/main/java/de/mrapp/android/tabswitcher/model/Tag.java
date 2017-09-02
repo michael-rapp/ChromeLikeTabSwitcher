@@ -48,7 +48,7 @@ public class Tag implements Cloneable {
      */
     public Tag() {
         setPosition(Float.NaN);
-        setState(State.HIDDEN);
+        setState(State.hidden());
         setClosing(false);
     }
 

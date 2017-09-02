@@ -29,7 +29,9 @@ import de.mrapp.android.tabswitcher.layout.Arithmetics;
 import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
-import de.mrapp.android.tabswitcher.model.State;
+import de.mrapp.android.tabswitcher.model.State.FloatingState;
+import de.mrapp.android.tabswitcher.model.State.StackedAtopState;
+import de.mrapp.android.tabswitcher.model.State.StackedEndState;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -93,10 +95,10 @@ public class TabletDragTabsEventHandler
     private boolean isItemFocusable(@NonNull final AbstractItem item, final int selectedItemIndex,
                                     @Nullable final AbstractItem successor) {
         return item instanceof AddTabItem || item.getIndex() == selectedItemIndex ||
-                item.getTag().getState() == State.FLOATING ||
-                item.getTag().getState() == State.STACKED_ATOP ||
-                (item.getTag().getState() == State.STACKED_END &&
-                        (successor == null || successor.getTag().getState() == State.FLOATING));
+                item.getTag().getState() instanceof FloatingState ||
+                item.getTag().getState() instanceof StackedAtopState ||
+                (item.getTag().getState() instanceof StackedEndState && (successor == null ||
+                        successor.getTag().getState() instanceof FloatingState));
     }
 
     /**
