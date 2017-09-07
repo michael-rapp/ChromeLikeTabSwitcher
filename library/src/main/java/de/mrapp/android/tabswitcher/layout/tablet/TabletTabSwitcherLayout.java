@@ -141,6 +141,16 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
+     * The index of the stack, which is located at the start.
+     */
+    private static final int STACK_START = 0;
+
+    /**
+     * The index of the stack, which is located at the end.
+     */
+    private static final int STACK_END = 1;
+
+    /**
      * The number of tabs, which are contained by a stack.
      */
     private final int stackedTabCount;
@@ -944,7 +954,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 position = (getStackedTabSpacing() *
                         Math.min(count - (selectedItemIndex + 1), getStackedTabCount())) +
                         (getStackedTabSpacing() * (selectedItemIndex - index));
-                state = State.stackedEnd();
+                state = State.stackedEnd(STACK_START);
             } else {
                 position = (getStackedTabSpacing() *
                         Math.min(count - (selectedItemIndex + 1), getStackedTabCount())) +
@@ -978,22 +988,22 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
         if (index == 0 && getModel().isAddTabButtonShown()) {
             position = tabContainerWidth - addTabButtonWidth;
-            state = State.stackedEnd();
+            state = State.stackedEnd(STACK_END);
         } else if (index == selectedItemIndex) {
             position = tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
                     (getStackedTabSpacing() * Math.min(getStackedTabCount(), i));
-            state = State.stackedEnd();
+            state = State.stackedEnd(STACK_END);
         } else if (index < selectedItemIndex) {
             if (i < getStackedTabCount()) {
                 position =
                         tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
                                 (getStackedTabSpacing() * i);
-                state = State.stackedEnd();
+                state = State.stackedEnd(STACK_END);
             } else {
                 position =
                         tabContainerWidth - calculateAddTabButtonSpacing() - calculateTabSpacing() -
                                 (getStackedTabSpacing() * getStackedTabCount());
-                state = State.stackedEnd();
+                state = State.stackedEnd(STACK_END);
             }
         } else {
             float selectedItemPosition =
@@ -1004,7 +1014,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
             if (index <= selectedItemIndex + getStackedTabCount()) {
                 position = selectedItemPosition -
                         (getStackedTabSpacing() * (index - selectedItemIndex));
-                state = State.stackedEnd();
+                state = State.stackedEnd(STACK_END);
             } else {
                 position = selectedItemPosition - (getStackedTabSpacing() * getStackedTabCount());
                 state = State.hidden();
