@@ -56,10 +56,6 @@ import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.State;
-import de.mrapp.android.tabswitcher.model.State.FloatingState;
-import de.mrapp.android.tabswitcher.model.State.HiddenState;
-import de.mrapp.android.tabswitcher.model.State.StackedAtopState;
-import de.mrapp.android.tabswitcher.model.State.StackedStartState;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
@@ -612,7 +608,7 @@ public abstract class AbstractTabSwitcherLayout
             if (getItemCount() - item.getIndex() > 1) {
                 abort = calculatePositionWhenDraggingToEnd(dragDistance, item, iterator.previous());
 
-                if (firstVisibleIndex == -1 && item.getTag().getState() instanceof FloatingState) {
+                if (firstVisibleIndex == -1 && item.getTag().getState() == State.FLOATING) {
                     firstVisibleIndex = item.getIndex();
                 }
             } else {
@@ -643,9 +639,9 @@ public abstract class AbstractTabSwitcherLayout
     private boolean calculatePositionWhenDraggingToEnd(final float dragDistance,
                                                        @NonNull final AbstractItem item,
                                                        @Nullable final AbstractItem predecessor) {
-        if (predecessor == null || !(predecessor.getTag().getState() instanceof FloatingState)) {
-            if ((item.getTag().getState() instanceof StackedAtopState && item.getIndex() == 0) ||
-                    item.getTag().getState() instanceof FloatingState) {
+        if (predecessor == null || !(predecessor.getTag().getState() == State.FLOATING)) {
+            if ((item.getTag().getState() == State.STACKED_ATOP && item.getIndex() == 0) ||
+                    item.getTag().getState() == State.FLOATING) {
                 float currentPosition = item.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
                 float maxEndPosition = calculateMaxEndPosition(item.getIndex());
@@ -657,7 +653,7 @@ public abstract class AbstractTabSwitcherLayout
                 Pair<Float, State> pair = clipPosition(item.getIndex(), newPosition, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-            } else if (item.getTag().getState() instanceof StackedAtopState) {
+            } else if (item.getTag().getState() == State.STACKED_ATOP) {
                 return true;
             }
         } else {
@@ -719,7 +715,7 @@ public abstract class AbstractTabSwitcherLayout
                     successor.getTag().setState(pair.second);
                     inflateOrRemoveView(successor, true, true);
 
-                    if (successor.getTag().getState() instanceof FloatingState) {
+                    if (successor.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = successor.getIndex();
                     } else {
                         break;
@@ -736,7 +732,7 @@ public abstract class AbstractTabSwitcherLayout
                     item.getTag().setState(pair.second);
                     inflateOrRemoveView(item, true, true);
 
-                    if (item.getTag().getState() instanceof FloatingState) {
+                    if (item.getTag().getState() == State.FLOATING) {
                         firstVisibleIndex = item.getIndex();
                     }
                 }
@@ -762,9 +758,9 @@ public abstract class AbstractTabSwitcherLayout
                                                          @Nullable final AbstractItem predecessor) {
         float attachedPosition = calculateAttachedPosition(getTabSwitcher().getCount());
 
-        if (predecessor == null || !(predecessor.getTag().getState() instanceof FloatingState) ||
+        if (predecessor == null || !(predecessor.getTag().getState() == State.FLOATING) ||
                 (attachedPosition != -1 && predecessor.getTag().getPosition() > attachedPosition)) {
-            if (item.getTag().getState() instanceof FloatingState) {
+            if (item.getTag().getState() == State.FLOATING) {
                 float currentPosition = item.getTag().getPosition();
                 float newPosition = currentPosition + dragDistance;
                 float minStartPosition = calculateMinStartPosition(item.getIndex());
@@ -776,15 +772,15 @@ public abstract class AbstractTabSwitcherLayout
                 Pair<Float, State> pair = clipPosition(item.getIndex(), newPosition, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
-            } else if (item.getTag().getState() instanceof StackedAtopState) {
+            } else if (item.getTag().getState() == State.STACKED_ATOP) {
                 float currentPosition = item.getTag().getPosition();
                 Pair<Float, State> pair =
                         clipPosition(item.getIndex(), currentPosition, predecessor);
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
                 return true;
-            } else if (item.getTag().getState() instanceof HiddenState ||
-                    item.getTag().getState() instanceof StackedStartState) {
+            } else if (item.getTag().getState() == State.HIDDEN ||
+                    item.getTag().getState() == State.STACKED_START) {
                 return true;
             }
         } else {
@@ -938,10 +934,10 @@ public abstract class AbstractTabSwitcherLayout
         while ((item = iterator.next()) != null) {
             State state = item.getTag().getState();
 
-            if (state instanceof StackedStartState) {
+            if (state == State.STACKED_START) {
                 start = true;
                 break;
-            } else if (state instanceof FloatingState) {
+            } else if (state == State.FLOATING) {
                 start = false;
                 break;
             }
@@ -1001,7 +997,7 @@ public abstract class AbstractTabSwitcherLayout
                 State state = endPair.second;
                 return Pair.create(endPosition, state);
             } else {
-                State state = State.floating();
+                State state = State.FLOATING;
                 return Pair.create(position, state);
             }
         }
@@ -1594,7 +1590,7 @@ public abstract class AbstractTabSwitcherLayout
     }
 
     // TODO: Remove
-    private void print() {
+    protected final void print() {
         AbstractItemIterator iterator =
                 new ItemIterator.Builder(getModel(), getTabViewRecycler()).reverse(true)
                         .start(getModel().getCount()).create();
