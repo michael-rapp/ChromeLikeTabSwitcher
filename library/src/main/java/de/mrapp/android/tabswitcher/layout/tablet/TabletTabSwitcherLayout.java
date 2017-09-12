@@ -1152,49 +1152,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 AbstractItem item;
 
                 while ((item = iterator.next()) != null && (item.getIndex() <= selectedItemIndex ||
-                        item.getTag().getState() == State.STACKED_END ||
-                        item.getTag().getState() == State.STACKED_START ||
-                        item.getTag().getState() == State.HIDDEN)) {
+                        item.getTag().getState() != State.FLOATING)) {
+                    float position = -1;
+
                     if (item.getTag().getState() == State.FLOATING) {
                         stackIndex = 1;
+                    } else if (stackIndex == 1) {
+                        position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
+                                item.getIndex(), iterator.previous()).first;
+                    } else {
+                        position = calculatePositionAndStateWhenStackedAtEnd(item.getIndex()).first;
                     }
 
-                    if (item.getIndex() == selectedItemIndex &&
-                            (item.getTag().getState() == State.HIDDEN ||
-                                    item.getTag().getState() == State.STACKED_END)) {
-                        float position;
-
-                        if (stackIndex == 0) {
-                            position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
-                                    item.getIndex(), iterator.previous()).first;
-                        } else {
-                            position = calculatePositionAndStateWhenStackedAtEnd(
-                                    item.getIndex()).first;
-                        }
-
-                        Pair<Float, State> pair =
-                                clipPosition(item.getIndex(), position, iterator.previous());
-                        item.getTag().setPosition(pair.first);
-                        item.getTag().setState(pair.second);
-                    } else if (item.getTag().getState() == State.STACKED_START) {
-                        float position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
-                                item.getIndex(), iterator.previous()).first;
-                        Pair<Float, State> pair =
-                                clipPosition(item.getIndex(), position, iterator.previous());
-                        item.getTag().setPosition(pair.first);
-                        item.getTag().setState(pair.second);
-                    } else if (item.getIndex() > selectedItemIndex &&
-                            !(item.getTag().getState() == State.FLOATING)) {
-                        float position =
-                                calculatePositionAndStateWhenStackedAtEnd(item.getIndex()).first;
-                        Pair<Float, State> pair =
-                                clipPosition(item.getIndex(), position, iterator.previous());
-                        item.getTag().setPosition(pair.first);
-                        item.getTag().setState(pair.second);
-                    } else if (item.getIndex() < selectedItemIndex &&
-                            item.getTag().getState() == State.HIDDEN) {
-                        float position =
-                                calculatePositionAndStateWhenStackedAtEnd(item.getIndex()).first;
+                    if (position != -1) {
                         Pair<Float, State> pair =
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
