@@ -294,7 +294,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 float offset =
                         adaptCloseButtonVisibility(viewHolder, tabItem, predecessor, animate);
                 View titleContainer = viewHolder.titleContainer;
-                titleContainer.setPadding(Math.round(offset), 0, 0, 0);
+                titleContainer.setPadding(Math.max(0, Math.round(offset)), 0, 0, 0);
             }
         }
     }
