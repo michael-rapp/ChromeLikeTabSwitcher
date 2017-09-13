@@ -1152,6 +1152,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 AbstractItem item;
 
                 while ((item = iterator.next()) != null) {
+                    AbstractItem previous = iterator.previous();
                     State state = item.getTag().getState();
                     float position = -1;
 
@@ -1165,10 +1166,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                 item.getTag().setState(State.HIDDEN);
                             }
                         }
-                    } else if (!stackEnd) {
-                        position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
-                                item.getIndex(), iterator.previous()).first;
-                    } else {
+                    } else if (stackEnd) {
                         AbstractItem next = iterator.peek();
 
                         if ((state == State.HIDDEN || state == State.STACKED_END) && next != null &&
@@ -1178,11 +1176,19 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                             position = calculatePositionAndStateWhenStackedAtEnd(
                                     item.getIndex()).first;
                         }
+                    } else {
+                        if ((state == State.HIDDEN || state == State.STACKED_END) &&
+                                previous != null &&
+                                previous.getTag().getState() == State.FLOATING) {
+                            position = previous.getTag().getPosition() - calculateTabSpacing();
+                        } else {
+                            position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
+                                    item.getIndex(), previous).first;
+                        }
                     }
 
                     if (position != -1) {
-                        Pair<Float, State> pair =
-                                clipPosition(item.getIndex(), position, iterator.previous());
+                        Pair<Float, State> pair = clipPosition(item.getIndex(), position, previous);
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
                     }
