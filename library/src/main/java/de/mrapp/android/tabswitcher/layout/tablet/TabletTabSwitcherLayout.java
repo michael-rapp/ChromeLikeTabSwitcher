@@ -1144,24 +1144,40 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                 inflateContent(selectedTab, createContentLayoutListener(selectedTab));
                 tabViewRecycler.setComparator(
                         Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
-                int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
-                int stackIndex = 0;
+                boolean stackEnd = true;
+                AbstractItem firstStackedEndItem = null;
                 AbstractItemIterator iterator =
                         new ItemIterator.Builder(getModel(), getTabViewRecycler())
                                 .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
                 AbstractItem item;
 
-                while ((item = iterator.next()) != null && (item.getIndex() <= selectedItemIndex ||
-                        item.getTag().getState() != State.FLOATING)) {
+                while ((item = iterator.next()) != null) {
+                    State state = item.getTag().getState();
                     float position = -1;
 
-                    if (item.getTag().getState() == State.FLOATING) {
-                        stackIndex = 1;
-                    } else if (stackIndex == 1) {
+                    if (state == State.FLOATING) {
+                        if (stackEnd) {
+                            stackEnd = false;
+
+                            if (firstStackedEndItem != null &&
+                                    firstStackedEndItem.getTag().getPosition() <
+                                            item.getTag().getPosition()) {
+                                item.getTag().setState(State.HIDDEN);
+                            }
+                        }
+                    } else if (!stackEnd) {
                         position = calculatePositionAndStateWhenStackedAtStart(getItemCount(),
                                 item.getIndex(), iterator.previous()).first;
                     } else {
-                        position = calculatePositionAndStateWhenStackedAtEnd(item.getIndex()).first;
+                        AbstractItem next = iterator.peek();
+
+                        if ((state == State.HIDDEN || state == State.STACKED_END) && next != null &&
+                                next.getTag().getState() == State.FLOATING) {
+                            position = next.getTag().getPosition() + calculateTabSpacing();
+                        } else {
+                            position = calculatePositionAndStateWhenStackedAtEnd(
+                                    item.getIndex()).first;
+                        }
                     }
 
                     if (position != -1) {
@@ -1169,6 +1185,10 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
                                 clipPosition(item.getIndex(), position, iterator.previous());
                         item.getTag().setPosition(pair.first);
                         item.getTag().setState(pair.second);
+                    }
+
+                    if (stackEnd && item.getTag().getState() == State.STACKED_END) {
+                        firstStackedEndItem = item;
                     }
 
                     inflateOrRemoveView(item, true, false);
