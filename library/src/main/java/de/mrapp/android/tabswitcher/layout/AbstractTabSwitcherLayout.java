@@ -1593,7 +1593,8 @@ public abstract class AbstractTabSwitcherLayout
     protected final void print() {
         AbstractItemIterator iterator =
                 new ItemIterator.Builder(getModel(), getTabViewRecycler()).reverse(true)
-                        .start(getModel().getCount()).create();
+                        .start(getModel().getCount() - (getModel().isAddTabButtonShown() ? 0 : 1))
+                        .create();
         AbstractItem item;
 
         while ((item = iterator.next()) != null) {
