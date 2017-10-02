@@ -1,5 +1,15 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.4 (Oct. 2nd 2017)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed an issue in the example app, which caused the contents of `EditText` widgets to be shown in the wrong tabs.
+- Updated `targetSdkVersion` to API level 26.
+- Updated dependency "AndroidUtil" to version 1.18.0.
+- Updated AppCompat v7 support library to version 26.1.0.
+- Updated AppCompat annotations support library to version 26.1.0.
+
 ## Version 0.1.3 (May 23th 2017)
 
 A bugfix release, which fixes the following issues:
