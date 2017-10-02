@@ -1,6 +1,6 @@
 # ChromeLikeTabSwitcher - README
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
+[![API-Level](https://img.shields.io/badge/API-14%2B-orange.svg)](https://android-arsenal.com/api?level=14) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
@@ -12,7 +12,7 @@ The library provides the following features:
 - Tabs can dynamically be added and removed either programmatically or by using the UI. Different types of animations are available for said purpose.
 - The tab switcher's state is automatically restored on configuration changes.
 - In order to provide great performance, views are automatically recycled and the previews of tabs are rendered as bitmaps.
-- The apperance of tabs, e.g. their background or title color, can be customized.
+- The appearance of tabs, e.g. their background or title color, can be customized.
  
 ## License Agreement
 
