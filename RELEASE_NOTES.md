@@ -4,6 +4,7 @@
 
 A bugfix release, which fixes the following issues:
 
+- Fixed a crash which might occurred when resuming the activity after it was in the background for a long time (see https://github.com/michael-rapp/ChromeLikeTabSwitcher/issues/7).
 - Updated dependency "AndroidUtil" to version 1.18.2.
 - Updated AppCompat v7 support library to version 27.0.1.
 - Updated AppCompat annotations support library to version 27.0.1.
