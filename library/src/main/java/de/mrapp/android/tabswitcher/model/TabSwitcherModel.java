@@ -94,10 +94,10 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::SwitcherShown";
 
     /**
-     * The name of the extra, which is used to store the selected tab within a bundle.
+     * The name of the extra, which is used to store the index of the selected tab within a bundle.
      */
-    private static final String SELECTED_TAB_EXTRA =
-            TabSwitcherModel.class.getName() + "::SelectedTab";
+    private static final String SELECTED_TAB_INDEX_EXTRA =
+            TabSwitcherModel.class.getName() + "::SelectedTabIndex";
 
     /**
      * The name of the extra, which is used to store the padding within a bundle.
@@ -1258,7 +1258,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putSerializable(LOG_LEVEL_EXTRA, logLevel);
         outState.putParcelableArrayList(TABS_EXTRA, tabs);
         outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
-        outState.putParcelable(SELECTED_TAB_EXTRA, selectedTab);
+        outState.putInt(SELECTED_TAB_INDEX_EXTRA, selectedTab != null ? indexOf(selectedTab) : -1);
         outState.putIntArray(PADDING_EXTRA, padding);
         outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
         outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
@@ -1280,7 +1280,8 @@ public class TabSwitcherModel implements Model, Restorable {
             logLevel = (LogLevel) savedInstanceState.getSerializable(LOG_LEVEL_EXTRA);
             tabs = savedInstanceState.getParcelableArrayList(TABS_EXTRA);
             switcherShown = savedInstanceState.getBoolean(SWITCHER_SHOWN_EXTRA);
-            selectedTab = savedInstanceState.getParcelable(SELECTED_TAB_EXTRA);
+            int selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_EXTRA);
+            selectedTab = selectedTabIndex != -1 ? tabs.get(selectedTabIndex) : null;
             padding = savedInstanceState.getIntArray(PADDING_EXTRA);
             tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
             tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
