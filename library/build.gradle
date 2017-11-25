@@ -18,9 +18,9 @@ android {
 }
 
 dependencies {
-    compile 'com.github.michael-rapp:android-util:1.18.0'
-    compile 'com.android.support:support-annotations:26.1.0'
-    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.github.michael-rapp:android-util:1.18.2'
+    compile 'com.android.support:support-annotations:27.0.1'
+    compile 'com.android.support:appcompat-v7:27.0.1'
     testCompile 'junit:junit:4.12'
 }
 
