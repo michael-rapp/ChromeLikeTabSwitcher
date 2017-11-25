@@ -1,5 +1,13 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.5 (Nov. 25th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- Updated dependency "AndroidUtil" to version 1.18.2.
+- Updated AppCompat v7 support library to version 27.0.1.
+- Updated AppCompat annotations support library to version 27.0.1.
+
 ## Version 0.1.4 (Oct. 2nd 2017)
 
 A bugfix release, which fixes the following issues:
