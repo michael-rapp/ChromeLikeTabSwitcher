@@ -30,7 +30,7 @@ License.
             android:layout_height="match_parent"
             android:ellipsize="marquee"
             android:gravity="center_vertical"
-            android:maxLines="1"
+            android:singleLine="true"
             android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"/>
 
         <android.support.v7.widget.Toolbar
