@@ -14,6 +14,12 @@ The first stable release of the library. It introduces the following features:
 - Added the functionality to show a circular progress bar instead of an icon for individual tabs.
 - Fixed various minor issues
 
+## Version 0.1.6 (Dec. 23th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- If a `Tab`, which is added to a `TabSwitcher`, happens to have the same hash code as a previously removed `Tab`, the state of the removed tab is not restored anymore.
+
 ## Version 0.1.5 (Nov. 25th 2017)
 
 A bugfix release, which fixes the following issues:
