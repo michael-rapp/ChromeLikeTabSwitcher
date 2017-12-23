@@ -64,6 +64,28 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
     private SparseArray<Bundle> savedInstanceStates;
 
     /**
+     * Puts the parameter {@link Tab#WAS_SHOWN_PARAMETER} into a specific bundle. If the bundle is
+     * null, a new bundle is created.
+     *
+     * @param parameters
+     *         The bundle, the parameter should be put into, as an instance of the class {@link
+     *         Bundle} or null
+     * @return The bundle, the parameter has been put into, as an instance of the clas {@link
+     * Bundle}. The bundle may not be null
+     */
+    @NonNull
+    private Bundle setWasShownParameter(@Nullable final Bundle parameters) {
+        Bundle result = parameters;
+
+        if (result == null) {
+            result = new Bundle();
+        }
+
+        result.putBoolean(Tab.WAS_SHOWN_PARAMETER, true);
+        return result;
+    }
+
+    /**
      * Creates a new view recycler adapter, which allows to inflate the views, which are used to
      * visualize the child views of the tabs of a {@link TabSwitcher}, by encapsulating a {@link
      * TabSwitcherDecorator}.
@@ -99,7 +121,14 @@ public class ChildRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void
                                  @NonNull final Tab item, final boolean inflated,
                                  @NonNull final Void... params) {
         int index = tabSwitcher.indexOf(item);
-        Bundle savedInstanceState = savedInstanceStates.get(item.hashCode());
+        Bundle savedInstanceState = null;
+        Bundle parameters = item.getParameters();
+
+        if (parameters != null && parameters.getBoolean(Tab.WAS_SHOWN_PARAMETER, false)) {
+            savedInstanceState = savedInstanceStates.get(item.hashCode());
+        }
+
+        item.setParameters(setWasShownParameter(parameters));
         decorator.applyDecorator(context, tabSwitcher, view, item, index, savedInstanceState);
     }
 

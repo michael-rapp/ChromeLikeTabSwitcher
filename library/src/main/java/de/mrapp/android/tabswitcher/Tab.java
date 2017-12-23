@@ -46,6 +46,12 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class Tab implements Parcelable {
 
     /**
+     * The name of the parameter, which specifies, whether the tab was already shown in a {@link
+     * TabSwitcher}, or not. This parameter should be not be set or modified manually.
+     */
+    public static final String WAS_SHOWN_PARAMETER = Tab.class.getName() + "::wasShown";
+
+    /**
      * A creator, which allows to create instances of the class {@link Tab} from parcels.
      */
     public static final Creator<Tab> CREATOR = new Creator<Tab>() {
