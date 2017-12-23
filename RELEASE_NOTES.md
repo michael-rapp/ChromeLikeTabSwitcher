@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.6 (Dec. 23th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- If a `Tab`, which is added to a `TabSwitcher`, happens to have the same hash code as a previously removed `Tab`, the state of the removed tab is not restored anymore.
+
 ## Version 0.1.5 (Nov. 25th 2017)
 
 A bugfix release, which fixes the following issues:
