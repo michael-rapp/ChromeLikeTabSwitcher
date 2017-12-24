@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.1.7 (Dec. 24th 2017)
+
+A minor release, which introduces the following changes:
+
+- Added an additional `setupWithMenu`-method for setting up the menu of a `TabSwitcher`. If necessary, it uses a `OnGlobalLayoutListener` internally.
+
 ## Version 0.1.6 (Dec. 23th 2017)
 
 A bugfix release, which fixes the following issues:
