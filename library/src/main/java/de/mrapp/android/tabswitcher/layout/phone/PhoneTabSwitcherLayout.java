@@ -3343,7 +3343,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
         if (tabsOnly) {
-            toolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
+            toolbar = getTabSwitcher().findViewById(R.id.primary_toolbar);
         } else {
             toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
             toolbar.setVisibility(getModel().areToolbarsShown() ? View.VISIBLE : View.INVISIBLE);
@@ -3408,7 +3408,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return tabContainer;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public final Toolbar[] getToolbars() {
         return new Toolbar[]{toolbar};

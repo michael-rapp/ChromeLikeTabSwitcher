@@ -88,7 +88,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         viewHolder.child = child;
     }
 
-    @Nullable
+    @NonNull
     @Override
     protected final Bitmap doInBackground(@NonNull final Tab key,
                                           @NonNull final TabItem... params) {

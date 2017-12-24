@@ -40,7 +40,7 @@ public enum LayoutPolicy {
     /**
      * The value of the layout policy.
      */
-    private int value;
+    private final int value;
 
     /**
      * Creates a new layout policy.

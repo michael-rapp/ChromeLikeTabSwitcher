@@ -33,7 +33,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
@@ -526,11 +525,11 @@ public class PhoneRecyclerAdapter extends AbstractViewRecycler.Adapter<TabItem, 
         ViewUtil.setBackground(view, backgroundDrawable);
         int padding = tabInset + tabBorderWidth;
         view.setPadding(padding, tabInset, padding, padding);
-        viewHolder.titleContainer = (ViewGroup) view.findViewById(R.id.tab_title_container);
-        viewHolder.titleTextView = (TextView) view.findViewById(R.id.tab_title_text_view);
-        viewHolder.closeButton = (ImageButton) view.findViewById(R.id.close_tab_button);
-        viewHolder.childContainer = (ViewGroup) view.findViewById(R.id.child_container);
-        viewHolder.previewImageView = (ImageView) view.findViewById(R.id.preview_image_view);
+        viewHolder.titleContainer = view.findViewById(R.id.tab_title_container);
+        viewHolder.titleTextView = view.findViewById(R.id.tab_title_text_view);
+        viewHolder.closeButton = view.findViewById(R.id.close_tab_button);
+        viewHolder.childContainer = view.findViewById(R.id.child_container);
+        viewHolder.previewImageView = view.findViewById(R.id.preview_image_view);
         adaptPadding(viewHolder);
         viewHolder.borderView = view.findViewById(R.id.border_view);
         Drawable borderDrawable =

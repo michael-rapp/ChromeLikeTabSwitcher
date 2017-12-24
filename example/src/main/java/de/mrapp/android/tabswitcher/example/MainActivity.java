@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 view = inflater.inflate(R.layout.tab_edit_text, parent, false);
             }
 
-            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            Toolbar toolbar = view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.tab);
             toolbar.setOnMenuItemClickListener(createToolbarMenuListener());
             Menu menu = toolbar.getMenu();
@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
+        tabSwitcher = findViewById(R.id.tab_switcher);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
