@@ -938,6 +938,52 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * Setups the tab switcher to be associated with those menu items of its own toolbar menu, which
+     * use a {@link TabSwitcherButton} as their action view. The icon of such menu items will
+     * automatically be updated, when the number of tabs, which are contained by the tab switcher,
+     * changes.
+     *
+     * Calling this method is basically the same as calling <code>setupWithMenu(tabSwitcher,
+     * tabSwitcher.getToolbarMenu(), listener)</code>. However, if the {@link Menu}, which is
+     * returned by <code>tabSwitcher.getToolbarMenu()</code> is null, a {@link
+     * OnGlobalLayoutListener} is registered at the given tab switcher to setup the tab switcher as
+     * soon as the menu is initialized.
+     *
+     * @param tabSwitcher
+     *         The tab switcher, which should become associated with the menu items, as an instance
+     *         of the class {@link TabSwitcher}. The tab switcher may not be null
+     * @param listener
+     *         The listener, which should be set to the menu items, which use a {@link
+     *         TabSwitcherButton} as their action view, as an instance of the type {@link
+     *         OnClickListener} or null, if no listener should be set
+     */
+    public static void setupWithMenu(@NonNull final TabSwitcher tabSwitcher,
+                                     @Nullable final OnClickListener listener) {
+        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Menu menu = tabSwitcher.getToolbarMenu();
+
+        if (menu != null) {
+            setupWithMenu(tabSwitcher, menu, listener);
+        } else {
+            tabSwitcher.getViewTreeObserver()
+                    .addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+
+                        @Override
+                        public void onGlobalLayout() {
+                            ViewUtil.removeOnGlobalLayoutListener(tabSwitcher.getViewTreeObserver(),
+                                    this);
+                            Menu menu = tabSwitcher.getToolbarMenu();
+
+                            if (menu != null) {
+                                TabSwitcher.setupWithMenu(tabSwitcher, menu, listener);
+                            }
+                        }
+
+                    });
+        }
+    }
+
+    /**
      * Setups the tab switcher to be associated with those menu items of a specific menu, which use
      * a {@link TabSwitcherButton} as their action view. The icon of such menu items will
      * automatically be updated, when the number of tabs, which are contained by the tab switcher,

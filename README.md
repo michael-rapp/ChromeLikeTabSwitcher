@@ -235,18 +235,14 @@ In order to provide a button, similar to the one, which is used in Google's Chro
 </menu>
 ```
 
-In order to register a menu's `TabSwitcherButton` as a listener of a `TabSwitcher`, the static `setupWithMenu`-method can be used. It automatically registers all items of a `Menu`, that use a `TabSwitcherButton`, as listeners of a specific `TabSwitcher`. The `OnClickListener`, which can optionally be specified, is invoked when one of these buttons is clicked. The following code shows, how the method can be used together with the toolbar menu of a `TabSwitcher`. However, it also works with arbitrary menus.
+In order to register a menu's `TabSwitcherButton` as a listener of a `TabSwitcher`, the static `setupWithMenu`-method can be used. It automatically registers all items of a `Menu`, that use a `TabSwitcherButton`, as listeners of a specific `TabSwitcher`. The `OnClickListener`, which can optionally be specified, is invoked when one of these buttons is clicked. The following code shows, how the method can be used together with an arbitrary menu.
 
 ```java
-tabSwitcher.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-    
-    @Override
-    public void onGlobalLayout() {
-        Menu menu = tabSwitcher.getToolbarMenu();
-        TabSwitcher.setupWithMenu(tabSwitcher, menu, new OnClickListener() { /* ... */ });
-    }
-    
-});
+TabSwitcher.setupWithMenu(tabSwitcher, menu, new OnClickListener() { /* ... */ });
+```
+If the menu, which is part of the tab switcher itself, should be set up, the following method call can be used. 
+```java
+TabSwitcher.setupWithMenu(tabSwitcher, new OnClickListener() { /* ... */ });
 ```
 
 ## Using Themes

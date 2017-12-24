@@ -2915,8 +2915,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     protected final void onInflateLayout(@NonNull final LayoutInflater inflater,
                                          final boolean tabsOnly) {
         if (tabsOnly) {
-            toolbar = (Toolbar) getTabSwitcher().findViewById(R.id.primary_toolbar);
-            tabContainer = (ViewGroup) getTabSwitcher().findViewById(R.id.tab_container);
+            toolbar = getTabSwitcher().findViewById(R.id.primary_toolbar);
+            tabContainer = getTabSwitcher().findViewById(R.id.tab_container);
         } else {
             toolbar = (Toolbar) inflater.inflate(R.layout.phone_toolbar, getTabSwitcher(), false);
             getTabSwitcher().addView(toolbar);
@@ -3126,7 +3126,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return tabContainer;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public final Toolbar[] getToolbars() {
         return toolbar != null ? new Toolbar[]{toolbar} : null;
