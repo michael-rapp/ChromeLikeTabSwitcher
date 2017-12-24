@@ -35,7 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -51,9 +50,7 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
-import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
 import de.mrapp.android.util.ThemeUtil;
-import de.mrapp.android.util.ViewUtil;
 
 import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
 
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 view = inflater.inflate(R.layout.tab_edit_text, parent, false);
             }
 
-            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            Toolbar toolbar = view.findViewById(R.id.toolbar);
             toolbar.inflateMenu(R.menu.tab);
             toolbar.setOnMenuItemClickListener(createToolbarMenuListener());
             Menu menu = toolbar.getMenu();
@@ -243,43 +240,12 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
-     * Creates and returns a layout listener, which allows to setup the tab switcher's toolbar menu,
-     * once the tab switcher has been laid out.
-     *
-     * @return The listener, which has been created, as an instance of the type {@link
-     * OnGlobalLayoutListener}. The listener may not be null
-     */
-    @NonNull
-    private OnGlobalLayoutListener createTabSwitcherLayoutListener() {
-        return new OnGlobalLayoutListener() {
-
-            @Override
-            public void onGlobalLayout() {
-                ViewUtil.removeOnGlobalLayoutListener(tabSwitcher.getViewTreeObserver(), this);
-                setupWithMenu();
-            }
-
-        };
-    }
-
-    /**
      * Inflates the tab switcher's menu, depending on whether it is empty, or not.
      */
     private void inflateMenu() {
         tabSwitcher
                 .inflateToolbarMenu(tabSwitcher.getCount() > 0 ? R.menu.tab_switcher : R.menu.tab,
                         createToolbarMenuListener());
-    }
-
-    /**
-     * Setups the tab switcher to be associated with the {@link TabSwitcherButton} of its menu.
-     */
-    private void setupWithMenu() {
-        Menu menu = tabSwitcher.getToolbarMenu();
-
-        if (menu != null) {
-            TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
-        }
     }
 
     /**
@@ -475,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
                                  @NonNull final Tab tab, @NonNull final Animation animation) {
         inflateMenu();
-        setupWithMenu();
+        TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
     }
 
     @Override
@@ -484,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         CharSequence text = getString(R.string.removed_tab_snackbar, tab.getTitle());
         showUndoSnackbar(text, index, tab);
         inflateMenu();
-        setupWithMenu();
+        TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
     }
 
     @Override
@@ -494,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         CharSequence text = getString(R.string.cleared_tabs_snackbar);
         showUndoSnackbar(text, 0, tabs);
         inflateMenu();
-        setupWithMenu();
+        TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
     }
 
     @Override
@@ -515,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tabSwitcher = (TabSwitcher) findViewById(R.id.tab_switcher);
+        tabSwitcher = findViewById(R.id.tab_switcher);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
         tabSwitcher.setDecorator(new Decorator());
         tabSwitcher.addListener(this);
@@ -528,8 +494,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         tabSwitcher.showAddTabButton(createAddTabButtonListener());
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
-        tabSwitcher.getViewTreeObserver()
-                .addOnGlobalLayoutListener(createTabSwitcherLayoutListener());
+        TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
         inflateMenu();
     }
 

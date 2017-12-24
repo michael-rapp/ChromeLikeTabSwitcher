@@ -3127,7 +3127,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         return tabContainer;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public final Toolbar[] getToolbars() {
         return toolbar != null ? new Toolbar[]{toolbar} : null;
