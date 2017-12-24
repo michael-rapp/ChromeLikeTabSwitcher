@@ -80,7 +80,7 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
         /**
          * When the currently selected tab is pulled down.
          */
-        PULLING_DOWN;
+        PULLING_DOWN
 
     }
 
