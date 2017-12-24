@@ -31,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -43,7 +42,6 @@ import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
-import de.mrapp.android.util.ViewUtil;
 
 /**
  * The example app's main activity.
@@ -205,30 +203,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                         return true;
                     default:
                         return false;
-                }
-            }
-
-        };
-    }
-
-    /**
-     * Creates and returns a layout listener, which allows to setup the tab switcher's toolbar menu,
-     * once the tab switcher has been laid out.
-     *
-     * @return The listener, which has been created, as an instance of the type {@link
-     * OnGlobalLayoutListener}. The listener may not be null
-     */
-    @NonNull
-    private OnGlobalLayoutListener createTabSwitcherLayoutListener() {
-        return new OnGlobalLayoutListener() {
-
-            @Override
-            public void onGlobalLayout() {
-                ViewUtil.removeOnGlobalLayoutListener(tabSwitcher.getViewTreeObserver(), this);
-                Menu menu = tabSwitcher.getToolbarMenu();
-
-                if (menu != null) {
-                    TabSwitcher.setupWithMenu(tabSwitcher, menu, createTabSwitcherButtonListener());
                 }
             }
 
@@ -436,8 +410,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         tabSwitcher
                 .setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, createAddTabListener());
         tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher, createToolbarMenuListener());
-        tabSwitcher.getViewTreeObserver()
-                .addOnGlobalLayoutListener(createTabSwitcherLayoutListener());
+        TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
 
         for (int i = 0; i < TAB_COUNT; i++) {
             tabSwitcher.addTab(createTab(i));
