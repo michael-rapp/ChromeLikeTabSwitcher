@@ -639,7 +639,7 @@ public abstract class AbstractTabSwitcherLayout
     private boolean calculatePositionWhenDraggingToEnd(final float dragDistance,
                                                        @NonNull final AbstractItem item,
                                                        @Nullable final AbstractItem predecessor) {
-        if (predecessor == null || !(predecessor.getTag().getState() == State.FLOATING)) {
+        if (predecessor == null || predecessor.getTag().getState() != State.FLOATING) {
             if ((item.getTag().getState() == State.STACKED_ATOP && item.getIndex() == 0) ||
                     item.getTag().getState() == State.FLOATING) {
                 float currentPosition = item.getTag().getPosition();

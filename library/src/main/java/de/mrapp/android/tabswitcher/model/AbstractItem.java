@@ -118,7 +118,7 @@ public abstract class AbstractItem {
      * @return True, if the item is currently visible, false otherwise
      */
     public final boolean isVisible() {
-        return !(tag.getState() == State.HIDDEN) || tag.isClosing();
+        return tag.getState() != State.HIDDEN || tag.isClosing();
     }
 
     /**

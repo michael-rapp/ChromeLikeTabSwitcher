@@ -588,8 +588,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 item.getTag().setPosition(pair.first);
                 item.getTag().setState(pair.second);
 
-                if (getFirstVisibleIndex() == -1 && !(pair.second == State.STACKED_END) &&
-                        !(pair.second == State.HIDDEN)) {
+                if (getFirstVisibleIndex() == -1 && pair.second != State.STACKED_END &&
+                        pair.second != State.HIDDEN) {
                     setFirstVisibleIndex(item.getIndex());
                 }
 
@@ -2301,7 +2301,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         }
 
         if (attachedPositionChanged && getModel().getCount() > 2 &&
-                !(removedItem.getTag().getState() == State.STACKED_ATOP)) {
+                removedItem.getTag().getState() != State.STACKED_ATOP) {
             iterator = new ItemIterator.Builder(getTabSwitcher(), tabViewRecycler)
                     .start(removedItem.getIndex()).create();
             float previousPosition = initialReferencePosition;
@@ -2950,7 +2950,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                     TabItem.create(getModel(), getTabViewRecycler(), getFirstVisibleIndex());
             Tag tag = tabItem.getTag();
 
-            if (!(tag.getState() == State.HIDDEN)) {
+            if (tag.getState() != State.HIDDEN) {
                 float position = tag.getPosition();
                 float draggingAxisSize =
                         getArithmetics().getTabContainerSize(Axis.DRAGGING_AXIS, false);
