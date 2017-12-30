@@ -9,10 +9,8 @@ The first stable release of the library. It introduces the following features:
 - Added support for drag gestures. So far, the drag gestures `SwipeGesture` and `PullDownGesture` are provided
 - Added the `tabContentBackgroundColor` XML attribute and according setter methods for customizing the background color of a tab's content
 - The background color of tabs is now adapted when pressed, if a `ColorStateList` with state `android:state_pressed` is set
-- Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode
 - Added the possibility to show a certain placeholder view, when a `TabSwitcher` is empty
 - Added the functionality to show a circular progress bar instead of an icon for individual tabs.
-- Fixed various minor issues
 
 ## Version 0.1.7 (Dec. 24th 2017)
 
