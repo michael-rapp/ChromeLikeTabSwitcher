@@ -1,10 +1,9 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Nov. 26th 2017)
+## Version 0.2.0 (Dec. 30th 2017)
 
-The first stable release of the library. It introduces the following features:
+A major release, which introduces the following features:
 
-- A layout, which is optimized for tablets, is now provided
 - Added predefined dark and light themes
 - Added support for drag gestures. So far, the drag gestures `SwipeGesture` and `PullDownGesture` are provided
 - Added the `tabContentBackgroundColor` XML attribute and according setter methods for customizing the background color of a tab's content
