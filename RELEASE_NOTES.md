@@ -10,6 +10,10 @@ A major release, which introduces the following features:
 - The background color of tabs is now adapted when pressed, if a `ColorStateList` with state `android:state_pressed` is set
 - Added the possibility to show a certain placeholder view, when a `TabSwitcher` is empty
 - Added the functionality to show a circular progress bar instead of an icon for individual tabs.
+- Updated dependency "AndroidUtil" to version 1.18.3
+- Updated AppCompat v7 support library to version 27.0.2
+- Updated AppCompat annotations support library to version 27.0.2
+- Added dependency "AndroidMaterialViews" with version 2.1.9
 
 ## Version 0.1.7 (Dec. 24th 2017)
 
