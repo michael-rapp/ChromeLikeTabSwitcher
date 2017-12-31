@@ -2,7 +2,7 @@
 
 *THIS LIBRARY IS STILL WORK IN PROGRESS. THE LAYOUT OPTIMIZED FOR TABLETS IS NOT IMPLEMENTED YET.*
 
-[![API-Level](https://img.shields.io/badge/API-14%2B-orange.svg)](https://android-arsenal.com/api?level=14) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ChromeLikeTabSwitcher-green.svg?style=true)](https://android-arsenal.com/details/1/5654) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
+[![API-Level](https://img.shields.io/badge/API-14%2B-orange.svg)](https://android-arsenal.com/api?level=14) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ChromeLikeTabSwitcher-brightgreen.svg?style=true)](https://android-arsenal.com/details/1/5654) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
