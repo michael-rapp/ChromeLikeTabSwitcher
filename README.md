@@ -322,7 +322,7 @@ An example of a placeholder view being shown, when the tab switcher is empty, ca
 
 ## Padding
 
-The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWIndowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
+The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWindowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
 
 ```java
 ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, new OnApplyWIndowInsetsListener() {
