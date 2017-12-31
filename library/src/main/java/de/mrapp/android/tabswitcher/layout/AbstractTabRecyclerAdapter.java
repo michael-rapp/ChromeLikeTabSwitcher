@@ -345,8 +345,8 @@ public abstract class AbstractTabRecyclerAdapter
      * Returns the view recycler, the adapter is bound to, or throws an {@link
      * IllegalStateException}, if no view recycler has been set.
      *
-     * @return The view recycler, the adapter is bound to, as an instance of the class {@link
-     * AttachedViewRecycler}. The view recycler may not be null
+     * @return The view recycler, the adapter is bound to, as an instance of the class
+     * AttachedViewRecycler. The view recycler may not be null
      */
     @NonNull
     protected final AttachedViewRecycler<AbstractItem, Integer> getViewRecyclerOrThrowException() {

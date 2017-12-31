@@ -1689,8 +1689,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         Pair<Integer, Float> pair = layout.detachLayout(true);
 
         if (pair != null) {
-            savedState.modelState
-                    .putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
+            savedState.modelState.putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
             savedState.modelState
                     .putFloat(TabSwitcherModel.REFERENCE_TAB_POSITION_EXTRA, pair.second);
             model.setReferenceTabIndex(pair.first);

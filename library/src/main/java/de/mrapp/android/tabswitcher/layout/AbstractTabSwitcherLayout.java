@@ -64,7 +64,6 @@ import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-import de.mrapp.android.util.view.ViewRecycler;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -957,7 +956,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The predecessor of the given item as an instance of the class {@link AbstractItem} or
      *         null, if the item does not have a predecessor
      * @return A pair, which contains the position and state of the item, as an instance of the
-     * class {@link Pair}. The pair may not be null
+     * class Pair. The pair may not be null
      */
     @NonNull
     protected final Pair<Float, State> clipPosition(final int index, final float position,
@@ -977,7 +976,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The state of the predecessor of the given item as a value of the enum {@link State}
      *         or null, if the item does not have a predecessor
      * @return A pair, which contains the position and state of the item, as an instance of the
-     * class {@link Pair}. The pair may not be null
+     * class Pair. The pair may not be null
      */
     protected final Pair<Float, State> clipPosition(final int index, final float position,
                                                     @Nullable final State predecessorState) {
@@ -1016,7 +1015,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The predecessor of the given item as an instance of the class {@link AbstractItem} or
      *         null, if the item does not have a predecessor
      * @return A pair, which contains the position and state of the given item, when stacked at the
-     * start, as an instance of the class {@link Pair}. The pair may not be null
+     * start, as an instance of the class Pair. The pair may not be null
      */
     @NonNull
     protected final Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(final int count,
@@ -1199,7 +1198,7 @@ public abstract class AbstractTabSwitcherLayout
      * recycler, which allows to recycle the views, which are associated with tabs.
      *
      * @return The view recycler, which allows to recycle the views, which are associated with tabs,
-     * as an instance of the class {@link ViewRecycler} or null, if the view recycler has not been
+     * as an instance of the class ViewRecycler or null, if the view recycler has not been
      * initialized yet
      */
     protected abstract AbstractViewRecycler<Tab, Void> getContentViewRecycler();
@@ -1209,8 +1208,8 @@ public abstract class AbstractTabSwitcherLayout
      * recycler, which allows to inflate the views, which are used to visualize the tabs.
      *
      * @return The view recycler, which allows to inflate the views, which are used to visualize the
-     * tabs, as an instance of the class {@link AttachedViewRecycler} or null, if the view recycler
-     * has not been initialized yet
+     * tabs, as an instance of the class AttachedViewRecycler or null, if the view recycler has not
+     * been initialized yet
      */
     protected abstract AttachedViewRecycler<AbstractItem, Integer> getTabViewRecycler();
 
@@ -1264,7 +1263,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The state of the predecessor of the given item as a value of the enum {@link State}
      *         or null, if the item does not have a predecessor
      * @return A pair, which contains the position and state of the given item, when stacked at the
-     * start, as an instance of the class {@link Pair}. The pair may not be null
+     * start, as an instance of the class Pair. The pair may not be null
      */
     @NonNull
     protected abstract Pair<Float, State> calculatePositionAndStateWhenStackedAtStart(
@@ -1278,7 +1277,7 @@ public abstract class AbstractTabSwitcherLayout
      *         The index of the item, whose position and state should be returned, as an {@link
      *         Integer} value
      * @return A pair, which contains the position and state of the given item, when stacked at the
-     * end, as an instance of the class {@link Pair}. The pair may not be null
+     * end, as an instance of the class Pair. The pair may not be null
      */
     @NonNull
     protected abstract Pair<Float, State> calculatePositionAndStateWhenStackedAtEnd(
@@ -1383,8 +1382,8 @@ public abstract class AbstractTabSwitcherLayout
      * The method, which is invoked on implementing subclasses in order to create the view recycler
      * adapter, which allows to inflate the views, which are associated with tabs.
      *
-     * @return The view recycler adapter, which has been created, as an instance of the class {@link
-     * AttachedViewRecycler.Adapter}. The recycler adapter may not be null }
+     * @return The view recycler adapter, which has been created, as an instance of the class
+     * AttachedViewRecycler.Adapter. The recycler adapter may not be null }
      */
     @NonNull
     protected AttachedViewRecycler.Adapter<Tab, Void> onCreateContentRecyclerAdapter() {

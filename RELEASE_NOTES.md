@@ -1,18 +1,25 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Nov. 26th 2017)
+## Version 1.0.0 (Dec. 31th 2017)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.2.0 (Dec. 30th 2017)
+
+A major release, which introduces the following features:
+
 - Added predefined dark and light themes
 - Added support for drag gestures. So far, the drag gestures `SwipeGesture` and `PullDownGesture` are provided
 - Added the `tabContentBackgroundColor` XML attribute and according setter methods for customizing the background color of a tab's content
 - The background color of tabs is now adapted when pressed, if a `ColorStateList` with state `android:state_pressed` is set
-- Added the layout policy `TABLET_LANDSCAPE`. It allows to use the tablet layout on smartphones, when in landscape mode
 - Added the possibility to show a certain placeholder view, when a `TabSwitcher` is empty
 - Added the functionality to show a circular progress bar instead of an icon for individual tabs.
-- Fixed various minor issues
+- Updated dependency "AndroidUtil" to version 1.18.3
+- Updated AppCompat v7 support library to version 27.0.2
+- Updated AppCompat annotations support library to version 27.0.2
+- Added dependency "AndroidMaterialViews" with version 2.1.9
 
 ## Version 0.1.7 (Dec. 24th 2017)
 

@@ -1,6 +1,6 @@
 # ChromeLikeTabSwitcher - README
 
-[![API-Level](https://img.shields.io/badge/API-14%2B-orange.svg)](https://android-arsenal.com/api?level=14) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
+[![API-Level](https://img.shields.io/badge/API-14%2B-orange.svg)](https://android-arsenal.com/api?level=14) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ChromeLikeTabSwitcher-brightgreen.svg?style=true)](https://android-arsenal.com/details/1/5654) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X75YSLEJV3DWE)
 
 "ChromeLikeTabSwitcher" is an Android-library, which provides a tab switcher similar to the one, which is used in the Android version of Google's Chrome browser. It provides layouts optimized for smartphone and tablet devices. The following GIFs illustrate the appearance of the library:
 
@@ -26,7 +26,7 @@ Alternatively, the library can be added to your Android app as a Gradle dependen
 
 ```groovy
 dependencies {
-    compile 'com.github.michael-rapp:chrome-like-tab-switcher:1.0.0'
+    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.0'
 }
 ```
 
@@ -320,7 +320,7 @@ An example of a placeholder view being shown, when the tab switcher is empty, ca
 
 ## Padding
 
-The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWIndowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
+The view `TabSwitcher` overrides the `setPadding`-methods of the class `View` in order to apply the padding to all tabs as well as to their parent view. The main purpose of this behavior is to apply window insets, when using a translucent status and/or navigation bar as it can be seen in the library's example app. The following code sample demonstrates, how the window insets of an activity can be applied to a tab switcher by using a `OnApplyWindowInsetsListener`. It is meant to be used in the activity's `onCreate`-method.
 
 ```java
 ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, new OnApplyWIndowInsetsListener() {
