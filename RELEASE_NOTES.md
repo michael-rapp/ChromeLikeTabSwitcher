@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 1.0.0 (Dec. 31th 2017)
+
+The first stable release of the library. It introduces the following features:
+
+- A layout, which is optimized for tablets, is now provided
+
 ## Version 0.2.0 (Dec. 30th 2017)
 
 A major release, which introduces the following features:
