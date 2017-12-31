@@ -98,8 +98,8 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
      *         The style, which allows to retrieve style attributes of the tab switcher, as an
      *         instance of the class {@link TabSwitcherStyle}. The style may not be null
      * @param viewRecycler
-     *         The view recycler, the adapter is attached to, as an instance of the class {@link
-     *         AttachedViewRecycler}. The view recycler may not be null
+     *         The view recycler, the adapter is attached to, as an instance of the class
+     *         AttachedViewRecycler. The view recycler may not be null
      * @param encapsulatedAdapter
      *         The view recycler adapter, which should be encapsulated, as an instance of the class
      *         {@link ContentRecyclerAdapter}. The recycler adapter may not be null

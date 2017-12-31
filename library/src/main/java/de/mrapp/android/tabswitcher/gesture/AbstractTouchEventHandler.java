@@ -270,7 +270,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      * Returns the drag helper, which is used by the event handler to recognize drag gestures.
      *
      * @return The drag helper, which is used by the event handler to recognize drag gestures, as an
-     * instance of the class {@link DragHelper}. The drag helper may not be null
+     * instance of the class DragHelper. The drag helper may not be null
      */
     @NonNull
     public final DragHelper getDragHelper() {
