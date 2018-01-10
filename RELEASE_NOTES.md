@@ -1,6 +1,6 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 0.2.1 (Jan. 10th 2017)
+## Version 0.2.1 (Jan. 10th 2018)
 
 A bugfix release, which fixes the following issues:
 
