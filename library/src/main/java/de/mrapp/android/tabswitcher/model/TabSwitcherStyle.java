@@ -42,6 +42,11 @@ public class TabSwitcherStyle {
     private final TabSwitcher tabSwitcher;
 
     /**
+     * The model of the tab switcher, whose style attributes are retrieved.
+     */
+    private final Model model;
+
+    /**
      * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
      */
     private final ThemeHelper themeHelper;
@@ -50,18 +55,23 @@ public class TabSwitcherStyle {
      * Creates a new class, which allows to retrieve the style attributes of a {@link TabSwitcher}.
      *
      * @param tabSwitcher
-     *         The tab switcher, whose style attributes are retrieved, as an instance of the class
+     *         The tab switcher, whose style attributes are retrieved, as an instance of the type
      *         {@link TabSwitcher}. The tab switcher may not be null
+     * @param model
+     *         The model of the tab switcher, whose style attributes are retrieved, as an instance
+     *         of the class {@link TabSwitcher}. The model may not be null
      * @param themeHelper
      *         The theme helper, which allows to retrieve resources, depending on the tab switcher's
      *         theme, as an instance of the class {@link ThemeHelper}. The theme helper may not be
      *         null
      */
-    public TabSwitcherStyle(@NonNull final TabSwitcher tabSwitcher,
+    public TabSwitcherStyle(@NonNull final TabSwitcher tabSwitcher, @NonNull final Model model,
                             @NonNull final ThemeHelper themeHelper) {
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        ensureNotNull(model, "The model may not be null");
         ensureNotNull(themeHelper, "The theme helper may not be null");
         this.tabSwitcher = tabSwitcher;
+        this.model = model;
         this.themeHelper = themeHelper;
     }
 
@@ -88,10 +98,10 @@ public class TabSwitcherStyle {
      */
     @Nullable
     public final Drawable getTabIcon(@Nullable final Tab tab) {
-        Drawable icon = tab != null ? tab.getIcon(tabSwitcher.getContext()) : null;
+        Drawable icon = tab != null ? tab.getIcon(model.getContext()) : null;
 
         if (icon == null) {
-            icon = tabSwitcher.getTabIcon();
+            icon = model.getTabIcon();
 
             if (icon == null) {
                 try {
@@ -119,7 +129,7 @@ public class TabSwitcherStyle {
         ColorStateList colorStateList = tab != null ? tab.getBackgroundColor() : null;
 
         if (colorStateList == null) {
-            colorStateList = tabSwitcher.getTabBackgroundColor();
+            colorStateList = model.getTabBackgroundColor();
 
             if (colorStateList == null) {
                 colorStateList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
@@ -144,7 +154,7 @@ public class TabSwitcherStyle {
         int color = tab != null ? tab.getContentBackgroundColor() : -1;
 
         if (color == -1) {
-            color = tabSwitcher.getTabContentBackgroundColor();
+            color = model.getTabContentBackgroundColor();
 
             if (color == -1) {
                 color = themeHelper.getColor(tabSwitcher.getLayout(),
@@ -167,7 +177,7 @@ public class TabSwitcherStyle {
         ColorStateList colorStateList = tab != null ? tab.getTitleTextColor() : null;
 
         if (colorStateList == null) {
-            colorStateList = tabSwitcher.getTabTitleTextColor();
+            colorStateList = model.getTabTitleTextColor();
 
             if (colorStateList == null) {
                 colorStateList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
@@ -187,10 +197,10 @@ public class TabSwitcherStyle {
      * @return The close button icon of tabs as an instance of the class {@link Drawable}
      */
     public final Drawable getTabCloseButtonIcon(@Nullable final Tab tab) {
-        Drawable icon = tab != null ? tab.getCloseButtonIcon(tabSwitcher.getContext()) : null;
+        Drawable icon = tab != null ? tab.getCloseButtonIcon(model.getContext()) : null;
 
         if (icon == null) {
-            icon = tabSwitcher.getTabCloseButtonIcon();
+            icon = model.getTabCloseButtonIcon();
 
             if (icon == null) {
                 icon = themeHelper
@@ -214,7 +224,7 @@ public class TabSwitcherStyle {
         int color = tab != null ? tab.getProgressBarColor() : -1;
 
         if (color == -1) {
-            color = tabSwitcher.getTabProgressBarColor();
+            color = model.getTabProgressBarColor();
 
             if (color == -1) {
                 color = themeHelper
@@ -234,7 +244,7 @@ public class TabSwitcherStyle {
      * {@link ColorStateList} or null, if the default color is used
      */
     public final ColorStateList getAddTabButtonColor() {
-        ColorStateList colorStateList = tabSwitcher.getAddTabButtonColor();
+        ColorStateList colorStateList = model.getAddTabButtonColor();
 
         if (colorStateList == null) {
             colorStateList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
@@ -253,7 +263,7 @@ public class TabSwitcherStyle {
      */
     @Nullable
     public final CharSequence getToolbarTitle() {
-        CharSequence title = tabSwitcher.getToolbarTitle();
+        CharSequence title = model.getToolbarTitle();
 
         if (TextUtils.isEmpty(title)) {
             try {
@@ -276,7 +286,7 @@ public class TabSwitcherStyle {
      */
     @Nullable
     public final Drawable getToolbarNavigationIcon() {
-        Drawable icon = tabSwitcher.getToolbarNavigationIcon();
+        Drawable icon = model.getToolbarNavigationIcon();
 
         if (icon == null) {
             try {
