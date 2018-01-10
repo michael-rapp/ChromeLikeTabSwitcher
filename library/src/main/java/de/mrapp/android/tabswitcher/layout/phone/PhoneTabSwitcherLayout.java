@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -598,8 +598,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 }
             }
 
-            boolean overshooting =
-                    referenceIndex == getModel().getCount() - 1 || isOvershootingAtEnd(iterator);
+            boolean overshooting = referenceIndex == getModel().getCount() - 1 ||
+                    isOvershootingAtEnd(DragState.NONE, iterator);
             iterator = new InitialItemIteratorBuilder(items).reverse(true).start(referenceIndex - 1)
                     .create();
             float minTabSpacing = calculateMinTabSpacing();
@@ -3077,9 +3077,10 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final boolean isOvershootingAtEnd(@NonNull final AbstractItemIterator iterator) {
+    protected final boolean isOvershootingAtEnd(@NonNull final DragState dragState,
+                                                @NonNull final AbstractItemIterator iterator) {
         if (getTabSwitcher().getCount() <= 1) {
-            return true;
+            return dragState != DragState.DRAG_TO_START;
         } else {
             AbstractItem lastItem = iterator.getItem(getTabSwitcher().getCount() - 1);
             AbstractItem predecessor = iterator.getItem(getTabSwitcher().getCount() - 2);

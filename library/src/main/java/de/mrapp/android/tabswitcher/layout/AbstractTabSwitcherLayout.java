@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -1348,13 +1348,17 @@ public abstract class AbstractTabSwitcherLayout
      * The method, which is invoked on implementing subclasses in order to retrieve, whether the
      * items are overshooting at the end.
      *
+     * @param dragState
+     *         The current drag state as an instance of the enum {@link DragState}. The drag state
+     *         may not be null
      * @param iterator
      *         An iterator, which allows to iterate the items, which are contained by the tab
      *         switcher, as an instance of the class {@link AbstractItemIterator}. The iterator may
      *         not be null
      * @return True, if the items are overshooting at the end, false otherwise
      */
-    protected boolean isOvershootingAtEnd(@NonNull final AbstractItemIterator iterator) {
+    protected boolean isOvershootingAtEnd(@NonNull final DragState dragState,
+                                          @NonNull final AbstractItemIterator iterator) {
         return false;
     }
 
@@ -1572,7 +1576,7 @@ public abstract class AbstractTabSwitcherLayout
             secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
         }
 
-        DragState overshoot = isOvershootingAtEnd(
+        DragState overshoot = isOvershootingAtEnd(dragState,
                 new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()).create()) ?
                 DragState.OVERSHOOT_END :
                 (isOvershootingAtStart() ? DragState.OVERSHOOT_START : null);

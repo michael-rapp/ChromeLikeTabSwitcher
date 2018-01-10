@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -320,7 +320,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
             int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
             themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
-            style = new TabSwitcherStyle(this, themeHelper);
+            style = new TabSwitcherStyle(this, model, themeHelper);
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
