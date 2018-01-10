@@ -1,5 +1,12 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.2.1 (Jan. 10th 2017)
+
+A bugfix release, which fixes the following issues:
+
+- Overshooting towards the end as well as the start is now possible when using the phone layout, if only one tab is contained by a `TabSwitcher`
+- Fixed the navigation icon of a `TabSwitcher`'s toolbar not being shown
+
 ## Version 0.2.0 (Dec. 30th 2017)
 
 A major release, which introduces the following features:
