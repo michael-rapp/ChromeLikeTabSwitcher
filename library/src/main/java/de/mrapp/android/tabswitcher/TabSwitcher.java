@@ -319,7 +319,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             int phoneTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themePhone, 0);
             int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
             themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
-            style = new TabSwitcherStyle(this, themeHelper);
+            style = new TabSwitcherStyle(this, model, themeHelper);
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
@@ -1688,8 +1688,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         Pair<Integer, Float> pair = layout.detachLayout(true);
 
         if (pair != null) {
-            savedState.modelState
-                    .putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
+            savedState.modelState.putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
             savedState.modelState
                     .putFloat(TabSwitcherModel.REFERENCE_TAB_POSITION_EXTRA, pair.second);
             model.setReferenceTabIndex(pair.first);
