@@ -109,6 +109,13 @@ public class TabSwitcherModel implements Model, Restorable {
     private static final String PADDING_EXTRA = TabSwitcherModel.class.getName() + "::Padding";
 
     /**
+     * The name of the extra, which is used to store, whether the padding of the tab switcher is
+     * applied to the content of its tabs, or not, within a bundle.
+     */
+    private static final String APPLY_PADDING_TO_TABS_EXTRA =
+            TabSwitcherModel.class.getName() + "::ApplyPaddingToTabs";
+
+    /**
      * The name of the extra, which is used to store the resource id of a tab's icon within a
      * bundle.
      */
@@ -229,6 +236,12 @@ public class TabSwitcherModel implements Model, Restorable {
      * An array, which contains the left, top, right and bottom padding of the tab switcher.
      */
     private int[] padding;
+
+    /**
+     * True, if the padding of tab switcher should is applied to the content of its tabs, false
+     * otherwise.
+     */
+    private boolean applyPaddingToTabs;
 
     /**
      * The resource id of a tab's icon.
@@ -556,6 +569,20 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
+     * Notifies the listeners, that it has been changed, whether the padding of the tab switcher is
+     * applied to the content of its tabs, or not.
+     *
+     * @param applyPaddingToTabs
+     *         True, if the padding of the tab switcher is applied to the content of its tabs, false
+     *         otherwise
+     */
+    private void notifyOnApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+        for (Listener listener : listeners) {
+            listener.onApplyPaddingToTabsChanged(applyPaddingToTabs);
+        }
+    }
+
+    /**
      * Notifies the listeners, that the default icon of a tab has been changed.
      *
      * @param icon
@@ -763,6 +790,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.decorator = null;
         this.contentRecyclerAdapter = null;
         this.padding = new int[]{0, 0, 0, 0};
+        this.applyPaddingToTabs = true;
         this.tabIconId = -1;
         this.tabIconBitmap = null;
         this.tabBackgroundColor = null;
@@ -1248,6 +1276,17 @@ public class TabSwitcherModel implements Model, Restorable {
         return getPaddingRight();
     }
 
+    @Override
+    public final void applyPaddingToTabs(final boolean applyPaddingToTabs) {
+        this.applyPaddingToTabs = applyPaddingToTabs;
+        notifyOnApplyPaddingToTabsChanged(applyPaddingToTabs);
+    }
+
+    @Override
+    public final boolean isPaddingAppliedToTabs() {
+        return applyPaddingToTabs;
+    }
+
     @Nullable
     @Override
     public final Drawable getTabIcon() {
@@ -1500,6 +1539,7 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putBoolean(SWITCHER_SHOWN_EXTRA, switcherShown);
         outState.putInt(SELECTED_TAB_INDEX_EXTRA, selectedTab != null ? indexOf(selectedTab) : -1);
         outState.putIntArray(PADDING_EXTRA, padding);
+        outState.putBoolean(APPLY_PADDING_TO_TABS_EXTRA, applyPaddingToTabs);
         outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
         outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
         outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
@@ -1524,6 +1564,7 @@ public class TabSwitcherModel implements Model, Restorable {
             int selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_EXTRA);
             selectedTab = selectedTabIndex != -1 ? tabs.get(selectedTabIndex) : null;
             padding = savedInstanceState.getIntArray(PADDING_EXTRA);
+            applyPaddingToTabs = savedInstanceState.getBoolean(APPLY_PADDING_TO_TABS_EXTRA);
             tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
             tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
             tabBackgroundColor = savedInstanceState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);

@@ -663,6 +663,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             }
 
             @Override
+            public void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
+            }
+
+            @Override
             public void onTabIconChanged(@Nullable final Drawable icon) {
 
             }
@@ -1439,6 +1444,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final int getPaddingEnd() {
         return model.getPaddingEnd();
+    }
+
+    @Override
+    public final void applyPaddingToTabs(final boolean applyPaddingToTabs) {
+        model.applyPaddingToTabs(applyPaddingToTabs);
+    }
+
+    @Override
+    public final boolean isPaddingAppliedToTabs() {
+        return model.isPaddingAppliedToTabs();
     }
 
     @Nullable

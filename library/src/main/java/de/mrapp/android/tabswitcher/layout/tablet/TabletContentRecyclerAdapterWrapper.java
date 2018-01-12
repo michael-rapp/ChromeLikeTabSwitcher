@@ -280,6 +280,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     }
 
     @Override
+    public final void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
+    }
+
+    @Override
     public final void onTabIconChanged(@Nullable final Drawable icon) {
 
     }

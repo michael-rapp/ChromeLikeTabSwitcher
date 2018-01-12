@@ -197,6 +197,16 @@ public interface Model extends Iterable<Tab> {
         void onPaddingChanged(int left, int top, int right, int bottom);
 
         /**
+         * The method, which is invoked, when it has been changed, whether the padding of the tab
+         * switcher is applied to the content of its tabs, or not.
+         *
+         * @param applyPaddingToTabs
+         *         True, if the padding of the tab switcher is applied to the content of its tabs,
+         *         false otherwise
+         */
+        void onApplyPaddingToTabsChanged(boolean applyPaddingToTabs);
+
+        /**
          * The method, which is invoked, when the default icon of a tab has been changed.
          *
          * @param icon
@@ -730,6 +740,26 @@ public interface Model extends Iterable<Tab> {
      * @return The end padding of the tab switcher in pixels as an {@link Integer} value
      */
     int getPaddingEnd();
+
+    /**
+     * Sets, whether the padding of the tab switcher should be applied to the content of its tabs,
+     * or not. When set to <code>false</code> the padding is still taken into account for
+     * positioning tabs and the tab switcher's toolbars.
+     *
+     * @param applyPaddingToTabs
+     *         True, if the padding of the tab switcher should be applied to the content of its
+     *         tabs, false otherwise
+     */
+    void applyPaddingToTabs(boolean applyPaddingToTabs);
+
+    /**
+     * Returns, whether the padding of the tab switcher is applied to the content of its tabs, or
+     * not.
+     *
+     * @return True, if the padding of the tab switcher is applied to the content of its tabs, false
+     * otherwise
+     */
+    boolean isPaddingAppliedToTabs();
 
     /**
      * Returns the default icon of a tab.

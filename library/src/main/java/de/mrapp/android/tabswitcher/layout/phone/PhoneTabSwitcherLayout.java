@@ -3298,6 +3298,11 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
+    public final void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
+    }
+
+    @Override
     public final void onEmptyViewChanged(@Nullable final View view, final long animationDuration) {
         if (getModel().isEmpty()) {
             adaptEmptyView(0);

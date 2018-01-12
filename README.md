@@ -343,6 +343,8 @@ ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, new OnApplyWIndowInsetsLi
 });
 ```
 
+If the padding of a `TabSwitcher` should not be applied to the content of tabs, `false` can be passed to the `applyPaddingToTabs`-method. This prevents the content of tabs from being inset, but does not affect the position of tabs or the position of a `TabSwitcher`'s toolbar(s). This might be useful, if you want to take care of the padding, which is applied to tabs by yourself, e.g. when the content should scroll below the system's status and/or navigation bar.
+
 ## Contact information
 
 For personal feedback or questions feel free to contact me via the mail address, which is mentioned on my [Github profile](https://github.com/michael-rapp). If you have found any bugs or want to post a feature request please use the [bugtracker](https://github.com/michael-rapp/ChromeLikeTabSwitcher/issues) to report them.

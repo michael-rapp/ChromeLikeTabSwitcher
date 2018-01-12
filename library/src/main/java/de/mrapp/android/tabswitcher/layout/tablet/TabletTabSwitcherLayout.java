@@ -1246,6 +1246,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
+    public final void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
+    }
+
+    @Override
     public void onTabBackgroundColorChanged(@Nullable final ColorStateList colorStateList) {
         adaptBorderColor();
     }

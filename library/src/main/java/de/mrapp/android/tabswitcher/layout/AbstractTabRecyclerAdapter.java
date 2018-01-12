@@ -534,6 +534,11 @@ public abstract class AbstractTabRecyclerAdapter
     }
 
     @Override
+    public void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
+    }
+
+    @Override
     public final void onTabIconChanged(@Nullable final Drawable icon) {
         ItemIterator iterator =
                 new ItemIterator.Builder(model, getViewRecyclerOrThrowException()).create();
