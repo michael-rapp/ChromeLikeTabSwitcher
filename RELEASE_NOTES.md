@@ -1,5 +1,12 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.2.2 (Jan 14th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- `TabSwitcherButton`s are now rendered properly in the preview of tabs.
+- Added the attribute `applyPaddingToTabs`. 
+
 ## Version 0.2.1 (Jan. 10th 2018)
 
 A bugfix release, which fixes the following issues:
