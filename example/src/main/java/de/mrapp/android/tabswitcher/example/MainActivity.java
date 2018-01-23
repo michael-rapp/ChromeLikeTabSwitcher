@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 if (tabSwitcher.isSwitcherShown()) {
                     tabSwitcher.addAllTabs(tabs, index);
                 } else if (tabs.length == 1) {
-                    tabSwitcher.addTab(tabs[0], index, createPeekAnimation());
+                    tabSwitcher.addTab(tabs[0], 0, createPeekAnimation());
                 }
 
             }
