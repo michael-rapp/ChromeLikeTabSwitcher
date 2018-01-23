@@ -1,6 +1,12 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 0.2.2 (Jan 14th 2018)
+## Version 0.2.3 (Jan. 23th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Added additional method parameter to the interface `Model.Listener`. It allows to reliably determine, whether the selection changed when adding or removing tabs.
+
+## Version 0.2.2 (Jan. 14th 2018)
 
 A bugfix release, which fixes the following issues:
 
