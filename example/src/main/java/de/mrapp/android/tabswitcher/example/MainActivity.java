@@ -214,6 +214,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.remove_tab_menu_item:
+                        Tab selectedTab = tabSwitcher.getSelectedTab();
+
+                        if (selectedTab != null) {
+                            tabSwitcher.removeTab(selectedTab);
+                        }
+
+                        return true;
                     case R.id.add_tab_menu_item:
                         int index = tabSwitcher.getCount();
                         Tab tab = createTab(index);
@@ -315,7 +323,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
                 if (tabSwitcher.isSwitcherShown()) {
                     tabSwitcher.addAllTabs(tabs, index);
+                } else if (tabs.length == 1) {
+                    tabSwitcher.addTab(tabs[0], index, createRevealAnimation());
                 }
+
             }
 
         };
