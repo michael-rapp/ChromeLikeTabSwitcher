@@ -609,11 +609,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onTabAdded(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    final boolean switcherVisibilityChanged,
                                    @NonNull final Animation animation) {
                 notifyOnTabAdded(index, tab, animation);
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
@@ -626,13 +627,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                        final int previousSelectedTabIndex,
-                                       final int selectedTabIndex,
+                                       final int selectedTabIndex, final boolean selectionChanged,
                                        @NonNull final Animation animation) {
                 for (Tab tab : tabs) {
                     notifyOnTabAdded(index, tab, animation);
                 }
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
@@ -641,10 +642,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onTabRemoved(final int index, @NonNull final Tab tab,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
                 notifyOnTabRemoved(index, tab, animation);
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
@@ -660,6 +662,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onPaddingChanged(final int left, final int top, final int right,
                                          final int bottom) {
+
+            }
+
+            @Override
+            public void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
 
             }
 
@@ -1440,6 +1447,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final int getPaddingEnd() {
         return model.getPaddingEnd();
+    }
+
+    @Override
+    public final void applyPaddingToTabs(final boolean applyPaddingToTabs) {
+        model.applyPaddingToTabs(applyPaddingToTabs);
+    }
+
+    @Override
+    public final boolean isPaddingAppliedToTabs() {
+        return model.isPaddingAppliedToTabs();
     }
 
     @Nullable

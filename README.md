@@ -26,7 +26,7 @@ Alternatively, the library can be added to your Android app as a Gradle dependen
 
 ```groovy
 dependencies {
-    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.1'
+    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.3'
 }
 ```
 
@@ -340,6 +340,8 @@ ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, new OnApplyWIndowInsetsLi
 
 });
 ```
+
+If the padding of a `TabSwitcher` should not be applied to the content of tabs, `false` can be passed to the `applyPaddingToTabs`-method. This prevents the content of tabs from being inset, but does not affect the position of tabs or the position of a `TabSwitcher`'s toolbar(s). This might be useful, if you want to take care of the padding, which is applied to tabs by yourself, e.g. when the content should scroll below the system's status and/or navigation bar.
 
 ## Contact information
 
