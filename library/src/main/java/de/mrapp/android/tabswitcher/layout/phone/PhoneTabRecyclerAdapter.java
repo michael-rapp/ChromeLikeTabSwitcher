@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.layout.phone;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
@@ -101,8 +102,8 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
             view = pair.first;
             LayoutParams layoutParams =
                     new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
-                    getModel().getPaddingRight(), getModel().getPaddingBottom());
+            Rect padding = getPadding();
+            layoutParams.setMargins(padding.left, padding.top, padding.right, padding.bottom);
             parent.addView(view, 0, layoutParams);
             viewHolder.content = view;
         } else {
@@ -198,16 +199,33 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
      *         class {@link PhoneTabViewHolder}. The view holder may not be null
      */
     private void adaptPadding(@NonNull final PhoneTabViewHolder viewHolder) {
+        Rect padding = getPadding();
+
         if (viewHolder.content != null) {
             LayoutParams contentLayoutParams = (LayoutParams) viewHolder.content.getLayoutParams();
-            contentLayoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
-                    getModel().getPaddingRight(), getModel().getPaddingBottom());
+            contentLayoutParams
+                    .setMargins(padding.left, padding.top, padding.right, padding.bottom);
         }
 
         LayoutParams previewLayoutParams =
                 (LayoutParams) viewHolder.previewImageView.getLayoutParams();
-        previewLayoutParams.setMargins(getModel().getPaddingLeft(), getModel().getPaddingTop(),
-                getModel().getPaddingRight(), getModel().getPaddingBottom());
+        previewLayoutParams.setMargins(padding.left, padding.top, padding.right, padding.bottom);
+    }
+
+    /**
+     * Returns the padding of a tab.
+     *
+     * @return A rect, which contains the left, top, right and bottom padding of a tab, as an
+     * instance of the class {@link Rect}. The rect may not be null
+     */
+    @NonNull
+    private Rect getPadding() {
+        if (getModel().isPaddingAppliedToTabs()) {
+            return new Rect(getModel().getPaddingLeft(), getModel().getPaddingTop(),
+                    getModel().getPaddingRight(), getModel().getPaddingBottom());
+        } else {
+            return new Rect(0, 0, 0, 0);
+        }
     }
 
     /**
@@ -354,6 +372,20 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
     @Override
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
+        ItemIterator iterator =
+                new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
+        AbstractItem item;
+
+        while ((item = iterator.next()) != null) {
+            if (item.isInflated() && item instanceof TabItem) {
+                AbstractTabViewHolder viewHolder = ((TabItem) item).getViewHolder();
+                adaptPadding((PhoneTabViewHolder) viewHolder);
+            }
+        }
+    }
+
+    @Override
+    public final void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
         ItemIterator iterator =
                 new ItemIterator.Builder(getModel(), getViewRecyclerOrThrowException()).create();
         AbstractItem item;

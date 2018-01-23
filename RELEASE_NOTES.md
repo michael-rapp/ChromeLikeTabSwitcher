@@ -1,10 +1,30 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Dec. 31th 2017)
+## Version 1.0.0 (Jan. 23th 2018)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.2.3 (Jan. 23th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Added additional method parameter to the interface `Model.Listener`. It allows to reliably determine, whether the selection changed when adding or removing tabs.
+
+## Version 0.2.2 (Jan. 14th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- `TabSwitcherButton`s are now rendered properly in the preview of tabs.
+- Added the attribute `applyPaddingToTabs`. 
+
+## Version 0.2.1 (Jan. 10th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Overshooting towards the end as well as the start is now possible when using the phone layout, if only one tab is contained by a `TabSwitcher`
+- Fixed the navigation icon of a `TabSwitcher`'s toolbar not being shown
 
 ## Version 0.2.0 (Dec. 30th 2017)
 

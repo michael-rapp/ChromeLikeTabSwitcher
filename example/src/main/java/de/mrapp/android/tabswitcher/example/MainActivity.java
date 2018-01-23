@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -214,6 +214,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             @Override
             public boolean onMenuItemClick(final MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.remove_tab_menu_item:
+                        Tab selectedTab = tabSwitcher.getSelectedTab();
+
+                        if (selectedTab != null) {
+                            tabSwitcher.removeTab(selectedTab);
+                        }
+
+                        return true;
                     case R.id.add_tab_menu_item:
                         int index = tabSwitcher.getCount();
                         Tab tab = createTab(index);
@@ -315,7 +323,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
                 if (tabSwitcher.isSwitcherShown()) {
                     tabSwitcher.addAllTabs(tabs, index);
+                } else if (tabs.length == 1) {
+                    tabSwitcher.addTab(tabs[0], 0, createPeekAnimation());
                 }
+
             }
 
         };

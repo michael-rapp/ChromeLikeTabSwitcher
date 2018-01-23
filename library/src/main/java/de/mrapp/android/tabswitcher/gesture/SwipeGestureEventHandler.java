@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -57,13 +57,16 @@ public class SwipeGestureEventHandler extends AbstractDragGestureEventHandler {
          *         The index of the tab, which should become selected, as an {@link Integer} value
          * @param previousSelectedTabIndex
          *         The index of the previously selected tab as an {@link Integer} value
+         * @param selectionChanged
+         *         True, if the selection has changed, false otherwise
          * @param velocity
          *         The velocity of the swipe gesture in pixels per second as a {@link Float} value
          * @param animationDuration
          *         The duration of the swipe animation in milliseconds as a {@link Long} value
          */
         void onSwitchingBetweenTabsEnded(int selectedTabIndex, int previousSelectedTabIndex,
-                                         float velocity, long animationDuration);
+                                         boolean selectionChanged, float velocity,
+                                         long animationDuration);
 
     }
 
@@ -131,15 +134,18 @@ public class SwipeGestureEventHandler extends AbstractDragGestureEventHandler {
      *         The index of the tab, which should become selected, as an {@link Integer} value
      * @param previousSelectedTabIndex
      *         The index of the previously selected tab as an {@link Integer} value
+     * @param selectionChanged
+     *         True, if the selection has changed, false otherwise
      * @param velocity
      *         The velocity of the swipe gesture in pixels per second as a {@link Float} value
      */
     private void notifyOnSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                    final int previousSelectedTabIndex,
+                                                   final boolean selectionChanged,
                                                    final float velocity) {
         if (callback != null) {
             callback.onSwitchingBetweenTabsEnded(selectedTabIndex, previousSelectedTabIndex,
-                    velocity, swipeAnimationDuration);
+                    selectionChanged, velocity, swipeAnimationDuration);
         }
     }
 
@@ -228,14 +234,16 @@ public class SwipeGestureEventHandler extends AbstractDragGestureEventHandler {
             }
 
             int index = selectedTabIndex;
+            boolean selectionChanged = false;
 
             if (swipeVelocity >= minSwipeVelocity || isSwipeThresholdReached()) {
                 index = getDragHelper().getDragDistance() > 0 ? selectedTabIndex + 1 :
                         selectedTabIndex - 1;
+                selectionChanged = true;
                 index = Math.max(Math.min(index, getTabSwitcher().getCount() - 1), 0);
             }
 
-            notifyOnSwitchingBetweenTabsEnded(index, selectedTabIndex,
+            notifyOnSwitchingBetweenTabsEnded(index, selectedTabIndex, selectionChanged,
                     swipeVelocity >= minSwipeVelocity ? swipeVelocity : 0);
         }
 

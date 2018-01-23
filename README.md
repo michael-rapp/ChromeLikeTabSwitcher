@@ -26,7 +26,7 @@ Alternatively, the library can be added to your Android app as a Gradle dependen
 
 ```groovy
 dependencies {
-    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.0'
+    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.3'
 }
 ```
 
@@ -180,7 +180,7 @@ Animation animation = new RevealAnimation.Builder().setDuration(2000)
 
 ### PeekAnimation
 
-A `RevealAnimation` can be used to add a tab, if the smartphone layout is used and when the switcher is currently not shown. Similar to a `RevealAnimation`, the size of the added tab is animated, starting at a specific position. The tab is then shown at the bottom (or right in landscape mode) of the tab switcher for a short time. Unlike a `RevealAnimation`, a `PeekAnimation` does not cause the added tab to become selected. Its purpose is to give a preview of the added tab, while another tab is still shown fullscreen. This corresponds to the animation, which is used in the Google Chrome browser when opening a link in a new tab. A `PeekAnimation` can be created by using the builder pattern as shown below.
+A `PeekAnimation` can be used to add a tab, if the smartphone layout is used and when the switcher is currently not shown. Similar to a `RevealAnimation`, the size of the added tab is animated, starting at a specific position. The tab is then shown at the bottom (or right in landscape mode) of the tab switcher for a short time. Unlike a `RevealAnimation`, a `PeekAnimation` does not cause the added tab to become selected. Its purpose is to give a preview of the added tab, while another tab is still shown fullscreen. This corresponds to the animation, which is used in the Google Chrome browser when opening a link in a new tab. A `PeekAnimation` can be created by using the builder pattern as shown below.
 
 ```java
 Animation animation = new PeekAnimation.Builder().setDuration(2000)
@@ -192,14 +192,16 @@ Animation animation = new PeekAnimation.Builder().setDuration(2000)
 
 # Using drag gestures
 
-The library provides multiple drag gestures, which can be used to perform certain actions. They can be set to a `TabSwitcher` by using its `addDragGesture`-method. If a previously added drag gesture should be removed, the `removeDragGesture`-method can be used accordingly. Usually, a onscreen area is specified for each gesture in order to specify the area, where drag gestures should be detected. Gestures, which In the following, the available drag gestures are discussed.
+The library provides multiple drag gestures, which can be used to perform certain actions. They can be set to a `TabSwitcher` by using its `addDragGesture`-method. If a previously added drag gesture should be removed, the `removeDragGesture`-method can be used accordingly. Usually, a onscreen area is specified for each gesture in order to specify the area, where drag gestures should be detected. In the following, the available drag gestures are discussed.
 
 ## SwipeGesture
 
 Swipe gestures allow to switch between neighboring tabs, when the tab switcher is not currently shown, by swiping horizontally. Such gestures are represented by instances of the class `SwipeGesture`. In order to create a swipe gesture the builder pattern can be used as shown below. The `setTouchableArea` method call is used to specify the onscreen area, which should be taken into account for recognizing the gesture, the `setAnimationDuration`-method allows to set the duration of the swipe animation and the `setThreshold`-method call sets the distance in pixels, the gesture must last until it is recognized. All of these method calls  are optional.
 
 ```java
-DragGesture gesture = new SwipeGesture.Builder().setTouchableArea(0, 0, 200, 100).setAnimationDuration(1000L).setThreshold(10).create();
+DragGesture gesture = new SwipeGesture.Builder().setTouchableArea(0, 0, 200, 100)
+        .setAnimationDuration(1000L).setThreshold(10)
+        .create();
 ```
 
 ![](doc/images/swipe_gesture.gif)
@@ -209,7 +211,9 @@ DragGesture gesture = new SwipeGesture.Builder().setTouchableArea(0, 0, 200, 100
 A `PullDownGesture` can be used on smartphones to show the tab switcher by pulling down from the top. It does not have any effects when using the tablet layout. Instances of the class `PullDownGesture` can be created as follows.
 
 ```java
-DragGesture gesture = new PullDownGesture.Builder().setTouchableArea(0, 0, 200, 100).setThreshold(10).create();
+DragGesture gesture = new PullDownGesture.Builder().setTouchableArea(0, 0, 200, 100)
+        .setThreshold(10)
+        .create();
 ```
 
 ![](doc/images/pull_down_gesture.gif)
@@ -303,7 +307,7 @@ The class `TabSwitcher` provides `setEmptyView`-methods, which can be used to sp
 
 ```java
 View view = // ... inflate view
-tabSwitcher.setEmpty(view); 
+tabSwitcher.setEmptyView(view); 
 // or tabSwitcher.setEmptyView(view, 1000L) if an animation duration should be specified
 ```
 
@@ -336,6 +340,8 @@ ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, new OnApplyWIndowInsetsLi
 
 });
 ```
+
+If the padding of a `TabSwitcher` should not be applied to the content of tabs, `false` can be passed to the `applyPaddingToTabs`-method. This prevents the content of tabs from being inset, but does not affect the position of tabs or the position of a `TabSwitcher`'s toolbar(s). This might be useful, if you want to take care of the padding, which is applied to tabs by yourself, e.g. when the content should scroll below the system's status and/or navigation bar.
 
 ## Contact information
 

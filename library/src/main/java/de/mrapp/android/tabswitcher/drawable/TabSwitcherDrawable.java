@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
@@ -95,9 +96,8 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
                 resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_normal);
         textSizeSmall =
                 resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_font_size_small);
-        background =
-                ContextCompat.getDrawable(context, R.drawable.tab_switcher_drawable_background)
-                        .mutate();
+        background = ContextCompat.getDrawable(context, R.drawable.tab_switcher_drawable_background)
+                .mutate();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.WHITE);
         paint.setTextAlign(Align.CENTER);
@@ -131,13 +131,13 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
 
     @Override
     public final void draw(@NonNull final Canvas canvas) {
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        Rect bounds = getBounds();
+        int width = bounds.right;
+        int height = bounds.bottom;
         int intrinsicWidth = background.getIntrinsicWidth();
         int intrinsicHeight = background.getIntrinsicHeight();
         int left = (width / 2) - (intrinsicWidth / 2);
         int top = (height / 2) - (intrinsicHeight / 2);
-        background.getIntrinsicWidth();
         background.setBounds(left, top, left + intrinsicWidth, top + intrinsicHeight);
         background.draw(canvas);
         float x = width / 2f;

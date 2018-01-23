@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -1137,8 +1137,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
-        if (previousIndex != index) {
-            contentViewRecycler.removeAll();
+        contentViewRecycler.removeAll();
 
             if (selectedTab != null) {
                 inflateContent(selectedTab, createContentLayoutListener(selectedTab));
@@ -1202,7 +1201,6 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
 
                 secondLayoutPass(new ItemIterator.Builder(getModel(), getTabViewRecycler()));
             }
-        }
 
         print();
     }
@@ -1236,6 +1234,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
+                                 final boolean selectionChanged,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
         tab.addCallback(this);
@@ -1245,6 +1244,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
         for (Tab tab : tabs) {
             tab.addCallback(this);
@@ -1255,6 +1255,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    @NonNull final Animation animation) {
         tab.removeCallback(this);
         // TODO: Implement
@@ -1273,6 +1274,11 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     public final void onPaddingChanged(final int left, final int top, final int right,
                                        final int bottom) {
         adaptTabContainerAndToolbarMargins();
+    }
+
+    @Override
+    public final void onApplyPaddingToTabsChanged(final boolean applyPaddingToTabs) {
+
     }
 
     @Override
@@ -1328,6 +1334,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
+                                                  final boolean selectionChanged,
                                                   final float velocity,
                                                   final long animationDuration) {
         TabItem selectedTabItem =
@@ -1336,7 +1343,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         TabItem neighbor = null;
         boolean left = false;
 
-        if (selectedTabIndex != previousSelectedTabIndex) {
+        if (selectionChanged) {
             neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
             left = selectedTabIndex < previousSelectedTabIndex;
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Michael Rapp
+ * Copyright 2016 - 2018 Michael Rapp
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -117,6 +117,8 @@ public interface Model extends Iterable<Tab> {
          * @param selectedTabIndex
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
+         * @param selectionChanged
+         *         True, if the selection has changed, false otherwise
          * @param switcherVisibilityChanged
          *         True, if adding the tab caused the visibility of the tab switcher to be changed,
          *         false otherwise
@@ -125,8 +127,8 @@ public interface Model extends Iterable<Tab> {
          *         {@link Animation}. The animation may not be null
          */
         void onTabAdded(int index, @NonNull Tab tab, int previousSelectedTabIndex,
-                        int selectedTabIndex, boolean switcherVisibilityChanged,
-                        @NonNull Animation animation);
+                        int selectedTabIndex, boolean selectionChanged,
+                        boolean switcherVisibilityChanged, @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when multiple tabs have been added to the model.
@@ -139,6 +141,8 @@ public interface Model extends Iterable<Tab> {
          * @param previousSelectedTabIndex
          *         The index of the previously selected tab as an {@link Integer} value or -1, if no
          *         tab was selected
+         * @param selectionChanged
+         *         True, if the selection has changed, false otherwise
          * @param selectedTabIndex
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
@@ -147,7 +151,8 @@ public interface Model extends Iterable<Tab> {
          *         {@link Animation}. The animation may not be null
          */
         void onAllTabsAdded(int index, @NonNull Tab[] tabs, int previousSelectedTabIndex,
-                            int selectedTabIndex, @NonNull Animation animation);
+                            int selectedTabIndex, boolean selectionChanged,
+                            @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when a tab has been removed from the model.
@@ -163,12 +168,15 @@ public interface Model extends Iterable<Tab> {
          * @param selectedTabIndex
          *         The index of the currently selected tab as an {@link Integer} value or -1, if the
          *         tab switcher does not contain any tabs
+         * @param selectionChanged
+         *         True, if the selection changed, false otherwise
          * @param animation
          *         The animation, which has been used to remove the tab, as an instance of the class
          *         {@link Animation}. The animation may not be null
          */
         void onTabRemoved(int index, @NonNull Tab tab, int previousSelectedTabIndex,
-                          int selectedTabIndex, @NonNull Animation animation);
+                          int selectedTabIndex, boolean selectionChanged,
+                          @NonNull Animation animation);
 
         /**
          * The method, which is invoked, when all tabs have been removed from the tab switcher.
@@ -195,6 +203,16 @@ public interface Model extends Iterable<Tab> {
          *         The bottom padding, which has been set, in pixels as an {@link Integer} value
          */
         void onPaddingChanged(int left, int top, int right, int bottom);
+
+        /**
+         * The method, which is invoked, when it has been changed, whether the padding of the tab
+         * switcher is applied to the content of its tabs, or not.
+         *
+         * @param applyPaddingToTabs
+         *         True, if the padding of the tab switcher is applied to the content of its tabs,
+         *         false otherwise
+         */
+        void onApplyPaddingToTabsChanged(boolean applyPaddingToTabs);
 
         /**
          * The method, which is invoked, when the default icon of a tab has been changed.
@@ -730,6 +748,26 @@ public interface Model extends Iterable<Tab> {
      * @return The end padding of the tab switcher in pixels as an {@link Integer} value
      */
     int getPaddingEnd();
+
+    /**
+     * Sets, whether the padding of the tab switcher should be applied to the content of its tabs,
+     * or not. When set to <code>false</code> the padding is still taken into account for
+     * positioning tabs and the tab switcher's toolbars.
+     *
+     * @param applyPaddingToTabs
+     *         True, if the padding of the tab switcher should be applied to the content of its
+     *         tabs, false otherwise
+     */
+    void applyPaddingToTabs(boolean applyPaddingToTabs);
+
+    /**
+     * Returns, whether the padding of the tab switcher is applied to the content of its tabs, or
+     * not.
+     *
+     * @return True, if the padding of the tab switcher is applied to the content of its tabs, false
+     * otherwise
+     */
+    boolean isPaddingAppliedToTabs();
 
     /**
      * Returns the default icon of a tab.
