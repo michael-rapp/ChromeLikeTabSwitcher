@@ -3169,6 +3169,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
+                                 final boolean selectionChanged,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
         getLogger().logInfo(getClass(),
@@ -3195,6 +3196,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for adding multiple tabs");
@@ -3207,6 +3209,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    @NonNull final Animation animation) {
         ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for removing tabs");
@@ -3219,7 +3222,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
             if (getModel().isEmpty()) {
                 toolbar.setAlpha(getModel().areToolbarsShown() ? 1 : 0);
-            } else if (selectedTabIndex != previousSelectedTabIndex) {
+            } else if (selectionChanged) {
                 tabViewRecycler.inflate(
                         TabItem.create(getTabSwitcher(), tabViewRecycler, selectedTabIndex));
             }
@@ -3429,6 +3432,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
+                                                  final boolean selectionChanged,
                                                   final float velocity,
                                                   final long animationDuration) {
         TabItem selectedTabItem =
@@ -3437,7 +3441,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
         TabItem neighbor = null;
         boolean left = false;
 
-        if (selectedTabIndex != previousSelectedTabIndex) {
+        if (selectionChanged) {
             neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
             left = selectedTabIndex < previousSelectedTabIndex;
         } else if (getArithmetics().getPosition(Axis.X_AXIS, selectedTabItem) > 0) {

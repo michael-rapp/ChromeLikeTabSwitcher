@@ -248,6 +248,7 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
+                                 final boolean selectionChanged,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
 
@@ -256,6 +257,7 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     @Override
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
 
     }
@@ -263,6 +265,7 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    @NonNull final Animation animation) {
 
     }

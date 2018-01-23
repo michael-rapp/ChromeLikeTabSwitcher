@@ -1100,83 +1100,63 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     public final void onSelectionChanged(final int previousIndex, final int index,
                                          @Nullable final Tab selectedTab,
                                          final boolean switcherHidden) {
-        if (previousIndex != index) {
-            contentViewRecycler.removeAll();
+        contentViewRecycler.removeAll();
 
-            if (selectedTab != null) {
-                inflateContent(selectedTab, createContentLayoutListener(selectedTab));
-                tabViewRecycler.setComparator(
-                        Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
-                int tabSpacing = calculateTabSpacing();
-                int previousSelectedItemIndex = previousIndex +
-                        (previousIndex != -1 && getModel().isAddTabButtonShown() ? 1 : 0);
-                int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
-                TabItem selectedTabItem = TabItem.create(getModel(), tabViewRecycler, index);
-                float referencePosition;
+        if (selectedTab != null) {
+            inflateContent(selectedTab, createContentLayoutListener(selectedTab));
+            tabViewRecycler.setComparator(
+                    Collections.reverseOrder(new TabletItemComparator(getTabSwitcher())));
+            int tabSpacing = calculateTabSpacing();
+            int previousSelectedItemIndex = previousIndex +
+                    (previousIndex != -1 && getModel().isAddTabButtonShown() ? 1 : 0);
+            int selectedItemIndex = index + (getModel().isAddTabButtonShown() ? 1 : 0);
+            TabItem selectedTabItem = TabItem.create(getModel(), tabViewRecycler, index);
+            float referencePosition;
 
-                if (selectedTabItem.isInflated()) {
-                    referencePosition = selectedTabItem.getTag().getPosition();
-                } else if (isStackedAtStart(selectedTabItem.getIndex())) {
-                    Pair<Float, State> pair =
-                            calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
-                                    selectedTabItem.getIndex(), selectedTabItem);
-                    referencePosition = pair.first;
-                } else {
-                    Pair<Float, State> pair =
-                            calculatePositionAndStateWhenStackedAtEnd(selectedTabItem.getIndex());
-                    referencePosition = pair.first;
-                }
-
-                AbstractItemIterator iterator =
-                        new ItemIterator.Builder(getModel(), getTabViewRecycler())
-                                .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
-                AbstractItem item;
-
-                while ((item = iterator.next()) != null) {
-                    float position = -1;
-
-                    if (item.getIndex() == selectedItemIndex) {
-                        position = referencePosition;
-                    } else if (item.getIndex() < selectedItemIndex) {
-                        position = referencePosition +
-                                ((selectedItemIndex - item.getIndex()) * tabSpacing);
-                    } else if (item.getIndex() == previousSelectedItemIndex) {
-                        position = item.getTag().getPosition();
-                    } else if (item.getTag().getState() == State.STACKED_END ||
-                            (item.getTag().getState() == State.HIDDEN &&
-                                    item.getIndex() < (selectedItemIndex + getStackedTabCount()))) {
-                        position = referencePosition;
-                    }
-
-                    if (position != -1) {
-                        Pair<Float, State> pair =
-                                clipPosition(item.getIndex(), position, iterator.previous());
-                        item.getTag().setPosition(pair.first);
-                        item.getTag().setState(pair.second);
-                        inflateOrRemoveView(item, false);
-                    }
-                }
-
-                secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
-
-                    /*
-                    if (previousIndex > index) {
-                        iterator = new ItemIterator.Builder(getModel(), getTabViewRecycler())
-                                .start(previousIndex + (getModel().isAddTabButtonShown() ? 1 : 0))
-                                .create();
-                        TabItem tabItem = (TabItem) iterator.next();
-
-                        if (tabItem != null) {
-                            Pair<Float, State> pair =
-                                    clipPosition(tabItem.getIndex(), tabItem.getTag().getPosition(),
-                                            iterator.previous());
-                            tabItem.getTag().setPosition(pair.first);
-                            tabItem.getTag().setState(pair.second);
-                            inflateOrRemoveView(tabItem);
-                        }
-                    }
-                    */
+            if (selectedTabItem.isInflated()) {
+                referencePosition = selectedTabItem.getTag().getPosition();
+            } else if (isStackedAtStart(selectedTabItem.getIndex())) {
+                Pair<Float, State> pair =
+                        calculatePositionAndStateWhenStackedAtStart(getModel().getCount(),
+                                selectedTabItem.getIndex(), selectedTabItem);
+                referencePosition = pair.first;
+            } else {
+                Pair<Float, State> pair =
+                        calculatePositionAndStateWhenStackedAtEnd(selectedTabItem.getIndex());
+                referencePosition = pair.first;
             }
+
+            AbstractItemIterator iterator =
+                    new ItemIterator.Builder(getModel(), getTabViewRecycler())
+                            .start(getModel().isAddTabButtonShown() ? 1 : 0).create();
+            AbstractItem item;
+
+            while ((item = iterator.next()) != null) {
+                float position = -1;
+
+                if (item.getIndex() == selectedItemIndex) {
+                    position = referencePosition;
+                } else if (item.getIndex() < selectedItemIndex) {
+                    position = referencePosition +
+                            ((selectedItemIndex - item.getIndex()) * tabSpacing);
+                } else if (item.getIndex() == previousSelectedItemIndex) {
+                    position = item.getTag().getPosition();
+                } else if (item.getTag().getState() == State.STACKED_END ||
+                        (item.getTag().getState() == State.HIDDEN &&
+                                item.getIndex() < (selectedItemIndex + getStackedTabCount()))) {
+                    position = referencePosition;
+                }
+
+                if (position != -1) {
+                    Pair<Float, State> pair =
+                            clipPosition(item.getIndex(), position, iterator.previous());
+                    item.getTag().setPosition(pair.first);
+                    item.getTag().setState(pair.second);
+                    inflateOrRemoveView(item, false);
+                }
+            }
+
+            secondLayoutPass(new ItemIterator.Builder(getTabSwitcher(), getTabViewRecycler()));
         }
     }
 
@@ -1206,6 +1186,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onTabAdded(final int index, @NonNull final Tab tab,
                                  final int previousSelectedTabIndex, final int selectedTabIndex,
+                                 final boolean selectionChanged,
                                  final boolean switcherVisibilityChanged,
                                  @NonNull final Animation animation) {
         tab.addCallback(this);
@@ -1215,6 +1196,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
         for (Tab tab : tabs) {
             tab.addCallback(this);
@@ -1225,6 +1207,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onTabRemoved(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    @NonNull final Animation animation) {
         tab.removeCallback(this);
         // TODO: Implement
@@ -1303,6 +1286,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     @Override
     public final void onSwitchingBetweenTabsEnded(final int selectedTabIndex,
                                                   final int previousSelectedTabIndex,
+                                                  final boolean selectionChanged,
                                                   final float velocity,
                                                   final long animationDuration) {
         TabItem selectedTabItem =
@@ -1311,7 +1295,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
         TabItem neighbor = null;
         boolean left = false;
 
-        if (selectedTabIndex != previousSelectedTabIndex) {
+        if (selectionChanged) {
             neighbor = TabItem.create(getModel(), getTabViewRecycler(), previousSelectedTabIndex);
             left = selectedTabIndex < previousSelectedTabIndex;
         } else {

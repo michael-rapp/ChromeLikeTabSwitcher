@@ -460,6 +460,8 @@ public class TabSwitcherModel implements Model, Restorable {
      * @param selectedTabIndex
      *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
      *         switcher does not contain any tabs
+     * @param selectionChanged
+     *         True, if the selection has changed, false otherwise
      * @param switcherVisibilityChanged
      *         True, if adding the tab caused the visibility of the tab switcher to be changed,
      *         false otherwise
@@ -469,11 +471,12 @@ public class TabSwitcherModel implements Model, Restorable {
      */
     private void notifyOnTabAdded(final int index, @NonNull final Tab tab,
                                   final int previousSelectedTabIndex, final int selectedTabIndex,
+                                  final boolean selectionChanged,
                                   final boolean switcherVisibilityChanged,
                                   @NonNull final Animation animation) {
         for (Listener listener : listeners) {
             listener.onTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
-                    switcherVisibilityChanged, animation);
+                    selectionChanged, switcherVisibilityChanged, animation);
         }
     }
 
@@ -491,17 +494,19 @@ public class TabSwitcherModel implements Model, Restorable {
      * @param selectedTabIndex
      *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
      *         switcher does not contain any tabs
+     * @param selectionChanged
+     *         True, if the selection has changed, false otherwise
      * @param animation
      *         The animation, which has been used to add the tabs, as an instance of the class
      *         {@link Animation}. The animation may not be null
      */
     private void notifyOnAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                       final int previousSelectedTabIndex,
-                                      final int selectedTabIndex,
+                                      final int selectedTabIndex, final boolean selectionChanged,
                                       @NonNull final Animation animation) {
         for (Listener listener : listeners) {
             listener.onAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
-                    animation);
+                    selectionChanged, animation);
         }
     }
 
@@ -519,16 +524,19 @@ public class TabSwitcherModel implements Model, Restorable {
      * @param selectedTabIndex
      *         The index of the currently selected tab as an {@link Integer} value or -1, if the tab
      *         switcher does not contain any tabs
+     * @param selectionChanged
+     *         True, if the selection has changed, false otherwiseF
      * @param animation
      *         The animation, which has been used to remove the tab, as an instance of the class
      *         {@link Animation}. The animation may not be null
      */
     private void notifyOnTabRemoved(final int index, @NonNull final Tab tab,
                                     final int previousSelectedTabIndex, final int selectedTabIndex,
+                                    final boolean selectionChanged,
                                     @NonNull final Animation animation) {
         for (Listener listener : listeners) {
             listener.onTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex,
-                    animation);
+                    selectionChanged, animation);
         }
     }
 
@@ -1054,16 +1062,19 @@ public class TabSwitcherModel implements Model, Restorable {
         tabs.add(index, tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
         int selectedTabIndex = previousSelectedTabIndex;
+        boolean selectionChanged = false;
         boolean switcherVisibilityChanged = false;
 
         if (previousSelectedTabIndex == -1) {
             selectedTab = tab;
             selectedTabIndex = index;
+            selectionChanged = true;
         }
 
         if (animation instanceof RevealAnimation) {
             selectedTab = tab;
             selectedTabIndex = index;
+            selectionChanged = true;
             switcherVisibilityChanged = setSwitcherShown(false);
         }
 
@@ -1071,7 +1082,7 @@ public class TabSwitcherModel implements Model, Restorable {
             switcherVisibilityChanged = setSwitcherShown(true);
         }
 
-        notifyOnTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex,
+        notifyOnTabAdded(index, tab, previousSelectedTabIndex, selectedTabIndex, selectionChanged,
                 switcherVisibilityChanged, animation);
     }
 
@@ -1113,6 +1124,7 @@ public class TabSwitcherModel implements Model, Restorable {
         if (tabs.length > 0) {
             int previousSelectedTabIndex = getSelectedTabIndex();
             int selectedTabIndex = previousSelectedTabIndex;
+            boolean selectionChanged = false;
 
             for (int i = 0; i < tabs.length; i++) {
                 Tab tab = tabs[i];
@@ -1122,10 +1134,11 @@ public class TabSwitcherModel implements Model, Restorable {
             if (previousSelectedTabIndex == -1) {
                 selectedTabIndex = 0;
                 selectedTab = tabs[selectedTabIndex];
+                selectionChanged = true;
             }
 
             notifyOnAllTabsAdded(index, tabs, previousSelectedTabIndex, selectedTabIndex,
-                    animation);
+                    selectionChanged, animation);
         }
     }
 
@@ -1141,20 +1154,24 @@ public class TabSwitcherModel implements Model, Restorable {
         int index = indexOfOrThrowException(tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
         int selectedTabIndex = previousSelectedTabIndex;
+        boolean selectionChanged = false;
         tabs.remove(index);
 
         if (isEmpty()) {
             selectedTabIndex = -1;
             selectedTab = null;
+            selectionChanged = true;
         } else if (index == previousSelectedTabIndex) {
             if (index > 0) {
                 selectedTabIndex = index - 1;
             }
 
             selectedTab = getTab(selectedTabIndex);
+            selectionChanged = true;
         }
 
-        notifyOnTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex, animation);
+        notifyOnTabRemoved(index, tab, previousSelectedTabIndex, selectedTabIndex, selectionChanged,
+                animation);
 
     }
 

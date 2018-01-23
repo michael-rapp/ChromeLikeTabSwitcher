@@ -608,11 +608,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onTabAdded(final int index, @NonNull final Tab tab,
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
+                                   final boolean selectionChanged,
                                    final boolean switcherVisibilityChanged,
                                    @NonNull final Animation animation) {
                 notifyOnTabAdded(index, tab, animation);
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
@@ -625,13 +626,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onAllTabsAdded(final int index, @NonNull final Tab[] tabs,
                                        final int previousSelectedTabIndex,
-                                       final int selectedTabIndex,
+                                       final int selectedTabIndex, final boolean selectionChanged,
                                        @NonNull final Animation animation) {
                 for (Tab tab : tabs) {
                     notifyOnTabAdded(index, tab, animation);
                 }
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
@@ -640,10 +641,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             @Override
             public void onTabRemoved(final int index, @NonNull final Tab tab,
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
+                                     final boolean selectionChanged,
                                      @NonNull final Animation animation) {
                 notifyOnTabRemoved(index, tab, animation);
 
-                if (previousSelectedTabIndex != selectedTabIndex) {
+                if (selectionChanged) {
                     notifyOnSelectionChanged(selectedTabIndex,
                             selectedTabIndex != -1 ? getTab(selectedTabIndex) : null);
                 }
