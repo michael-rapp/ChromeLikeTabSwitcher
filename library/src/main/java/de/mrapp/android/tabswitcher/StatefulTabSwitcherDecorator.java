@@ -17,12 +17,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -57,9 +55,9 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitcherDecorator {
 
     /**
-     * A map, which is used to store the states of tabs.
+     * A sparse array, which is used to store the states of tabs.
      */
-    private Map<Tab, StateType> states;
+    private SparseArray<StateType> states;
 
     /**
      * The method, which is invoked on subclasses in order to create the state for a specific tab.
@@ -177,7 +175,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
         ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
-            return states.get(tab);
+            return states.get(tab.hashCode());
         }
 
         return null;
@@ -194,9 +192,9 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
         ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
-            states.remove(tab);
+            states.remove(tab.hashCode());
 
-            if (states.isEmpty()) {
+            if (states.size() == 0) {
                 states = null;
             }
         }
@@ -218,17 +216,18 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
                                 @NonNull final Tab tab, final int index, final int viewType,
                                 @Nullable final Bundle savedInstanceState) {
         if (states == null) {
-            states = new HashMap<>();
+            states = new SparseArray<>();
         }
 
-        StateType state = states.get(tab);
+        int hashCode = tab.hashCode();
+        StateType state = states.get(hashCode);
 
         if (state == null) {
             state = onCreateState(context, tabSwitcher, view, tab, index, viewType,
                     savedInstanceState);
 
             if (state != null) {
-                states.put(tab, state);
+                states.put(hashCode, state);
             }
         }
 
