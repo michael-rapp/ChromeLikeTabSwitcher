@@ -64,7 +64,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      */
     public PreviewDataBinder(@NonNull final ViewGroup parent,
                              @NonNull final ViewRecycler<Tab, Void> contentViewRecycler) {
-        super(parent.getContext(), new LruCache<Tab, Bitmap>(7));
+        super(parent.getContext().getApplicationContext(), new LruCache<Tab, Bitmap>(7));
         ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
         this.parent = parent;
