@@ -22,6 +22,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.ref.SoftReference;
+
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -57,7 +59,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
     /**
      * A sparse array, which is used to store the states of tabs.
      */
-    private SparseArray<StateType> states;
+    private SparseArray<SoftReference<StateType>> states;
 
     /**
      * The method, which is invoked on subclasses in order to create the state for a specific tab.
@@ -168,14 +170,18 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
      *         The tab, whose state should be returned, as an instance of the class {@link Tab}. The
      *         tab may not be null
      * @return The state of the given tab as an instance of the generic type {@link StateType} or
-     * null, if no state has been created yet
+     * null, if no state has been created yet or if it was removed
      */
     @Nullable
     public final StateType getState(@NonNull final Tab tab) {
         ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
-            return states.get(tab.hashCode());
+            SoftReference<StateType> reference = states.get(tab.hashCode());
+
+            if (reference != null) {
+                return reference.get();
+            }
         }
 
         return null;
@@ -219,15 +225,14 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
             states = new SparseArray<>();
         }
 
-        int hashCode = tab.hashCode();
-        StateType state = states.get(hashCode);
+        StateType state = getState(tab);
 
         if (state == null) {
             state = onCreateState(context, tabSwitcher, view, tab, index, viewType,
                     savedInstanceState);
 
             if (state != null) {
-                states.put(hashCode, state);
+                states.put(tab.hashCode(), new SoftReference<>(state));
             }
         }
 
