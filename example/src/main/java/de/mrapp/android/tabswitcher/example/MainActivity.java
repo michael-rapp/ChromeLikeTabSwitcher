@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
             if (tab.equals(key)) {
                 adapter = data;
                 view.setAdapter(adapter);
-                // TODO: Unregister listener
+                dataBinder.removeListener(this);
             }
         }
 
@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 view.setAdapter(data);
             }
         }
+
     }
 
     /**
