@@ -55,11 +55,13 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
      * display them afterwards.
      *
-     * @param parent              The parent view of the tab switcher, the tabs belong to, as an instance of the class
-     *                            {@link ViewGroup}. The parent may not be null
-     * @param contentViewRecycler The view recycler, which should be used to inflate the views, which are associated
-     *                            with tabs, as an instance of the class ViewRecycler. The view recycler may not be
-     *                            null
+     * @param parent
+     *         The parent view of the tab switcher, the tabs belong to, as an instance of the class
+     *         {@link ViewGroup}. The parent may not be null
+     * @param contentViewRecycler
+     *         The view recycler, which should be used to inflate the views, which are associated
+     *         with tabs, as an instance of the class ViewRecycler. The view recycler may not be
+     *         null
      */
     public PreviewDataBinder(@NonNull final ViewGroup parent,
                              @NonNull final ViewRecycler<Tab, Void> contentViewRecycler) {
@@ -109,13 +111,15 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
 
     @Override
     protected final void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
-                                       @NonNull final TabItem... params) {
+                                       final long duration, @NonNull final TabItem... params) {
         view.setImageBitmap(data);
 
         if (data != null) {
             view.setAlpha(0f);
             view.setVisibility(View.VISIBLE);
-            view.animate().alpha(1f).setDuration(getContext().getResources().getInteger(android.R.integer.config_longAnimTime)).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            view.animate().alpha(1f).setDuration(
+                    getContext().getResources().getInteger(android.R.integer.config_longAnimTime))
+                    .setInterpolator(new AccelerateDecelerateInterpolator()).start();
         } else {
             view.setVisibility(View.INVISIBLE);
         }
