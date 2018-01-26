@@ -28,10 +28,12 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
  * A {@link TabSwitcherDecorator}, which allows to store any arbitrary state for each tab of the
- * associated {@link TabSwitcher}. Unlike the parameters, which can be set for an individual {@link
- * Tab} using the method {@link Tab#setParameters(Bundle)}, these states are not restored when
- * restoring the state of a {@link TabSwitcher}, e.g. after orientation changes. Instead the state
- * is vanished and will be created from scratch when the tab is shown for the next time.
+ * associated {@link TabSwitcher}. The state is kept even if the tab is currently not shown.
+ * However, it is possible that states are vanished, if few memory is available, because they are
+ * stored using {@link SoftReference}s. Unlike the parameters, which can be set for an individual
+ * {@link Tab} using the method {@link Tab#setParameters(Bundle)}, these states are not restored
+ * when restoring the state of a {@link TabSwitcher}, e.g. after orientation changes. Instead the
+ * state is vanished and will be created from scratch when the tab is shown for the next time.
  * <p>
  * If it is necessary to store some data from a state, it can be put into the bundle, which is
  * passed to the {@link #onSaveInstanceState(View, Tab, int, int, Object, Bundle)} method. The data
@@ -39,10 +41,10 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * {@link #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} is invoked for the next
  * time.
  * <p>
- * By default, the state of a tab is kept even when the tab has been removed from the
- * {@link TabSwitcher}. To manually remove the state of a specific tab, the method
- * {@link #clearState(Tab)} can be used. The method {@link #clearAllStates()} allows to remove the
- * states of all tabs accordingly.
+ * By default, the state of a tab is kept even when the tab has been removed from the {@link
+ * TabSwitcher}. To manually remove the state of a specific tab, the method {@link #clearState(Tab)}
+ * can be used. The method {@link #clearAllStates()} allows to remove the states of all tabs
+ * accordingly.
  * <p>
  * IMPORTANT: States must not store references to views, which have been inflated in the decorator's
  * {@link #onInflateView(LayoutInflater, ViewGroup, int)} method, because these views can be reused
