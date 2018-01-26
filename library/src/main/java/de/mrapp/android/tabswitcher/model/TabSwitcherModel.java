@@ -53,6 +53,7 @@ import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
+import de.mrapp.android.util.datastructure.ListenerList;
 import de.mrapp.android.util.logging.LogLevel;
 
 import static de.mrapp.android.util.Condition.ensureNotEqual;
@@ -341,13 +342,13 @@ public class TabSwitcherModel implements Model, Restorable {
      * A set, which contains the listeners, which should be notified, when a tab is about to be
      * closed by clicking its close button.
      */
-    private final Set<TabCloseListener> tabCloseListeners;
+    private final ListenerList<TabCloseListener> tabCloseListeners;
 
     /**
      * A set, which contains the listeners, which should be notified, when the previews of tabs are
      * about to be loaded.
      */
-    private final Set<TabPreviewListener> tabPreviewListeners;
+    private final ListenerList<TabPreviewListener> tabPreviewListeners;
 
     /**
      * Returns the index of a specific tab or throws a {@link NoSuchElementException}, if the model
@@ -815,8 +816,8 @@ public class TabSwitcherModel implements Model, Restorable {
         this.toolbarNavigationIconListener = null;
         this.toolbarMenuId = -1;
         this.toolbarMenuItemListener = null;
-        this.tabCloseListeners = new LinkedHashSet<>();
-        this.tabPreviewListeners = new LinkedHashSet<>();
+        this.tabCloseListeners = new ListenerList<>();
+        this.tabPreviewListeners = new ListenerList<>();
     }
 
     /**
@@ -956,12 +957,12 @@ public class TabSwitcherModel implements Model, Restorable {
      * Returns the listeners, which should be notified, when a tab is about to be closed by clicking
      * its close button.
      *
-     * @return A set, which contains the listeners, which should be notified, when a tab is about to
-     * be closed by clicking its close button, as an instance of the type {@link Set} or an empty
-     * set, if no listeners should be notified
+     * @return A list, which contains the listeners, which should be notified, when a tab is about
+     * to be closed by clicking its close button, as an instance of the type ListenerList or an
+     * empty list, if no listeners should be notified
      */
     @NonNull
-    public final Set<TabCloseListener> getTabCloseListeners() {
+    public final ListenerList<TabCloseListener> getTabCloseListeners() {
         return tabCloseListeners;
     }
 
@@ -969,12 +970,12 @@ public class TabSwitcherModel implements Model, Restorable {
      * Returns the listeners, which should be notified, when the previews of tabs are about to be
      * loaded.
      *
-     * @return A set, which contains the listeners, which should be notified, when the previews of
-     * tabs are about to be loaded, as an instance of the type {@link Set} or an empty set, if no
+     * @return A list, which contains the listeners, which should be notified, when the previews of
+     * tabs are about to be loaded, as an instance of the type ListenerList or an empty list, if no
      * listeners should be notified
      */
     @NonNull
-    public final Set<TabPreviewListener> getTabPreviewListeners() {
+    public final ListenerList<TabPreviewListener> getTabPreviewListeners() {
         return tabPreviewListeners;
     }
 

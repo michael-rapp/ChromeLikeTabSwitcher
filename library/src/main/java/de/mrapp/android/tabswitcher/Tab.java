@@ -29,8 +29,7 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import de.mrapp.android.util.datastructure.ListenerList;
 
 import static de.mrapp.android.util.Condition.ensureNotEmpty;
 import static de.mrapp.android.util.Condition.ensureNotNull;
@@ -164,7 +163,7 @@ public class Tab implements Parcelable {
      * A set, which contains the callbacks, which have been registered to be notified, when the
      * tab's properties have been changed.
      */
-    private final Set<Callback> callbacks = new LinkedHashSet<>();
+    private final ListenerList<Callback> callbacks = new ListenerList<>();
 
     /**
      * The tab's title.
