@@ -68,7 +68,9 @@ import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
  */
 public class MainActivity extends AppCompatActivity implements TabSwitcherListener {
 
-    private class State implements AbstractDataBinder.Listener<ArrayAdapter<String>, Tab, ListView, Void>, Restorable, TabPreviewListener {
+    private class State
+            implements AbstractDataBinder.Listener<ArrayAdapter<String>, Tab, ListView, Void>,
+            Restorable, TabPreviewListener {
 
         private final Tab tab;
 
@@ -88,17 +90,23 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         }
 
         @Override
-        public boolean onLoadData(@NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder, @NonNull final Tab key, @NonNull final Void... params) {
+        public boolean onLoadData(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder,
+                @NonNull final Tab key, @NonNull final Void... params) {
             return true;
         }
 
         @Override
-        public void onCanceled(@NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder) {
+        public void onCanceled(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder) {
 
         }
 
         @Override
-        public void onFinished(@NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder, @NonNull final Tab key, @Nullable final ArrayAdapter<String> data, @NonNull final ListView view, @NonNull final Void... params) {
+        public void onFinished(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder,
+                @NonNull final Tab key, @Nullable final ArrayAdapter<String> data,
+                @NonNull final ListView view, @NonNull final Void... params) {
             if (tab.equals(key)) {
                 adapter = data;
                 view.setAdapter(adapter);
@@ -126,13 +134,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 String[] items = savedInstanceState.getStringArray(key);
 
                 if (items != null && items.length > 0) {
-                    adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, items);
+                    adapter = new ArrayAdapter<>(MainActivity.this,
+                            android.R.layout.simple_list_item_1, items);
                 }
             }
         }
 
         @Override
-        public boolean onLoadTabPreview(@NonNull final TabSwitcher tabSwitcher, @NonNull final Tab tab) {
+        public boolean onLoadTabPreview(@NonNull final TabSwitcher tabSwitcher,
+                                        @NonNull final Tab tab) {
             return !this.tab.equals(tab) || adapter != null;
 
         }
@@ -146,7 +156,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
         @Nullable
         @Override
-        protected State onCreateState(@NonNull final Context context, @NonNull final TabSwitcher tabSwitcher, @NonNull final View view, @NonNull final Tab tab, final int index, final int viewType, @Nullable final Bundle savedInstanceState) {
+        protected State onCreateState(@NonNull final Context context,
+                                      @NonNull final TabSwitcher tabSwitcher,
+                                      @NonNull final View view, @NonNull final Tab tab,
+                                      final int index, final int viewType,
+                                      @Nullable final Bundle savedInstanceState) {
             if (viewType == 2) {
                 State state = new State(tab);
                 tabSwitcher.addTabPreviewListener(state);
@@ -170,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 state.saveInstanceState(outState);
             }
         }
-
 
         @NonNull
         @Override
@@ -232,7 +245,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
     }
 
-    private static class DataBinder extends AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> {
+    private static class DataBinder
+            extends AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> {
 
         public DataBinder(@NonNull final Context context) {
             super(context.getApplicationContext());
@@ -257,7 +271,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         }
 
         @Override
-        protected void onPostExecute(@NonNull ListView view, @Nullable ArrayAdapter<String> data, @NonNull Void... params) {
+        protected void onPostExecute(@NonNull ListView view, @Nullable ArrayAdapter<String> data,
+                                     final long duration, @NonNull Void... params) {
             if (data != null) {
                 view.setAdapter(data);
             }
@@ -453,11 +468,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
      * Creates and returns a listener, which allows to undo the removal of tabs from the tab
      * switcher, when the button of the activity's snackbar is clicked.
      *
-     * @param snackbar The activity's snackbar as an instance of the class {@link Snackbar}. The snackbar
-     *                 may not be null
-     * @param index    The index of the first tab, which has been removed, as an {@link Integer} value
-     * @param tabs     An array, which contains the tabs, which have been removed, as an array of the type
-     *                 {@link Tab}. The array may not be null
+     * @param snackbar
+     *         The activity's snackbar as an instance of the class {@link Snackbar}. The snackbar
+     *         may not be null
+     * @param index
+     *         The index of the first tab, which has been removed, as an {@link Integer} value
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The array may not be null
      * @return The listener, which has been created, as an instance of the type {@link
      * OnClickListener}. The listener may not be null
      */
@@ -485,11 +503,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     /**
      * Shows a snackbar, which allows to undo the removal of tabs from the activity's tab switcher.
      *
-     * @param text  The text of the snackbar as an instance of the type {@link CharSequence}. The text
-     *              may not be null
-     * @param index The index of the first tab, which has been removed, as an {@link Integer} value
-     * @param tabs  An array, which contains the tabs, which have been removed, as an array of the type
-     *              {@link Tab}. The array may not be null
+     * @param text
+     *         The text of the snackbar as an instance of the type {@link CharSequence}. The text
+     *         may not be null
+     * @param index
+     *         The index of the first tab, which has been removed, as an {@link Integer} value
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The array may not be null
      */
     private void showUndoSnackbar(@NonNull final CharSequence text, final int index,
                                   @NonNull final Tab... tabs) {
@@ -561,7 +582,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     /**
      * Creates and returns a tab.
      *
-     * @param index The index, the tab should be added at, as an {@link Integer} value
+     * @param index
+     *         The index, the tab should be added at, as an {@link Integer} value
      * @return The tab, which has been created, as an instance of the class {@link Tab}. The tab may
      * not be null
      */
