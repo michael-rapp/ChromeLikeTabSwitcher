@@ -46,7 +46,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * It is recommended to use the class {@link AbstractState} as a base class for implementing states.
  * This is not necessary though. Said class stores a reference to the tab, it corresponds to and
  * implements the interface {@link Restorable} to be able to store and restore its state. By
- * implementing these methods and calling them in the decorator's
+ * implementing the methods of this interface and calling them in the decorator's
  * {@link #onSaveInstanceState(View, Tab, int, int, Object, Bundle)}, respectively
  * {@link #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} method, the selected
  * properties of the state can be stored and restored.
@@ -101,6 +101,16 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
         @NonNull
         public Tab getTab() {
             return tab;
+        }
+
+        @Override
+        public void saveInstanceState(@NonNull final Bundle outState) {
+
+        }
+
+        @Override
+        public void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
+
         }
 
     }
