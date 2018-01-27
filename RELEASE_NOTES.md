@@ -5,6 +5,7 @@
 A minor release, which introduces the following changes:
 
 - Added the class `StatefulTabSwitcherDecorator`.
+- The saved states of tabs are now cleared when the corresponding tab is removed by default. This can be turned of by using the `clearSavedStatesWhenRemovingTabs`-method. 
 - Fade animations can now be used to show the previews of tabs when using the smartphone layout.
 - Updated `targetSdkVersion` to API level 27 (Android 8.1).
 - Updated dependency "AndroidUtil" to version 1.19.0.
