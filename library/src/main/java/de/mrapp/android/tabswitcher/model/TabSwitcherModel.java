@@ -56,6 +56,7 @@ import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.util.datastructure.ListenerList;
 import de.mrapp.android.util.logging.LogLevel;
 
+import static de.mrapp.android.util.Condition.ensureAtLeast;
 import static de.mrapp.android.util.Condition.ensureNotEqual;
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -1532,6 +1533,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setTabPreviewFadeThreshold(final long threshold) {
+        ensureAtLeast(threshold, 0, "The threshold must be at least 0");
         this.tabPreviewFadeThreshold = threshold;
     }
 
@@ -1542,6 +1544,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setTabPreviewFadeDuration(final long duration) {
+        ensureAtLeast(duration, 0, "The duration must be at least 0");
         this.tabPreviewFadeDuration = duration;
     }
 
