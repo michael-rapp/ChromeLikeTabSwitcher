@@ -252,7 +252,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
         super(tabSwitcher, model, style);
         ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;
-        this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler);
+        this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler, model);
         this.dataBinder.addListener(this);
         Resources resources = tabSwitcher.getResources();
         this.tabInset = resources.getDimensionPixelSize(R.dimen.tab_inset);

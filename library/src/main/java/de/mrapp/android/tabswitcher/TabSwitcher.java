@@ -58,6 +58,7 @@ import de.mrapp.android.tabswitcher.gesture.DragGestureEventHandlerFactory;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
+import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneTabSwitcherLayout;
@@ -81,18 +82,18 @@ import static de.mrapp.android.util.DisplayUtil.getOrientation;
 /**
  * A tab switcher, which allows to switch between multiple tabs. It it is designed similar to the
  * tab switcher of the Google Chrome Android app.
- *
+ * <p>
  * In order to specify the appearance of individual tabs, a class, which extends from the abstract
  * class {@link TabSwitcherDecorator}, must be implemented and set to the tab switcher via the
  * <code>setDecorator</code>-method.
- *
+ * <p>
  * The currently selected tab is shown fullscreen by default. When displaying the switcher via the
  * <code>showSwitcher-method</code>, an overview of all tabs is shown, allowing to select an other
  * tab by clicking it. By swiping a tab or by clicking its close button, it can be removed,
  * resulting in the selected tab to be altered automatically. The switcher can programmatically be
  * hidden by calling the <code>hideSwitcher</code>-method. By calling the
  * <code>setSelectedTab</code>-method programmatically, a tab is selected and shown fullscreen.
- *
+ * <p>
  * Individual tabs are represented by instances of the class {@link Tab}. Such tabs can dynamically
  * be added to the tab switcher by using the <code>addTab</code>-methods. In order to remove them
  * afterwards, the <code>removeTab</code> can be used. If the switcher is currently shown, calling
@@ -329,9 +330,12 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainAddTabButtonColor(typedArray);
             obtainTabTitleTextColor(typedArray);
             obtainTabCloseButtonIcon(typedArray);
+            obtainShowToolbars(typedArray);
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
             obtainToolbarMenu(typedArray);
+            obtainTabPreviewFadeThreshold(typedArray);
+            obtainTabPreviewFadeDuration(typedArray);
             obtainEmptyView(typedArray);
         } finally {
             typedArray.recycle();
@@ -458,6 +462,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * Obtains, whether the tab switcher's toolbars should be shown, or not, from a specific typed
+     * array.
+     *
+     * @param typedArray
+     *         The typed array, it should be obtained from, whether the toolbars should be shown, as
+     *         an instance of the class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainShowToolbars(@NonNull final TypedArray typedArray) {
+        showToolbars(typedArray.getBoolean(R.styleable.TabSwitcher_showToolbars, false));
+    }
+
+    /**
      * Obtains the title of the toolbar, which is shown, when the tab switcher is shown, from a
      * specific typed array.
      *
@@ -499,6 +515,47 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
         if (resourceId != 0) {
             inflateToolbarMenu(resourceId, null);
+        }
+    }
+
+    /**
+     * Obtains the duration, which must be reached when loading the preview of tabs to use a fade
+     * duration, from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the duration should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabPreviewFadeThreshold(@NonNull final TypedArray typedArray) {
+        int threshold = typedArray.getInteger(R.styleable.TabSwitcher_tabPreviewFadeThreshold, -1);
+
+        if (threshold == -1) {
+            threshold = themeHelper
+                    .getInteger(getLayout(), R.attr.tabSwitcherTabToolbarPreviewFadeThreshold, -1);
+        }
+
+        if (threshold != -1) {
+            setTabPreviewFadeThreshold(threshold);
+        }
+    }
+
+    /**
+     * Sets the duration of the fade animation, which is used to show the previews of tabs.
+     *
+     * @param typedArray
+     *         The typed array, the duration should be obtained from, as an instance of the class
+     *         {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabPreviewFadeDuration(@NonNull final TypedArray typedArray) {
+        int duration = typedArray.getInteger(R.styleable.TabSwitcher_tabPreviewFadeDuration, -1);
+
+        if (duration == -1) {
+            duration = themeHelper
+                    .getInteger(getLayout(), R.attr.tabSwitcherTabToolbarPreviewFadeDuration, -1);
+        }
+
+        if (duration != -1) {
+            setTabPreviewFadeDuration(duration);
         }
     }
 
@@ -949,7 +1006,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      * use a {@link TabSwitcherButton} as their action view. The icon of such menu items will
      * automatically be updated, when the number of tabs, which are contained by the tab switcher,
      * changes.
-     *
+     * <p>
      * Calling this method is basically the same as calling <code>setupWithMenu(tabSwitcher,
      * tabSwitcher.getToolbarMenu(), listener)</code>. However, if the {@link Menu}, which is
      * returned by <code>tabSwitcher.getToolbarMenu()</code> is null, a {@link
@@ -1065,7 +1122,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     /**
      * Sets the layout policy, which should be used by the tab switcher.
-     *
+     * <p>
      * Changing the layout policy after the view has been laid out does not have any effect.
      *
      * @param layoutPolicy
@@ -1137,6 +1194,33 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         AbstractTouchEventHandler eventHandler =
                 new DragGestureEventHandlerFactory(this).fromGesture(dragGesture);
         touchEventDispatcher.removeEventHandler(eventHandler);
+    }
+
+    /**
+     * Clears the saved state of a specific tab.
+     *
+     * @param tab
+     *         The tab, whose saved state should be cleared, as an instance of the class {@link
+     *         Tab}. The tab may not be null
+     */
+    public void clearSavedState(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
+        ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
+
+        if (contentRecyclerAdapter != null) {
+            contentRecyclerAdapter.clearSavedState(tab);
+        }
+    }
+
+    /**
+     * Clears the saved states of all tabs.
+     */
+    public void clearAllSavedStates() {
+        ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
+
+        if (contentRecyclerAdapter != null) {
+            clearAllSavedStates();
+        }
     }
 
     @Override
@@ -1624,6 +1708,26 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         model.inflateToolbarMenu(resourceId, listener);
     }
 
+    @Override
+    public final long getTabPreviewFadeThreshold() {
+        return model.getTabPreviewFadeThreshold();
+    }
+
+    @Override
+    public final void setTabPreviewFadeThreshold(final long threshold) {
+        model.setTabPreviewFadeThreshold(threshold);
+    }
+
+    @Override
+    public final long getTabPreviewFadeDuration() {
+        return model.getTabPreviewFadeDuration();
+    }
+
+    @Override
+    public final void setTabPreviewFadeDuration(final long duration) {
+        model.setTabPreviewFadeDuration(duration);
+    }
+
     @Nullable
     @Override
     public final View getEmptyView() {
@@ -1648,6 +1752,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setEmptyView(@LayoutRes final int resourceId, final long animationDuration) {
         model.setEmptyView(resourceId);
+    }
+
+    @Override
+    public final boolean areSavedStatesClearedWhenRemovingTabs() {
+        return model.areSavedStatesClearedWhenRemovingTabs();
+    }
+
+    @Override
+    public final void clearSavedStatesWhenRemovingTabs(final boolean clear) {
+        model.clearSavedStatesWhenRemovingTabs(clear);
     }
 
     @Override

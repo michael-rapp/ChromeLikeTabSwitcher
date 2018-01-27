@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.OnApplyWindowInsetsListener;
@@ -35,23 +36,31 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Locale;
+
+import de.mrapp.android.tabswitcher.AbstractState;
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.PeekAnimation;
 import de.mrapp.android.tabswitcher.PullDownGesture;
 import de.mrapp.android.tabswitcher.RevealAnimation;
+import de.mrapp.android.tabswitcher.StatefulTabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.SwipeGesture;
 import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
+import de.mrapp.android.util.multithreading.AbstractDataBinder;
 
+import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
 
 /**
@@ -62,10 +71,148 @@ import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
 public class MainActivity extends AppCompatActivity implements TabSwitcherListener {
 
     /**
+     * The state of tabs, which display list items in a list view.
+     */
+    private class State extends AbstractState
+            implements AbstractDataBinder.Listener<ArrayAdapter<String>, Tab, ListView, Void>,
+            TabPreviewListener {
+
+        /**
+         * The adapter, which contains the list items of the tab.
+         */
+        private ArrayAdapter<String> adapter;
+
+        /**
+         * Creates a new state of a tab, which displays list items in a list view.
+         *
+         * @param tab
+         *         The tab, the state should correspond to, as an instance of the class {@link Tab}.
+         *         The tab may not be null
+         */
+        State(@NonNull final Tab tab) {
+            super(tab);
+        }
+
+        /**
+         * Loads the list items of the tab.
+         *
+         * @param listView
+         *         The list view, which should be used to display the list items, as an instance of
+         *         the class {@link ListView}. The list view may not be null
+         */
+        public void loadItems(@NonNull final ListView listView) {
+            ensureNotNull(listView, "The list view may not be null");
+
+            if (adapter == null) {
+                dataBinder.addListener(this);
+                dataBinder.load(getTab(), listView);
+            } else if (listView.getAdapter() != adapter) {
+                listView.setAdapter(adapter);
+            }
+        }
+
+        @Override
+        public boolean onLoadData(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder,
+                @NonNull final Tab key, @NonNull final Void... params) {
+            return true;
+        }
+
+        @Override
+        public void onCanceled(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder) {
+
+        }
+
+        @Override
+        public void onFinished(
+                @NonNull final AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> dataBinder,
+                @NonNull final Tab key, @Nullable final ArrayAdapter<String> data,
+                @NonNull final ListView view, @NonNull final Void... params) {
+            if (getTab().equals(key)) {
+                adapter = data;
+                view.setAdapter(adapter);
+                dataBinder.removeListener(this);
+            }
+        }
+
+        @Override
+        public final void saveInstanceState(@NonNull final Bundle outState) {
+            if (adapter != null && !adapter.isEmpty()) {
+                String[] array = new String[adapter.getCount()];
+
+                for (int i = 0; i < array.length; i++) {
+                    array[i] = adapter.getItem(i);
+                }
+
+                outState.putStringArray(String.format(ADAPTER_STATE_EXTRA, getTab().getTitle()),
+                        array);
+            }
+        }
+
+        @Override
+        public void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
+            if (savedInstanceState != null) {
+                String key = String.format(ADAPTER_STATE_EXTRA, getTab().getTitle());
+                String[] items = savedInstanceState.getStringArray(key);
+
+                if (items != null && items.length > 0) {
+                    adapter = new ArrayAdapter<>(MainActivity.this,
+                            android.R.layout.simple_list_item_1, items);
+                }
+            }
+        }
+
+        @Override
+        public boolean onLoadTabPreview(@NonNull final TabSwitcher tabSwitcher,
+                                        @NonNull final Tab tab) {
+            return !getTab().equals(tab) || adapter != null;
+
+        }
+
+    }
+
+    /**
      * The decorator, which is used to inflate and visualize the tabs of the activity's tab
      * switcher.
      */
-    private class Decorator extends TabSwitcherDecorator {
+    private class Decorator extends StatefulTabSwitcherDecorator<State> {
+
+        @Nullable
+        @Override
+        protected State onCreateState(@NonNull final Context context,
+                                      @NonNull final TabSwitcher tabSwitcher,
+                                      @NonNull final View view, @NonNull final Tab tab,
+                                      final int index, final int viewType,
+                                      @Nullable final Bundle savedInstanceState) {
+            if (viewType == 2) {
+                State state = new State(tab);
+                tabSwitcher.addTabPreviewListener(state);
+
+                if (savedInstanceState != null) {
+                    state.restoreInstanceState(savedInstanceState);
+                }
+
+                return state;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onClearState(@NonNull final State state) {
+            tabSwitcher.removeTabPreviewListener(state);
+        }
+
+        @Override
+        protected void onSaveInstanceState(@NonNull final View view, @NonNull final Tab tab,
+                                           final int index, final int viewType,
+                                           @Nullable final State state,
+                                           @NonNull final Bundle outState) {
+            if (state != null) {
+                state.saveInstanceState(outState);
+            }
+        }
 
         @NonNull
         @Override
@@ -75,8 +222,10 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
 
             if (viewType == 0) {
                 view = inflater.inflate(R.layout.tab_text_view, parent, false);
-            } else {
+            } else if (viewType == 1) {
                 view = inflater.inflate(R.layout.tab_edit_text, parent, false);
+            } else {
+                view = inflater.inflate(R.layout.tab_list_view, parent, false);
             }
 
             Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -91,13 +240,14 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         public void onShowTab(@NonNull final Context context,
                               @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
                               @NonNull final Tab tab, final int index, final int viewType,
+                              @Nullable final State state,
                               @Nullable final Bundle savedInstanceState) {
             TextView textView = findViewById(android.R.id.title);
             textView.setText(tab.getTitle());
             Toolbar toolbar = findViewById(R.id.toolbar);
             toolbar.setVisibility(tabSwitcher.isSwitcherShown() ? View.GONE : View.VISIBLE);
 
-            if (viewType != 0) {
+            if (viewType == 1) {
                 EditText editText = findViewById(android.R.id.edit);
 
                 if (savedInstanceState == null) {
@@ -105,12 +255,15 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 }
 
                 editText.requestFocus();
+            } else if (viewType == 2 && state != null) {
+                ListView listView = findViewById(android.R.id.list);
+                state.loadItems(listView);
             }
         }
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -122,9 +275,64 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
+     * A data binder, which is used to asynchronously load the list items, which are displayed by a
+     * tab.
+     */
+    private static class DataBinder
+            extends AbstractDataBinder<ArrayAdapter<String>, Tab, ListView, Void> {
+
+        /**
+         * Creates a new data binder, which is used to asynchronously load the list items, which are
+         * displayed by a tab.
+         *
+         * @param context
+         *         The context, which should be used by the data binder, as an instance of the class
+         *         {@link Context}. The context may not be null
+         */
+        public DataBinder(@NonNull final Context context) {
+            super(context.getApplicationContext());
+        }
+
+        @Nullable
+        @Override
+        protected ArrayAdapter<String> doInBackground(@NonNull final Tab key,
+                                                      @NonNull final Void... params) {
+            String[] array = new String[10];
+
+            for (int i = 0; i < array.length; i++) {
+                array[i] = String.format(Locale.getDefault(), "%s, item %d", key.getTitle(), i + 1);
+            }
+
+            try {
+                // Simulate a long loading time...
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // There's nothing we can do...
+            }
+
+            return new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, array);
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull final ListView view,
+                                     @Nullable final ArrayAdapter<String> data, final long duration,
+                                     @NonNull final Void... params) {
+            if (data != null) {
+                view.setAdapter(data);
+            }
+        }
+
+    }
+
+    /**
      * The name of the extra, which is used to store the view type of a tab within a bundle.
      */
     private static final String VIEW_TYPE_EXTRA = MainActivity.class.getName() + "::ViewType";
+
+    /**
+     * The name of the extra, which is used to store the state of a list adapter within a bundle.
+     */
+    private static final String ADAPTER_STATE_EXTRA = State.class.getName() + "::%s::AdapterState";
 
     /**
      * The number of tabs, which are contained by the example app's tab switcher.
@@ -137,9 +345,19 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     private TabSwitcher tabSwitcher;
 
     /**
+     * The decorator of the activity's tab switcher.
+     */
+    private Decorator decorator;
+
+    /**
      * The activity's snackbar.
      */
     private Snackbar snackbar;
+
+    /**
+     * The data binder, which is used to load the list items of tabs.
+     */
+    private DataBinder dataBinder;
 
     /**
      * Creates a listener, which allows to apply the window insets to the tab switcher's padding.
@@ -333,6 +551,33 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
+     * Creates and returns a callback, which allows to observe, when a snackbar, which allows to
+     * undo the removal of tabs, has been dismissed.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The tab may not be null
+     * @return The callback, which has been created, as an instance of the type class {@link
+     * BaseTransientBottomBar.BaseCallback}. The callback may not be null
+     */
+    @NonNull
+    private BaseTransientBottomBar.BaseCallback<Snackbar> createUndoSnackbarCallback(
+            final Tab... tabs) {
+        return new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+
+            @Override
+            public void onDismissed(final Snackbar snackbar, final int event) {
+                if (event != DISMISS_EVENT_ACTION) {
+                    for (Tab tab : tabs) {
+                        tabSwitcher.clearSavedState(tab);
+                        decorator.clearState(tab);
+                    }
+                }
+            }
+        };
+    }
+
+    /**
      * Shows a snackbar, which allows to undo the removal of tabs from the activity's tab switcher.
      *
      * @param text
@@ -349,6 +594,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG).setActionTextColor(
                 ContextCompat.getColor(this, R.color.snackbar_action_text_color));
         snackbar.setAction(R.string.undo, createUndoSnackbarListener(snackbar, index, tabs));
+        snackbar.addCallback(createUndoSnackbarCallback(tabs));
         snackbar.show();
     }
 
@@ -424,7 +670,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         CharSequence title = getString(R.string.tab_title, index + 1);
         Tab tab = new Tab(title);
         Bundle parameters = new Bundle();
-        parameters.putInt(VIEW_TYPE_EXTRA, index % 2);
+        parameters.putInt(VIEW_TYPE_EXTRA, index % 3);
         tab.setParameters(parameters);
         return tab;
     }
@@ -492,9 +738,12 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     protected final void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dataBinder = new DataBinder(this);
+        decorator = new Decorator();
         tabSwitcher = findViewById(R.id.tab_switcher);
+        tabSwitcher.clearSavedStatesWhenRemovingTabs(false);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
-        tabSwitcher.setDecorator(new Decorator());
+        tabSwitcher.setDecorator(decorator);
         tabSwitcher.addListener(this);
         tabSwitcher.showToolbars(true);
 

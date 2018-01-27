@@ -23,9 +23,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import de.mrapp.android.tabswitcher.Animation;
+import de.mrapp.android.tabswitcher.StatefulTabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
+import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.tabswitcher.model.Restorable;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 
@@ -39,7 +42,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Void>
-        implements Restorable {
+        implements Restorable, TabSwitcherListener {
 
     /**
      * The name of the extra, which is used to store the saved instance states of previously removed
@@ -104,8 +107,28 @@ public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Vo
         ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         ensureNotNull(decorator, "The decorator may not be null");
         this.tabSwitcher = tabSwitcher;
+        tabSwitcher.addListener(this);
         this.decorator = decorator;
         this.savedInstanceStates = new SparseArray<>();
+    }
+
+    /**
+     * Clears the saved state of a specific tab.
+     *
+     * @param tab
+     *         The tab, whose saved state should be cleared, as an instance of the class {@link
+     *         Tab}. The tab may not be null
+     */
+    public void clearSavedState(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
+        savedInstanceStates.remove(tab.hashCode());
+    }
+
+    /**
+     * Clears the saved states of all tabs.
+     */
+    public void clearAllSavedStates() {
+        savedInstanceStates.clear();
     }
 
     @NonNull
@@ -164,6 +187,57 @@ public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Vo
         if (savedInstanceState != null) {
             savedInstanceStates =
                     savedInstanceState.getSparseParcelableArray(SAVED_INSTANCE_STATES_EXTRA);
+        }
+    }
+
+    @Override
+    public final void onSwitcherShown(@NonNull final TabSwitcher tabSwitcher) {
+
+    }
+
+    @Override
+    public final void onSwitcherHidden(@NonNull final TabSwitcher tabSwitcher) {
+
+    }
+
+    @Override
+    public final void onSelectionChanged(@NonNull final TabSwitcher tabSwitcher,
+                                         final int selectedTabIndex,
+                                         @Nullable final Tab selectedTab) {
+
+    }
+
+    @Override
+    public final void onTabAdded(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                 @NonNull final Tab tab, @NonNull final Animation animation) {
+
+    }
+
+    @Override
+    public final void onTabRemoved(@NonNull final TabSwitcher tabSwitcher, final int index,
+                                   @NonNull final Tab tab, @NonNull final Animation animation) {
+        if (tabSwitcher.areSavedStatesClearedWhenRemovingTabs()) {
+            clearSavedState(tab);
+            TabSwitcherDecorator decorator = tabSwitcher.getDecorator();
+
+            if (decorator instanceof StatefulTabSwitcherDecorator) {
+                ((StatefulTabSwitcherDecorator) decorator).clearState(tab);
+            }
+        }
+    }
+
+    @Override
+    public final void onAllTabsRemoved(@NonNull final TabSwitcher tabSwitcher,
+                                       @NonNull final Tab[] tabs,
+                                       @NonNull final Animation animation) {
+        if (tabSwitcher.areSavedStatesClearedWhenRemovingTabs()) {
+            clearAllSavedStates();
+
+            TabSwitcherDecorator decorator = tabSwitcher.getDecorator();
+
+            if (decorator instanceof StatefulTabSwitcherDecorator) {
+                ((StatefulTabSwitcherDecorator) decorator).clearAllStates();
+            }
         }
     }
 

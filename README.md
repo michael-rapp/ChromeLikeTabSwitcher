@@ -26,7 +26,7 @@ Alternatively, the library can be added to your Android app as a Gradle dependen
 
 ```groovy
 dependencies {
-    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.3'
+    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.4'
 }
 ```
 
@@ -88,7 +88,7 @@ In order to specify how the tabs of a `TabSwitcher` should look like, the abstra
 
 If different views should be inflated for different tabs, the `getViewTypeCount`- and `getViewType`-methods must be overridden as well. The first one should return the total number of different views, which are inflated by the `onInflateView`-method, the latter one must return a distinct integer value, which specifies the view type of a specific tab. The following code illustrates how the class `TabSwitcherDecorator` can be implemented.
 
-Furthermore, the class `TabSwitcherDecorator` enables to override the `onSaveInstanceState`-method in order to store the current state of a tab within a `Bundle`. When the tab is shown again, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state.
+Furthermore, the class `TabSwitcherDecorator` enables to override the `onSaveInstanceState`-method in order to store the current state of a tab within a `Bundle`. When the tab is shown again, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state. If you want to take care of clearing saved state by yourself, false can be passed to the `clearSavedStatesWhenRemovingTabs`-method. To manually clear the saved state of a single tab, the `clearSavedState`-method can be used. For clearing all saved states, the `clearAllSavedStates`-method is provided.
 
 
 ```java
@@ -148,7 +148,17 @@ In order to apply a decorator to a `TabSwitcher` its `setDecorator`-method must 
 tabSwitcher.setDecorator(new Decorator());
 ```
 
-In order to observe the state of a `TabSwitcher`, the interface `TabSwitcherListener` listener can be implemented. The interface provides methods, which are invoked, when tabs are added to or removed from a tab switcher, or if the tab switcher has been hidden or shown (only when using the smartphone layout). Instances of the type `TabSwitcherListener` can be added by using a `TabSwitcher`'s `addListener`-method. In order to observe, when the close button of a tab has been clicked, the interface `TabCloseListener` can be implemented and added by using the `addTabCloseListener`-method accordingly. 
+In order to observe the state of a `TabSwitcher`, the interface `TabSwitcherListener` listener can be implemented. The interface provides methods, which are invoked, when tabs are added to or removed from a tab switcher, or if the tab switcher has been hidden or shown (only when using the smartphone layout). Instances of the type `TabSwitcherListener` can be added by using a `TabSwitcher`'s `addListener`-method. In order to observe, when the close button of a tab has been clicked, the interface `TabCloseListener` can be implemented and added by using the `addTabCloseListener`-method accordingly.
+
+## Stateful Decorators
+
+As an alternative of the class `TabSwitcherDecorator`, the class `StatefulTabSwitcherDecorator` can be used. It is an extension of the class `TabSwitcherDecorator`, which allows to maintain arbitrary states for a `TabSwitcher`'s tab (it is recommended to use the class `AbstractState` as a base class though). This is for example useful, if list items are shown within a tab and a reference to the used adapter should be stored to easy the modification of the list items. The states are kept even if the corresponding tab is currently not shown. However, they are not restored after orientation changes and may be vanished when the device is low on memory.
+
+To create states, they must be returned by the decorator's `onCreateState`-method. When a state is about to be deleted, the `onClearState`-method is invoked. 
+
+By default, the states of tabs are automatically clear, when the corresponding tab is removed. However, when passing `false` to the `clearSavedStatesWhenRemovingTabs`-method, this mechanism is turned off. To manually remove states, the `clearState`- and `clearAllStates`-methods can be used.
+
+The library's example app illustrates how the class `StatefulTabSwitcherDecorator` can be used for asynchronouly loading list items, which are shown in a tab using an `ArrayAdapter` and a `Listener`. Please refer to its code for further information.
 
 ## Using Animations
 

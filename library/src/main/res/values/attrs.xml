@@ -34,6 +34,8 @@ License.
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
     <attr name="tabSwitcherToolbarNavigationIcon" format="reference"/>
+    <attr name="tabSwitcherTabToolbarPreviewFadeThreshold" format="integer"/>
+    <attr name="tabSwitcherTabToolbarPreviewFadeDuration" format="integer"/>
     <attr name="tabSwitcherEmptyView" format="reference"/>
     <attr name="tabSwitcherEmptyViewAnimationDuration" format="integer"/>
     <attr name="tabSwitcherToolbarPopupTheme" format="reference"/>
@@ -52,9 +54,12 @@ License.
         <attr name="addTabButtonColor" format="color"/>
         <attr name="tabTitleTextColor" format="color"/>
         <attr name="tabCloseButtonIcon" format="reference"/>
+        <attr name="showToolbars" format="boolean"/>
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
+        <attr name="tabPreviewFadeThreshold" format="integer"/>
+        <attr name="tabPreviewFadeDuration" format="integer"/>
         <attr name="emptyView" format="reference"/>
         <attr name="emptyViewAnimationDuration" format="integer"/>
         <attr name="themeGlobal" format="reference"/>
