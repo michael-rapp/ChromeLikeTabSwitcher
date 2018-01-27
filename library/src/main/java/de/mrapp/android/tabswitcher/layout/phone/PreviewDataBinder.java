@@ -26,6 +26,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
 import de.mrapp.android.tabswitcher.Tab;
+import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.ViewRecycler;
@@ -52,6 +53,11 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     private final ViewRecycler<Tab, Void> contentViewRecycler;
 
     /**
+     * The model of the tab switcher, the tabs belong to.
+     */
+    private final Model model;
+
+    /**
      * Creates a new data binder, which allows to asynchronously render preview images of tabs and
      * display them afterwards.
      *
@@ -62,14 +68,19 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
      *         The view recycler, which should be used to inflate the views, which are associated
      *         with tabs, as an instance of the class ViewRecycler. The view recycler may not be
      *         null
+     * @param model
+     *         The model of the tab switcher, the tabs belong to, as an instance of the type {@link
+     *         Model}. The model may not be null
      */
     public PreviewDataBinder(@NonNull final ViewGroup parent,
-                             @NonNull final ViewRecycler<Tab, Void> contentViewRecycler) {
+                             @NonNull final ViewRecycler<Tab, Void> contentViewRecycler,
+                             @NonNull final Model model) {
         super(parent.getContext().getApplicationContext(), new LruCache<Tab, Bitmap>(7));
         ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
         this.parent = parent;
         this.contentViewRecycler = contentViewRecycler;
+        this.model = model;
     }
 
     @Override
@@ -115,11 +126,14 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         view.setImageBitmap(data);
 
         if (data != null) {
-            view.setAlpha(0f);
+            boolean useFadeAnimation = duration > model.getTabPreviewFadeThreshold();
+            view.setAlpha(useFadeAnimation ? 0f : 1f);
             view.setVisibility(View.VISIBLE);
-            view.animate().alpha(1f).setDuration(
-                    getContext().getResources().getInteger(android.R.integer.config_longAnimTime))
-                    .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+
+            if (useFadeAnimation) {
+                view.animate().alpha(1f).setDuration(model.getTabPreviewFadeDuration())
+                        .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            }
         } else {
             view.setVisibility(View.INVISIBLE);
         }

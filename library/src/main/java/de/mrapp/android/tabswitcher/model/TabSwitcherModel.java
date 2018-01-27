@@ -160,27 +160,41 @@ public class TabSwitcherModel implements Model, Restorable {
      * The name of the extra, which is used to store the bitmap of a tab's icon within a bundle.
      */
     private static final String TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA =
-            TabSwitcher.class.getName() + "::TabCloseButtonIconBitmap";
+            TabSwitcherModel.class.getName() + "::TabCloseButtonIconBitmap";
 
     /**
      * The name of the extra, which is used to store the color of a tab's progress bar within a
      * bundle.
      */
     private static final String TAB_PROGRESS_BAR_COLOR_EXTRA =
-            TabSwitcher.class.getName() + "::TabProgressBarColor";
+            TabSwitcherModel.class.getName() + "::TabProgressBarColor";
 
     /**
      * The name of the extra, which is used to store, whether the toolbars are shown, or not, within
      * a bundle.
      */
     private static final String SHOW_TOOLBARS_EXTRA =
-            TabSwitcher.class.getName() + "::ShowToolbars";
+            TabSwitcherModel.class.getName() + "::ShowToolbars";
 
     /**
      * The name of the extra, which is used to store the title of the toolbar within a bundle.
      */
     private static final String TOOLBAR_TITLE_EXTRA =
-            TabSwitcher.class.getName() + "::ToolbarTitle";
+            TabSwitcherModel.class.getName() + "::ToolbarTitle";
+
+    /**
+     * The name of the extra, which is used to store the duration, which must be reached when
+     * loading the preview of tabs to use a fade animation, within a bundle.
+     */
+    private static final String TAB_PREVIEW_FADE_THRESHOLD_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabPreviewFadeThreshold";
+
+    /**
+     * The name of the extra, which is used to store the duration of the fade animation, which is
+     * used to show the preview of tabs, within a bundle.
+     */
+    private static final String TAB_PREVIEW_FADE_DURATION =
+            TabSwitcherModel.class.getName() + "::TabPreviewFadeDuration";
 
     /**
      * The tab switcher, the model belongs to.
@@ -320,6 +334,17 @@ public class TabSwitcherModel implements Model, Restorable {
      * The resource id of the menu of the toolbar, which is shown, when the tab switcher is shown.
      */
     private int toolbarMenuId;
+
+    /**
+     * The duration, which must be reached when loading the preview of a tab to use a fade
+     * animation.
+     */
+    private long tabPreviewFadeThreshold;
+
+    /**
+     * The duration of the fade animation, which is used to show the preview of tabs.
+     */
+    private long tabPreviewFadeDuration;
 
     /**
      * The view, which is shown, when the tab switcher is empty.
@@ -812,6 +837,9 @@ public class TabSwitcherModel implements Model, Restorable {
         this.addTabButtonColor = null;
         this.showToolbars = false;
         this.toolbarTitle = null;
+        this.tabPreviewFadeThreshold = 200;
+        this.tabPreviewFadeDuration =
+                getContext().getResources().getInteger(android.R.integer.config_longAnimTime);
         this.toolbarNavigationIcon = null;
         this.toolbarNavigationIconListener = null;
         this.toolbarMenuId = -1;
@@ -1497,6 +1525,26 @@ public class TabSwitcherModel implements Model, Restorable {
         notifyOnToolbarMenuInflated(resourceId, listener);
     }
 
+    @Override
+    public final long getTabPreviewFadeThreshold() {
+        return tabPreviewFadeThreshold;
+    }
+
+    @Override
+    public final void setTabPreviewFadeThreshold(final long threshold) {
+        this.tabPreviewFadeThreshold = threshold;
+    }
+
+    @Override
+    public final long getTabPreviewFadeDuration() {
+        return tabPreviewFadeDuration;
+    }
+
+    @Override
+    public final void setTabPreviewFadeDuration(final long duration) {
+        this.tabPreviewFadeDuration = duration;
+    }
+
     @Nullable
     @Override
     public final View getEmptyView() {
@@ -1568,6 +1616,8 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putInt(TAB_PROGRESS_BAR_COLOR_EXTRA, tabProgressBarColor);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
+        outState.putLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA, tabPreviewFadeThreshold);
+        outState.putLong(TAB_PREVIEW_FADE_DURATION, tabPreviewFadeDuration);
         getContentRecyclerAdapter().saveInstanceState(outState);
     }
 
@@ -1595,6 +1645,8 @@ public class TabSwitcherModel implements Model, Restorable {
             tabProgressBarColor = savedInstanceState.getInt(TAB_PROGRESS_BAR_COLOR_EXTRA, -1);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+            tabPreviewFadeThreshold = savedInstanceState.getLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA);
+            tabPreviewFadeDuration = savedInstanceState.getLong(TAB_PREVIEW_FADE_DURATION);
             getContentRecyclerAdapter().restoreInstanceState(savedInstanceState);
         }
     }

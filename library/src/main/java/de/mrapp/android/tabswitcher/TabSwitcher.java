@@ -1623,6 +1623,26 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         model.inflateToolbarMenu(resourceId, listener);
     }
 
+    @Override
+    public final long getTabPreviewFadeThreshold() {
+        return model.getTabPreviewFadeThreshold();
+    }
+
+    @Override
+    public final void setTabPreviewFadeThreshold(final long threshold) {
+        model.setTabPreviewFadeThreshold(threshold);
+    }
+
+    @Override
+    public final long getTabPreviewFadeDuration() {
+        return model.getTabPreviewFadeDuration();
+    }
+
+    @Override
+    public final void setTabPreviewFadeDuration(final long duration) {
+        model.setTabPreviewFadeDuration(duration);
+    }
+
     @Nullable
     @Override
     public final View getEmptyView() {

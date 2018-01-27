@@ -1067,6 +1067,42 @@ public interface Model extends Iterable<Tab> {
     void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
 
     /**
+     * Returns the duration, which must be reached when loading the preview of a tab to use a fade
+     * animation.
+     *
+     * @return The duration, which must be reached when loading the preview of a tab to use a fade
+     * animation, in milliseconds as a {@link Long} value
+     */
+    long getTabPreviewFadeThreshold();
+
+    /**
+     * Sets the duration, which must be reached when loading the preview of a tab to use a fade
+     * animation.
+     *
+     * @param threshold
+     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
+     *         duration must be at least 0
+     */
+    void setTabPreviewFadeThreshold(long threshold);
+
+    /**
+     * Returns the duration of the fade animation, which is used to show the preview of tabs.
+     *
+     * @return The duration of the fade animation, which is used to show the preview of tabs, in
+     * milliseconds as a {@link Long} value
+     */
+    long getTabPreviewFadeDuration();
+
+    /**
+     * Sets the duration of the fade animation, which is used to show the preview of tabs.
+     *
+     * @param duration
+     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
+     *         duration must be at least 0
+     */
+    void setTabPreviewFadeDuration(long duration);
+
+    /**
      * Returns the view, which is shown, when the tab switcher is empty.
      *
      * @return The view, which is shown, when the tab switcher is empty, as an instance of the class
