@@ -90,7 +90,7 @@ In order to specify how the tabs of a `TabSwitcher` should look like, the abstra
 
 If different views should be inflated for different tabs, the `getViewTypeCount`- and `getViewType`-methods must be overridden as well. The first one should return the total number of different views, which are inflated by the `onInflateView`-method, the latter one must return a distinct integer value, which specifies the view type of a specific tab. The following code illustrates how the class `TabSwitcherDecorator` can be implemented.
 
-Furthermore, the class `TabSwitcherDecorator` enables to override the `onSaveInstanceState`-method in order to store the current state of a tab within a `Bundle`. When the tab is shown again, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state.
+Furthermore, the class `TabSwitcherDecorator` enables to override the `onSaveInstanceState`-method in order to store the current state of a tab within a `Bundle`. When the tab is shown again, the `Bundle` will be passed to the `onShowTab`-method in order to be able to restore the previously saved state. If you want to take care of clearing saved state by yourself, false can be passed to the `clearSavedStatesWhenRemovingTabs`-method. To manually clear the saved state of a single tab, the `clearSavedState`-method can be used. For clearing all saved states, the `clearAllSavedStates`-method is provided.
 
 
 ```java
