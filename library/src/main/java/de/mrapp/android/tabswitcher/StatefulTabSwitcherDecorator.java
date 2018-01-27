@@ -24,6 +24,8 @@ import android.view.ViewGroup;
 
 import java.lang.ref.SoftReference;
 
+import de.mrapp.android.tabswitcher.model.Restorable;
+
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
 /**
@@ -41,6 +43,14 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * {@link #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} is invoked for the next
  * time.
  * <p>
+ * It is recommended to use the class {@link AbstractState} as a base class for implementing states.
+ * This is not necessary though. Said class stores a reference to the tab, it corresponds to and
+ * implements the interface {@link Restorable} to be able to store and restore its state. By
+ * implementing these methods and calling them in the decorator's
+ * {@link #onSaveInstanceState(View, Tab, int, int, Object, Bundle)}, respectively
+ * {@link #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} method, the selected
+ * properties of the state can be stored and restored.
+ * <p>
  * By default, the state of a tab is kept even when the tab has been removed from the {@link
  * TabSwitcher}. To manually remove the state of a specific tab, the method {@link #clearState(Tab)}
  * can be used. The method {@link #clearAllStates()} allows to remove the states of all tabs
@@ -57,6 +67,43 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.2.4
  */
 public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitcherDecorator {
+
+    /**
+     * An abstract base class for the states of tabs, which can be used together with a {@link
+     * StatefulTabSwitcherDecorator}. The state stores the tab it corresponds to and implements the
+     * interface {@link Restorable} to be able to store and restore its state.
+     */
+    public abstract class AbstractState implements Restorable {
+
+        /**
+         * The tab, the state corresponds to.
+         */
+        private final Tab tab;
+
+        /**
+         * Creates a new state of a specific tab.
+         *
+         * @param tab
+         *         The tab, the state should correspond to, as an instance of the class {@link Tab}.
+         *         The tab may not be null
+         */
+        public AbstractState(@NonNull final Tab tab) {
+            ensureNotNull(tab, "The tab may not be null");
+            this.tab = tab;
+        }
+
+        /**
+         * Returns the tab, the state corresponds to.
+         *
+         * @return The tab, the state corresponds to, as an instance of the class {@link Tab}. The
+         * tab may not be null
+         */
+        @NonNull
+        public Tab getTab() {
+            return tab;
+        }
+
+    }
 
     /**
      * A sparse array, which is used to store the states of tabs.
