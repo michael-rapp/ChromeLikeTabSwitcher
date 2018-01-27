@@ -1077,7 +1077,7 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Sets the duration, which must be reached when loading the preview of a tab to use a fade
-     * animation.
+     * animation. Previews are only shown when using the smartphone layout.
      *
      * @param threshold
      *         The duration, which should be set, in milliseconds as a {@link Long} value. The
@@ -1094,7 +1094,8 @@ public interface Model extends Iterable<Tab> {
     long getTabPreviewFadeDuration();
 
     /**
-     * Sets the duration of the fade animation, which is used to show the preview of tabs.
+     * Sets the duration of the fade animation, which is used to show the preview of tabs. Previews
+     * are only shown when using the smartphone layout.
      *
      * @param duration
      *         The duration, which should be set, in milliseconds as a {@link Long} value. The
