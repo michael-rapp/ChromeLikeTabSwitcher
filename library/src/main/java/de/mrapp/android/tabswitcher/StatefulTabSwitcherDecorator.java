@@ -69,53 +69,6 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitcherDecorator {
 
     /**
-     * An abstract base class for the states of tabs, which can be used together with a {@link
-     * StatefulTabSwitcherDecorator}. The state stores the tab it corresponds to and implements the
-     * interface {@link Restorable} to be able to store and restore its state.
-     */
-    public abstract class AbstractState implements Restorable {
-
-        /**
-         * The tab, the state corresponds to.
-         */
-        private final Tab tab;
-
-        /**
-         * Creates a new state of a specific tab.
-         *
-         * @param tab
-         *         The tab, the state should correspond to, as an instance of the class {@link Tab}.
-         *         The tab may not be null
-         */
-        public AbstractState(@NonNull final Tab tab) {
-            ensureNotNull(tab, "The tab may not be null");
-            this.tab = tab;
-        }
-
-        /**
-         * Returns the tab, the state corresponds to.
-         *
-         * @return The tab, the state corresponds to, as an instance of the class {@link Tab}. The
-         * tab may not be null
-         */
-        @NonNull
-        public Tab getTab() {
-            return tab;
-        }
-
-        @Override
-        public void saveInstanceState(@NonNull final Bundle outState) {
-
-        }
-
-        @Override
-        public void restoreInstanceState(@Nullable final Bundle savedInstanceState) {
-
-        }
-
-    }
-
-    /**
      * A sparse array, which is used to store the states of tabs.
      */
     private SparseArray<SoftReference<StateType>> states;
