@@ -227,7 +227,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
             if (reference != null) {
                 StateType state = reference.get();
 
-                if (reference != null) {
+                if (state != null) {
                     onClearState(state);
                 }
 
@@ -246,8 +246,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
     public final void clearAllStates() {
         if (states != null) {
             for (int i = 0; i < states.size(); i++) {
-                int key = states.keyAt(i);
-                SoftReference<StateType> reference = states.get(key);
+                SoftReference<StateType> reference = states.valueAt(i);
                 StateType state = reference.get();
 
                 if (state != null) {
