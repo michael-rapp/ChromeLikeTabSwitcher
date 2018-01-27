@@ -46,15 +46,16 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * It is recommended to use the class {@link AbstractState} as a base class for implementing states.
  * This is not necessary though. Said class stores a reference to the tab, it corresponds to and
  * implements the interface {@link Restorable} to be able to store and restore its state. By
- * implementing the methods of this interface and calling them in the decorator's
- * {@link #onSaveInstanceState(View, Tab, int, int, Object, Bundle)}, respectively
- * {@link #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} method, the selected
+ * implementing the methods of this interface and calling them in the decorator's {@link
+ * #onSaveInstanceState(View, Tab, int, int, Object, Bundle)}, respectively {@link
+ * #onCreateState(Context, TabSwitcher, View, Tab, int, int, Bundle)} method, the selected
  * properties of the state can be stored and restored.
  * <p>
- * By default, the state of a tab is kept even when the tab has been removed from the {@link
- * TabSwitcher}. To manually remove the state of a specific tab, the method {@link #clearState(Tab)}
- * can be used. The method {@link #clearAllStates()} allows to remove the states of all tabs
- * accordingly.
+ * If {@link TabSwitcher#areSavedStatesClearedWhenRemovingTabs()} returns true, the state of tabs is
+ * cleared when a tab has been removed from the {@link TabSwitcher}. This can be prevented by using
+ * the method {@link TabSwitcher#clearSavedStatesWhenRemovingTabs(boolean)}. To manually remove the
+ * state of a specific tab, the method {@link #clearState(Tab)} can be used. The method {@link
+ * #clearAllStates()} allows to remove the states of all tabs accordingly.
  * <p>
  * IMPORTANT: States must not store references to views, which have been inflated in the decorator's
  * {@link #onInflateView(LayoutInflater, ViewGroup, int)} method, because these views can be reused

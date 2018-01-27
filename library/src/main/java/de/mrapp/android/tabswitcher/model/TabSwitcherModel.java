@@ -198,6 +198,13 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::TabPreviewFadeDuration";
 
     /**
+     * The name of the extra, which is used to store, whether saved states of tabs are cleared when
+     * removing the corresponding tabs from the tabs switcher, or not, within a bundle.
+     */
+    private static final String CLEAR_SAVED_STATES_WHEN_REMOVING_TABS_EXTRA =
+            TabSwitcherModel.class.getName() + "::ClearSavedStatesWhenRemovingTabs";
+
+    /**
      * The tab switcher, the model belongs to.
      */
     private final TabSwitcher tabSwitcher;
@@ -357,6 +364,12 @@ public class TabSwitcherModel implements Model, Restorable {
      * when the tab switcher is empty.
      */
     private long emptyViewAnimationDuration;
+
+    /**
+     * True, if the saved states of tabs are cleared when the corresponding tabs are removed from
+     * the tab switcher, false otherwise.
+     */
+    private boolean clearSavedStatesWhenRemovingTabs;
 
     /**
      * The listener, which is notified, when an item of the menu of the toolbar, which is shown,
@@ -841,6 +854,7 @@ public class TabSwitcherModel implements Model, Restorable {
         this.tabPreviewFadeThreshold = 200;
         this.tabPreviewFadeDuration =
                 getContext().getResources().getInteger(android.R.integer.config_longAnimTime);
+        this.clearSavedStatesWhenRemovingTabs = true;
         this.toolbarNavigationIcon = null;
         this.toolbarNavigationIconListener = null;
         this.toolbarMenuId = -1;
@@ -1578,6 +1592,16 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     @Override
+    public final boolean areSavedStatesClearedWhenRemovingTabs() {
+        return clearSavedStatesWhenRemovingTabs;
+    }
+
+    @Override
+    public final void clearSavedStatesWhenRemovingTabs(final boolean clear) {
+        this.clearSavedStatesWhenRemovingTabs = clear;
+    }
+
+    @Override
     public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
         ensureNotNull(listener, "The listener may not be null");
         tabCloseListeners.add(listener);
@@ -1621,6 +1645,8 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
         outState.putLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA, tabPreviewFadeThreshold);
         outState.putLong(TAB_PREVIEW_FADE_DURATION, tabPreviewFadeDuration);
+        outState.putBoolean(CLEAR_SAVED_STATES_WHEN_REMOVING_TABS_EXTRA,
+                clearSavedStatesWhenRemovingTabs);
         getContentRecyclerAdapter().saveInstanceState(outState);
     }
 
@@ -1650,6 +1676,8 @@ public class TabSwitcherModel implements Model, Restorable {
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
             tabPreviewFadeThreshold = savedInstanceState.getLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA);
             tabPreviewFadeDuration = savedInstanceState.getLong(TAB_PREVIEW_FADE_DURATION);
+            clearSavedStatesWhenRemovingTabs =
+                    savedInstanceState.getBoolean(CLEAR_SAVED_STATES_WHEN_REMOVING_TABS_EXTRA);
             getContentRecyclerAdapter().restoreInstanceState(savedInstanceState);
         }
     }

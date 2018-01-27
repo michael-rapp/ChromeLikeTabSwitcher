@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.OnApplyWindowInsetsListener;
@@ -344,6 +345,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     private TabSwitcher tabSwitcher;
 
     /**
+     * The decorator of the activity's tab switcher.
+     */
+    private Decorator decorator;
+
+    /**
      * The activity's snackbar.
      */
     private Snackbar snackbar;
@@ -545,6 +551,33 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
     }
 
     /**
+     * Creates and returns a callback, which allows to observe, when a snackbar, which allows to
+     * undo the removal of tabs, has been dismissed.
+     *
+     * @param tabs
+     *         An array, which contains the tabs, which have been removed, as an array of the type
+     *         {@link Tab}. The tab may not be null
+     * @return The callback, which has been created, as an instance of the type class {@link
+     * BaseTransientBottomBar.BaseCallback}. The callback may not be null
+     */
+    @NonNull
+    private BaseTransientBottomBar.BaseCallback<Snackbar> createUndoSnackbarCallback(
+            final Tab... tabs) {
+        return new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+
+            @Override
+            public void onDismissed(final Snackbar snackbar, final int event) {
+                if (event != DISMISS_EVENT_ACTION) {
+                    for (Tab tab : tabs) {
+                        tabSwitcher.clearSavedState(tab);
+                        decorator.clearState(tab);
+                    }
+                }
+            }
+        };
+    }
+
+    /**
      * Shows a snackbar, which allows to undo the removal of tabs from the activity's tab switcher.
      *
      * @param text
@@ -561,6 +594,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         snackbar = Snackbar.make(tabSwitcher, text, Snackbar.LENGTH_LONG).setActionTextColor(
                 ContextCompat.getColor(this, R.color.snackbar_action_text_color));
         snackbar.setAction(R.string.undo, createUndoSnackbarListener(snackbar, index, tabs));
+        snackbar.addCallback(createUndoSnackbarCallback(tabs));
         snackbar.show();
     }
 
@@ -705,9 +739,11 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         dataBinder = new DataBinder(this);
+        decorator = new Decorator();
         tabSwitcher = findViewById(R.id.tab_switcher);
+        tabSwitcher.clearSavedStatesWhenRemovingTabs(false);
         ViewCompat.setOnApplyWindowInsetsListener(tabSwitcher, createWindowInsetsListener());
-        tabSwitcher.setDecorator(new Decorator());
+        tabSwitcher.setDecorator(decorator);
         tabSwitcher.addListener(this);
         tabSwitcher.showToolbars(true);
 

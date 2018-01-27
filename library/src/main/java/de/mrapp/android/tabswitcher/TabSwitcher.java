@@ -58,6 +58,7 @@ import de.mrapp.android.tabswitcher.gesture.DragGestureEventHandlerFactory;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.AbstractTabSwitcherLayout.LayoutListenerWrapper;
+import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
 import de.mrapp.android.tabswitcher.layout.TabSwitcherLayout;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneArithmetics;
 import de.mrapp.android.tabswitcher.layout.phone.PhoneTabSwitcherLayout;
@@ -1194,6 +1195,33 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         touchEventDispatcher.removeEventHandler(eventHandler);
     }
 
+    /**
+     * Clears the saved state of a specific tab.
+     *
+     * @param tab
+     *         The tab, whose saved state should be cleared, as an instance of the class {@link
+     *         Tab}. The tab may not be null
+     */
+    public void clearSavedState(@NonNull final Tab tab) {
+        ensureNotNull(tab, "The tab may not be null");
+        ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
+
+        if (contentRecyclerAdapter != null) {
+            contentRecyclerAdapter.clearSavedState(tab);
+        }
+    }
+
+    /**
+     * Clears the saved states of all tabs.
+     */
+    public void clearAllSavedStates() {
+        ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
+
+        if (contentRecyclerAdapter != null) {
+            clearAllSavedStates();
+        }
+    }
+
     @Override
     public final void addTab(@NonNull final Tab tab) {
         enqueuePendingAction(new Runnable() {
@@ -1723,6 +1751,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setEmptyView(@LayoutRes final int resourceId, final long animationDuration) {
         model.setEmptyView(resourceId);
+    }
+
+    @Override
+    public final boolean areSavedStatesClearedWhenRemovingTabs() {
+        return model.areSavedStatesClearedWhenRemovingTabs();
+    }
+
+    @Override
+    public final void clearSavedStatesWhenRemovingTabs(final boolean clear) {
+        model.clearSavedStatesWhenRemovingTabs(clear);
     }
 
     @Override

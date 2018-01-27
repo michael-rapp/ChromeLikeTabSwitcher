@@ -1157,6 +1157,25 @@ public interface Model extends Iterable<Tab> {
     void setEmptyView(@LayoutRes int resourceId, long animationDuration);
 
     /**
+     * Returns, whether saved states of tabs are cleared when the corresponding tabs are removed
+     * from the tab switcher, or not.
+     *
+     * @return True, if saved states of tabs are cleared when the corresponding tabs are removed
+     * from the tab switcher, false otherwise
+     */
+    boolean areSavedStatesClearedWhenRemovingTabs();
+
+    /**
+     * Sets, whether saved states of tabs should be cleared when the corresponding tabs are removed,
+     * or not.
+     *
+     * @param clear
+     *         True, if the saved states of tabs should be cleared when the corresponding tabs are
+     *         removed, false otherwise
+     */
+    void clearSavedStatesWhenRemovingTabs(boolean clear);
+
+    /**
      * Adds a new listener, which should be notified, when a tab is about to be closed by clicking
      * its close button.
      *
