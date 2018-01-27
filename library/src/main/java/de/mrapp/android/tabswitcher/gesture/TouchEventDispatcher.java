@@ -18,14 +18,13 @@ import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import de.mrapp.android.util.datastructure.ListenerList;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
 
@@ -96,7 +95,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
 
             if (priorityIterator.hasNext()) {
                 int key = priorityIterator.next();
-                Set<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
+                ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
                 eventHandlerIterator = handlers.iterator();
             } else {
                 eventHandlerIterator = null;
@@ -115,7 +114,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
                 return eventHandlerIterator.next();
             } else if (priorityIterator.hasNext()) {
                 int key = priorityIterator.next();
-                Set<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
+                ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
                 eventHandlerIterator = handlers.iterator();
                 return next();
             }
@@ -129,7 +128,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      * A sorted map, which contains the event handlers, touch events can be dispatched to. The
      * handlers are sorted by decreasing priority.
      */
-    private final SortedMap<Integer, Set<AbstractTouchEventHandler>> eventHandlers;
+    private final SortedMap<Integer, ListenerList<AbstractTouchEventHandler>> eventHandlers;
 
     /**
      * A list, which contains the event handlers, which are currently active.
@@ -205,10 +204,10 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
     public final void addEventHandler(@NonNull final AbstractTouchEventHandler handler) {
         ensureNotNull(handler, "The handler may not be null");
         int key = handler.getPriority();
-        Set<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
+        ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
 
         if (handlers == null) {
-            handlers = new LinkedHashSet<>();
+            handlers = new ListenerList<>();
             eventHandlers.put(key, handlers);
         }
 
@@ -225,7 +224,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      */
     public final void removeEventHandler(@NonNull final AbstractTouchEventHandler handler) {
         ensureNotNull(handler, "The handler may not be null");
-        Collection<AbstractTouchEventHandler> handlers = eventHandlers.get(handler.getPriority());
+        ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(handler.getPriority());
 
         if (handlers != null) {
             Iterator<AbstractTouchEventHandler> iterator = handlers.iterator();

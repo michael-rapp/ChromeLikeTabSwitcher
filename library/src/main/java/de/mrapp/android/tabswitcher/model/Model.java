@@ -1067,6 +1067,43 @@ public interface Model extends Iterable<Tab> {
     void inflateToolbarMenu(@MenuRes int resourceId, @Nullable OnMenuItemClickListener listener);
 
     /**
+     * Returns the duration, which must be reached when loading the preview of a tab to use a fade
+     * animation.
+     *
+     * @return The duration, which must be reached when loading the preview of a tab to use a fade
+     * animation, in milliseconds as a {@link Long} value
+     */
+    long getTabPreviewFadeThreshold();
+
+    /**
+     * Sets the duration, which must be reached when loading the preview of a tab to use a fade
+     * animation. Previews are only shown when using the smartphone layout.
+     *
+     * @param threshold
+     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
+     *         duration must be at least 0
+     */
+    void setTabPreviewFadeThreshold(long threshold);
+
+    /**
+     * Returns the duration of the fade animation, which is used to show the preview of tabs.
+     *
+     * @return The duration of the fade animation, which is used to show the preview of tabs, in
+     * milliseconds as a {@link Long} value
+     */
+    long getTabPreviewFadeDuration();
+
+    /**
+     * Sets the duration of the fade animation, which is used to show the preview of tabs. Previews
+     * are only shown when using the smartphone layout.
+     *
+     * @param duration
+     *         The duration, which should be set, in milliseconds as a {@link Long} value. The
+     *         duration must be at least 0
+     */
+    void setTabPreviewFadeDuration(long duration);
+
+    /**
      * Returns the view, which is shown, when the tab switcher is empty.
      *
      * @return The view, which is shown, when the tab switcher is empty, as an instance of the class
@@ -1118,6 +1155,25 @@ public interface Model extends Iterable<Tab> {
      *         default duration should be used
      */
     void setEmptyView(@LayoutRes int resourceId, long animationDuration);
+
+    /**
+     * Returns, whether saved states of tabs are cleared when the corresponding tabs are removed
+     * from the tab switcher, or not.
+     *
+     * @return True, if saved states of tabs are cleared when the corresponding tabs are removed
+     * from the tab switcher, false otherwise
+     */
+    boolean areSavedStatesClearedWhenRemovingTabs();
+
+    /**
+     * Sets, whether saved states of tabs should be cleared when the corresponding tabs are removed,
+     * or not.
+     *
+     * @param clear
+     *         True, if the saved states of tabs should be cleared when the corresponding tabs are
+     *         removed, false otherwise
+     */
+    void clearSavedStatesWhenRemovingTabs(boolean clear);
 
     /**
      * Adds a new listener, which should be notified, when a tab is about to be closed by clicking

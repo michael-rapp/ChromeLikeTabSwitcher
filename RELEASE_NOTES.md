@@ -1,10 +1,22 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Jan. 23th 2018)
+## Version 1.0.0 (Jan. 27th 2018)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Versopm 0.2.4 (Jan. 27th 2018)
+
+A minor release, which introduces the following changes:
+
+- Added the class `StatefulTabSwitcherDecorator`.
+- The saved states of tabs are now cleared when the corresponding tab is removed by default. This can be turned of by using the `clearSavedStatesWhenRemovingTabs`-method. 
+- Fade animations can now be used to show the previews of tabs when using the smartphone layout.
+- Updated `targetSdkVersion` to API level 27 (Android 8.1).
+- Updated dependency "AndroidUtil" to version 1.19.0.
+- Updated dependency "AndroidMaterialViews" to version 2.1.10.
+- The data structure `ListenerList` is now used for managing event listeners.
 
 ## Version 0.2.3 (Jan. 23th 2018)
 
