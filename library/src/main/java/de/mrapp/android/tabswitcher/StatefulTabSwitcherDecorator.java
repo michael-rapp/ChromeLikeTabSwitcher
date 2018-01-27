@@ -110,6 +110,18 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
                                                @Nullable final Bundle savedInstanceState);
 
     /**
+     * The method, which is invoked on subclasses, when a state is cleared using the {@link
+     * #clearState(Tab)} or {@link #clearAllStates()} method.
+     *
+     * @param state
+     *         The state, which is cleared, as an instance of the generic type {@link StateType}.
+     *         The state may not be null
+     */
+    protected void onClearState(@NonNull final StateType state) {
+
+    }
+
+    /**
      * The method which is invoked, when the view, which is used to visualize a tab, should be
      * shown, respectively when it should be refreshed. The purpose of this method is to customize
      * the appearance of the view, which is used to visualize the corresponding tab, depending on
@@ -210,10 +222,20 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
         ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
-            states.remove(tab.hashCode());
+            SoftReference<StateType> reference = states.get(tab.hashCode());
 
-            if (states.size() == 0) {
-                states = null;
+            if (reference != null) {
+                StateType state = reference.get();
+
+                if (reference != null) {
+                    onClearState(state);
+                }
+
+                states.remove(tab.hashCode());
+
+                if (states.size() == 0) {
+                    states = null;
+                }
             }
         }
     }
@@ -223,6 +245,16 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
      */
     public final void clearAllStates() {
         if (states != null) {
+            for (int i = 0; i < states.size(); i++) {
+                int key = states.keyAt(i);
+                SoftReference<StateType> reference = states.get(key);
+                StateType state = reference.get();
+
+                if (state != null) {
+                    onClearState(state);
+                }
+            }
+
             states.clear();
             states = null;
         }
