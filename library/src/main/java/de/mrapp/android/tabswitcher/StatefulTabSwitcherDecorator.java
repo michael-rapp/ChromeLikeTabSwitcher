@@ -289,7 +289,6 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
                                           @NonNull final Bundle outState) {
         StateType state = getState(tab);
         onSaveInstanceState(view, tab, index, viewType, state, outState);
-        clearState(tab);
     }
 
 }

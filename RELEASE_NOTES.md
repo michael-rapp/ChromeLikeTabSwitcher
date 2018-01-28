@@ -6,7 +6,13 @@ The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
 
-## Versopm 0.2.4 (Jan. 27th 2018)
+## Version 0.2.5 (Jan. 28th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed an issue, which caused states of a `StatefulTabSwitcherDecorator` to be cleared prematurely.
+
+## Version 0.2.4 (Jan. 27th 2018)
 
 A minor release, which introduces the following changes:
 
