@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +58,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @since 0.1.0
  */
 public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
-        implements AbstractDataBinder.Listener<Bitmap, Tab, ImageView, TabItem> {
+        implements AbstractDataBinder.Listener<Void, Tab, ImageView, TabItem> {
 
     /**
      * The view recycler, which allows to inflate the views, which are associated with tabs.
@@ -67,7 +68,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
     /**
      * The data binder, which allows to render previews of tabs.
      */
-    private final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder;
+    private final AbstractDataBinder<Void, Tab, ImageView, TabItem> dataBinder;
 
     /**
      * The inset of tabs in pixels.
@@ -421,7 +422,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
 
     @Override
     public final boolean onLoadData(
-            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder,
+            @NonNull final AbstractDataBinder<Void, Tab, ImageView, TabItem> dataBinder,
             @NonNull final Tab key, @NonNull final TabItem... params) {
         boolean result = true;
 
@@ -429,20 +430,24 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
             result &= listener.onLoadTabPreview(getTabSwitcher(), key);
         }
 
+        if (key.getTitle().equals("Tab 3")) {
+            Log.e("foo", "result = " + result);
+        }
+
         return result;
     }
 
     @Override
     public final void onFinished(
-            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder,
-            @NonNull final Tab key, @Nullable final Bitmap data, @NonNull final ImageView view,
+            @NonNull final AbstractDataBinder<Void, Tab, ImageView, TabItem> dataBinder,
+            @NonNull final Tab key, @Nullable final Void data, @NonNull final ImageView view,
             @NonNull final TabItem... params) {
 
     }
 
     @Override
     public final void onCanceled(
-            @NonNull final AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> dataBinder) {
+            @NonNull final AbstractDataBinder<Void, Tab, ImageView, TabItem> dataBinder) {
 
     }
 
