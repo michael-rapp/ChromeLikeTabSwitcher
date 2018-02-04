@@ -1864,6 +1864,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 super.onAnimationStart(animation);
 
                 if (getModel().isEmpty()) {
+                    setFirstVisibleIndex(-1);
                     animateToolbarVisibility(getModel().areToolbarsShown(), 0);
                 }
 
