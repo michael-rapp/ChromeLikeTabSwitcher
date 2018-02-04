@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
                 @NonNull final Tab key, @Nullable final ArrayAdapter<String> data,
                 @NonNull final ListView view, @NonNull final Void... params) {
             if (getTab().equals(key)) {
+                view.setAdapter(data);
                 adapter = data;
-                view.setAdapter(adapter);
                 dataBinder.removeListener(this);
             }
         }
@@ -167,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         public boolean onLoadTabPreview(@NonNull final TabSwitcher tabSwitcher,
                                         @NonNull final Tab tab) {
             return !getTab().equals(tab) || adapter != null;
-
         }
 
     }
