@@ -1,10 +1,17 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Jan. 27th 2018)
+## Version 1.0.0 (Feb. 4th 2018)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.2.6 (Feb. 4th 2018)
+
+- A bugfix release, which fixes the following issues:
+
+- Fixed previews of tabs not able to be loaded when certain child views (e.g. `AppBarLayout`s) are contained by the tabs.
+- Fixed a crash when storing the state of a TabSwitcher, if the switcher is still shown after all tabs have been removed.
 
 ## Version 0.2.5 (Jan. 28th 2018)
 
