@@ -98,6 +98,9 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
             contentViewRecycler.getAdapter().onShowView(getContext(), content, tab, false);
         }
 
+        content.measure(MeasureSpec.makeMeasureSpec(parent.getWidth(), MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(parent.getHeight(), MeasureSpec.EXACTLY));
+        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
         viewHolder.content = content;
     }
 
@@ -111,9 +114,6 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
         viewHolder.content = null;
         int width = parent.getWidth();
         int height = parent.getHeight();
-        content.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         content.draw(canvas);
