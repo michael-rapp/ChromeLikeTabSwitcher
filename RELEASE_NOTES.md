@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.2.8 (Feb. 4th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Implemented an alternative fix regarding the issue of previews not being loaded, which does not come with a performance loss. Previews are now again rendered in background threads.
+
 ## Version 0.2.7 (Feb. 4th 2018)
 
 A bugfix release, which fixes the following issues:
