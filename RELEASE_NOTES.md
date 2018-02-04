@@ -6,9 +6,15 @@ The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
 
+## Version 0.2.7 (Feb. 4th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Improved the fix in the last release regarding previews not being loaded. Previews are now entirely rendered on the UI thread. 
+
 ## Version 0.2.6 (Feb. 4th 2018)
 
-- A bugfix release, which fixes the following issues:
+A bugfix release, which fixes the following issues:
 
 - Fixed previews of tabs not able to be loaded when certain child views (e.g. `AppBarLayout`s) are contained by the tabs.
 - Fixed a crash when storing the state of a TabSwitcher, if the switcher is still shown after all tabs have been removed.

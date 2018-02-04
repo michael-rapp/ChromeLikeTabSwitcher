@@ -40,7 +40,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
  * @author Michael Rapp
  * @since 0.1.0
  */
-public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView, TabItem> {
+public class PreviewDataBinder extends AbstractDataBinder<Void, Tab, ImageView, TabItem> {
 
     /**
      * The parent view of the tab switcher, the tabs belong to.
@@ -75,7 +75,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
     public PreviewDataBinder(@NonNull final ViewGroup parent,
                              @NonNull final ViewRecycler<Tab, Void> contentViewRecycler,
                              @NonNull final Model model) {
-        super(parent.getContext().getApplicationContext(), new LruCache<Tab, Bitmap>(7));
+        super(parent.getContext().getApplicationContext(), new LruCache<Tab, Void>(7));
         ensureNotNull(parent, "The parent may not be null");
         ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
         this.parent = parent;
@@ -98,34 +98,32 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
             contentViewRecycler.getAdapter().onShowView(getContext(), content, tab, false);
         }
 
-        content.measure(MeasureSpec.makeMeasureSpec(parent.getWidth(), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(parent.getHeight(), MeasureSpec.EXACTLY));
-        content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
         viewHolder.content = content;
     }
 
     @NonNull
     @Override
-    protected final Bitmap doInBackground(@NonNull final Tab key,
-                                          @NonNull final TabItem... params) {
-        TabItem tabItem = params[0];
-        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
-        View content = viewHolder.content;
-        viewHolder.content = null;
-        int width = parent.getWidth();
-        int height = parent.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        content.draw(canvas);
-        return bitmap;
+    protected final Void doInBackground(@NonNull final Tab key, @NonNull final TabItem... params) {
+        return null;
     }
 
     @Override
-    protected final void onPostExecute(@NonNull final ImageView view, @Nullable final Bitmap data,
+    protected final void onPostExecute(@NonNull final ImageView view, @Nullable final Void data,
                                        final long duration, @NonNull final TabItem... params) {
-        view.setImageBitmap(data);
+        TabItem tabItem = params[0];
+        PhoneTabViewHolder viewHolder = (PhoneTabViewHolder) tabItem.getViewHolder();
+        View content = viewHolder.content;
 
-        if (data != null) {
+        if (content != null) {
+            int width = parent.getWidth();
+            int height = parent.getHeight();
+            content.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            content.layout(0, 0, content.getMeasuredWidth(), content.getMeasuredHeight());
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            content.draw(canvas);
+            view.setImageBitmap(bitmap);
             boolean useFadeAnimation = duration > model.getTabPreviewFadeThreshold();
             view.setAlpha(useFadeAnimation ? 0f : 1f);
             view.setVisibility(View.VISIBLE);
@@ -138,8 +136,7 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
             view.setVisibility(View.INVISIBLE);
         }
 
-        view.setVisibility(data != null ? View.VISIBLE : View.GONE);
-        TabItem tabItem = params[0];
+        viewHolder.content = null;
         contentViewRecycler.remove(tabItem.getTab());
     }
 
