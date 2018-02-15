@@ -6,6 +6,13 @@ The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
 
+## Version 0.2.9 (Feb. 15th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed a crash of the example app on tablets.
+- Updated the dependency "AndroidUtil" to version 1.20.1.
+
 ## Version 0.2.8 (Feb. 4th 2018)
 
 A bugfix release, which fixes the following issues:

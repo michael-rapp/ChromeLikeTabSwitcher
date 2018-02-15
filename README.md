@@ -26,7 +26,7 @@ Alternatively, the library can be added to your Android app as a Gradle dependen
 
 ```groovy
 dependencies {
-    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.8'
+    compile 'com.github.michael-rapp:chrome-like-tab-switcher:0.2.9'
 }
 ```
 
