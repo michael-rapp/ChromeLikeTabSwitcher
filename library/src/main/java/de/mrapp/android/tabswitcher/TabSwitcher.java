@@ -67,14 +67,12 @@ import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
 import de.mrapp.android.tabswitcher.view.TabSwitcherButton;
-import de.mrapp.android.util.DisplayUtil.DeviceType;
 import de.mrapp.android.util.DisplayUtil.Orientation;
 import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractSavedState;
 
 import static de.mrapp.android.util.Condition.ensureNotNull;
-import static de.mrapp.android.util.DisplayUtil.getDeviceType;
 import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
@@ -1158,13 +1156,16 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     @NonNull
     public final Layout getLayout() {
+        // TODO: Return Layout.TABLET once supported
+        /*
         if (layoutPolicy == LayoutPolicy.TABLET || (layoutPolicy == LayoutPolicy.AUTO &&
                 getDeviceType(getContext()) == DeviceType.TABLET)) {
             return Layout.TABLET;
         } else {
-            return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
-                    Layout.PHONE_PORTRAIT;
-        }
+        */
+        return getOrientation(getContext()) == Orientation.LANDSCAPE ? Layout.PHONE_LANDSCAPE :
+                Layout.PHONE_PORTRAIT;
+        //}
     }
 
     /**
