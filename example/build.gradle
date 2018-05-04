@@ -18,7 +18,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:design:27.0.2'
-    compile project(':library')
+    api 'com.android.support:design:27.0.2'
+    api project(':library')
 }
