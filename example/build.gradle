@@ -18,6 +18,6 @@ android {
 }
 
 dependencies {
-    api 'com.android.support:design:27.0.2'
+    api 'com.android.support:design:27.1.1'
     api project(':library')
 }
