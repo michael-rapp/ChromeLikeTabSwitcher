@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -181,6 +182,16 @@ public class Tab implements Parcelable {
     private Bitmap iconBitmap;
 
     /**
+     * The color state list, which is used to tint the tab's icon.
+     */
+    private ColorStateList iconTintList;
+
+    /**
+     * The mode, which is used to tint the tab's icon.
+     */
+    private PorterDuff.Mode iconTintMode;
+
+    /**
      * True, if the tab is closeable, false otherwise.
      */
     private boolean closeable;
@@ -194,6 +205,16 @@ public class Tab implements Parcelable {
      * The bitmap of the icon of the tab's close button.
      */
     private Bitmap closeButtonIconBitmap;
+
+    /**
+     * The color state list, which is used to tint the tab's close button.
+     */
+    private ColorStateList closeButtonIconTintList;
+
+    /**
+     * The mode, which is used to tint the tab's close button.
+     */
+    private PorterDuff.Mode closeButtonIconTintMode;
 
     /**
      * The background color of the tab.
@@ -317,9 +338,13 @@ public class Tab implements Parcelable {
         this.title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         this.iconId = source.readInt();
         this.iconBitmap = source.readParcelable(getClass().getClassLoader());
+        this.iconTintList = source.readParcelable(getClass().getClassLoader());
+        this.iconTintMode = (PorterDuff.Mode) source.readSerializable();
         this.closeable = source.readInt() > 0;
         this.closeButtonIconId = source.readInt();
         this.closeButtonIconBitmap = source.readParcelable(getClass().getClassLoader());
+        this.closeButtonIconTintList = source.readParcelable(getClass().getClassLoader());
+        this.closeButtonIconTintMode = (PorterDuff.Mode) source.readSerializable();
         this.backgroundColor = source.readParcelable(getClass().getClassLoader());
         this.contentBackgroundColor = source.readInt();
         this.titleTextColor = source.readParcelable(getClass().getClassLoader());
@@ -340,8 +365,12 @@ public class Tab implements Parcelable {
         this.closeable = true;
         this.closeButtonIconId = -1;
         this.closeButtonIconBitmap = null;
+        this.closeButtonIconTintList = null;
+        this.closeButtonIconTintMode = null;
         this.iconId = -1;
         this.iconBitmap = null;
+        this.iconTintList = null;
+        this.iconTintMode = null;
         this.backgroundColor = null;
         this.contentBackgroundColor = -1;
         this.titleTextColor = null;
@@ -451,6 +480,60 @@ public class Tab implements Parcelable {
     }
 
     /**
+     * Returns the color state list, which is used to tint the tab's icon.
+     *
+     * @return The color state list, which is used to tint the tab's icon, as an instance of the
+     * class {@link ColorStateList} or null, if the icon is not tinted
+     */
+    public final ColorStateList getIconTintList() {
+        return iconTintList;
+    }
+
+    /**
+     * Sets the color, which should be used to tint the tab's icon.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    public final void setIconTint(@ColorInt final int color) {
+        setIconTintList(ColorStateList.valueOf(color));
+    }
+
+    /**
+     * Sets the color state list, which should be used to tint the tab's icon.
+     *
+     * @param tintList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the icon should not be tinted
+     */
+    public final void setIconTintList(@Nullable final ColorStateList tintList) {
+        this.iconTintList = tintList;
+        notifyOnIconChanged();
+    }
+
+    /**
+     * Returns the mode, which is used to tint the tab's icon.
+     *
+     * @return The mode, which is used to tint the tab's icon, as a value of the enum {@link
+     * PorterDuff.Mode} or null, if the default mode is used
+     */
+    public final PorterDuff.Mode getIconTintMode() {
+        return iconTintMode;
+    }
+
+    /**
+     * Sets the mode, which should be used to tint the tab's icon.
+     *
+     * @param mode
+     *         The mode, which should be set, as a value of enum {@link PorterDuff.Mode} or null, if
+     *         the default mode should be used
+     */
+    public final void setIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        this.iconTintMode = mode;
+        notifyOnIconChanged();
+    }
+
+    /**
      * Returns, whether the tab is closeable, or not.
      *
      * @return True, if the tab is closeable, false otherwise
@@ -514,6 +597,60 @@ public class Tab implements Parcelable {
     public final void setCloseButtonIcon(@Nullable final Bitmap icon) {
         this.closeButtonIconId = -1;
         this.closeButtonIconBitmap = icon;
+        notifyOnCloseButtonIconChanged();
+    }
+
+    /**
+     * Returns the color state list, which is used to tint the tab's close button.
+     *
+     * @return The color state list, which is used to tint the tab's close button, as an instance of
+     * the class {@link ColorStateList} or null, if the close button is not tinted
+     */
+    public final ColorStateList getCloseButtonIconTintList() {
+        return closeButtonIconTintList;
+    }
+
+    /**
+     * Sets the color, which should be used to tint the tab's close button.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    public final void setCloseButtonIconTint(@ColorInt final int color) {
+        setCloseButtonIconTintList(ColorStateList.valueOf(color));
+    }
+
+    /**
+     * Sets the color state list, which should be used to tint the tab's close button.
+     *
+     * @param tintList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the close button should not be tinted
+     */
+    public final void setCloseButtonIconTintList(@Nullable final ColorStateList tintList) {
+        this.closeButtonIconTintList = tintList;
+        notifyOnCloseButtonIconChanged();
+    }
+
+    /**
+     * Returns the mode, which is used to tint the tab's close button.
+     *
+     * @return The mode, which is used to tint the tab's close button, as a value of the enum {@link
+     * PorterDuff.Mode} or null, if the default mode is used
+     */
+    public final PorterDuff.Mode getCloseButtonIconTintMode() {
+        return closeButtonIconTintMode;
+    }
+
+    /**
+     * Sets the mode, which should be used to tint the tab's close button.
+     *
+     * @param mode
+     *         The mode, which should be set, as a value of enum {@link PorterDuff.Mode} or null, if
+     *         the default mode should be used
+     */
+    public final void setCloseButtonIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        this.closeButtonIconTintMode = mode;
         notifyOnCloseButtonIconChanged();
     }
 
@@ -710,9 +847,13 @@ public class Tab implements Parcelable {
         TextUtils.writeToParcel(title, parcel, flags);
         parcel.writeInt(iconId);
         parcel.writeParcelable(iconBitmap, flags);
+        parcel.writeParcelable(iconTintList, flags);
+        parcel.writeSerializable(iconTintMode);
         parcel.writeInt(closeable ? 1 : 0);
         parcel.writeInt(closeButtonIconId);
         parcel.writeParcelable(closeButtonIconBitmap, flags);
+        parcel.writeParcelable(closeButtonIconTintList, flags);
+        parcel.writeSerializable(closeButtonIconTintMode);
         parcel.writeParcelable(backgroundColor, flags);
         parcel.writeInt(contentBackgroundColor);
         parcel.writeParcelable(titleTextColor, flags);
