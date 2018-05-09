@@ -18,7 +18,7 @@ android {
 }
 
 dependencies {
-    api 'com.github.michael-rapp:android-util:1.20.2'
+    api 'com.github.michael-rapp:android-util:1.20.3'
     api 'com.github.michael-rapp:android-material-views:2.1.11'
     api 'com.android.support:support-annotations:27.1.1'
     api 'com.android.support:appcompat-v7:27.1.1'
