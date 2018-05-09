@@ -36,6 +36,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
@@ -520,8 +521,14 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
-        setToolbarNavigationIcon(
-                typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon), null);
+        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarNavigationIcon, -1);
+        Drawable navigationIcon = null;
+
+        if (resourceId != -1) {
+            navigationIcon = AppCompatResources.getDrawable(getContext(), resourceId);
+        }
+
+        setToolbarNavigationIcon(navigationIcon, null);
     }
 
     /**

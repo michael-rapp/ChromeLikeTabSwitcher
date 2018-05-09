@@ -27,7 +27,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 
 import de.mrapp.android.util.datastructure.ListenerList;
@@ -446,7 +446,7 @@ public class Tab implements Parcelable {
         ensureNotNull(context, "The context may not be null");
 
         if (iconId != -1) {
-            return ContextCompat.getDrawable(context, iconId);
+            return AppCompatResources.getDrawable(context, iconId);
         } else {
             return iconBitmap != null ? new BitmapDrawable(context.getResources(), iconBitmap) :
                     null;
@@ -567,7 +567,7 @@ public class Tab implements Parcelable {
         ensureNotNull(context, "The context may not be null");
 
         if (closeButtonIconId != -1) {
-            return ContextCompat.getDrawable(context, closeButtonIconId);
+            return AppCompatResources.getDrawable(context, closeButtonIconId);
         } else {
             return closeButtonIconBitmap != null ?
                     new BitmapDrawable(context.getResources(), closeButtonIconBitmap) : null;

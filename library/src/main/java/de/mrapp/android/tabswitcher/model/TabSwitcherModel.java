@@ -28,7 +28,7 @@ import android.support.annotation.MenuRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1402,7 +1402,7 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final Drawable getTabIcon() {
         if (tabIconId != -1) {
-            return ContextCompat.getDrawable(getContext(), tabIconId);
+            return AppCompatResources.getDrawable(getContext(), tabIconId);
         } else {
             return tabIconBitmap != null ?
                     new BitmapDrawable(getContext().getResources(), tabIconBitmap) : null;
@@ -1500,7 +1500,7 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final Drawable getTabCloseButtonIcon() {
         if (tabCloseButtonIconId != -1) {
-            return ContextCompat.getDrawable(getContext(), tabCloseButtonIconId);
+            return AppCompatResources.getDrawable(getContext(), tabCloseButtonIconId);
         } else {
             return tabCloseButtonIconBitmap != null ?
                     new BitmapDrawable(getContext().getResources(), tabCloseButtonIconBitmap) :
@@ -1624,7 +1624,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
-        setToolbarNavigationIcon(ContextCompat.getDrawable(getContext(), resourceId), listener);
+        setToolbarNavigationIcon(AppCompatResources.getDrawable(getContext(), resourceId),
+                listener);
     }
 
     @Override
