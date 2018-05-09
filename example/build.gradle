@@ -9,6 +9,7 @@ android {
         targetSdkVersion project.TARGET_SDK_VERSION.toInteger()
         versionName project.VERSION_NAME
         versionCode project.VERSION_CODE.toInteger()
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
