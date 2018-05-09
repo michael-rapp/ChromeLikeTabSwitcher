@@ -15,10 +15,12 @@ package de.mrapp.android.tabswitcher.model;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.TextUtils;
 
 import de.mrapp.android.tabswitcher.R;
@@ -50,6 +52,111 @@ public class TabSwitcherStyle {
      * The theme helper, which allows to retrieve resources, depending on the tab switcher's theme.
      */
     private final ThemeHelper themeHelper;
+
+    /**
+     * Return the color state list, which should be used to tint the icon of tabs.
+     *
+     * @param tab
+     *         The tab, the color state list should be returned for, as an instance of the class
+     *         {@link Tab} or null, if the color state list should not be returned for a specific
+     *         tab
+     * @return The color state list, which should be used to tint the icon of tabs, as an instance
+     * of the class {@link ColorStateList} or null, if the icon should not be tinted
+     */
+    @Nullable
+    private ColorStateList getTabIconTintList(@Nullable final Tab tab) {
+        ColorStateList tintList = tab != null ? tab.getCloseButtonIconTintList() : null;
+
+        if (tintList == null) {
+            tintList = model.getTabCloseButtonIconTintList();
+
+            if (tintList == null) {
+                try {
+                    int tintColor = themeHelper
+                            .getColor(tabSwitcher.getLayout(), R.attr.tabSwitcherTabIconTint);
+                    tintList = ColorStateList.valueOf(tintColor);
+                } catch (NotFoundException e) {
+                    tintList = null;
+                }
+
+            }
+        }
+
+        return tintList;
+    }
+
+    /**
+     * Returns the mode, which should be used to tint the icon of tabs.
+     *
+     * @param tab
+     *         The tab, the mode should be returned for, as an instance of the class {@link Tab} or
+     *         null, if the mode should not be returned for a specific tab
+     * @return The mode, which should be used to tint the icon of tabs, as a value of the enum
+     * {@link PorterDuff.Mode}. The mode may not be null
+     */
+    @NonNull
+    private PorterDuff.Mode getTabIconTintMode(@Nullable final Tab tab) {
+        PorterDuff.Mode tintMode = tab != null ? tab.getIconTintMode() : null;
+
+        if (tintMode == null) {
+            tintMode = model.getTabIconTintMode();
+        }
+
+        return tintMode != null ? tintMode : PorterDuff.Mode.SRC_ATOP;
+    }
+
+    /**
+     * Return the color state list, which should be used to tint the close button of tabs.
+     *
+     * @param tab
+     *         The tab, the color state list should be returned for, as an instance of the class
+     *         {@link Tab} or null, if the color state list should not be returned for a specific
+     *         tab
+     * @return The color state list, which should be used to tint the close button of tabs, as an
+     * instance of the class {@link ColorStateList} or null, if the close button should not be
+     * tinted
+     */
+    @Nullable
+    private ColorStateList getTabCloseButtonIconTintList(@Nullable final Tab tab) {
+        ColorStateList tintList = tab != null ? tab.getCloseButtonIconTintList() : null;
+
+        if (tintList == null) {
+            tintList = model.getTabCloseButtonIconTintList();
+
+            if (tintList == null) {
+                try {
+                    int tintColor = themeHelper.getColor(tabSwitcher.getLayout(),
+                            R.attr.tabSwitcherTabCloseButtonIconTint);
+                    tintList = ColorStateList.valueOf(tintColor);
+                } catch (NotFoundException e) {
+                    tintList = null;
+                }
+
+            }
+        }
+
+        return tintList;
+    }
+
+    /**
+     * Returns the mode, which should be used to tint the close button of tabs.
+     *
+     * @param tab
+     *         The tab, the mode should be returned for, as an instance of the class {@link Tab} or
+     *         null, if the mode should not be returned for a specific tab
+     * @return The mode, which should be used to tint the close button of tabs, as a value of the
+     * enum {@link PorterDuff.Mode}. The mode may not be null
+     */
+    @NonNull
+    private PorterDuff.Mode getTabCloseButtonIconTintMode(@Nullable final Tab tab) {
+        PorterDuff.Mode tintMode = tab != null ? tab.getCloseButtonIconTintMode() : null;
+
+        if (tintMode == null) {
+            tintMode = model.getTabCloseButtonIconTintMode();
+        }
+
+        return tintMode != null ? tintMode : PorterDuff.Mode.SRC_ATOP;
+    }
 
     /**
      * Creates a new class, which allows to retrieve the style attributes of a {@link TabSwitcher}.
@@ -110,6 +217,16 @@ public class TabSwitcherStyle {
                 } catch (NotFoundException e) {
                     icon = null;
                 }
+            }
+        }
+
+        if (icon != null) {
+            ColorStateList tintList = getTabIconTintList(tab);
+
+            if (tintList != null) {
+                PorterDuff.Mode tintMode = getTabIconTintMode(tab);
+                DrawableCompat.setTintList(icon, tintList);
+                DrawableCompat.setTintMode(icon, tintMode);
             }
         }
 
@@ -205,6 +322,16 @@ public class TabSwitcherStyle {
             if (icon == null) {
                 icon = themeHelper
                         .getDrawable(tabSwitcher.getLayout(), R.attr.tabSwitcherTabCloseButtonIcon);
+            }
+        }
+
+        if (icon != null) {
+            ColorStateList tintList = getTabCloseButtonIconTintList(tab);
+
+            if (tintList != null) {
+                PorterDuff.Mode tintMode = getTabCloseButtonIconTintMode(tab);
+                DrawableCompat.setTintList(icon, tintList);
+                DrawableCompat.setTintMode(icon, tintMode);
             }
         }
 

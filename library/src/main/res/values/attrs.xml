@@ -25,11 +25,13 @@ License.
         <enum name="tablet" value="3"/>
     </attr>
     <attr name="tabSwitcherTabIcon" format="reference"/>
+    <attr name="tabSwitcherTabIconTint" format="color"/>
     <attr name="tabSwitcherTabBackgroundColor" format="color"/>
     <attr name="tabSwitcherTabContentBackgroundColor" format="color"/>
     <attr name="tabSwitcherAddTabButtonColor" format="color"/>
     <attr name="tabSwitcherTabTitleTextColor" format="color"/>
     <attr name="tabSwitcherTabCloseButtonIcon" format="reference"/>
+    <attr name="tabSwitcherTabCloseButtonIconTint" format="color"/>
     <attr name="tabSwitcherTabProgressBarColor" format="color"/>
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
@@ -49,11 +51,13 @@ License.
             <enum name="tablet_landscape" value="3"/>
         </attr>
         <attr name="tabIcon" format="reference"/>
+        <attr name="tabIconTint" format="color"/>
         <attr name="tabBackgroundColor" format="color"/>
         <attr name="tabContentBackgroundColor" format="color"/>
         <attr name="addTabButtonColor" format="color"/>
         <attr name="tabTitleTextColor" format="color"/>
         <attr name="tabCloseButtonIcon" format="reference"/>
+        <attr name="tabCloseButtonIconTint" format="color"/>
         <attr name="showToolbars" format="boolean"/>
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>

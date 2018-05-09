@@ -324,11 +324,13 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
+            obtainTabIconTint(typedArray);
             obtainTabBackgroundColor(typedArray);
             obtainTabContentBackgroundColor(typedArray);
             obtainAddTabButtonColor(typedArray);
             obtainTabTitleTextColor(typedArray);
             obtainTabCloseButtonIcon(typedArray);
+            obtainTabCloseButtonIconTint(typedArray);
             obtainShowToolbars(typedArray);
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
@@ -397,6 +399,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * Obtains the color state list, which should be used to tint the icon of a tab, from a specific
+     * typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabIconTint(@NonNull final TypedArray typedArray) {
+        setTabIconTintList(typedArray.getColorStateList(R.styleable.TabSwitcher_tabIconTint));
+    }
+
+    /**
      * Obtains the background color of a tab from a specific typed array.
      *
      * @param typedArray
@@ -458,6 +472,19 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         if (resourceId != 0) {
             setTabCloseButtonIcon(resourceId);
         }
+    }
+
+    /**
+     * Obtains the color state list, which should be used to tint the close button of a tab, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabCloseButtonIconTint(@NonNull final TypedArray typedArray) {
+        setTabIconTintList(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabCloseButtonIconTint));
     }
 
     /**
