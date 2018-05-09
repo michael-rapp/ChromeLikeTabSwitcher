@@ -19,6 +19,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -166,7 +167,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
-     * The index of the primary toolbar as returned by the method {@link TabSwitcher#getToolbars()}.
+     * The index of the primary toolbar as returned by the method {@link
+     * TabSwitcher#getToolbars()}.
      */
     public static final int PRIMARY_TOOLBAR_INDEX = 0;
 
@@ -1559,6 +1561,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         model.setTabIcon(icon);
     }
 
+    @Override
+    public final ColorStateList getTabIconTintList() {
+        return model.getTabIconTintList();
+    }
+
+    @Override
+    public final void setTabIconTint(@ColorInt final int color) {
+        model.setTabIconTint(color);
+    }
+
+    @Override
+    public final void setTabIconTintList(@Nullable final ColorStateList tintList) {
+        model.setTabIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabIconTintMode() {
+        return model.getTabIconTintMode();
+    }
+
+    @Override
+    public final void setTabIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setTabIconTintMode(mode);
+    }
+
     @Nullable
     @Override
     public final ColorStateList getTabBackgroundColor() {
@@ -1626,6 +1653,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setTabCloseButtonIcon(@Nullable final Bitmap icon) {
         model.setTabCloseButtonIcon(icon);
+    }
+
+    @Override
+    public final ColorStateList getTabCloseButtonIconTintList() {
+        return model.getTabCloseButtonIconTintList();
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTint(@ColorInt final int color) {
+        model.setTabCloseButtonIconTint(color);
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintList(@Nullable final ColorStateList tintList) {
+        model.setTabCloseButtonIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabCloseButtonIconTintMode() {
+        return model.getTabCloseButtonIconTintMode();
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setTabCloseButtonIconTintMode(mode);
     }
 
     @Override

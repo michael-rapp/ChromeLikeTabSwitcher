@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.model;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
@@ -443,9 +444,9 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds a new tab to the tab switcher. By default, the tab is added at the end. If the switcher
      * is currently shown, the tab is added by using an animation. By default, a {@link
-     * SwipeAnimation} with direction {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If
-     * an animation is currently running, the tab will be added once all previously started
-     * animations have been finished.
+     * SwipeAnimation} with direction {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If an
+     * animation is currently running, the tab will be added once all previously started animations
+     * have been finished.
      *
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
@@ -455,9 +456,9 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher at a specific index. If the switcher is currently shown,
-     * the tab is added by using an animation. By default, a {@link SwipeAnimation} with
-     * direction {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently
-     * running, the tab will be added once all previously started animations have been finished.
+     * the tab is added by using an animation. By default, a {@link SwipeAnimation} with direction
+     * {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tab
+     * will be added once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
@@ -471,8 +472,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Adds a new tab to the tab switcher at a specific index. If the switcher is currently shown,
-     * the tab is added by using a specific animation. If an animation is currently
-     * running, the tab will be added once all previously started animations have been finished.
+     * the tab is added by using a specific animation. If an animation is currently running, the tab
+     * will be added once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be added, as an instance of the class {@link Tab}. The tab may
@@ -503,9 +504,9 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by a collection, to the tab switcher, starting at a
      * specific index. If the switcher is currently shown, the tabs are added by using an animation.
-     * By default, a {@link SwipeAnimation} with direction {@link
-     * SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tabs will
-     * be added once all previously started animations have been finished.
+     * By default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT_OR_BOTTOM} is
+     * used. If an animation is currently running, the tabs will be added once all previously
+     * started animations have been finished.
      *
      * @param tabs
      *         A collection, which contains the tabs, which should be added, as an instance of the
@@ -553,9 +554,9 @@ public interface Model extends Iterable<Tab> {
     /**
      * Adds all tabs, which are contained by an array, to the tab switcher, starting at a specific
      * index. If the switcher is currently shown, the tabs are added by using an animation. By
-     * default, a {@link SwipeAnimation} with direction {@link
-     * SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tabs will
-     * be added once all previously started animations have been finished.
+     * default, a {@link SwipeAnimation} with direction {@link SwipeDirection#RIGHT_OR_BOTTOM} is
+     * used. If an animation is currently running, the tabs will be added once all previously
+     * started animations have been finished.
      *
      * @param tabs
      *         An array, which contains the tabs, which should be added, as an array of the type
@@ -568,10 +569,10 @@ public interface Model extends Iterable<Tab> {
     void addAllTabs(@NonNull Tab[] tabs, int index);
 
     /**
-     * Adds all tabs, which are contained by an array, to the tab switcher, starting at a
-     * specific index. If the switcher is currently shown, the tabs are added by using a specific
-     * animation. If an animation is currently running, the tabs will be added once all previously
-     * started animations have been finished.
+     * Adds all tabs, which are contained by an array, to the tab switcher, starting at a specific
+     * index. If the switcher is currently shown, the tabs are added by using a specific animation.
+     * If an animation is currently running, the tabs will be added once all previously started
+     * animations have been finished.
      *
      * @param tabs
      *         An array, which contains the tabs, which should be added, as an array of the type
@@ -588,9 +589,9 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
-     * removed by using an animation. By default, a {@link SwipeAnimation} with direction
-     * {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tab
-     * will be removed once all previously started animations have been finished.
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tab will
+     * be removed once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be removed, as an instance of the class {@link Tab}. The tab
@@ -600,8 +601,8 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Removes a specific tab from the tab switcher. If the switcher is currently shown, the tab is
-     * removed by using a specific animation. If an animation is currently running, the
-     * tab will be removed once all previously started animations have been finished.
+     * removed by using a specific animation. If an animation is currently running, the tab will be
+     * removed once all previously started animations have been finished.
      *
      * @param tab
      *         The tab, which should be removed, as an instance of the class {@link Tab}. The tab
@@ -614,16 +615,16 @@ public interface Model extends Iterable<Tab> {
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
-     * removed by using an animation. By default, a {@link SwipeAnimation} with direction
-     * {@link SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the
-     * tabs will be removed once all previously started animations have been finished.
+     * removed by using an animation. By default, a {@link SwipeAnimation} with direction {@link
+     * SwipeDirection#RIGHT_OR_BOTTOM} is used. If an animation is currently running, the tabs will
+     * be removed once all previously started animations have been finished.
      */
     void clear();
 
     /**
      * Removes all tabs from the tab switcher. If the switcher is currently shown, the tabs are
-     * removed by using a specific animation. If an animation is currently running, the
-     * tabs will be removed once all previously started animations have been finished.
+     * removed by using a specific animation. If an animation is currently running, the tabs will be
+     * removed once all previously started animations have been finished.
      *
      * @param animation
      *         The animation, which should be used to remove the tabs, as an instance of the class
@@ -797,6 +798,90 @@ public interface Model extends Iterable<Tab> {
     void setTabIcon(@Nullable Bitmap icon);
 
     /**
+     * Returns the color state list, which is used to tint the icon of a tab.
+     *
+     * @return The color state list, which is used to tint the icon of a tab, as an instance of the
+     * class {@link ColorStateList} or null, if the icon is not tinted
+     */
+    ColorStateList getTabIconTintList();
+
+    /**
+     * Sets the color, which should be used to tint the icon of a tab.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    void setTabIconTint(@ColorInt int color);
+
+    /**
+     * Sets the color state list, which should be used to tint the icon of a tab.
+     *
+     * @param tintList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the icon should not be tinted
+     */
+    void setTabIconTintList(@Nullable ColorStateList tintList);
+
+    /**
+     * Returns the mode, which is used to tint the icon of a tab.
+     *
+     * @return The mode, which is used to tint the icon of a tab, as a value of the enum {@link
+     * PorterDuff.Mode} or null, if the default mode is used
+     */
+    PorterDuff.Mode getTabIconTintMode();
+
+    /**
+     * Sets the mode, which should be used to tint the icon of a tab.
+     *
+     * @param mode
+     *         The mode, which should be set, as a value of enum {@link PorterDuff.Mode} or null, if
+     *         the default mode should be used
+     */
+    void setTabIconTintMode(@Nullable PorterDuff.Mode mode);
+
+    /**
+     * Returns the color state list, which is used to tint the close button of a tab.
+     *
+     * @return The color state list, which is used to tint the close button of a tab, as an instance
+     * of the class {@link ColorStateList} or null, if the close button is not tinted
+     */
+    ColorStateList getTabCloseButtonIconTintList();
+
+    /**
+     * Sets the color, which should be used to tint the close button of a tab.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    void setTabCloseButtonIconTint(@ColorInt int color);
+
+    /**
+     * Sets the color state list, which should be used to tint the close button of a tab.
+     *
+     * @param tintList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the close button should not be tinted
+     */
+    void setTabCloseButtonIconTintList(@Nullable ColorStateList tintList);
+
+    /**
+     * Returns the mode, which is used to tint the close button of a tab.
+     *
+     * @return The mode, which is used to tint the close button of a tab, as a value of the enum
+     * {@link PorterDuff.Mode} or null, if the default mode is used
+     */
+    PorterDuff.Mode getTabCloseButtonIconTintMode();
+
+    /**
+     * Sets the mode, which should be used to tint the close button of a tab.
+     *
+     * @param mode
+     *         The mode, which should be set, as a value of enum {@link PorterDuff.Mode} or null, if
+     *         the default mode should be used
+     */
+    void setTabCloseButtonIconTintMode(@Nullable PorterDuff.Mode mode);
+
+    /**
      * Returns the default background color of a tab.
      *
      * @return The default background color of a tab as an instance of the class {@link
@@ -945,9 +1030,9 @@ public interface Model extends Iterable<Tab> {
     ColorStateList getAddTabButtonColor();
 
     /**
-     * Sets the color of the button, which allows to add a new tab. This method does not
-     * have any effect when using the smartphone layout. When using the tablet layout, the button is
-     * shown next to the tabs.
+     * Sets the color of the button, which allows to add a new tab. This method does not have any
+     * effect when using the smartphone layout. When using the tablet layout, the button is shown
+     * next to the tabs.
      *
      * @param color
      *         The color, which should be set, as an {@link Integer} value or -1, if the default
@@ -956,9 +1041,9 @@ public interface Model extends Iterable<Tab> {
     void setAddTabButtonColor(@ColorInt int color);
 
     /**
-     * Sets the color of the button, which allows to add a new tab. This method does not
-     * have any effect when using the smartphone layout. When using the tablet layout, the button is
-     * shown next to the tabs.
+     * Sets the color of the button, which allows to add a new tab. This method does not have any
+     * effect when using the smartphone layout. When using the tablet layout, the button is shown
+     * next to the tabs.
      *
      * @param colorStateList
      *         The color, which should be set, as an instance of the class {@link ColorStateList} or

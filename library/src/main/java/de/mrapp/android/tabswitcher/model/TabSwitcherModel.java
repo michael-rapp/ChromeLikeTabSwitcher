@@ -16,6 +16,7 @@ package de.mrapp.android.tabswitcher.model;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -131,6 +132,20 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::TabIconBitmap";
 
     /**
+     * The name of the extra, which is used to store the tint list, which is used to tint a tab's
+     * icon, within a bundle.
+     */
+    private static final String TAB_ICON_TINT_LIST_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabIconTintList";
+
+    /**
+     * The name of the extra, which is used to store the mode, which is used to tint a tab's icon,
+     * within a bundle.
+     */
+    private static final String TAB_ICON_TINT_MODE_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabIconTintMode";
+
+    /**
      * The name of the extra, which is used to store the background color of a tab within a bundle.
      */
     private static final String TAB_BACKGROUND_COLOR_EXTRA =
@@ -162,6 +177,20 @@ public class TabSwitcherModel implements Model, Restorable {
      */
     private static final String TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA =
             TabSwitcherModel.class.getName() + "::TabCloseButtonIconBitmap";
+
+    /**
+     * The name of the extra, which is used to store the tint list, which is used to tint a tab's
+     * close button, within a bundle.
+     */
+    private static final String TAB_CLOSE_BUTTON_ICON_TINT_LIST_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabCloseButtonIconTintList";
+
+    /**
+     * The name of the extra, which is used to store the mode, which is used to tint a tab's close
+     * button, within a bundle.
+     */
+    private static final String TAB_CLOSE_BUTTON_ICON_TINT_MODE_EXTRA =
+            TabSwitcherModel.class.getName() + "::TabCloseButtonIconTintMode";
 
     /**
      * The name of the extra, which is used to store the color of a tab's progress bar within a
@@ -277,6 +306,16 @@ public class TabSwitcherModel implements Model, Restorable {
     private Bitmap tabIconBitmap;
 
     /**
+     * The color state list, which is used to tint the icon of a tab.
+     */
+    private ColorStateList tabIconTintList;
+
+    /**
+     * The mode, which is used to tint the icon of a tab.
+     */
+    private PorterDuff.Mode tabIconTintMode;
+
+    /**
      * The background color of a tab;
      */
     private ColorStateList tabBackgroundColor;
@@ -300,6 +339,16 @@ public class TabSwitcherModel implements Model, Restorable {
      * The bitmap of the icon of a tab's close button.
      */
     private Bitmap tabCloseButtonIconBitmap;
+
+    /**
+     * The color state list, which is used to tint the close button of a tab.
+     */
+    private ColorStateList tabCloseButtonIconTintList;
+
+    /**
+     * The mode, which is used to tint the close button of a tab.
+     */
+    private PorterDuff.Mode tabCloseButtonIconTintMode;
 
     /**
      * The color of a tab's progress bar.
@@ -657,7 +706,8 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     /**
-     * Notifies the listeners, the the default background color of a tab's content has been changed.
+     * Notifies the listeners, the the default background color of a tab's content has been
+     * changed.
      *
      * @param color
      *         The color, which has been set, as an {@link Integer} value
@@ -1373,6 +1423,33 @@ public class TabSwitcherModel implements Model, Restorable {
         notifyOnTabIconChanged(getTabIcon());
     }
 
+    @Override
+    public final ColorStateList getTabIconTintList() {
+        return tabIconTintList;
+    }
+
+    @Override
+    public final void setTabIconTint(@ColorInt final int color) {
+        setTabIconTintList(ColorStateList.valueOf(color));
+    }
+
+    @Override
+    public final void setTabIconTintList(@Nullable final ColorStateList tintList) {
+        this.tabIconTintList = tintList;
+        notifyOnTabIconChanged(getTabIcon());
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabIconTintMode() {
+        return tabIconTintMode;
+    }
+
+    @Override
+    public final void setTabIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        this.tabIconTintMode = mode;
+        notifyOnTabIconChanged(getTabIcon());
+    }
+
     @Nullable
     @Override
     public final ColorStateList getTabBackgroundColor() {
@@ -1454,6 +1531,32 @@ public class TabSwitcherModel implements Model, Restorable {
         tabCloseButtonIconId = -1;
         tabCloseButtonIconBitmap = icon;
         notifyOnTabCloseButtonIconChanged(getTabCloseButtonIcon());
+    }
+
+    @Override
+    public final ColorStateList getTabCloseButtonIconTintList() {
+        return tabCloseButtonIconTintList;
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTint(@ColorInt final int color) {
+        setTabCloseButtonIconTintList(ColorStateList.valueOf(color));
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintList(@Nullable final ColorStateList tintList) {
+        this.tabCloseButtonIconTintList = tintList;
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabCloseButtonIconTintMode() {
+        return tabCloseButtonIconTintMode;
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        this.tabCloseButtonIconTintMode = mode;
+        notifyOnTabIconChanged(getTabIcon());
     }
 
     @Override
@@ -1635,11 +1738,15 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putBoolean(APPLY_PADDING_TO_TABS_EXTRA, applyPaddingToTabs);
         outState.putInt(TAB_ICON_ID_EXTRA, tabIconId);
         outState.putParcelable(TAB_ICON_BITMAP_EXTRA, tabIconBitmap);
+        outState.putParcelable(TAB_ICON_TINT_LIST_EXTRA, tabIconTintList);
+        outState.putSerializable(TAB_ICON_TINT_MODE_EXTRA, tabIconTintMode);
         outState.putParcelable(TAB_BACKGROUND_COLOR_EXTRA, tabBackgroundColor);
         outState.putInt(TAB_CONTENT_BACKGROUND_COLOR_EXTRA, tabContentBackgroundColor);
         outState.putParcelable(TAB_TITLE_TEXT_COLOR_EXTRA, tabTitleTextColor);
         outState.putInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA, tabCloseButtonIconId);
         outState.putParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA, tabCloseButtonIconBitmap);
+        outState.putParcelable(TAB_CLOSE_BUTTON_ICON_TINT_LIST_EXTRA, tabCloseButtonIconTintList);
+        outState.putSerializable(TAB_CLOSE_BUTTON_ICON_TINT_MODE_EXTRA, tabCloseButtonIconTintMode);
         outState.putInt(TAB_PROGRESS_BAR_COLOR_EXTRA, tabProgressBarColor);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
@@ -1664,6 +1771,9 @@ public class TabSwitcherModel implements Model, Restorable {
             applyPaddingToTabs = savedInstanceState.getBoolean(APPLY_PADDING_TO_TABS_EXTRA);
             tabIconId = savedInstanceState.getInt(TAB_ICON_ID_EXTRA);
             tabIconBitmap = savedInstanceState.getParcelable(TAB_ICON_BITMAP_EXTRA);
+            tabIconTintList = savedInstanceState.getParcelable(TAB_ICON_TINT_LIST_EXTRA);
+            tabIconTintMode =
+                    (PorterDuff.Mode) savedInstanceState.getSerializable(TAB_ICON_TINT_MODE_EXTRA);
             tabBackgroundColor = savedInstanceState.getParcelable(TAB_BACKGROUND_COLOR_EXTRA);
             tabContentBackgroundColor =
                     savedInstanceState.getInt(TAB_CONTENT_BACKGROUND_COLOR_EXTRA);
@@ -1671,6 +1781,10 @@ public class TabSwitcherModel implements Model, Restorable {
             tabCloseButtonIconId = savedInstanceState.getInt(TAB_CLOSE_BUTTON_ICON_ID_EXTRA);
             tabCloseButtonIconBitmap =
                     savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_BITMAP_EXTRA);
+            tabCloseButtonIconTintList =
+                    savedInstanceState.getParcelable(TAB_CLOSE_BUTTON_ICON_TINT_LIST_EXTRA);
+            tabCloseButtonIconTintMode = (PorterDuff.Mode) savedInstanceState
+                    .getSerializable(TAB_CLOSE_BUTTON_ICON_TINT_MODE_EXTRA);
             tabProgressBarColor = savedInstanceState.getInt(TAB_PROGRESS_BAR_COLOR_EXTRA, -1);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
