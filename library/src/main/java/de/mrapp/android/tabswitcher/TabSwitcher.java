@@ -521,7 +521,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
-        int resourceId = typedArray.getResourceId(R.styleable.TabSwitcher_toolbarNavigationIcon, -1);
+        int resourceId =
+                typedArray.getResourceId(R.styleable.TabSwitcher_toolbarNavigationIcon, -1);
         Drawable navigationIcon = null;
 
         if (resourceId != -1) {
@@ -1786,6 +1787,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
         model.setToolbarNavigationIcon(resourceId, listener);
+    }
+
+    @Override
+    public final ColorStateList getToolbarNavigationIconTintList() {
+        return model.getToolbarNavigationIconTintList();
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTint(@ColorInt final int color) {
+        model.setToolbarNavigationIconTint(color);
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintList(@Nullable final ColorStateList tintList) {
+        model.setToolbarNavigationIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getToolbarNavigationIconTintMode() {
+        return model.getToolbarNavigationIconTintMode();
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setToolbarNavigationIconTintMode(mode);
     }
 
     @Override

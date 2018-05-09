@@ -213,6 +213,20 @@ public class TabSwitcherModel implements Model, Restorable {
             TabSwitcherModel.class.getName() + "::ToolbarTitle";
 
     /**
+     * The name of the extra, which is used to store the color state list, which is used to tint the
+     * navigation icon fof the toolbar, within a bundle.
+     */
+    private static final String TOOLBAR_NAVIGATION_ICON_TINT_LIST_EXTRA =
+            TabSwitcherModel.class.getName() + "::ToolbarNavigationIconTintList";
+
+    /**
+     * The name of the extra, which is used to store the mode, which is used to tint the navigation
+     * icon fof the toolbar, within a bundle.
+     */
+    private static final String TOOLBAR_NAVIGATION_ICON_TINT_MODE_EXTRA =
+            TabSwitcherModel.class.getName() + "::ToolbarNavigationIconTintMode";
+
+    /**
      * The name of the extra, which is used to store the duration, which must be reached when
      * loading the preview of tabs to use a fade animation, within a bundle.
      */
@@ -380,6 +394,18 @@ public class TabSwitcherModel implements Model, Restorable {
      * The navigation icon of the toolbar, which is shown, when the tab switcher is shown.
      */
     private Drawable toolbarNavigationIcon;
+
+    /**
+     * The color state list, which is used to tint the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown.
+     */
+    private ColorStateList toolbarNavigationIconTintList;
+
+    /**
+     * The mode, which is used to tint the navigation icon of the toolbar, which is shown, when the
+     * tab switcher is shown.
+     */
+    private PorterDuff.Mode toolbarNavigationIconTintMode;
 
     /**
      * The listener, which is notified, when the navigation icon of the toolbar, which is shown,
@@ -1637,6 +1663,33 @@ public class TabSwitcherModel implements Model, Restorable {
     }
 
     @Override
+    public final ColorStateList getToolbarNavigationIconTintList() {
+        return toolbarNavigationIconTintList;
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTint(@ColorInt final int color) {
+        setToolbarNavigationIconTintList(ColorStateList.valueOf(color));
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintList(@Nullable final ColorStateList tintList) {
+        this.toolbarNavigationIconTintList = tintList;
+        notifyOnToolbarNavigationIconChanged(toolbarNavigationIcon, toolbarNavigationIconListener);
+    }
+
+    @Override
+    public final PorterDuff.Mode getToolbarNavigationIconTintMode() {
+        return toolbarNavigationIconTintMode;
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        this.toolbarNavigationIconTintMode = mode;
+        notifyOnToolbarNavigationIconChanged(toolbarNavigationIcon, toolbarNavigationIconListener);
+    }
+
+    @Override
     public final void inflateToolbarMenu(@MenuRes final int resourceId,
                                          @Nullable final OnMenuItemClickListener listener) {
         this.toolbarMenuId = resourceId;
@@ -1751,6 +1804,10 @@ public class TabSwitcherModel implements Model, Restorable {
         outState.putInt(TAB_PROGRESS_BAR_COLOR_EXTRA, tabProgressBarColor);
         outState.putBoolean(SHOW_TOOLBARS_EXTRA, showToolbars);
         outState.putCharSequence(TOOLBAR_TITLE_EXTRA, toolbarTitle);
+        outState.putParcelable(TOOLBAR_NAVIGATION_ICON_TINT_LIST_EXTRA,
+                toolbarNavigationIconTintList);
+        outState.putSerializable(TOOLBAR_NAVIGATION_ICON_TINT_MODE_EXTRA,
+                toolbarNavigationIconTintMode);
         outState.putLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA, tabPreviewFadeThreshold);
         outState.putLong(TAB_PREVIEW_FADE_DURATION, tabPreviewFadeDuration);
         outState.putBoolean(CLEAR_SAVED_STATES_WHEN_REMOVING_TABS_EXTRA,
@@ -1789,6 +1846,10 @@ public class TabSwitcherModel implements Model, Restorable {
             tabProgressBarColor = savedInstanceState.getInt(TAB_PROGRESS_BAR_COLOR_EXTRA, -1);
             showToolbars = savedInstanceState.getBoolean(SHOW_TOOLBARS_EXTRA);
             toolbarTitle = savedInstanceState.getCharSequence(TOOLBAR_TITLE_EXTRA);
+            toolbarNavigationIconTintList =
+                    savedInstanceState.getParcelable(TOOLBAR_NAVIGATION_ICON_TINT_LIST_EXTRA);
+            toolbarNavigationIconTintMode = (PorterDuff.Mode) savedInstanceState
+                    .getSerializable(TOOLBAR_NAVIGATION_ICON_TINT_MODE_EXTRA);
             tabPreviewFadeThreshold = savedInstanceState.getLong(TAB_PREVIEW_FADE_THRESHOLD_EXTRA);
             tabPreviewFadeDuration = savedInstanceState.getLong(TAB_PREVIEW_FADE_DURATION);
             clearSavedStatesWhenRemovingTabs =

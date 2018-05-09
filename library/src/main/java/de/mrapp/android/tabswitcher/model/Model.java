@@ -1137,6 +1137,55 @@ public interface Model extends Iterable<Tab> {
     void setToolbarNavigationIcon(@Nullable Drawable icon, @Nullable OnClickListener listener);
 
     /**
+     * Returns the color state list, which is used to tint the navigation icon of the toolbar, which
+     * is shown, when the tab switcher is shown.
+     *
+     * @return The color state list, which is used to tint the navigation icon of the toolbar, which
+     * is shown, when the tab switcher is shown, as an instance of the class {@link ColorStateList}
+     * or null, if the navigation icon is not tinted
+     */
+    ColorStateList getToolbarNavigationIconTintList();
+
+    /**
+     * Sets the color, which should be used to tint the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown.
+     *
+     * @param color
+     *         The color, which should be set, as an {@link Integer} value
+     */
+    void setToolbarNavigationIconTint(@ColorInt int color);
+
+    /**
+     * Sets the color state list, which should be used to tint the navigation icon of the toolbar,
+     * which is shown, when the tab switcher is shown.
+     *
+     * @param tintList
+     *         The color state list, which should be set, as an instance of the class {@link
+     *         ColorStateList} or null, if the navigation icon should not be tinted
+     */
+    void setToolbarNavigationIconTintList(@Nullable ColorStateList tintList);
+
+    /**
+     * Returns the mode, which is used to tint the navigation icon of the toolbar, which is shown,
+     * when the tab switcher is shown.
+     *
+     * @return The mode, which is used to tint the navigation icon of the toolbar, which is shown,
+     * when the tab switcher is shown, as a value of the enum {@link PorterDuff.Mode} or null, if
+     * the default mode is used
+     */
+    PorterDuff.Mode getToolbarNavigationIconTintMode();
+
+    /**
+     * Sets the mode, which should be used to tint the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown.
+     *
+     * @param mode
+     *         The mode, which should be set, as a value of the enum {@link PorterDuff.Mode} or
+     *         null, if the default mode should be used
+     */
+    void setToolbarNavigationIconTintMode(@Nullable PorterDuff.Mode mode);
+
+    /**
      * Inflates the menu of the toolbar, which is shown, when the tab switcher is shown. When using
      * the tablet layout, the menu is inflated into the secondary toolbar. If another menu has
      * already been inflated, its items will be removed.
