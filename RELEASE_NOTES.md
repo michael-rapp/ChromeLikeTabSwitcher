@@ -6,7 +6,7 @@ A feature release, which introduces the following changes:
 
 - Updated AppCompat v7 support library to version 27.1.1
 - Updated AppCompat annotations support library to version 27.1.1
-- Updated dependency "AndroidUtil" to version 1.20.2.
+- Updated dependency "AndroidUtil" to version 1.20.3.
 - Updated dependency "AndroidMaterialViews" to version 2.1.11.
 
 ## Version 0.2.9 (Feb. 15th 2018)
