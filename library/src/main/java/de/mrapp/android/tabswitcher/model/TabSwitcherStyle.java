@@ -72,9 +72,8 @@ public class TabSwitcherStyle {
 
             if (tintList == null) {
                 try {
-                    int tintColor = themeHelper
-                            .getColor(tabSwitcher.getLayout(), R.attr.tabSwitcherTabIconTint);
-                    tintList = ColorStateList.valueOf(tintColor);
+                    tintList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
+                            R.attr.tabSwitcherTabIconTint);
                 } catch (NotFoundException e) {
                     tintList = null;
                 }
@@ -125,9 +124,8 @@ public class TabSwitcherStyle {
 
             if (tintList == null) {
                 try {
-                    int tintColor = themeHelper.getColor(tabSwitcher.getLayout(),
+                    tintList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
                             R.attr.tabSwitcherTabCloseButtonIconTint);
-                    tintList = ColorStateList.valueOf(tintColor);
                 } catch (NotFoundException e) {
                     tintList = null;
                 }
