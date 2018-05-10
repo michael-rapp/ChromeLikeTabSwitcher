@@ -4,6 +4,7 @@
 
 A feature release, which introduces the following changes:
 
+- It is now possible to use vector drawables for the navigation icon of a `TabSwitcher`'s toolbar as well as for the icon and close button icon of tabs (even on pre-Lollipop devices).
 - Updated AppCompat v7 support library to version 27.1.1
 - Updated AppCompat annotations support library to version 27.1.1
 - Updated dependency "AndroidUtil" to version 1.20.3.
