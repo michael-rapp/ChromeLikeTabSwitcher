@@ -47,29 +47,35 @@ The library's tab switcher is implemented as a custom view `TabSwitcher`. It can
         android:background="@color/tab_switcher_background_color"
         custom:layoutPolicy="auto"
         custom:tabIcon="@drawable/ic_file_outline_18dp"
+        custom:tabIconTint="@android:color/black"
         custom:tabBackgroundColor="@color/tab_background_color"
         custom:tabContentBackgroundColor="@color/tab_content_background_color"
         custom:tabTitleTextColor="@color/tab_title_text_color"
         custom:tabCloseButtonIcon="@ic_close_18dp"
+        custom:tabCloseBUttonIconTint="@android:color/black"
         custom:toolbarTitle="@string/tab_switcher_toolbar_title"
         custom:toolbarMenu="@menu/tab_switcher_toolbar_menu"
-        custom:toolbarNavigationIcon="@drawable/ic_add_box_white_24dp"/>
+        custom:toolbarNavigationIcon="@drawable/ic_add_box_24dp"
+        custom:toolbarNavigationIconTint="@android:color/white"/>
 ```
 
 When instantiating a `TabSwitcher` programmatically, the following Java code can be used. For all XML attributes shown in the example above, corresponding setter methods are available. 
 
 ```java
 TabSwitcher tabSwitcher = new TabSwitcher(context);
-tabSwitcher.setBackground(ContextCompat.getColor(context, R.color.tab_switcher_background_color);
+tabSwitcher.setBackground(ContextCompat.getColor(context, R.color.tab_switcher_background_color));
 tabSwitcher.setLayoutPolicy(LayoutPolicy.AUTO);
 tabSwitcher.setTabIcon(R.drawable.ic_file_outline_18dp);
-tabSwitcher.setTabBackgroundColor(ContextCompat.getColor(context, R.color.tab_background_color);
-tabSwitcher.setTabContentBackgroundColor(ContextCompat.getColor(context, R.color.tab_content_background_color);
-tabSwitcher.setTabTitleTextColor(ContextCompat.getColor(context, R.color.tab_title_text_color);
+tabSwitcher.setTabIconTint(ContextCompat.getColor(context, android.R.color.black));
+tabSwitcher.setTabBackgroundColor(ContextCompat.getColor(context, R.color.tab_background_color));
+tabSwitcher.setTabContentBackgroundColor(ContextCompat.getColor(context, R.color.tab_content_background_color));
+tabSwitcher.setTabTitleTextColor(ContextCompat.getColor(context, R.color.tab_title_text_color));
 tabSwitcher.setTabCloseButtonIcon(R.drawable.ic_close_18dp);
+tabSwitcher.setTabCloseButtonIcon(ContextCompat.getColor(context, android.R.color.black));
 tabSwitcher.setToolbarTitle(context.getString(R.string.tab_switcher_toolbar_title));
 tabSwitcher.inflateToolbarMenu(R.menu.tab_switcher_toolbar_menu, null);
 tabSwitcher.setToolbarNavigationIcon(R.drawable.ic_add_box_white_24dp, null);
+tabSwitcher.setToolbarNavigationIconTint(ContextCompat.getColor(context, android.R.color.black));
 ```
 
 The tabs, which are contained by a `TabSwitcher` are represented by instances of the class `Tab`. The following Java code demonstrates, how a new tab can be created and added to a tab switcher. By setting a custom icon, background color, title color etc., the defaults, which are applied to the `TabSwitcher` can be overridden for that particular tab. The `setParameters`-method allows to associate a tab with a `Bundle`, which may contain additional information about the tab. By implementing the interface `Tab.Callback` and registering an instance at a `Tab` by using its `addCallback`-method, it can be observed, when the properties of a tab has been changed. 
@@ -78,9 +84,12 @@ The tabs, which are contained by a `TabSwitcher` are represented by instances of
 Tab tab = new Tab("Title");
 tab.setCloseable(true);
 tab.setIcon(R.drawable.ic_file_outline_18dp);
+tab.setIconTint(ContextCompat.getColor(context, androidR.color.black));
 tab.setBackgroundColor(ContextCompat.getColor(context, R.color.tab_background_color));
 tab.setContentBackgroundColor(ContextCompat.getColor(context, R.color.tab_content_background_color));
 tab.setTitleTextColor(ContextCompat.getColor(context, R.color.tab_title_text_color));
+tab.setCloseButtonIcon(R.drawable.ic_close_18dp);
+tab.setCloseButtonIconTint(ContextCompat.getColor(context, android.R.color.black));
 tab.setParameters(new Bundle());
 tab.addCallback(new Tab.Callback() { /* ... */ });
 tabSwitcher.addTab(tab);
