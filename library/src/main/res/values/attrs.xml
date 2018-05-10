@@ -36,6 +36,7 @@ License.
     <attr name="tabSwitcherToolbarTitle" format="string"/>
     <attr name="tabSwitcherToolbarMenu" format="reference"/>
     <attr name="tabSwitcherToolbarNavigationIcon" format="reference"/>
+    <attr name="tabSwitcherToolbarNavigationIconTint" format="color"/>
     <attr name="tabSwitcherTabToolbarPreviewFadeThreshold" format="integer"/>
     <attr name="tabSwitcherTabToolbarPreviewFadeDuration" format="integer"/>
     <attr name="tabSwitcherEmptyView" format="reference"/>
@@ -62,6 +63,7 @@ License.
         <attr name="toolbarTitle" format="string"/>
         <attr name="toolbarMenu" format="reference"/>
         <attr name="toolbarNavigationIcon" format="reference"/>
+        <attr name="toolbarNavigationIconTint" format="color"/>
         <attr name="tabPreviewFadeThreshold" format="integer"/>
         <attr name="tabPreviewFadeDuration" format="integer"/>
         <attr name="emptyView" format="reference"/>

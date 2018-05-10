@@ -335,6 +335,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainShowToolbars(typedArray);
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
+            obtainToolbarNavigationIconTint(typedArray);
             obtainToolbarMenu(typedArray);
             obtainTabPreviewFadeThreshold(typedArray);
             obtainTabPreviewFadeDuration(typedArray);
@@ -530,6 +531,19 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         }
 
         setToolbarNavigationIcon(navigationIcon, null);
+    }
+
+    /**
+     * Obtains the color state list, which should be used to tint the navigation icon of the
+     * toolbar, which is shown, when the tab switcher is shown, from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarNavigationIconTint(@NonNull final TypedArray typedArray) {
+        setToolbarNavigationIconTintList(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_toolbarNavigationIconTint));
     }
 
     /**

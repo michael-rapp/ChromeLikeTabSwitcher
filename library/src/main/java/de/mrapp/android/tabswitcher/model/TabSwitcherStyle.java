@@ -157,6 +157,45 @@ public class TabSwitcherStyle {
     }
 
     /**
+     * Return the color state list, which should be used to tint the navigation icon of the toolbar,
+     * which is shown, when the tab switcher is shown.
+     *
+     * @return The color state list, which should be used to tint the navigation icon of the
+     * toolbar, which is shown, then the tab switcher is shown, as an instance of the class {@link
+     * ColorStateList} or null, if the navigation icon should not be tinted
+     */
+    @Nullable
+    private ColorStateList getToolbarNavigationIconTintList() {
+        ColorStateList tintList = model.getTabCloseButtonIconTintList();
+
+        if (tintList == null) {
+            try {
+                tintList = themeHelper.getColorStateList(tabSwitcher.getLayout(),
+                        R.attr.tabSwitcherToolbarNavigationIconTint);
+            } catch (NotFoundException e) {
+                tintList = null;
+            }
+
+        }
+
+        return tintList;
+    }
+
+    /**
+     * Returns the mode, which should be used to tint the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown.
+     *
+     * @return The mode, which should be used to tint the navigation icon of the toolbar, which is
+     * shown, when the tab switcher is shown, as a value of the enum {@link PorterDuff.Mode}. The
+     * mode may not be null
+     */
+    @NonNull
+    private PorterDuff.Mode getToolbarNavigationIconTintMode() {
+        PorterDuff.Mode tintMode = model.getToolbarNavigationIconTintMode();
+        return tintMode != null ? tintMode : PorterDuff.Mode.SRC_ATOP;
+    }
+
+    /**
      * Creates a new class, which allows to retrieve the style attributes of a {@link TabSwitcher}.
      *
      * @param tabSwitcher
@@ -419,6 +458,16 @@ public class TabSwitcherStyle {
                         R.attr.tabSwitcherToolbarNavigationIcon);
             } catch (NotFoundException e) {
                 icon = null;
+            }
+        }
+
+        if (icon != null) {
+            ColorStateList tintList = getToolbarNavigationIconTintList();
+
+            if (tintList != null) {
+                PorterDuff.Mode tintMode = getToolbarNavigationIconTintMode();
+                DrawableCompat.setTintList(icon, tintList);
+                DrawableCompat.setTintMode(icon, tintMode);
             }
         }
 
