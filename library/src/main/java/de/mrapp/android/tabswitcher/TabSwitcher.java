@@ -19,6 +19,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.content.res.AppCompatResources;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
@@ -170,7 +172,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
-     * The index of the primary toolbar as returned by the method {@link TabSwitcher#getToolbars()}.
+     * The index of the primary toolbar as returned by the method {@link
+     * TabSwitcher#getToolbars()}.
      */
     public static final int PRIMARY_TOOLBAR_INDEX = 0;
 
@@ -325,14 +328,17 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
+            obtainTabIconTint(typedArray);
             obtainTabBackgroundColor(typedArray);
             obtainTabContentBackgroundColor(typedArray);
             obtainAddTabButtonColor(typedArray);
             obtainTabTitleTextColor(typedArray);
             obtainTabCloseButtonIcon(typedArray);
+            obtainTabCloseButtonIconTint(typedArray);
             obtainShowToolbars(typedArray);
             obtainToolbarTitle(typedArray);
             obtainToolbarNavigationIcon(typedArray);
+            obtainToolbarNavigationIconTint(typedArray);
             obtainToolbarMenu(typedArray);
             obtainTabPreviewFadeThreshold(typedArray);
             obtainTabPreviewFadeDuration(typedArray);
@@ -395,6 +401,18 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         if (resourceId != 0) {
             setTabIcon(resourceId);
         }
+    }
+
+    /**
+     * Obtains the color state list, which should be used to tint the icon of a tab, from a specific
+     * typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabIconTint(@NonNull final TypedArray typedArray) {
+        setTabIconTintList(typedArray.getColorStateList(R.styleable.TabSwitcher_tabIconTint));
     }
 
     /**
@@ -462,6 +480,19 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     }
 
     /**
+     * Obtains the color state list, which should be used to tint the close button of a tab, from a
+     * specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainTabCloseButtonIconTint(@NonNull final TypedArray typedArray) {
+        setTabIconTintList(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_tabCloseButtonIconTint));
+    }
+
+    /**
      * Obtains, whether the tab switcher's toolbars should be shown, or not, from a specific typed
      * array.
      *
@@ -494,8 +525,28 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         class {@link TypedArray}. The typed array may not be null
      */
     private void obtainToolbarNavigationIcon(@NonNull final TypedArray typedArray) {
-        setToolbarNavigationIcon(
-                typedArray.getDrawable(R.styleable.TabSwitcher_toolbarNavigationIcon), null);
+        int resourceId =
+                typedArray.getResourceId(R.styleable.TabSwitcher_toolbarNavigationIcon, -1);
+        Drawable navigationIcon = null;
+
+        if (resourceId != -1) {
+            navigationIcon = AppCompatResources.getDrawable(getContext(), resourceId);
+        }
+
+        setToolbarNavigationIcon(navigationIcon, null);
+    }
+
+    /**
+     * Obtains the color state list, which should be used to tint the navigation icon of the
+     * toolbar, which is shown, when the tab switcher is shown, from a specific typed array.
+     *
+     * @param typedArray
+     *         The typed array, the color state list should be obtained from, as an instance of the
+     *         class {@link TypedArray}. The typed array may not be null
+     */
+    private void obtainToolbarNavigationIconTint(@NonNull final TypedArray typedArray) {
+        setToolbarNavigationIconTintList(
+                typedArray.getColorStateList(R.styleable.TabSwitcher_toolbarNavigationIconTint));
     }
 
     /**
@@ -1559,6 +1610,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         model.setTabIcon(icon);
     }
 
+    @Override
+    public final ColorStateList getTabIconTintList() {
+        return model.getTabIconTintList();
+    }
+
+    @Override
+    public final void setTabIconTint(@ColorInt final int color) {
+        model.setTabIconTint(color);
+    }
+
+    @Override
+    public final void setTabIconTintList(@Nullable final ColorStateList tintList) {
+        model.setTabIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabIconTintMode() {
+        return model.getTabIconTintMode();
+    }
+
+    @Override
+    public final void setTabIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setTabIconTintMode(mode);
+    }
+
     @Nullable
     @Override
     public final ColorStateList getTabBackgroundColor() {
@@ -1626,6 +1702,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final void setTabCloseButtonIcon(@Nullable final Bitmap icon) {
         model.setTabCloseButtonIcon(icon);
+    }
+
+    @Override
+    public final ColorStateList getTabCloseButtonIconTintList() {
+        return model.getTabCloseButtonIconTintList();
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTint(@ColorInt final int color) {
+        model.setTabCloseButtonIconTint(color);
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintList(@Nullable final ColorStateList tintList) {
+        model.setTabCloseButtonIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getTabCloseButtonIconTintMode() {
+        return model.getTabCloseButtonIconTintMode();
+    }
+
+    @Override
+    public final void setTabCloseButtonIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setTabCloseButtonIconTintMode(mode);
     }
 
     @Override
@@ -1700,6 +1801,31 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final void setToolbarNavigationIcon(@DrawableRes final int resourceId,
                                                @Nullable final OnClickListener listener) {
         model.setToolbarNavigationIcon(resourceId, listener);
+    }
+
+    @Override
+    public final ColorStateList getToolbarNavigationIconTintList() {
+        return model.getToolbarNavigationIconTintList();
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTint(@ColorInt final int color) {
+        model.setToolbarNavigationIconTint(color);
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintList(@Nullable final ColorStateList tintList) {
+        model.setToolbarNavigationIconTintList(tintList);
+    }
+
+    @Override
+    public final PorterDuff.Mode getToolbarNavigationIconTintMode() {
+        return model.getToolbarNavigationIconTintMode();
+    }
+
+    @Override
+    public final void setToolbarNavigationIconTintMode(@Nullable final PorterDuff.Mode mode) {
+        model.setToolbarNavigationIconTintMode(mode);
     }
 
     @Override

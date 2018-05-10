@@ -18,11 +18,11 @@ android {
 }
 
 dependencies {
-    compile 'com.github.michael-rapp:android-util:1.20.1'
-    compile 'com.github.michael-rapp:android-material-views:2.1.10'
-    compile 'com.android.support:support-annotations:27.0.2'
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    testCompile 'junit:junit:4.12'
+    api 'com.github.michael-rapp:android-util:1.20.3'
+    api 'com.github.michael-rapp:android-material-views:2.1.11'
+    api 'com.android.support:support-annotations:27.1.1'
+    api 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
 }
 
 apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'

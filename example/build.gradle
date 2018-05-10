@@ -9,6 +9,7 @@ android {
         targetSdkVersion project.TARGET_SDK_VERSION.toInteger()
         versionName project.VERSION_NAME
         versionCode project.VERSION_CODE.toInteger()
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -18,7 +19,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:design:27.0.2'
-    compile project(':library')
+    api 'com.android.support:design:27.1.1'
+    api project(':library')
 }

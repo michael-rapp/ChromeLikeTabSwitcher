@@ -1,10 +1,20 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Feb. 4th 2018)
+## Version 1.0.0 (May 5th 2018)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.3.0 (May 5th 2018)
+
+A feature release, which introduces the following changes:
+
+- It is now possible to use vector drawables for the navigation icon of a `TabSwitcher`'s toolbar as well as for the icon and close button icon of tabs (even on pre-Lollipop devices).
+- Updated AppCompat v7 support library to version 27.1.1
+- Updated AppCompat annotations support library to version 27.1.1
+- Updated dependency "AndroidUtil" to version 1.20.3.
+- Updated dependency "AndroidMaterialViews" to version 2.1.11.
 
 ## Version 0.2.9 (Feb. 15th 2018)
 
