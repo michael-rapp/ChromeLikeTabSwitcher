@@ -25,7 +25,7 @@ License.
     <dimen name="min_swipe_velocity">1024dp</dimen>
     <dimen name="drag_threshold">8dp</dimen>
     <dimen name="swipe_threshold">24dp</dimen>
-    <dimen name="tab_switcher_drawable_size">32dp</dimen>
+    <dimen name="tab_switcher_drawable_size">48dp</dimen>
     <dimen name="tab_switcher_drawable_font_size_normal">10sp</dimen>
     <dimen name="tab_switcher_drawable_font_size_small">7sp</dimen>
     <dimen name="swiped_tab_distance">32dp</dimen>
