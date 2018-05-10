@@ -42,12 +42,14 @@ License.
     <style name="LightTabSwitcher" parent="@style/TabSwitcher.Light">
         <item name="tabSwitcherTabIcon">@drawable/ic_file_outline_18dp</item>
         <item name="tabSwitcherTabIconTint">#ff666666</item>
+        <item name="tabSwitcherToolbarNavigationIconTint">@android:color/white</item>
         <item name="toolbarTheme">@style/LightToolbar</item>
     </style>
 
     <style name="DarkTabSwitcher" parent="@style/TabSwitcher">
         <item name="tabSwitcherTabIcon">@drawable/ic_file_outline_18dp</item>
         <item name="tabSwitcherTabIconTint">@android:color/white</item>
+        <item name="tabSwitcherToolbarNavigationIconTint">@android:color/white</item>
         <item name="toolbarTheme">@style/DarkToolbar</item>
     </style>
 
