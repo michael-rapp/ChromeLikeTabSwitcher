@@ -1551,6 +1551,9 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final void setPadding(final int left, final int top, final int right, final int bottom) {
+        // The model might be null on old API levels, where the super constructor implicitly invokes
+        // the setPadding-method. We can simply ignore such method call and will set the correct
+        // padding later on
         if (model != null) {
             model.setPadding(left, top, right, bottom);
         }
