@@ -1945,29 +1945,35 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     @Override
     public final Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-        TabSwitcherState savedState = new TabSwitcherState(superState);
-        savedState.layoutPolicy = layoutPolicy;
-        savedState.modelState = new Bundle();
-        Pair<Integer, Float> pair = layout.detachLayout(true);
 
-        if (pair != null) {
-            savedState.modelState.putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
-            savedState.modelState
-                    .putFloat(TabSwitcherModel.REFERENCE_TAB_POSITION_EXTRA, pair.second);
-            model.setReferenceTabIndex(pair.first);
-            model.setReferenceTabPosition(pair.second);
-        } else {
-            model.setReferenceTabPosition(-1);
-            model.setReferenceTabIndex(-1);
+        if (layout != null) {
+            TabSwitcherState savedState = new TabSwitcherState(superState);
+            savedState.layoutPolicy = layoutPolicy;
+            savedState.modelState = new Bundle();
+            Pair<Integer, Float> pair = layout.detachLayout(true);
+
+            if (pair != null) {
+                savedState.modelState
+                        .putInt(TabSwitcherModel.REFERENCE_TAB_INDEX_EXTRA, pair.first);
+                savedState.modelState
+                        .putFloat(TabSwitcherModel.REFERENCE_TAB_POSITION_EXTRA, pair.second);
+                model.setReferenceTabIndex(pair.first);
+                model.setReferenceTabPosition(pair.second);
+            } else {
+                model.setReferenceTabPosition(-1);
+                model.setReferenceTabIndex(-1);
+            }
+
+            model.removeListener(layout);
+            layout = null;
+            executePendingAction();
+            getViewTreeObserver().addOnGlobalLayoutListener(
+                    new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
+            model.saveInstanceState(savedState.modelState);
+            return savedState;
         }
 
-        model.removeListener(layout);
-        layout = null;
-        executePendingAction();
-        getViewTreeObserver().addOnGlobalLayoutListener(
-                new LayoutListenerWrapper(this, createGlobalLayoutListener(true)));
-        model.saveInstanceState(savedState.modelState);
-        return savedState;
+        return superState;
     }
 
     @Override
