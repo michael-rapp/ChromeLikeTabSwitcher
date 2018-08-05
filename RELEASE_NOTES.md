@@ -6,6 +6,12 @@ The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
 
+## Version 0.3.3 (Aug. 5th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed a crash when a `TabSwitcher`'s `onSaveInstanceState`-method is called before the view is laid out. This might happen on some devices when the app is started in landscape mode.
+
 ## Version 0.3.2 (May 20th 2018)
 
 A bugfix release, which fixes the following issues:
