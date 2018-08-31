@@ -1270,7 +1270,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
 
         if (contentRecyclerAdapter != null) {
-            clearAllSavedStates();
+            contentRecyclerAdapter.clearAllSavedStates();
         }
     }
 
