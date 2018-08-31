@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.3.4 (Sep. 1st 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed an infinite recursion when calling a `TabSwitcher`'s `clearAllSavedStates`-method.
+
 ## Version 0.3.3 (Aug. 5th 2018)
 
 A bugfix release, which fixes the following issues:
