@@ -24,7 +24,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -429,10 +428,6 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
 
         for (TabPreviewListener listener : getModel().getTabPreviewListeners()) {
             result &= listener.onLoadTabPreview(getTabSwitcher(), key);
-        }
-
-        if (key.getTitle().equals("Tab 3")) {
-            Log.e("foo", "result = " + result);
         }
 
         return result;
