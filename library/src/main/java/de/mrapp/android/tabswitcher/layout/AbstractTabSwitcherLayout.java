@@ -1196,7 +1196,7 @@ public abstract class AbstractTabSwitcherLayout
      * as an instance of the class ViewRecycler or null, if the view recycler has not been
      * initialized yet
      */
-    protected abstract AbstractViewRecycler<Tab, Void> getContentViewRecycler();
+    public abstract AbstractViewRecycler<Tab, Void> getContentViewRecycler();
 
     /**
      * The method, which is invoked on implementing subclasses in order to retrieve the view

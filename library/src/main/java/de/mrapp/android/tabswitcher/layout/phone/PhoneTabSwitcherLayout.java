@@ -2975,7 +2975,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     @Override
-    protected final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
+    public final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
         return contentViewRecycler;
     }
 
