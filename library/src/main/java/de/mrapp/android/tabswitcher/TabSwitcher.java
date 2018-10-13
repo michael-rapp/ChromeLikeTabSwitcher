@@ -376,7 +376,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             try {
                 background = themeHelper.getDrawable(getLayout(), R.attr.tabSwitcherBackground);
             } catch (NotFoundException e) {
-                background = null;
+                // There's nothing we can do
             }
         }
 
