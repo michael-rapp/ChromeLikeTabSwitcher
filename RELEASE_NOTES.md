@@ -1,5 +1,12 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.3.5 (Oct. 13th 2018)
+
+A minor release, which introduces the following changes:
+
+- Added `notifyTabChanged`-method to class `TabSwitcher`.
+- Updated dependency "AndroidUtil" to version 1.21.0.
+
 ## Version 0.3.4 (Sep. 1st 2018)
 
 A bugfix release, which fixes the following issues:
