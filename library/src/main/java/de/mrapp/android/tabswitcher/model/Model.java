@@ -362,7 +362,6 @@ public interface Model extends Iterable<Tab> {
      * @return The context, which is used by the tab switcher, as an instance of the class {@link
      * Context}. The context may not be null
      */
-    @NonNull
     Context getContext();
 
     /**

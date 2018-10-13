@@ -788,7 +788,8 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     /**
-     * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on tablets.
+     * Creates a new layout, which implements the functionality of a {@link TabSwitcher} on
+     * tablets.
      *
      * @param tabSwitcher
      *         The tab switcher, the layout belongs to, as an instance of the class {@link
@@ -892,7 +893,7 @@ public class TabletTabSwitcherLayout extends AbstractTabSwitcherLayout implement
     }
 
     @Override
-    protected final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
+    public final AbstractViewRecycler<Tab, Void> getContentViewRecycler() {
         return contentViewRecycler;
     }
 
