@@ -1,5 +1,12 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.3.7 (Nov. 6th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Fixed an issue that caused animations to be started although another animation was still executed.
+- Fixed a crash when dragging after repeatedly removing tabs (this is an enhanced attempt to fix https://github.com/michael-rapp/ChromeLikeTabSwitcher/issues/20).
+
 ## Version 0.3.6 (Nov. 5th 2018)
 
 A bugfix release, which fixes the following issues:
