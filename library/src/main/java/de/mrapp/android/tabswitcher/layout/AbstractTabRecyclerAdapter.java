@@ -263,7 +263,7 @@ public abstract class AbstractTabRecyclerAdapter
                 if (tabItem != null) {
                     State state = tabItem.getTag().getState();
 
-                    if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
+                    if (state == State.FLOATING || state == State.STACKED_ATOP) {
                         if (notifyOnCloseTab(tab)) {
                             closeButton.setOnClickListener(null);
                             tabSwitcher.removeTab(tab);
