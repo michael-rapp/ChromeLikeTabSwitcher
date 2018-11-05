@@ -39,6 +39,7 @@ import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
 import de.mrapp.android.tabswitcher.iterator.ItemIterator;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.Model;
+import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.tabswitcher.model.TabSwitcherModel;
 import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
@@ -257,9 +258,17 @@ public abstract class AbstractTabRecyclerAdapter
 
             @Override
             public void onClick(final View v) {
-                if (notifyOnCloseTab(tab)) {
-                    closeButton.setOnClickListener(null);
-                    tabSwitcher.removeTab(tab);
+                TabItem tabItem = getTabItem(tab);
+
+                if (tabItem != null) {
+                    State state = tabItem.getTag().getState();
+
+                    if (state == State.FLOATING || state == State.STACKED_START_ATOP) {
+                        if (notifyOnCloseTab(tab)) {
+                            closeButton.setOnClickListener(null);
+                            tabSwitcher.removeTab(tab);
+                        }
+                    }
                 }
             }
 
