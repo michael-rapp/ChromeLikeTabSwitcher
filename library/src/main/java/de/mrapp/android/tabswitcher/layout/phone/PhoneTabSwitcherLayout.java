@@ -1926,6 +1926,17 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 } else {
                     tabViewRecycler.remove(item);
                 }
+
+                ItemIterator iterator =
+                        new ItemIterator.Builder(getModel(), getTabViewRecycler()).create();
+                AbstractItem item;
+
+                while ((item = iterator.next()) != null) {
+                    if (item.getTag().getState() == State.FLOATING) {
+                        setFirstVisibleIndex(item.getIndex());
+                        break;
+                    }
+                }
             }
 
         };
