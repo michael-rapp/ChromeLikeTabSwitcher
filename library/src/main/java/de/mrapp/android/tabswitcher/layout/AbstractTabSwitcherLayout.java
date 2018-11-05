@@ -172,12 +172,12 @@ public abstract class AbstractTabSwitcherLayout
          */
         public AnimationListenerWrapper(@Nullable final AnimatorListener listener) {
             this.listener = listener;
+            runningAnimations++;
         }
 
         @Override
         public void onAnimationStart(final Animator animation) {
             super.onAnimationStart(animation);
-            runningAnimations++;
 
             if (listener != null) {
                 listener.onAnimationStart(animation);
