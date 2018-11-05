@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.3.6 (Nov. 5th 2018)
+
+A bugfix release, which fixes the following issues:
+
+- Prevented the close buttons of stacked tabs from being clicked (fixes https://github.com/michael-rapp/ChromeLikeTabSwitcher/issues/20).
+
 ## Version 0.3.5 (Oct. 13th 2018)
 
 A minor release, which introduces the following changes:
