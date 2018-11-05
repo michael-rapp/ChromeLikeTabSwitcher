@@ -705,9 +705,9 @@ public abstract class AbstractTabSwitcherLayout
 
             while ((item = iterator.next()) != null) {
                 AbstractItem successor = iterator.previous();
-                float successorPosition = successor.getTag().getPosition();
 
                 if (item.getIndex() < start) {
+                    float successorPosition = successor.getTag().getPosition();
                     Pair<Float, State> pair =
                             clipPosition(successor.getIndex(), successorPosition, item);
                     successor.getTag().setPosition(pair.first);
