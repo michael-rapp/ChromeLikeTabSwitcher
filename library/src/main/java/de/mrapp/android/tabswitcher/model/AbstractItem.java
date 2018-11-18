@@ -13,15 +13,13 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An item, which contains information about a child view of a {@link TabSwitcher}.
@@ -53,7 +51,7 @@ public abstract class AbstractItem {
      *         The index of the item as an {@link Integer} value. The index must be at least 0
      */
     public AbstractItem(final int index) {
-        ensureAtLeast(index, 0, "The index must be at least 0");
+        Condition.INSTANCE.ensureAtLeast(index, 0, "The index must be at least 0");
         this.index = index;
         this.view = null;
         this.tag = new Tag();
@@ -108,7 +106,7 @@ public abstract class AbstractItem {
      *         not be null
      */
     public final void setTag(@NonNull final Tag tag) {
-        ensureNotNull(tag, "The tag may not be null");
+        Condition.INSTANCE.ensureNotNull(tag, "The tag may not be null");
         this.tag = tag;
     }
 

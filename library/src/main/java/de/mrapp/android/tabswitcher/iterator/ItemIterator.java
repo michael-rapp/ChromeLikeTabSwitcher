@@ -13,16 +13,14 @@
  */
 package de.mrapp.android.tabswitcher.iterator;
 
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An iterator, which allows to iterate the items, which correspond to the child views of a {@link
@@ -34,8 +32,7 @@ import static de.mrapp.android.util.Condition.ensureNotNull;
 public class ItemIterator extends AbstractItemIterator {
 
     /**
-     * A builder, which allows to configure and create instances of the class {@link
-     * ItemIterator}.
+     * A builder, which allows to configure and create instances of the class {@link ItemIterator}.
      */
     public static class Builder extends AbstractBuilder<Builder, ItemIterator> {
 
@@ -67,8 +64,8 @@ public class ItemIterator extends AbstractItemIterator {
          */
         public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
-            ensureNotNull(model, "The model may not be null");
-            ensureNotNull(viewRecycler, "The view recycler may not be null");
+            Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+            Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
             this.model = model;
             this.viewRecycler = viewRecycler;
         }
@@ -112,8 +109,8 @@ public class ItemIterator extends AbstractItemIterator {
     private ItemIterator(@NonNull final Model model,
                          @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                          final boolean reverse, final int start) {
-        ensureNotNull(model, "The model may not be null");
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.model = model;
         this.viewRecycler = viewRecycler;
         initialize(reverse, start);

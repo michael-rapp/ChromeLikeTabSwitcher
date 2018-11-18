@@ -17,18 +17,17 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.TextUtils;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.graphics.drawable.DrawableCompat;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.util.ThemeHelper;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * Allows to retrieve the style attributes of a {@link TabSwitcher}.
@@ -211,9 +210,9 @@ public class TabSwitcherStyle {
      */
     public TabSwitcherStyle(@NonNull final TabSwitcher tabSwitcher, @NonNull final Model model,
                             @NonNull final ThemeHelper themeHelper) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(model, "The model may not be null");
-        ensureNotNull(themeHelper, "The theme helper may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+        Condition.INSTANCE.ensureNotNull(themeHelper, "The theme helper may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.themeHelper = themeHelper;

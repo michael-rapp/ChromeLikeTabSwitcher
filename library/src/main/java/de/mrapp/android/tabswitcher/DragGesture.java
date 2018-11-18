@@ -14,11 +14,10 @@
 package de.mrapp.android.tabswitcher;
 
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureGreater;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import de.mrapp.util.Condition;
 
 /**
  * A drag gesture, which can be used to perform certain actions when dragging in a particular
@@ -90,7 +89,7 @@ public abstract class DragGesture {
          */
         @NonNull
         public final BuilderType setThreshold(final int threshold) {
-            ensureAtLeast(threshold, -1, "The threshold must be at least -1");
+            Condition.INSTANCE.ensureAtLeast(threshold, -1, "The threshold must be at least -1");
             this.threshold = threshold;
             return self();
         }
@@ -117,10 +116,12 @@ public abstract class DragGesture {
         @NonNull
         public final BuilderType setTouchableArea(final float left, final float top,
                                                   final float right, final float bottom) {
-            ensureAtLeast(left, 0, "The left coordinate must be at least 0");
-            ensureAtLeast(top, 0, "The top coordinate must be at least 0");
-            ensureGreater(right, left, "The right coordinate must be greater than " + left);
-            ensureGreater(bottom, top, "The bottom coordinate must be greater than " + top);
+            Condition.INSTANCE.ensureAtLeast(left, 0, "The left coordinate must be at least 0");
+            Condition.INSTANCE.ensureAtLeast(top, 0, "The top coordinate must be at least 0");
+            Condition.INSTANCE.ensureGreater(right, left,
+                    "The right coordinate must be greater than " + left);
+            Condition.INSTANCE.ensureGreater(bottom, top,
+                    "The bottom coordinate must be greater than " + top);
             return setTouchableArea(new RectF(left, top, right, bottom));
         }
 
@@ -167,16 +168,16 @@ public abstract class DragGesture {
      *         the area should not be restricted
      */
     protected DragGesture(final int threshold, @Nullable final RectF touchableArea) {
-        ensureAtLeast(threshold, -1, "The threshold must be at least -1");
+        Condition.INSTANCE.ensureAtLeast(threshold, -1, "The threshold must be at least -1");
         this.threshold = threshold;
         this.touchableArea = touchableArea;
     }
 
     /**
      * Returns the distance in pixels, the gesture must last until it is recognized.
-     *
-     * The distance in pixels, the gesture must last until it is recognized, as an {@link
-     * Integer} value. The distance must be at least 0 or -1, if the default distance should be used
+     * <p>
+     * The distance in pixels, the gesture must last until it is recognized, as an {@link Integer}
+     * value. The distance must be at least 0 or -1, if the default distance should be used
      */
     public final int getThreshold() {
         return threshold;

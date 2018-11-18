@@ -14,12 +14,11 @@
 package de.mrapp.android.tabswitcher;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.model.Restorable;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for the states of tabs, which can be used together with a {@link
@@ -44,7 +43,7 @@ public abstract class AbstractState implements Restorable {
      *         tab may not be null
      */
     public AbstractState(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         this.tab = tab;
     }
 

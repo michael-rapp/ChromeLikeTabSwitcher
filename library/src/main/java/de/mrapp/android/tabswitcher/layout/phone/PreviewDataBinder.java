@@ -16,23 +16,22 @@ package de.mrapp.android.tabswitcher.layout.phone;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.LruCache;
-import android.support.v4.util.Pair;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.collection.LruCache;
+import androidx.core.util.Pair;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.ViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A data binder, which allows to asynchronously render preview images of tabs and display them
@@ -77,8 +76,9 @@ public class PreviewDataBinder extends AbstractDataBinder<Bitmap, Tab, ImageView
                              @NonNull final ViewRecycler<Tab, Void> contentViewRecycler,
                              @NonNull final Model model) {
         super(parent.getContext().getApplicationContext(), new LruCache<Tab, Bitmap>(7));
-        ensureNotNull(parent, "The parent may not be null");
-        ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(parent, "The parent may not be null");
+        Condition.INSTANCE
+                .ensureNotNull(contentViewRecycler, "The content view recycler may not be null");
         this.parent = parent;
         this.contentViewRecycler = contentViewRecycler;
         this.model = model;

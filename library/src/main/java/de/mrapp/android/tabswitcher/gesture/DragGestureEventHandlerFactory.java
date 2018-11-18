@@ -13,15 +13,13 @@
  */
 package de.mrapp.android.tabswitcher.gesture;
 
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.DragGesture;
 import de.mrapp.android.tabswitcher.PullDownGesture;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.SwipeGesture;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A factory, which allows to create instances of the class {@link AbstractDragGestureEventHandler}.
@@ -45,7 +43,7 @@ public class DragGestureEventHandlerFactory {
      *         class {@link TabSwitcher}. The tab switcher may not be null
      */
     public DragGestureEventHandlerFactory(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
     }
 
@@ -60,7 +58,7 @@ public class DragGestureEventHandlerFactory {
      */
     @NonNull
     public final AbstractTouchEventHandler fromGesture(@NonNull final DragGesture dragGesture) {
-        ensureNotNull(dragGesture, "The drag gesture may not be null");
+        Condition.INSTANCE.ensureNotNull(dragGesture, "The drag gesture may not be null");
 
         if (dragGesture instanceof SwipeGesture) {
             int dragThreshold = dragGesture.getThreshold() != -1 ? dragGesture.getThreshold() :

@@ -25,20 +25,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.AttrRes;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.annotation.StyleRes;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.content.res.AppCompatResources;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,6 +41,20 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.StyleRes;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar.OnMenuItemClickListener;
+import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
 import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
 import de.mrapp.android.tabswitcher.gesture.DragGestureEventHandlerFactory;
 import de.mrapp.android.tabswitcher.gesture.TouchEventDispatcher;
@@ -74,8 +74,8 @@ import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractSavedState;
 import de.mrapp.android.util.view.AbstractViewRecycler;
+import de.mrapp.util.Condition;
 
-import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.DisplayUtil.getOrientation;
 
 /**
@@ -644,7 +644,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         action may not be null
      */
     private void enqueuePendingAction(@NonNull final Runnable action) {
-        ensureNotNull(action, "The action may not be null");
+        Condition.INSTANCE.ensureNotNull(action, "The action may not be null");
         pendingActions.add(action);
         executePendingAction();
     }
@@ -881,7 +881,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
             @Override
             public void onGlobalLayout() {
-                ensureNotNull(getDecorator(), "No decorator has been set",
+                Condition.INSTANCE.ensureNotNull(getDecorator(), "No decorator has been set",
                         IllegalStateException.class);
                 initializeLayout(getLayout(), inflateTabsOnly);
             }
@@ -1072,7 +1072,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      */
     public static void setupWithMenu(@NonNull final TabSwitcher tabSwitcher,
                                      @Nullable final OnClickListener listener) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         Menu menu = tabSwitcher.getToolbarMenu();
 
         if (menu != null) {
@@ -1116,8 +1116,8 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public static void setupWithMenu(@NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final Menu menu,
                                      @Nullable final OnClickListener listener) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(menu, "The menu may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(menu, "The menu may not be null");
 
         for (int i = 0; i < menu.size(); i++) {
             MenuItem menuItem = menu.getItem(i);
@@ -1140,7 +1140,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TabSwitcherListener}. The listener may not be null
      */
     public final void addListener(@NonNull final TabSwitcherListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         this.listeners.add(listener);
     }
 
@@ -1153,7 +1153,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         TabSwitcherListener}. The listener may not be null
      */
     public final void removeListener(@NonNull final TabSwitcherListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         this.listeners.remove(listener);
     }
 
@@ -1180,7 +1180,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         or {@link LayoutPolicy#TABLET}
      */
     public final void setLayoutPolicy(@NonNull final LayoutPolicy layoutPolicy) {
-        ensureNotNull(layoutPolicy, "The layout policy may not be null");
+        Condition.INSTANCE.ensureNotNull(layoutPolicy, "The layout policy may not be null");
 
         if (this.layoutPolicy != layoutPolicy) {
             Layout previousLayout = getLayout();
@@ -1228,7 +1228,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         DragGesture}. The drag gesture may not be null
      */
     public final void addDragGesture(@NonNull final DragGesture dragGesture) {
-        ensureNotNull(dragGesture, "The drag gesture may not be null");
+        Condition.INSTANCE.ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
                 new DragGestureEventHandlerFactory(this).fromGesture(dragGesture);
         touchEventDispatcher.addEventHandler(eventHandler);
@@ -1242,7 +1242,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         DragGesture}. The drag gesture may not be null
      */
     public final void removeDragGesture(@NonNull final DragGesture dragGesture) {
-        ensureNotNull(dragGesture, "The drag gesture may not be null");
+        Condition.INSTANCE.ensureNotNull(dragGesture, "The drag gesture may not be null");
         AbstractTouchEventHandler eventHandler =
                 new DragGestureEventHandlerFactory(this).fromGesture(dragGesture);
         touchEventDispatcher.removeEventHandler(eventHandler);
@@ -1256,7 +1256,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         Tab}. The tab may not be null
      */
     public void clearSavedState(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         ContentRecyclerAdapter contentRecyclerAdapter = model.getContentRecyclerAdapter();
 
         if (contentRecyclerAdapter != null) {
@@ -1443,7 +1443,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
      *         be null
      */
     public final void notifyTabChanged(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
 
         if (layout != null) {
             AbstractViewRecycler<Tab, Void> contentViewRecycler = layout.getContentViewRecycler();

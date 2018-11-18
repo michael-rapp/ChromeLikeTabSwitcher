@@ -17,17 +17,17 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CallSuper;
-import android.support.annotation.ColorInt;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.ColorInt;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
@@ -46,8 +46,7 @@ import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all view recycler adapters, which allow to inflate the views, which
@@ -358,7 +357,8 @@ public abstract class AbstractTabRecyclerAdapter
      */
     @NonNull
     protected final AttachedViewRecycler<AbstractItem, Integer> getViewRecyclerOrThrowException() {
-        ensureNotNull(viewRecycler, "No view recycler has been set", IllegalStateException.class);
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "No view recycler has been set",
+                IllegalStateException.class);
         return viewRecycler;
     }
 
@@ -454,9 +454,9 @@ public abstract class AbstractTabRecyclerAdapter
     public AbstractTabRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                       @NonNull final TabSwitcherModel model,
                                       @NonNull final TabSwitcherStyle style) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(model, "The model may not be null");
-        ensureNotNull(style, "The style may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+        Condition.INSTANCE.ensureNotNull(style, "The style may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.style = style;
@@ -472,7 +472,7 @@ public abstract class AbstractTabRecyclerAdapter
      */
     public final void setViewRecycler(
             @NonNull final AttachedViewRecycler<AbstractItem, Integer> viewRecycler) {
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
     }
 

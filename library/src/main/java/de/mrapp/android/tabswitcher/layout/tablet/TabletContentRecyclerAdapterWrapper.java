@@ -17,16 +17,16 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
@@ -38,8 +38,7 @@ import de.mrapp.android.tabswitcher.model.TabSwitcherStyle;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A wrapper, which encapsulates a {@link ContentRecyclerAdapter}, which allows to inflate the
@@ -108,10 +107,11 @@ public class TabletContentRecyclerAdapterWrapper extends AbstractViewRecycler.Ad
                                                @NonNull final TabSwitcherStyle style,
                                                @NonNull final AttachedViewRecycler<Tab, ?> viewRecycler,
                                                @NonNull final ContentRecyclerAdapter encapsulatedAdapter) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(style, "The style may not be null");
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
-        ensureNotNull(encapsulatedAdapter, "The recycler adapter may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(style, "The style may not be null");
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
+        Condition.INSTANCE
+                .ensureNotNull(encapsulatedAdapter, "The recycler adapter may not be null");
         this.tabSwitcher = tabSwitcher;
         this.style = style;
         this.viewRecycler = viewRecycler;

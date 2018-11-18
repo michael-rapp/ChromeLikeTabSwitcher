@@ -25,19 +25,17 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A drawable, which allows to display the number of tabs, which are currently contained by a {@link
@@ -89,7 +87,7 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
      *         Context}. The context may not be null
      */
     public TabSwitcherDrawable(@NonNull final Context context) {
-        ensureNotNull(context, "The context may not be null");
+        Condition.INSTANCE.ensureNotNull(context, "The context may not be null");
         Resources resources = context.getResources();
         size = resources.getDimensionPixelSize(R.dimen.tab_switcher_drawable_size);
         textSizeNormal =
@@ -116,7 +114,7 @@ public class TabSwitcherDrawable extends Drawable implements TabSwitcherListener
      *         at least 0
      */
     public final void setCount(final int count) {
-        ensureAtLeast(count, 0, "The count must be at least 0");
+        Condition.INSTANCE.ensureAtLeast(count, 0, "The count must be at least 0");
         label = Integer.toString(count);
 
         if (label.length() > 2) {

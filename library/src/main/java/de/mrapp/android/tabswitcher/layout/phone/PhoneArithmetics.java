@@ -14,8 +14,6 @@
 package de.mrapp.android.tabswitcher.layout.phone;
 
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,15 +21,15 @@ import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler.DragState;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
-import static de.mrapp.android.util.Condition.ensureTrue;
+import de.mrapp.util.Condition;
 
 /**
  * Provides methods, which allow to calculate the position, size and rotation of a {@link
@@ -181,8 +179,9 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE
+                .ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return gravity == Gravity.START ? getTabSwitcher().getPaddingTop() :
@@ -195,7 +194,7 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
-        ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
         ViewGroup tabContainer = getTabSwitcher().getTabContainer();
         assert tabContainer != null;
         FrameLayout.LayoutParams layoutParams =
@@ -219,8 +218,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final float getTouchPosition(@NonNull final Axis axis,
                                         @NonNull final MotionEvent event) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(event, "The motion event may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(event, "The motion event may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             return event.getY();
@@ -231,8 +230,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getPosition(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -256,8 +255,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final void setPosition(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float position) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -282,9 +281,9 @@ public class PhoneArithmetics extends AbstractArithmetics {
                                       @NonNull final ViewPropertyAnimator animator,
                                       @NonNull final AbstractItem item, final float position,
                                       final boolean includePadding) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(animator, "The animator may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             Toolbar[] toolbars = getTabSwitcher().getToolbars();
@@ -307,7 +306,7 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getScale(@NonNull final AbstractItem item, final boolean includePadding) {
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
         float width = view.getWidth();
@@ -322,8 +321,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final void setScale(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                final float scale) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -337,8 +336,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     public final void animateScale(@NonNull final Axis axis,
                                    @NonNull final ViewPropertyAnimator animator,
                                    final float scale) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(animator, "The animator may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.scaleY(scale);
@@ -349,8 +348,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getSize(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -363,9 +362,9 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final float getPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                 @NonNull final DragState dragState) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
-        ensureNotNull(dragState, "The drag state may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(dragState, "The drag state may not be null");
 
         if (dragState == DragState.SWIPE) {
             return getPivotWhenSwiping(axis, item);
@@ -381,8 +380,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final void setPivot(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                final float pivot) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
 
@@ -401,8 +400,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getRotation(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The view may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The view may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -415,8 +414,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     @Override
     public final void setRotation(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float angle) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
@@ -432,8 +431,8 @@ public class PhoneArithmetics extends AbstractArithmetics {
     public final void animateRotation(@NonNull final Axis axis,
                                       @NonNull final ViewPropertyAnimator animator,
                                       final float angle) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(animator, "The animator may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(animator, "The animator may not be null");
 
         if (getOrientationInvariantAxis(axis) == Axis.DRAGGING_AXIS) {
             animator.rotationY(

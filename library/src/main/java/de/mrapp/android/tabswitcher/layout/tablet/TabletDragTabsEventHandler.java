@@ -15,11 +15,11 @@ package de.mrapp.android.tabswitcher.layout.tablet;
 
 import android.content.res.Resources;
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.iterator.AbstractItemIterator;
@@ -31,8 +31,7 @@ import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.AddTabItem;
 import de.mrapp.android.tabswitcher.model.State;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A drag handler, which allows to calculate the position and state of tabs on touch events, when
@@ -120,7 +119,7 @@ public class TabletDragTabsEventHandler
                                       @NonNull final Arithmetics arithmetics,
                                       @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler) {
         super(tabSwitcher, arithmetics, true);
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
         this.viewRecycler = viewRecycler;
         Resources resources = tabSwitcher.getResources();
         this.tabOffset = resources.getDimensionPixelSize(R.dimen.tablet_tab_offset);
