@@ -10,12 +10,12 @@
     width="24"
     height="24"
     viewBox="0 0 24 24"
-    id="svg2"
-    inkscape:version="0.91 r13725"
-    sodipodi:docname="ic_file_outline_18dp.svg"
-    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/example/src/main/res/drawable-xxxhdpi/ic_file_outline_grey600_18dp.png"
-    inkscape:export-xdpi="270"
-    inkscape:export-ydpi="270">
+    id="svg4"
+    sodipodi:docname="tab_switcher_drawable_background.svg"
+    inkscape:version="0.92.2 2405546, 2018-03-11"
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tab_switcher_drawable_background.png"
+    inkscape:export-xdpi="384"
+    inkscape:export-ydpi="384">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -24,6 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -38,19 +39,24 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="2880"
-     inkscape:window-height="1509"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
      id="namedview6"
-     showgrid="false"
-     inkscape:zoom="39.333333"
-     inkscape:cx="10.981787"
-     inkscape:cy="11.719547"
+     showgrid="true"
+     inkscape:zoom="16.267253"
+     inkscape:cx="5.4838413"
+     inkscape:cy="12"
      inkscape:window-x="0"
-     inkscape:window-y="55"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
+     inkscape:current-layer="svg4">
+    <inkscape:grid
+       type="xygrid"
+       id="grid823" />
+  </sodipodi:namedview>
   <path
-     d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,4H6V20H11L18,20V11H11V4Z"
-     id="path4"
-     style="fill:#000000;fill-opacity:0.65882355" />
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.18897638;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.02352941"
+     d="M 8.0351562,3.0371094 C 5.2860091,3.0371094 3.0742188,5.2508529 3.0742188,8 v 7.964844 c 0,2.749147 2.2117903,4.960937 4.9609374,4.960937 H 16 c 2.749147,0 4.962891,-2.21179 4.962891,-4.960937 V 8 C 20.962891,5.2508529 18.749147,3.0371094 16,3.0371094 Z M 9,5 h 6 c 2.216,0 4,1.784 4,4 v 6 c 0,2.216 -1.784,4 -4,4 H 9 C 6.784,19 5,17.216 5,15 V 9 C 5,6.784 6.784,5 9,5 Z"
+     id="rect825"
+     inkscape:connector-curvature="0" />
 </svg>
