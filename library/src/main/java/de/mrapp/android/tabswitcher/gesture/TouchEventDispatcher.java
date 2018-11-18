@@ -13,8 +13,6 @@
  */
 package de.mrapp.android.tabswitcher.gesture;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -24,9 +22,10 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.mrapp.android.util.datastructure.ListenerList;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import de.mrapp.util.Condition;
+import de.mrapp.util.datastructure.ListenerList;
 
 /**
  * A dispatcher, which allows to dispatch touch events to multiple event handlers in the order of
@@ -202,7 +201,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      *         AbstractTouchEventHandler}. The event handler may not be null
      */
     public final void addEventHandler(@NonNull final AbstractTouchEventHandler handler) {
-        ensureNotNull(handler, "The handler may not be null");
+        Condition.INSTANCE.ensureNotNull(handler, "The handler may not be null");
         int key = handler.getPriority();
         ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(key);
 
@@ -223,7 +222,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      *         AbstractTouchEventHandler}. The event handler may not be null
      */
     public final void removeEventHandler(@NonNull final AbstractTouchEventHandler handler) {
-        ensureNotNull(handler, "The handler may not be null");
+        Condition.INSTANCE.ensureNotNull(handler, "The handler may not be null");
         ListenerList<AbstractTouchEventHandler> handlers = eventHandlers.get(handler.getPriority());
 
         if (handlers != null) {
@@ -265,7 +264,7 @@ public class TouchEventDispatcher implements Iterable<AbstractTouchEventHandler>
      * @return True, if the event has been handled, false otherwise
      */
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        ensureNotNull(event, "The event may not be null");
+        Condition.INSTANCE.ensureNotNull(event, "The event may not be null");
         boolean result = false;
 
         if (draggingEventHandler != null) {

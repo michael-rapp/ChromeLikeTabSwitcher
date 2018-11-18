@@ -14,9 +14,9 @@
 package de.mrapp.android.tabswitcher;
 
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
+import androidx.annotation.Nullable;
+import de.mrapp.util.Condition;
 
 /**
  * A drag gesture, which allows to switch between tabs, when swiping horizontally.
@@ -55,7 +55,8 @@ public class SwipeGesture extends DragGesture {
          * BuilderType. The builder may not be null
          */
         public Builder setAnimationDuration(final long animationDuration) {
-            ensureAtLeast(animationDuration, -1, "The animation duration must be at least -1");
+            Condition.INSTANCE.ensureAtLeast(animationDuration, -1,
+                    "The animation duration must be at least -1");
             this.animationDuration = animationDuration;
             return self();
         }
@@ -90,7 +91,8 @@ public class SwipeGesture extends DragGesture {
     private SwipeGesture(final int threshold, @Nullable final RectF touchableArea,
                          final long animationDuration) {
         super(threshold, touchableArea);
-        ensureAtLeast(animationDuration, -1, "The animation duration must be at least -1");
+        Condition.INSTANCE
+                .ensureAtLeast(animationDuration, -1, "The animation duration must be at least -1");
         this.animationDuration = animationDuration;
     }
 

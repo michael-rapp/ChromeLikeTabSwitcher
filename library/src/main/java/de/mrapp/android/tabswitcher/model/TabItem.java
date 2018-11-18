@@ -13,17 +13,16 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractTabViewHolder;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An item, which contains information about a tab of a {@link TabSwitcher}.
@@ -54,7 +53,7 @@ public class TabItem extends AbstractItem {
      */
     private TabItem(final int index, @NonNull final Tab tab) {
         super(index);
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         this.tab = tab;
         this.viewHolder = null;
     }

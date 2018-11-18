@@ -14,7 +14,8 @@
 package de.mrapp.android.tabswitcher;
 
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 /**
  * A drag gesture, which can be used to show the tab switcher by pulling down the currently selected

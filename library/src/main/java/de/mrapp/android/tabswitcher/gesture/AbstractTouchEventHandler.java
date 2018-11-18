@@ -14,20 +14,17 @@
 package de.mrapp.android.tabswitcher.gesture;
 
 import android.graphics.RectF;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import java.util.Comparator;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.util.gesture.DragHelper;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureAtMaximum;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all event handlers, which can be managed by a {@link
@@ -195,10 +192,12 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      */
     public AbstractTouchEventHandler(final int priority, @NonNull final TabSwitcher tabSwitcher,
                                      final int dragThreshold) {
-        ensureAtLeast(priority, MIN_PRIORITY, "The priority must be at least" + MIN_PRIORITY);
-        ensureAtMaximum(priority, MAX_PRIORITY, "The priority must be at maximum " + MAX_PRIORITY);
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
+        Condition.INSTANCE.ensureAtLeast(priority, MIN_PRIORITY,
+                "The priority must be at least" + MIN_PRIORITY);
+        Condition.INSTANCE.ensureAtMaximum(priority, MAX_PRIORITY,
+                "The priority must be at maximum " + MAX_PRIORITY);
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureAtLeast(dragThreshold, 0, "The drag threshold must be at least 0");
         this.priority = priority;
         this.tabSwitcher = tabSwitcher;
         this.dragHelper = new DragHelper(0);
@@ -298,7 +297,7 @@ public abstract class AbstractTouchEventHandler implements Comparator<AbstractTo
      * @return True, if the event has been handled, false otherwise
      */
     public final boolean handleTouchEvent(@NonNull final MotionEvent event) {
-        ensureNotNull(event, "The event may not be null");
+        Condition.INSTANCE.ensureNotNull(event, "The event may not be null");
 
         if (!tabSwitcher.isAnimationRunning() && isDraggingAllowed()) {
             onTouchEvent();

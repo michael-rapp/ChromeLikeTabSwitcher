@@ -13,20 +13,17 @@
  */
 package de.mrapp.android.tabswitcher.iterator;
 
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.Model;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
- * An iterator, which allows to iterate the items, which correspond to the tabs, which are
- * contained by an array.
+ * An iterator, which allows to iterate the items, which correspond to the tabs, which are contained
+ * by an array.
  *
  * @author Michael Rapp
  * @since 0.1.0
@@ -85,10 +82,10 @@ public class ArrayItemIterator extends AbstractItemIterator {
         public Builder(@NonNull final Model model,
                        @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                        @NonNull final Tab[] array, final int firstIndex) {
-            ensureNotNull(model, "The model may not be null");
-            ensureNotNull(viewRecycler, "The view recycler may not be null");
-            ensureNotNull(array, "The array may not be null");
-            ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
+            Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+            Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
+            Condition.INSTANCE.ensureNotNull(array, "The array may not be null");
+            Condition.INSTANCE.ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
             this.model = model;
             this.viewRecycler = viewRecycler;
             this.array = array;
@@ -151,10 +148,10 @@ public class ArrayItemIterator extends AbstractItemIterator {
                               @NonNull final AttachedViewRecycler<AbstractItem, ?> viewRecycler,
                               @NonNull final Tab[] array, final int firstIndex,
                               final boolean reverse, final int start) {
-        ensureNotNull(model, "The model may not be null");
-        ensureNotNull(viewRecycler, "The view recycler may not be null");
-        ensureNotNull(array, "The array may not be null");
-        ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
+        Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+        Condition.INSTANCE.ensureNotNull(viewRecycler, "The view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(array, "The array may not be null");
+        Condition.INSTANCE.ensureAtLeast(firstIndex, 0, "The first index must be at least 0");
         this.model = model;
         this.viewRecycler = viewRecycler;
         this.array = array;

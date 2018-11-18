@@ -24,7 +24,7 @@ License.
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@id/primary_toolbar"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/tablet_tab_container_height"
@@ -34,7 +34,7 @@ License.
             android:visibility="invisible"
             app:popupTheme="?attr/tabSwitcherToolbarPopupTheme"/>
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@id/secondary_toolbar"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/tablet_tab_container_height"

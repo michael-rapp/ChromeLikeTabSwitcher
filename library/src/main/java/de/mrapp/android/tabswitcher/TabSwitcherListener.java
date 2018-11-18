@@ -13,8 +13,8 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Defines the interface, a class, which should be notified about a tab switcher's events, must

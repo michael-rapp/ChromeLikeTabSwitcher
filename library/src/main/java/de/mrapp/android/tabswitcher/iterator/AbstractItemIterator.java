@@ -13,13 +13,11 @@
  */
 package de.mrapp.android.tabswitcher.iterator;
 
-import android.support.annotation.NonNull;
-
 import java.util.Iterator;
 
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all iterators, which allow to iterate items of the type {@link
@@ -100,7 +98,7 @@ public abstract class AbstractItemIterator implements Iterator<AbstractItem> {
          */
         @NonNull
         public BuilderType start(final int start) {
-            ensureAtLeast(start, -1, "The start must be at least -1");
+            Condition.INSTANCE.ensureAtLeast(start, -1, "The start must be at least -1");
             this.start = start;
             return self();
         }
@@ -162,7 +160,7 @@ public abstract class AbstractItemIterator implements Iterator<AbstractItem> {
      *         -1, if all items should be iterated
      */
     protected final void initialize(final boolean reverse, final int start) {
-        ensureAtLeast(start, -1, "The start must be at least -1");
+        Condition.INSTANCE.ensureAtLeast(start, -1, "The start must be at least -1");
         this.reverse = reverse;
         this.previous = null;
         this.index = start != -1 ? start : (reverse ? getCount() - 1 : 0);

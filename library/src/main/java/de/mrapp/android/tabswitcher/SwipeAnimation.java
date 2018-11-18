@@ -13,12 +13,11 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.animation.Interpolator;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import de.mrapp.util.Condition;
 
 /**
  * A swipe animation, which moves tabs on the orthogonal axis. When using the smartphone layout,
@@ -87,7 +86,7 @@ public class SwipeAnimation extends Animation {
          */
         @NonNull
         public final Builder setDirection(@NonNull final SwipeDirection direction) {
-            ensureNotNull(direction, "The direction may not be null");
+            Condition.INSTANCE.ensureNotNull(direction, "The direction may not be null");
             this.direction = direction;
             return self();
         }
@@ -104,7 +103,7 @@ public class SwipeAnimation extends Animation {
          */
         @NonNull
         public final Builder setRelocateAnimationDuration(final long relocateAnimationDuration) {
-            ensureAtLeast(relocateAnimationDuration, -1,
+            Condition.INSTANCE.ensureAtLeast(relocateAnimationDuration, -1,
                     "The relocate animation duration must be at least -1");
             this.relocateAnimationDuration = relocateAnimationDuration;
             return self();
@@ -150,8 +149,8 @@ public class SwipeAnimation extends Animation {
                            @NonNull final SwipeDirection direction,
                            final long relocateAnimationDuration) {
         super(duration, interpolator);
-        ensureNotNull(direction, "The direction may not be null");
-        ensureAtLeast(relocateAnimationDuration, -1,
+        Condition.INSTANCE.ensureNotNull(direction, "The direction may not be null");
+        Condition.INSTANCE.ensureAtLeast(relocateAnimationDuration, -1,
                 "The relocate animation duration must be at least -1");
         this.direction = direction;
         this.relocateAnimationDuration = relocateAnimationDuration;

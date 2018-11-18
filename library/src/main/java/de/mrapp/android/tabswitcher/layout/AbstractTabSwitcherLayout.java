@@ -21,14 +21,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CallSuper;
-import android.support.annotation.ColorInt;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,6 +31,14 @@ import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.ColorInt;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar.OnMenuItemClickListener;
+import androidx.core.util.Pair;
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
@@ -64,8 +64,7 @@ import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.logging.Logger;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all layouts, which implement the functionality of a {@link
@@ -122,7 +121,7 @@ public abstract class AbstractTabSwitcherLayout
          */
         public LayoutListenerWrapper(@NonNull final View view,
                                      @Nullable final OnGlobalLayoutListener listener) {
-            ensureNotNull(view, "The view may not be null");
+            Condition.INSTANCE.ensureNotNull(view, "The view may not be null");
             this.view = view;
             this.listener = listener;
         }
@@ -216,21 +215,21 @@ public abstract class AbstractTabSwitcherLayout
             AbstractItemIterator.AbstractBuilder<InitialItemIteratorBuilder, InitialItemIterator> {
 
         /**
-         * The backing array, which is used to store items, once their initial position and
-         * state has been calculated.
+         * The backing array, which is used to store items, once their initial position and state
+         * has been calculated.
          */
         private final AbstractItem[] backingArray;
 
         /**
-         * Creates a new builder, which allows to configure and create instances of the class
-         * {@link InitialItemIterator}.
+         * Creates a new builder, which allows to configure and create instances of the class {@link
+         * InitialItemIterator}.
          *
          * @param backingArray
          *         The backing array, which should be used to store items, once their initial
          *         position and state has been calculated. The backing array may not be null
          */
         public InitialItemIteratorBuilder(@NonNull final AbstractItem[] backingArray) {
-            ensureNotNull(backingArray, "The backing array may not be null");
+            Condition.INSTANCE.ensureNotNull(backingArray, "The backing array may not be null");
             this.backingArray = backingArray;
         }
 
@@ -244,15 +243,15 @@ public abstract class AbstractTabSwitcherLayout
 
     /**
      * An iterator, which allows to iterate the items, which correspond to the child views of a
-     * {@link TabSwitcher}. When an item is referenced for the first time, its initial position
-     * and state is calculated and the item is stored in a backing array. When the item is
-     * iterated again, it is retrieved from the backing array.
+     * {@link TabSwitcher}. When an item is referenced for the first time, its initial position and
+     * state is calculated and the item is stored in a backing array. When the item is iterated
+     * again, it is retrieved from the backing array.
      */
     protected class InitialItemIterator extends AbstractItemIterator {
 
         /**
-         * The backing array, which is used to store items, once their initial position and
-         * state has been calculated.
+         * The backing array, which is used to store items, once their initial position and state
+         * has been calculated.
          */
         private final AbstractItem[] backingArray;
 
@@ -293,10 +292,10 @@ public abstract class AbstractTabSwitcherLayout
         }
 
         /**
-         * Creates a new iterator, which allows to iterate the items, which corresponds to the
-         * child views of a {@link TabSwitcher}. When an item is referenced for the first time, its
-         * initial position and state is calculated and the item is stored in a backing array.
-         * When the item is iterated again, it is retrieved from the backing array.
+         * Creates a new iterator, which allows to iterate the items, which corresponds to the child
+         * views of a {@link TabSwitcher}. When an item is referenced for the first time, its
+         * initial position and state is calculated and the item is stored in a backing array. When
+         * the item is iterated again, it is retrieved from the backing array.
          *
          * @param backingArray
          *         The backing array, which should be used to store items, once their initial
@@ -310,7 +309,7 @@ public abstract class AbstractTabSwitcherLayout
          */
         private InitialItemIterator(@NonNull final AbstractItem[] backingArray,
                                     final boolean reverse, final int start) {
-            ensureNotNull(backingArray, "The backing array may not be null");
+            Condition.INSTANCE.ensureNotNull(backingArray, "The backing array may not be null");
             this.backingArray = backingArray;
             initialize(reverse, start);
         }
@@ -1140,11 +1139,11 @@ public abstract class AbstractTabSwitcherLayout
                                      @NonNull final Arithmetics arithmetics,
                                      @NonNull final TabSwitcherStyle style,
                                      @NonNull final TouchEventDispatcher touchEventDispatcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(model, "The model may not be null");
-        ensureNotNull(arithmetics, "The arithmetics may not be null");
-        ensureNotNull(style, "The style may not be null");
-        ensureNotNull(touchEventDispatcher, "The dispatcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(model, "The model may not be null");
+        Condition.INSTANCE.ensureNotNull(arithmetics, "The arithmetics may not be null");
+        Condition.INSTANCE.ensureNotNull(style, "The style may not be null");
+        Condition.INSTANCE.ensureNotNull(touchEventDispatcher, "The dispatcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.model = model;
         this.arithmetics = arithmetics;

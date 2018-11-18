@@ -14,11 +14,11 @@
 
 package de.mrapp.android.tabswitcher.layout;
 
-import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler.DragState;
 import de.mrapp.android.tabswitcher.model.AbstractItem;

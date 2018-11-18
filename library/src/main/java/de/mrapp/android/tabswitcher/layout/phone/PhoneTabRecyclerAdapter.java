@@ -19,17 +19,17 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.Tab;
@@ -46,8 +46,7 @@ import de.mrapp.android.util.ViewUtil;
 import de.mrapp.android.util.logging.LogLevel;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
 import de.mrapp.android.util.view.ViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A view recycler adapter, which allows to inflate the views, which are used to visualize the tabs
@@ -250,7 +249,7 @@ public class PhoneTabRecyclerAdapter extends AbstractTabRecyclerAdapter
                                    @NonNull final TabSwitcherStyle style,
                                    @NonNull final ViewRecycler<Tab, Void> tabViewRecycler) {
         super(tabSwitcher, model, style);
-        ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
+        Condition.INSTANCE.ensureNotNull(tabViewRecycler, "The tab view recycler may not be null");
         this.tabViewRecycler = tabViewRecycler;
         this.dataBinder = new PreviewDataBinder(tabSwitcher, tabViewRecycler, model);
         this.dataBinder.addListener(this);

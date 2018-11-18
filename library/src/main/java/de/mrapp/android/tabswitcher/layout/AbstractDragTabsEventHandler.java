@@ -14,11 +14,11 @@
 package de.mrapp.android.tabswitcher.layout;
 
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.gesture.AbstractTouchEventHandler;
@@ -26,8 +26,7 @@ import de.mrapp.android.tabswitcher.layout.Arithmetics.Axis;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
 import de.mrapp.android.tabswitcher.model.TabItem;
 import de.mrapp.android.util.gesture.DragHelper;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all drag handlers, which allow to calculate the position and state of
@@ -501,7 +500,7 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
                                         final boolean swipeEnabled) {
         super(MIN_PRIORITY, tabSwitcher,
                 tabSwitcher.getResources().getDimensionPixelSize(R.dimen.drag_threshold));
-        ensureNotNull(arithmetics, "The arithmetics may not be null");
+        Condition.INSTANCE.ensureNotNull(arithmetics, "The arithmetics may not be null");
         this.arithmetics = arithmetics;
         this.swipeEnabled = swipeEnabled;
         Resources resources = tabSwitcher.getResources();
@@ -559,7 +558,8 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
     }
 
     /**
-     * The method, which is invoked on implementing subclasses, when an overshoot has been reverted.
+     * The method, which is invoked on implementing subclasses, when an overshoot has been
+     * reverted.
      */
     protected void onOvershootReverted() {
 
@@ -604,7 +604,7 @@ public abstract class AbstractDragTabsEventHandler<CallbackType extends Abstract
      *         may not be null
      */
     public final void setDragState(@NonNull final DragState dragState) {
-        ensureNotNull(dragState, "The drag state may not be null");
+        Condition.INSTANCE.ensureNotNull(dragState, "The drag state may not be null");
         this.dragState = dragState;
     }
 
