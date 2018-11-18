@@ -13,7 +13,7 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Defines the interface, a class, which should be notified, when the preview of a tab is about to

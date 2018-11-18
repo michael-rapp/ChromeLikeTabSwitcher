@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
 
 android {
     compileSdkVersion project.TARGET_SDK_VERSION.toInteger()
@@ -18,11 +19,8 @@ android {
 }
 
 dependencies {
-    api 'com.github.michael-rapp:android-util:1.21.0'
-    api 'com.github.michael-rapp:android-material-views:2.1.11'
-    api 'com.android.support:support-annotations:27.1.1'
-    api 'com.android.support:appcompat-v7:27.1.1'
-    testImplementation 'junit:junit:4.12'
+    api 'com.github.michael-rapp:android-util:2.0.0'
+    api 'com.github.michael-rapp:android-material-views:3.0.0'
+    api 'androidx.annotation:annotation:1.0.0'
+    api 'androidx.appcompat:appcompat:1.0.2'
 }
-
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'

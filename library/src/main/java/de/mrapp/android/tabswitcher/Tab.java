@@ -22,18 +22,16 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v7.content.res.AppCompatResources;
 import android.text.TextUtils;
 
-import de.mrapp.android.util.datastructure.ListenerList;
-
-import static de.mrapp.android.util.Condition.ensureNotEmpty;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.content.res.AppCompatResources;
+import de.mrapp.util.Condition;
+import de.mrapp.util.datastructure.ListenerList;
 
 /**
  * A tab, which can be added to a {@link TabSwitcher} widget. It has a title, as well as an optional
@@ -412,8 +410,8 @@ public class Tab implements Parcelable {
      *         title may neither be null, nor empty
      */
     public final void setTitle(@NonNull final CharSequence title) {
-        ensureNotNull(title, "The title may not be null");
-        ensureNotEmpty(title, "The title may not be empty");
+        Condition.INSTANCE.ensureNotNull(title, "The title may not be null");
+        Condition.INSTANCE.ensureNotEmpty(title, "The title may not be empty");
         this.title = title;
         notifyOnTitleChanged();
     }
@@ -443,7 +441,7 @@ public class Tab implements Parcelable {
      */
     @Nullable
     public final Drawable getIcon(@NonNull final Context context) {
-        ensureNotNull(context, "The context may not be null");
+        Condition.INSTANCE.ensureNotNull(context, "The context may not be null");
 
         if (iconId != -1) {
             return AppCompatResources.getDrawable(context, iconId);
@@ -564,7 +562,7 @@ public class Tab implements Parcelable {
      */
     @Nullable
     public final Drawable getCloseButtonIcon(@NonNull final Context context) {
-        ensureNotNull(context, "The context may not be null");
+        Condition.INSTANCE.ensureNotNull(context, "The context may not be null");
 
         if (closeButtonIconId != -1) {
             return AppCompatResources.getDrawable(context, closeButtonIconId);
@@ -820,7 +818,7 @@ public class Tab implements Parcelable {
      *         callback may not be null
      */
     public final void addCallback(@NonNull final Callback callback) {
-        ensureNotNull(callback, "The callback may not be null");
+        Condition.INSTANCE.ensureNotNull(callback, "The callback may not be null");
         this.callbacks.add(callback);
     }
 
@@ -833,7 +831,7 @@ public class Tab implements Parcelable {
      *         The callback may not be null
      */
     public final void removeCallback(@NonNull final Callback callback) {
-        ensureNotNull(callback, "The callback may not be null");
+        Condition.INSTANCE.ensureNotNull(callback, "The callback may not be null");
         this.callbacks.remove(callback);
     }
 

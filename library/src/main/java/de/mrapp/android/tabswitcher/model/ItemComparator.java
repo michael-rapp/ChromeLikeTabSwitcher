@@ -13,15 +13,12 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
-import android.support.annotation.NonNull;
-
 import java.util.Comparator;
 
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.Tab;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-
-import static de.mrapp.android.util.Condition.ensureNotEqual;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A comparator, which allows to compare two instances of the class {@link AbstractItem}.
@@ -56,7 +53,7 @@ public class ItemComparator implements Comparator<AbstractItem> {
      *         to, as a instance of the class {@link TabSwitcher}. The tab switcher may not be null
      */
     public ItemComparator(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
     }
 
@@ -77,10 +74,12 @@ public class ItemComparator implements Comparator<AbstractItem> {
             index1 = index1 == -1 ? item1.getIndex() : index1;
             int index2 = tabSwitcher.indexOf(tab2);
             index2 = index2 == -1 ? item2.getIndex() : index2;
-            ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
-                    RuntimeException.class);
-            ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
-                    RuntimeException.class);
+            Condition.INSTANCE
+                    .ensureNotEqual(index1, -1, "Tab " + tab1 + " not contained by tab switcher",
+                            RuntimeException.class);
+            Condition.INSTANCE
+                    .ensureNotEqual(index2, -1, "Tab " + tab2 + " not contained by tab switcher",
+                            RuntimeException.class);
             return index1 < index2 ? -1 : 1;
         } else {
             throw new RuntimeException("Unknown item types");

@@ -13,13 +13,12 @@
  */
 package de.mrapp.android.tabswitcher.layout;
 
-import android.support.annotation.NonNull;
 import android.view.ViewPropertyAnimator;
 
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * An abstract base class for all classes, which provide methods, which allow to calculate the
@@ -55,7 +54,7 @@ public abstract class AbstractArithmetics implements Arithmetics {
      *         class {@link TabSwitcher}. The tab switcher may not be null
      */
     public AbstractArithmetics(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
     }
 

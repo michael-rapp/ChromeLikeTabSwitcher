@@ -21,15 +21,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.MenuRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v7.content.res.AppCompatResources;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,6 +33,15 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.MenuRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.Toolbar.OnMenuItemClickListener;
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
@@ -54,12 +54,9 @@ import de.mrapp.android.tabswitcher.TabPreviewListener;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.layout.ContentRecyclerAdapter;
-import de.mrapp.android.util.datastructure.ListenerList;
 import de.mrapp.android.util.logging.LogLevel;
-
-import static de.mrapp.android.util.Condition.ensureAtLeast;
-import static de.mrapp.android.util.Condition.ensureNotEqual;
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
+import de.mrapp.util.datastructure.ListenerList;
 
 /**
  * The model of a {@link TabSwitcher}.
@@ -475,7 +472,8 @@ public class TabSwitcherModel implements Model, Restorable {
      */
     private int indexOfOrThrowException(@NonNull final Tab tab) {
         int index = indexOf(tab);
-        ensureNotEqual(index, -1, "No such tab: " + tab, NoSuchElementException.class);
+        Condition.INSTANCE
+                .ensureNotEqual(index, -1, "No such tab: " + tab, NoSuchElementException.class);
         return index;
     }
 
@@ -902,7 +900,7 @@ public class TabSwitcherModel implements Model, Restorable {
      *         ViewGroup}. The parent may not be null
      */
     public TabSwitcherModel(@NonNull final TabSwitcher tabSwitcher) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
         this.tabSwitcher = tabSwitcher;
         this.listeners = new LinkedHashSet<>();
         this.referenceTabIndex = -1;
@@ -947,7 +945,7 @@ public class TabSwitcherModel implements Model, Restorable {
      *         listener may not be null
      */
     public final void addListener(@NonNull final Listener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         listeners.add(listener);
     }
 
@@ -959,7 +957,7 @@ public class TabSwitcherModel implements Model, Restorable {
      *         The listener may not be null
      */
     public final void removeListener(@NonNull final Listener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         listeners.remove(listener);
     }
 
@@ -1105,7 +1103,7 @@ public class TabSwitcherModel implements Model, Restorable {
      * instance of the class {@link ContentRecyclerAdapter}
      */
     public final ContentRecyclerAdapter getContentRecyclerAdapter() {
-        ensureNotNull(contentRecyclerAdapter, "No decorator has been set",
+        Condition.INSTANCE.ensureNotNull(contentRecyclerAdapter, "No decorator has been set",
                 IllegalStateException.class);
         return contentRecyclerAdapter;
     }
@@ -1118,7 +1116,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setDecorator(@NonNull final TabSwitcherDecorator decorator) {
-        ensureNotNull(decorator, "The decorator may not be null");
+        Condition.INSTANCE.ensureNotNull(decorator, "The decorator may not be null");
         this.decorator = decorator;
         this.contentRecyclerAdapter = new ContentRecyclerAdapter(tabSwitcher, decorator);
         notifyOnDecoratorChanged(decorator);
@@ -1137,7 +1135,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setLogLevel(@NonNull final LogLevel logLevel) {
-        ensureNotNull(logLevel, "The log level may not be null");
+        Condition.INSTANCE.ensureNotNull(logLevel, "The log level may not be null");
         this.logLevel = logLevel;
         notifyOnLogLevelChanged(logLevel);
     }
@@ -1160,7 +1158,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final int indexOf(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         return tabs.indexOf(tab);
     }
 
@@ -1177,8 +1175,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void addTab(@NonNull final Tab tab, final int index,
                              @NonNull final Animation animation) {
-        ensureNotNull(tab, "The tab may not be null");
-        ensureNotNull(animation, "The animation may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(animation, "The animation may not be null");
         tabs.add(index, tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
         int selectedTabIndex = previousSelectedTabIndex;
@@ -1219,7 +1217,7 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void addAllTabs(@NonNull final Collection<? extends Tab> tabs, final int index,
                                  @NonNull final Animation animation) {
-        ensureNotNull(tabs, "The collection may not be null");
+        Condition.INSTANCE.ensureNotNull(tabs, "The collection may not be null");
         Tab[] array = new Tab[tabs.size()];
         tabs.toArray(array);
         addAllTabs(array, index, animation);
@@ -1238,8 +1236,8 @@ public class TabSwitcherModel implements Model, Restorable {
     @Override
     public final void addAllTabs(@NonNull final Tab[] tabs, final int index,
                                  @NonNull final Animation animation) {
-        ensureNotNull(tabs, "The array may not be null");
-        ensureNotNull(animation, "The animation may not be null");
+        Condition.INSTANCE.ensureNotNull(tabs, "The array may not be null");
+        Condition.INSTANCE.ensureNotNull(animation, "The animation may not be null");
 
         if (tabs.length > 0) {
             int previousSelectedTabIndex = getSelectedTabIndex();
@@ -1269,8 +1267,8 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void removeTab(@NonNull final Tab tab, @NonNull final Animation animation) {
-        ensureNotNull(tab, "The tab may not be null");
-        ensureNotNull(animation, "The animation may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(animation, "The animation may not be null");
         int index = indexOfOrThrowException(tab);
         int previousSelectedTabIndex = getSelectedTabIndex();
         int selectedTabIndex = previousSelectedTabIndex;
@@ -1302,7 +1300,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void clear(@NonNull final Animation animation) {
-        ensureNotNull(animation, "The animation may not be null");
+        Condition.INSTANCE.ensureNotNull(animation, "The animation may not be null");
         Tab[] result = new Tab[tabs.size()];
         tabs.toArray(result);
         tabs.clear();
@@ -1349,7 +1347,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void selectTab(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         int previousIndex = getSelectedTabIndex();
         int index = indexOfOrThrowException(tab);
         selectedTab = tab;
@@ -1704,7 +1702,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setTabPreviewFadeThreshold(final long threshold) {
-        ensureAtLeast(threshold, 0, "The threshold must be at least 0");
+        Condition.INSTANCE.ensureAtLeast(threshold, 0, "The threshold must be at least 0");
         this.tabPreviewFadeThreshold = threshold;
     }
 
@@ -1715,7 +1713,7 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void setTabPreviewFadeDuration(final long duration) {
-        ensureAtLeast(duration, 0, "The duration must be at least 0");
+        Condition.INSTANCE.ensureAtLeast(duration, 0, "The duration must be at least 0");
         this.tabPreviewFadeDuration = duration;
     }
 
@@ -1760,25 +1758,25 @@ public class TabSwitcherModel implements Model, Restorable {
 
     @Override
     public final void addCloseTabListener(@NonNull final TabCloseListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         tabCloseListeners.add(listener);
     }
 
     @Override
     public final void removeCloseTabListener(@NonNull final TabCloseListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         tabCloseListeners.remove(listener);
     }
 
     @Override
     public final void addTabPreviewListener(@NonNull final TabPreviewListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         tabPreviewListeners.add(listener);
     }
 
     @Override
     public final void removeTabPreviewListener(@NonNull final TabPreviewListener listener) {
-        ensureNotNull(listener, "The listener may not be null");
+        Condition.INSTANCE.ensureNotNull(listener, "The listener may not be null");
         tabPreviewListeners.remove(listener);
     }
 

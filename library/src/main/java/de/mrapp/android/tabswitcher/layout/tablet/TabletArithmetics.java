@@ -14,22 +14,20 @@
 package de.mrapp.android.tabswitcher.layout.tablet;
 
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.layout.AbstractArithmetics;
 import de.mrapp.android.tabswitcher.layout.AbstractDragTabsEventHandler.DragState;
 import de.mrapp.android.tabswitcher.model.AbstractItem;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
-import static de.mrapp.android.util.Condition.ensureTrue;
+import de.mrapp.util.Condition;
 
 /**
  * Provides methods, which allow to calculate the position, size and rotation of a {@link
@@ -79,8 +77,9 @@ public class TabletArithmetics extends AbstractArithmetics {
 
     @Override
     public final int getTabSwitcherPadding(@NonNull final Axis axis, final int gravity) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE
+                .ensureTrue(gravity == Gravity.START || gravity == Gravity.END, "Invalid gravity");
         if (axis == Axis.DRAGGING_AXIS) {
             return gravity == Gravity.START ? getTabSwitcher().getPaddingLeft() :
                     getTabSwitcher().getPaddingRight();
@@ -92,7 +91,7 @@ public class TabletArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getTabContainerSize(@NonNull final Axis axis, final boolean includePadding) {
-        ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
             ViewGroup tabContainer = getTabSwitcher().getTabContainer();
@@ -119,8 +118,8 @@ public class TabletArithmetics extends AbstractArithmetics {
     @Override
     public final float getTouchPosition(@NonNull final Axis axis,
                                         @NonNull final MotionEvent event) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(event, "The motion event may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(event, "The motion event may not be null");
 
         if (axis == Axis.DRAGGING_AXIS) {
             return event.getX();
@@ -131,8 +130,8 @@ public class TabletArithmetics extends AbstractArithmetics {
 
     @Override
     public final float getPosition(@NonNull final Axis axis, @NonNull final AbstractItem item) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The view may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The view may not be null");
         View view = item.getView();
 
         if (axis == Axis.DRAGGING_AXIS) {
@@ -149,8 +148,8 @@ public class TabletArithmetics extends AbstractArithmetics {
     @Override
     public final void setPosition(@NonNull final Axis axis, @NonNull final AbstractItem item,
                                   final float position) {
-        ensureNotNull(axis, "The axis may not be null");
-        ensureNotNull(item, "The item may not be null");
+        Condition.INSTANCE.ensureNotNull(axis, "The axis may not be null");
+        Condition.INSTANCE.ensureNotNull(item, "The item may not be null");
         View view = item.getView();
 
         if (axis == Axis.DRAGGING_AXIS) {

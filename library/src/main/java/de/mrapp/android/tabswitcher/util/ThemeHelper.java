@@ -17,15 +17,14 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.AttrRes;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.R;
 import de.mrapp.android.util.ThemeUtil;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A helper class, which allows to retrieve resources, depending on a tab switcher's theme.
@@ -81,8 +80,8 @@ public class ThemeHelper {
 
     /**
      * Returns the resource id of the theme, which is used when using a specific layout. The theme
-     * is obtained from a theme's attributes. If the theme is not specified, the
-     * resource id of the default theme is returned.
+     * is obtained from a theme's attributes. If the theme is not specified, the resource id of the
+     * default theme is returned.
      *
      * @param layout
      *         The layout as a value of the enum {@link Layout}. The layout may not be null
@@ -128,7 +127,7 @@ public class ThemeHelper {
      */
     public ThemeHelper(@NonNull final Context context, final int globalTheme, final int phoneTheme,
                        final int tabletTheme) {
-        ensureNotNull(context, "The context may not be null");
+        Condition.INSTANCE.ensureNotNull(context, "The context may not be null");
         this.context = context;
         this.globalTheme = globalTheme;
         this.phoneTheme = phoneTheme;
@@ -211,8 +210,8 @@ public class ThemeHelper {
     }
 
     /**
-     * Returns the drawable, which corresponds to a specific theme attribute, regarding the
-     * theme, which is used when using a specific layout.
+     * Returns the drawable, which corresponds to a specific theme attribute, regarding the theme,
+     * which is used when using a specific layout.
      *
      * @param layout
      *         The layout as a value of the enum {@link Layout}. The layout may not be null

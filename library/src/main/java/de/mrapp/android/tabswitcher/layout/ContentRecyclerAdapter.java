@@ -15,14 +15,14 @@ package de.mrapp.android.tabswitcher.layout;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.StatefulTabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.Tab;
@@ -31,8 +31,7 @@ import de.mrapp.android.tabswitcher.TabSwitcherDecorator;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.tabswitcher.model.Restorable;
 import de.mrapp.android.util.view.AbstractViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A view recycler adapter, which allows to inflate the views, which are associated with the tabs of
@@ -104,8 +103,8 @@ public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Vo
      */
     public ContentRecyclerAdapter(@NonNull final TabSwitcher tabSwitcher,
                                   @NonNull final TabSwitcherDecorator decorator) {
-        ensureNotNull(tabSwitcher, "The tab switcher may not be null");
-        ensureNotNull(decorator, "The decorator may not be null");
+        Condition.INSTANCE.ensureNotNull(tabSwitcher, "The tab switcher may not be null");
+        Condition.INSTANCE.ensureNotNull(decorator, "The decorator may not be null");
         this.tabSwitcher = tabSwitcher;
         tabSwitcher.addListener(this);
         this.decorator = decorator;
@@ -120,7 +119,7 @@ public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Vo
      *         Tab}. The tab may not be null
      */
     public void clearSavedState(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         savedInstanceStates.remove(tab.hashCode());
     }
 

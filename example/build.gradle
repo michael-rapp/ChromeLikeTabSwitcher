@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    api 'com.android.support:design:27.1.1'
+    api 'com.google.android.material:material:1.0.0'
     api project(':library')
 }

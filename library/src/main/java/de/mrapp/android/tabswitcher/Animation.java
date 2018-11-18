@@ -13,11 +13,11 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.animation.Interpolator;
 
-import static de.mrapp.android.util.Condition.ensureAtLeast;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import de.mrapp.util.Condition;
 
 /**
  * An animation, which can be used to add or remove tabs to/from a {@link TabSwitcher}.
@@ -89,7 +89,7 @@ public abstract class Animation {
          */
         @NonNull
         public final BuilderType setDuration(final long duration) {
-            ensureAtLeast(duration, -1, "The duration must be at least -1");
+            Condition.INSTANCE.ensureAtLeast(duration, -1, "The duration must be at least -1");
             this.duration = duration;
             return self();
         }
@@ -133,7 +133,7 @@ public abstract class Animation {
      *         {@link Interpolator} or null, if the default interpolator should be used
      */
     protected Animation(final long duration, @Nullable final Interpolator interpolator) {
-        ensureAtLeast(duration, -1, "The duration must be at least -1");
+        Condition.INSTANCE.ensureAtLeast(duration, -1, "The duration must be at least -1");
         this.duration = duration;
         this.interpolator = interpolator;
     }

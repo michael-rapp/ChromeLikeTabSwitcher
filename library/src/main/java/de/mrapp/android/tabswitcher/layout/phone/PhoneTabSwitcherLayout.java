@@ -18,11 +18,6 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -38,6 +33,11 @@ import android.widget.FrameLayout;
 
 import java.util.Collections;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
 import de.mrapp.android.tabswitcher.Animation;
 import de.mrapp.android.tabswitcher.Layout;
 import de.mrapp.android.tabswitcher.PeekAnimation;
@@ -68,9 +68,7 @@ import de.mrapp.android.tabswitcher.model.Tag;
 import de.mrapp.android.util.view.AbstractViewRecycler;
 import de.mrapp.android.util.view.AttachedViewRecycler;
 import de.mrapp.android.util.view.ViewRecycler;
-
-import static de.mrapp.android.util.Condition.ensureGreater;
-import static de.mrapp.android.util.Condition.ensureTrue;
+import de.mrapp.util.Condition;
 
 /**
  * A layout, which implements the functionality of a {@link TabSwitcher} on smartphones.
@@ -112,7 +110,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
          *         OnGlobalLayoutListener} or null, if no listener should be notified
          */
         CompoundLayoutListener(final int count, @Nullable final OnGlobalLayoutListener listener) {
-            ensureGreater(count, 0, "The count must be greater than 0");
+            Condition.INSTANCE.ensureGreater(count, 0, "The count must be greater than 0");
             this.count = count;
             this.listener = listener;
         }
@@ -872,8 +870,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Animates the position, size and alpha of a specific tab in order to swipe it
-     * orthogonally.
+     * Animates the position, size and alpha of a specific tab in order to swipe it orthogonally.
      *
      * @param item
      *         The item, corresponds to the tab, which should be animated, as an instance of the
@@ -1699,8 +1696,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
 
     /**
      * Creates and returns an animation listener, which allows to inflate or remove the views, which
-     * are used to visualize tabs, when an animation, which is used to hide the tab switcher,
-     * has been finished.
+     * are used to visualize tabs, when an animation, which is used to hide the tab switcher, has
+     * been finished.
      *
      * @return The animation listener, which has been created, as an instance of the type {@link
      * AnimatorListener}. The listener may not be null
@@ -1943,8 +1940,8 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     }
 
     /**
-     * Creates and returns an animation listener, which allows to adapt the pivot of a specific
-     * tab, when an animation, which reverted an overshoot, has been ended.
+     * Creates and returns an animation listener, which allows to adapt the pivot of a specific tab,
+     * when an animation, which reverted an overshoot, has been ended.
      *
      * @param item
      *         The item, which corresponds to the tab, whose pivot should be adapted, as an instance
@@ -3188,8 +3185,9 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                 "Added tab at index " + index + " using a " + animation.getClass().getSimpleName());
 
         if (animation instanceof PeekAnimation && getModel().getCount() > 1) {
-            ensureTrue(switcherVisibilityChanged, animation.getClass().getSimpleName() +
-                    " not supported when the tab switcher is shown");
+            Condition.INSTANCE.ensureTrue(switcherVisibilityChanged,
+                    animation.getClass().getSimpleName() +
+                            " not supported when the tab switcher is shown");
             PeekAnimation peekAnimation = (PeekAnimation) animation;
             AbstractItem item = TabItem.create(getModel(), 0, tab);
             inflateView(item, createPeekLayoutListener(item, peekAnimation));
@@ -3210,7 +3208,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                      final int previousSelectedTabIndex, final int selectedTabIndex,
                                      final boolean selectionChanged,
                                      @NonNull final Animation animation) {
-        ensureTrue(animation instanceof SwipeAnimation,
+        Condition.INSTANCE.ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for adding multiple tabs");
         getLogger().logInfo(getClass(),
                 "Added " + tabs.length + " tabs at index " + index + " using a " +
@@ -3223,7 +3221,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
                                    final int previousSelectedTabIndex, final int selectedTabIndex,
                                    final boolean selectionChanged,
                                    @NonNull final Animation animation) {
-        ensureTrue(animation instanceof SwipeAnimation,
+        Condition.INSTANCE.ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for removing tabs");
         getLogger().logInfo(getClass(), "Removed tab at index " + index + " using a " +
                 animation.getClass().getSimpleName());
@@ -3268,7 +3266,7 @@ public class PhoneTabSwitcherLayout extends AbstractTabSwitcherLayout
     @Override
     public final void onAllTabsRemoved(@NonNull final Tab[] tabs,
                                        @NonNull final Animation animation) {
-        ensureTrue(animation instanceof SwipeAnimation,
+        Condition.INSTANCE.ensureTrue(animation instanceof SwipeAnimation,
                 animation.getClass().getSimpleName() + " not supported for removing tabs ");
         getLogger().logInfo(getClass(),
                 "Removed all tabs using a " + animation.getClass().getSimpleName());

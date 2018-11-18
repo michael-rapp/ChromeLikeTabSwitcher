@@ -13,7 +13,7 @@
  */
 package de.mrapp.android.tabswitcher;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Defines the interface of a listener, which should be notified, when a button, which allows to add

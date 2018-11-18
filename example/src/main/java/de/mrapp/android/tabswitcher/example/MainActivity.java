@@ -19,17 +19,6 @@ import android.content.SharedPreferences;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.OnApplyWindowInsetsListener;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.WindowInsetsCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,8 +31,20 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.Locale;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar.OnMenuItemClickListener;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import de.mrapp.android.tabswitcher.AbstractState;
 import de.mrapp.android.tabswitcher.AddTabButtonListener;
 import de.mrapp.android.tabswitcher.Animation;
@@ -59,8 +60,8 @@ import de.mrapp.android.tabswitcher.TabSwitcher;
 import de.mrapp.android.tabswitcher.TabSwitcherListener;
 import de.mrapp.android.util.ThemeUtil;
 import de.mrapp.android.util.multithreading.AbstractDataBinder;
+import de.mrapp.util.Condition;
 
-import static de.mrapp.android.util.Condition.ensureNotNull;
 import static de.mrapp.android.util.DisplayUtil.getDisplayWidth;
 
 /**
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
          *         the class {@link ListView}. The list view may not be null
          */
         public void loadItems(@NonNull final ListView listView) {
-            ensureNotNull(listView, "The list view may not be null");
+            Condition.INSTANCE.ensureNotNull(listView, "The list view may not be null");
 
             if (adapter == null) {
                 dataBinder.addListener(this);
@@ -751,8 +752,7 @@ public class MainActivity extends AppCompatActivity implements TabSwitcherListen
         }
 
         tabSwitcher.showAddTabButton(createAddTabButtonListener());
-        tabSwitcher
-                .setToolbarNavigationIcon(R.drawable.ic_plus_box_24dp, createAddTabListener());
+        tabSwitcher.setToolbarNavigationIcon(R.drawable.ic_plus_24dp, createAddTabListener());
         TabSwitcher.setupWithMenu(tabSwitcher, createTabSwitcherButtonListener());
         inflateMenu();
     }

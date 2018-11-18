@@ -13,11 +13,9 @@
  */
 package de.mrapp.android.tabswitcher.model;
 
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import de.mrapp.android.tabswitcher.TabSwitcher;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A tag, which allows to store the properties of the tabs of a {@link TabSwitcher}.
@@ -89,7 +87,7 @@ public class Tag implements Cloneable {
      *         not be null
      */
     public final void setState(@NonNull final State state) {
-        ensureNotNull(state, "The state may not be null");
+        Condition.INSTANCE.ensureNotNull(state, "The state may not be null");
         this.state = state;
     }
 

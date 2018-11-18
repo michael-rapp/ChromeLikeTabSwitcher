@@ -15,7 +15,8 @@ package de.mrapp.android.tabswitcher.example;
 
 import android.os.Bundle;
 import android.preference.Preference;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 /**
  * A preference fragment, which contains the example app's settings.

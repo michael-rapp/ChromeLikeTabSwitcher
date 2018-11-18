@@ -15,8 +15,6 @@ package de.mrapp.android.tabswitcher;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,9 +22,10 @@ import android.view.ViewGroup;
 
 import java.lang.ref.SoftReference;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import de.mrapp.android.tabswitcher.model.Restorable;
-
-import static de.mrapp.android.util.Condition.ensureNotNull;
+import de.mrapp.util.Condition;
 
 /**
  * A {@link TabSwitcherDecorator}, which allows to store any arbitrary state for each tab of the
@@ -199,7 +198,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
      */
     @Nullable
     public final StateType getState(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
             SoftReference<StateType> reference = states.get(tab.hashCode());
@@ -220,7 +219,7 @@ public abstract class StatefulTabSwitcherDecorator<StateType> extends TabSwitche
      *         tab may not be null
      */
     public final void clearState(@NonNull final Tab tab) {
-        ensureNotNull(tab, "The tab may not be null");
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
 
         if (states != null) {
             SoftReference<StateType> reference = states.get(tab.hashCode());

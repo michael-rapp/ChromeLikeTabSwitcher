@@ -14,8 +14,9 @@
 package de.mrapp.android.tabswitcher.model;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Defines the interface, a class, whose state should be stored and restored, must implement.
