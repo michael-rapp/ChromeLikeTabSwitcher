@@ -13,9 +13,9 @@
     id="svg4"
     sodipodi:docname="tab_switcher_drawable_background.svg"
     inkscape:version="0.92.2 2405546, 2018-03-11"
-    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-xxxhdpi/tab_switcher_drawable_background.png"
-    inkscape:export-xdpi="384"
-    inkscape:export-ydpi="384">
+    inkscape:export-filename="/home/michael/Workspaces/Android/ChromeLikeTabSwitcher/library/src/main/res/drawable-mdpi/tab_switcher_drawable_background.png"
+    inkscape:export-xdpi="96"
+    inkscape:export-ydpi="96">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -24,7 +24,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -43,8 +43,8 @@
      inkscape:window-height="1017"
      id="namedview6"
      showgrid="true"
-     inkscape:zoom="16.267253"
-     inkscape:cx="5.4838413"
+     inkscape:zoom="18.716233"
+     inkscape:cx="-4.004104"
      inkscape:cy="12"
      inkscape:window-x="0"
      inkscape:window-y="27"
@@ -55,8 +55,7 @@
        id="grid823" />
   </sodipodi:namedview>
   <path
-     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.18897638;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.02352941"
-     d="M 8.0351562,3.0371094 C 5.2860091,3.0371094 3.0742188,5.2508529 3.0742188,8 v 7.964844 c 0,2.749147 2.2117903,4.960937 4.9609374,4.960937 H 16 c 2.749147,0 4.962891,-2.21179 4.962891,-4.960937 V 8 C 20.962891,5.2508529 18.749147,3.0371094 16,3.0371094 Z M 9,5 h 6 c 2.216,0 4,1.784 4,4 v 6 c 0,2.216 -1.784,4 -4,4 H 9 C 6.784,19 5,17.216 5,15 V 9 C 5,6.784 6.784,5 9,5 Z"
-     id="rect825"
-     inkscape:connector-curvature="0" />
+     style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.18897639;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.02352941"
+     d="M 8 3.0546875 C 5.260747 3.0546875 3.0546875 5.260747 3.0546875 8 L 3.0546875 16 C 3.0546875 18.739253 5.260747 20.945312 8 20.945312 L 16 20.945312 C 18.739253 20.945312 20.945312 18.739253 20.945312 16 L 20.945312 8 C 20.945312 5.260747 18.739253 3.0546875 16 3.0546875 L 8 3.0546875 z M 8 5 L 16 5 C 17.662 5 19 6.338 19 8 L 19 16 C 19 17.662 17.662 19 16 19 L 8 19 C 6.338 19 5 17.662 5 16 L 5 8 C 5 6.338 6.338 5 8 5 z "
+     id="rect816" />
 </svg>
