@@ -1350,9 +1350,12 @@ public class TabSwitcherModel implements Model, Restorable {
         Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
         int previousIndex = getSelectedTabIndex();
         int index = indexOfOrThrowException(tab);
-        selectedTab = tab;
-        boolean switcherHidden = setSwitcherShown(false);
-        notifyOnSelectionChanged(previousIndex, index, tab, switcherHidden);
+
+        if (previousIndex != index) {
+            selectedTab = tab;
+            boolean switcherHidden = setSwitcherShown(false);
+            notifyOnSelectionChanged(previousIndex, index, tab, switcherHidden);
+        }
     }
 
     @Override

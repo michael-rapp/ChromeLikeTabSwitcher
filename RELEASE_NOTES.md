@@ -1,10 +1,17 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Nov. 20th 2018)
+## Version 1.0.0 (Dec. 29th 2018)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.4.2 (Dec. 29th 2018)
+
+A bugfix release, which introduces the following changes:
+
+- When selecting a tab it is now only re-rendered if it was not already selected before.
+- Updated the annotation support library to version 1.0.1.
 
 ## Version 0.4.1 (Nov. 20th 2018)
 
