@@ -4,6 +4,7 @@
 
 A bugfix release, which introduces the following changes:
 
+- When selecting a tab it is now only re-rendered if it was not already selected before.
 - Updated the annotation support library to version 1.0.1.
 
 ## Version 0.4.1 (Nov. 20th 2018)
