@@ -1,5 +1,11 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.4.2 (Dec. 29th 2018)
+
+A bugfix release, which introduces the following changes:
+
+- Updated the annotation support library to version 1.0.1.
+
 ## Version 0.4.1 (Nov. 20th 2018)
 
 A minor release, which introduces the following changes:
