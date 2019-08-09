@@ -91,6 +91,40 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
                                    @Nullable final Bundle savedInstanceState);
 
     /**
+     * The method, which is invoked, when the view, which is used to visualize a tab has been
+     * recycled. The purpose of this method is to reset the appearance of the view to the default
+     * state, as it might still display the content of tab for which it was previously used. This
+     * method is called prior to invoking the method {@link #onShowTab(Context, TabSwitcher, View,
+     * Tab, int, int, Bundle)}.
+     *
+     * @param context
+     *         The context, the tab switcher belongs to, as an instance of the class {@link
+     *         Context}. The context may not be null
+     * @param tabSwitcher
+     *         The tab switcher, whose tabs are visualized by the decorator, as an instance of the
+     *         type {@link TabSwitcher}. The tab switcher may not be null
+     * @param view
+     *         The view, which is used to visualize the tab, as an instance of the class {@link
+     *         View}. The view may not be null
+     * @param tab
+     *         The tab, which should be visualized, as an instance of the class {@link Tab}. The tab
+     *         may not be null
+     * @param index
+     *         The index of the tab, which should be visualized, as an {@link Integer} value
+     * @param viewType
+     *         The view type of the tab, which should be visualized, as an {@link Integer} value
+     * @param savedInstanceState
+     *         The bundle, which has previously been used to save the state of the view as an
+     *         instance of the class {@link Bundle} or null, if no saved state is available
+     */
+    public void onRecycleView(@NonNull final Context context,
+                              @NonNull final TabSwitcher tabSwitcher, @NonNull final View view,
+                              @NonNull final Tab tab, final int index, final int viewType,
+                              @Nullable final Bundle savedInstanceState) {
+
+    }
+
+    /**
      * The method, which is invoked, when the view, which is used to visualize a tab, is removed.
      * The purpose of this method is to save the current state of the tab in a bundle.
      *
@@ -116,8 +150,7 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
 
     /**
      * Returns the view type, which corresponds to a specific tab. For each layout, which is
-     * inflated by the <code>onInflateView</code>-method, a distinct view type must be
-     * returned.
+     * inflated by the <code>onInflateView</code>-method, a distinct view type must be returned.
      *
      * @param tab
      *         The tab, whose view type should be returned, as an instance of the class {@link Tab}.
@@ -190,11 +223,14 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
      * @param savedInstanceState
      *         The bundle, which has previously been used to save the state of the view as an
      *         instance of the class {@link Bundle} or null, if no saved state is available
+     * @param inflated
+     *         True, if the view has been inflated, false, if it has been reused
      */
     public final void applyDecorator(@NonNull final Context context,
                                      @NonNull final TabSwitcher tabSwitcher,
                                      @NonNull final View view, @NonNull final Tab tab,
-                                     final int index, @Nullable final Bundle savedInstanceState) {
+                                     final int index, @Nullable final Bundle savedInstanceState,
+                                     final boolean inflated) {
         setCurrentParentView(view);
         int viewType = getViewType(tab, index);
 
@@ -205,6 +241,10 @@ public abstract class TabSwitcherDecorator extends AbstractViewHolderAdapter {
             if (viewStates != null) {
                 view.restoreHierarchyState(viewStates);
             }
+        }
+
+        if (!inflated) {
+            onRecycleView(context, tabSwitcher, view, tab, index, viewType, savedInstanceState);
         }
 
         onShowTab(context, tabSwitcher, view, tab, index, viewType, savedInstanceState);

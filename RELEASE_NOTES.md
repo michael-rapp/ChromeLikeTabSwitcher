@@ -1,10 +1,18 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
-## Version 1.0.0 (Feb. 23th 2019)
+## Version 1.0.0 (Aug. 9th 2019)
 
 The first stable release of the library. It introduces the following features:
 
 - A layout, which is optimized for tablets, is now provided
+
+## Version 0.4.5 (Aug. 9th 2019)
+
+A minor release, which introduces the following changes:
+
+- Added the `onRecycleView`-method to the class `TabSwitcherDecorator`.
+- Updated dependency "AndroidUtil" to version 2.0.2.
+- Updated the annotation support library to version 1.1.0.
 
 ## Version 0.4.4 (Feb. 23th 2019)
 
