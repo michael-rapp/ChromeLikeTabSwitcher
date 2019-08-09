@@ -155,7 +155,8 @@ public class ContentRecyclerAdapter extends AbstractViewRecycler.Adapter<Tab, Vo
         }
 
         item.setParameters(setWasShownParameter(parameters));
-        decorator.applyDecorator(context, tabSwitcher, view, item, index, savedInstanceState);
+        decorator.applyDecorator(context, tabSwitcher, view, item, index, savedInstanceState,
+                inflated);
     }
 
     @Override
