@@ -1,5 +1,13 @@
 # ChromeLikeTabSwitcher - RELEASE NOTES
 
+## Version 0.4.6 (Feb. 12th 2020)
+
+A minor release, which introduces the following changes:
+
+- Allow to specify whether the state of a `TabSwitcher` should be preserved (see https://github.com/michael-rapp/ChromeLikeTabSwitcher/pull/26).
+- Updated dependency "AndroidUtil" to version 2.1.0.
+- Updated AppCompat support library to version 1.1.0.
+
 ## Version 0.4.5 (Aug. 9th 2019)
 
 A minor release, which introduces the following changes:
