@@ -1303,6 +1303,26 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         }
     }
 
+    /**
+     * Notifies the tab switcher that a specific tab has changed. This will cause the content of the
+     * tab to be updated by utilizing the tab switcher's adapter.
+     *
+     * @param tab
+     *         The tab, which has changed, as an instance of the class {@link Tab}. The tab may not
+     *         be null
+     */
+    public final void notifyTabChanged(@NonNull final Tab tab) {
+        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
+
+        if (layout != null) {
+            AbstractViewRecycler<Tab, Void> contentViewRecycler = layout.getContentViewRecycler();
+
+            if (contentViewRecycler != null) {
+                contentViewRecycler.notifyItemChanged(tab);
+            }
+        }
+    }
+
     @Override
     public final void addTab(@NonNull final Tab tab) {
         enqueuePendingAction(new Runnable() {
@@ -1460,26 +1480,6 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             }
 
         });
-    }
-
-    /**
-     * Notifies the tab switcher that a specific tab has changed. This will cause the content of the
-     * tab to be updated by utilizing the tab switcher's adapter.
-     *
-     * @param tab
-     *         The tab, which has changed, as an instance of the class {@link Tab}. The tab may not
-     *         be null
-     */
-    public final void notifyTabChanged(@NonNull final Tab tab) {
-        Condition.INSTANCE.ensureNotNull(tab, "The tab may not be null");
-
-        if (layout != null) {
-            AbstractViewRecycler<Tab, Void> contentViewRecycler = layout.getContentViewRecycler();
-
-            if (contentViewRecycler != null) {
-                contentViewRecycler.notifyItemChanged(tab);
-            }
-        }
     }
 
     @Override
