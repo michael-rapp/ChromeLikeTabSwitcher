@@ -223,6 +223,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     private AbstractTabSwitcherLayout layout;
 
     /**
+     * Whether to preserve the TabSwitcher's state in the onSaveInstanceState() call.
+     */
+    private boolean preserveState = true;
+
+    /**
      * Initializes the view.
      *
      * @param attributeSet
@@ -1967,7 +1972,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
     public final Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
 
-        if (layout != null) {
+        if (layout != null && preserveState) {
             TabSwitcherState savedState = new TabSwitcherState(superState);
             savedState.layoutPolicy = layoutPolicy;
             savedState.modelState = new Bundle();
@@ -1999,7 +2004,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
 
     @Override
     public final void onRestoreInstanceState(final Parcelable state) {
-        if (state instanceof TabSwitcherState) {
+        if (state instanceof TabSwitcherState && preserveState) {
             TabSwitcherState savedState = (TabSwitcherState) state;
             this.layoutPolicy = savedState.layoutPolicy;
             model.restoreInstanceState(savedState.modelState);
@@ -2009,4 +2014,11 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         }
     }
 
+    /**
+     * Optionally enable or disable preserving of the full state of the TabSwitcher.
+     * @param enabled Whether to enable preserving the state.
+     */
+    public void setPreserveState(boolean enabled) {
+        preserveState = enabled;
+    }
 }
