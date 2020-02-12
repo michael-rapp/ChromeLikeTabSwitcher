@@ -328,6 +328,7 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
             int tabletTheme = typedArray.getResourceId(R.styleable.TabSwitcher_themeTablet, 0);
             themeHelper = new ThemeHelper(getContext(), globalTheme, phoneTheme, tabletTheme);
             style = new TabSwitcherStyle(this, model, themeHelper);
+            obtainPreserveState(typedArray);
             obtainLayoutPolicy(typedArray);
             obtainBackground(typedArray);
             obtainTabIcon(typedArray);
@@ -349,6 +350,19 @@ public class TabSwitcher extends FrameLayout implements TabSwitcherLayout, Model
         } finally {
             typedArray.recycle();
         }
+    }
+
+    /**
+     * Obtains whether the tab switcher's state should be preserved, or not, from a specific typed
+     * array.
+     *
+     * @param typedArray
+     *         The typed array, it should be obtained from, whether the tab switcher's state should
+     *         be preserved, as an instance of the class {@link TypedArray}. The typed array may not
+     *         be null
+     */
+    private void obtainPreserveState(@NonNull final TypedArray typedArray) {
+        setPreserveState(typedArray.getBoolean(R.styleable.TabSwitcher_preserveState, false));
     }
 
     /**
